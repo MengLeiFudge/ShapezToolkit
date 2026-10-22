@@ -7,6 +7,8 @@ Shapez 工具箱。根目录的 `main.py` 统一管理命令；每个功能目�
 | 目录 | 内容 |
 |---|---|
 | [shapez1_tmam](shapez1_tmam/README.md) | 图形结构拆解、存档电路验证、图形数据库和验证记录 |
+| [shapez1_fmam](shapez1_fmam/README.md) | FMAM（Fast MAM），以尽快过关为目标；存档分析预留目录 |
+| [shapez1_mmam](shapez1_mmam/README.md) | MMAM（Mini MAM），以尽量小的实体工厂制作图形为目标；存档分析预留目录 |
 | [shapez1_mods](shapez1_mods/README.md) | mod.io 批量下载、本地版本整理、QQBot 群文件同步和模组包 |
 | [shapez1_puzzles](shapez1_puzzles/README.md) | Steam token 获取、谜题下载、本地查询、CSV 导出和历史资料 |
 | [common](common/README.md) | 本机路径设置、网络请求和文件写入等共用代码 |
