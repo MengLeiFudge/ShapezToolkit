@@ -385,4 +385,6 @@ DefaultPath.props
 /shapez1_puzzles/data/
 /shapez1_mods/data/
 /shapez1_tmam/data/
-/shapez1_tmam/verification/
+/shapez1_tmam/*/data/
+/shapez1_tmam/*/verification/
+/shapez1_tmam/comparison/

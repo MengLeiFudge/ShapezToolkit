@@ -30,6 +30,6 @@ TMAM 当前提供一代结构拆解和电路验证。图形渲染、网页入口
 
 ## 资料与历史
 
-通用拆解说明在 [shapez1_tmam/logic.md](shapez1_tmam/logic.md)，具体输入案例与全量结果保存在本机 `shapez1_tmam/verification/`，不纳入 Git。原 `TMAM-XianYu2` 按存档现名改为 `TMAM-XianYu-20221129`。
+通用拆解说明在 [XianYu 拆解思路](shapez1_tmam/xianyu_20221129/logic.md)，具体输入案例与全量结果保存在本机 `shapez1_tmam/<机器目录>/verification/`，不纳入 Git。TMAM 按机器分别归类；原 `XianYu2` 为 `XianYu-20221129`，原 `CTMAM` 为 `BugFix-20210622`。BugFix 的漏解清单和存档差异见 [说明](shapez1_tmam/bugfix_20210622/README.md)。
 
 旧 Java 工程及整理前的代码保存在 `.codex/trash/`；移动清单保存在 `.codex/drafts/`。这些是本机恢复资料，日常使用从上面的功能目录进入。旧 shapezTools 的谜题、图片和图形资料已归入对应功能目录。

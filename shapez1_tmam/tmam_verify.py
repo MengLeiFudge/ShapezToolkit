@@ -4,6 +4,7 @@ import csv
 import json
 import time
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 from .tmam_signals import FALSE, TRUE, describe, from_structure, operate, valid_structure
@@ -165,8 +166,8 @@ def verify_range(circuit: dict, feasible: set[int], start: int, stop: int, max_t
                 stream.flush()
     return {"name": circuit["name"], "start": start, "stop": stop, "counts": dict(counts), "seconds": time.monotonic() - started}
 
-def verify_saves(save_dir: Path, destination: Path, workers: int = 8, max_ticks: int = 4096,
-                 machines: tuple[str, ...] = ("XianYu", "CTMAM")) -> dict:
+def verify_saves(save_dir: Path, destination: Path | None, workers: int = 8, max_ticks: int = 4096,
+                 machines: tuple[str, ...] = ("XianYu", "BugFix-20210622")) -> dict:
     """并行验证所选存档的全部编号，合并逐项结果与来源摘要。"""
     import hashlib
     from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -175,39 +176,49 @@ def verify_saves(save_dir: Path, destination: Path, workers: int = 8, max_ticks:
 
     if not 1 <= workers <= 32 or max_ticks < 1:
         raise ValueError("workers 必须在 1..32 内，max_ticks 必须为正整数")
-    filenames = {
-        "XianYu-20221129": "savegame-916dcc85ebaf5438a5e23cb79d344e2fc28ef2c8.bin",
-        "XianYu": "savegame-72b2f5b7adb052ae84aa78fb4050371107d32eb5.bin",
-        "CTMAM": "savegame-3c4c1c08fc4161406e4353e25f06c4b92e824b48.bin",
+    machines = tuple("BugFix-20210622" if name == "CTMAM" else name for name in machines)
+    sources = {
+        "XianYu-20221129": ("xianyu_20221129", "savegame-916dcc85ebaf5438a5e23cb79d344e2fc28ef2c8.bin"),
+        "XianYu": ("xianyu_legacy", "savegame-72b2f5b7adb052ae84aa78fb4050371107d32eb5.bin"),
+        "BugFix-20210622": ("bugfix_20210622", "savegame-3c4c1c08fc4161406e4353e25f06c4b92e824b48.bin"),
     }
     database = Path(__file__).resolve().parent / "data/shapes/shapes.json"
     feasible = set(json.loads(database.read_text(encoding="utf-8")))
     if any(not valid_structure(shape) for shape in feasible):
         raise ValueError("对照集合包含非法结构编码")
-    destination.mkdir(parents=True, exist_ok=True)
-    if (destination / "summary.json").exists():
-        raise FileExistsError(f"结果目录已有报告，请选择新的目录：{destination}")
-    if not machines or len(set(machines)) != len(machines) or any(name not in filenames for name in machines):
-        raise ValueError("请选择不重复的 TMAM 名称：XianYu、XianYu-20221129、CTMAM")
-    circuits = {name: extract_circuit(save_dir / filenames[name], name) for name in machines}
+    if not machines or len(set(machines)) != len(machines) or any(name not in sources for name in machines):
+        raise ValueError("请选择不重复的 TMAM 名称：XianYu、XianYu-20221129、BugFix-20210622（旧名 CTMAM）")
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    directories = {
+        name: (destination / sources[name][0] if destination is not None
+               else Path(__file__).resolve().parent / sources[name][0] / "verification" / stamp)
+        for name in machines
+    }
+    for path in directories.values():
+        if (path / "summary.json").exists():
+            raise FileExistsError(f"结果目录已有报告，请选择新的目录：{path}")
+    for path in directories.values():
+        path.mkdir(parents=True, exist_ok=True)
+    circuits = {name: extract_circuit(save_dir / sources[name][1], name) for name in machines}
     for name, circuit in circuits.items():
         baseline = CircuitModel(circuit).run(circuit["initial"][circuit["input"]], max_ticks)
         if not baseline["success"] or baseline["status"] != "fixed":
             raise RuntimeError(f"{name} 未能复现存档保存的稳定输出：{baseline}")
-        (destination / f"{name}-circuit.json").write_text(json.dumps(circuit, ensure_ascii=False, indent=2), encoding="utf-8")
+        (directories[name] / f"{name}-circuit.json").write_text(json.dumps(circuit, ensure_ascii=False, indent=2), encoding="utf-8")
     summary = {
         "scope": "拆解与虚拟合成电路；未模拟传送带、实体加工和出货",
         "protocol": "从保存状态关启动开关至固定点，修改输入至固定点，再打开启动开关",
         "max_ticks": max_ticks, "workers": workers, "feasible_count": len(feasible),
         "database_sha256": hashlib.sha256(database.read_bytes()).hexdigest(),
         "machines": {},
+        "output_directories": {name: str(path) for name, path in directories.items()},
     }
     started = time.monotonic()
     jobs = []
     with ProcessPoolExecutor(max_workers=workers) as pool:
         for name, circuit in circuits.items():
             for start in range(0, 65536, 1024):
-                path = destination / "parts" / f"{name}-{start:05d}.csv"
+                path = directories[name] / "parts" / f"{name}-{start:05d}.csv"
                 future = pool.submit(verify_range, circuit, feasible, start, start + 1024, max_ticks, path)
                 jobs.append(future)
         reports = []
@@ -222,10 +233,10 @@ def verify_saves(save_dir: Path, destination: Path, workers: int = 8, max_ticks:
         for report in reports:
             if report["name"] == name:
                 counts.update(report["counts"])
-        with (destination / f"{name}.csv").open("w", encoding="utf-8", newline="") as target:
+        with (directories[name] / f"{name}.csv").open("w", encoding="utf-8", newline="") as target:
             writer = csv.writer(target)
             for start in range(0, 65536, 1024):
-                with (destination / "parts" / f"{name}-{start:05d}.csv").open(encoding="utf-8", newline="") as source:
+                with (directories[name] / "parts" / f"{name}-{start:05d}.csv").open(encoding="utf-8", newline="") as source:
                     reader = csv.reader(source)
                     header = next(reader)
                     if start == 0:
@@ -233,5 +244,8 @@ def verify_saves(save_dir: Path, destination: Path, workers: int = 8, max_ticks:
                     writer.writerows(reader)
         summary["machines"][name] = {"counts": dict(counts), "save_sha256": circuit["save_sha256"], "gates": len(circuit["gates"]), "networks": len(circuit["networks"])}
     summary["seconds"] = time.monotonic() - started
-    (destination / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    for name, path in directories.items():
+        report = {**summary, "machines": {name: summary["machines"][name]},
+                  "output_directories": {name: str(path)}}
+        (path / "summary.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return summary

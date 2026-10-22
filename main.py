@@ -2,7 +2,6 @@
 
 import argparse
 import json
-from datetime import datetime
 from pathlib import Path
 
 from common.settings import MOD_DIR, PUZZLE_DIR, STEAM_GAME_DIR, TOKEN_FILE
@@ -40,8 +39,8 @@ def build_parser() -> argparse.ArgumentParser:
     tmam_commands = tmam.add_subparsers(dest="command", required=True)
     verify = tmam_commands.add_parser("verify", help="按游戏 tick 规则穷举指定 TMAM 存档")
     verify.add_argument("--saves", type=Path, required=True, help="包含所选 TMAM 原始存档的目录")
-    verify.add_argument("--output", type=Path, default=Path(__file__).parent / "shapez1_tmam/verification" / datetime.now().strftime("%Y%m%d-%H%M%S"), help="保存电路、逐项 CSV 和汇总报告的目录")
-    verify.add_argument("--machine", nargs="+", choices=("XianYu", "XianYu-20221129", "CTMAM"), default=("XianYu", "CTMAM"), help="选择存档，默认 XianYu CTMAM")
+    verify.add_argument("--output", type=Path, help="自定义报告根目录，按机器分目录；默认写到各机器的 verification 下")
+    verify.add_argument("--machine", nargs="+", choices=("XianYu", "XianYu-20221129", "BugFix-20210622", "CTMAM"), default=("XianYu", "BugFix-20210622"), help="选择存档，默认 XianYu BugFix-20210622；CTMAM 为 BugFix 旧名")
     verify.add_argument("--workers", type=int, default=8, help="并行进程数，1..32，默认 8")
     verify.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数；超时单独报告")
     solve = tmam_commands.add_parser("solve", help="用 XianYu-20221129 的逻辑拆解结构，输出部件与加工树，不查图形数据库")
@@ -57,13 +56,14 @@ def main() -> int:
     try:
         if args.tool == "tmam":
             if args.command == "solve":
-                from shapez1_tmam.xianyu_20221129 import XianYu20221129
+                from shapez1_tmam.xianyu_20221129.solver import XianYu20221129
                 report = XianYu20221129(args.max_ticks).solve(args.shape, include_events=args.events)
                 print(json.dumps(report, ensure_ascii=False, indent=2))
                 return int(not report["success"])
             report = verify_saves(args.saves, args.output, args.workers, args.max_ticks, tuple(args.machine))
             print(json.dumps(report, ensure_ascii=False, indent=2))
-            print(f"逐项验证结果：{args.output}")
+            for name, path in report["output_directories"].items():
+                print(f"{name} 逐项验证结果：{path}")
             return int(any(machine["counts"].get(key, 0) for machine in report["machines"].values() for key in ("false_positive", "false_negative", "timeout")))
         if args.tool == "mods":
             if args.command == "clean":

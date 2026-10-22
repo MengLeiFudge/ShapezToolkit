@@ -4,10 +4,10 @@
 同一行每个输出只在下一 tick 生效；IF 也有一 tick 延迟。
 输入元组中的提供者同时输出不同非空值时整条导线冲突，门输出 NULL。
 g_x_y 对应存档建筑坐标，second 表示第二输出。不得删除看似多余的延迟门。
-这份文件是电路的 Python 转录，不是图形答案库。加工模板见 xianyu_20221129.py。
+这份文件是电路的 Python 转录，不是图形答案库。加工模板见 solver.py。
 """
 
-from .tmam_signals import NULL, FALSE, TRUE, from_key
+from ..tmam_signals import NULL, FALSE, TRUE, from_key
 
 AND, NOT, XOR, OR, IF = 32, 34, 35, 36, 38
 CUT, ANALYZE, ROTATE, UNSTACK, EQUAL, STACK, PAINT = 42, 43, 44, 45, 46, 50, 51

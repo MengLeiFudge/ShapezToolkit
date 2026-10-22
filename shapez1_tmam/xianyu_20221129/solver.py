@@ -7,9 +7,9 @@
 from dataclasses import dataclass
 from functools import lru_cache
 
-from . import xianyu_20221129_controller as controller
-from .tmam_signals import FALSE, describe, from_key, from_structure, operate, to_key, valid_structure
-from .tmam_verify import CircuitModel
+from . import controller
+from ..tmam_signals import FALSE, describe, from_key, from_structure, operate, to_key, valid_structure
+from ..tmam_verify import CircuitModel
 
 
 @dataclass(frozen=True)

@@ -45,8 +45,9 @@ class MachineProfile(TypedDict):
 PROFILES: dict[str, MachineProfile] = {
     "XianYu-20221129": {"input": (7, 1), "enable": (20, 1), "outputs": ((49, -25), (64, -24), (73, -24), (78, -28)), "checks": ((49, -19), (63, -23), (72, -23), (79, -27))},
     "XianYu": {"input": (-293, -42), "enable": (-277, -32), "outputs": ((-274, -49),), "checks": ((-262, -57), (-248, -61), (-239, -61))},
-    "CTMAM": {"input": (59, 56), "enable": (62, 7), "outputs": ((70, -43), (71, -42)), "checks": ((69, -19),)},
+    "BugFix-20210622": {"input": (59, 56), "enable": (62, 7), "outputs": ((70, -43), (71, -42)), "checks": ((69, -19),)},
 }
+PROFILES["CTMAM"] = PROFILES["BugFix-20210622"]
 
 
 def _decompress(text: str) -> str:
