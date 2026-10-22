@@ -378,3 +378,11 @@ DefaultPath.props
 .sisyphus/
 .codex/
 .claude/
+
+# ShapezToolkit 本机状态及下载内容
+.local/
+.venv/
+/shapez1_puzzles/data/
+/shapez1_mods/data/
+/shapez1_tmam/data/
+/shapez1_tmam/verification/
