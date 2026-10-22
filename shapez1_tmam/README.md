@@ -6,10 +6,11 @@
 |---|---|
 | [bugfix_20210622](bugfix_20210622/README.md) | TMAM-BugFix-20210622，旧名 CTMAM；漏解短代码、故障分析和历史验证记录 |
 | [xianyu_20221129](xianyu_20221129/README.md) | TMAM-XianYu-20221129，旧名 XianYu2；Python 拆解器、控制器、通用思路和验证记录 |
+| [nabi_20221128](nabi_20221128/README.md) | TMAM-Nabi-20221128 的 v7f；逐 tick 指令审计、缓存时序分析和无输出清单 |
 | `comparison/` | 本机跨机器的比较报告和共同反例，不上传 |
 | `data/shapes/` | 本机共用图形 CSV 与 `shapes.json` 对照库，不上传 |
 
-Nabi 存档尚未在本工具中建立验证配置。
+Nabi v7f 输出脉冲指令，使用独立审计入口，见下方说明。
 
 ## 共用代码
 
@@ -37,6 +38,14 @@ python main.py tmam verify --machine XianYu-20221129 --saves "C:\Users\MLJ\AppDa
 命令遍历全部 65,536 个结构编号，默认 8 个进程；`--workers` 可设置 1..32，`--max-ticks` 设置每阶段上限，默认 4096。每个输入独立恢复保存状态，再关闭开关、换输入、开启开关，保持反馈和冲突语义。
 
 只有持续还原目标并通过相等检查才算成功。固定点、周期、超时和非法编码分别记录，超时不证明不可制作。出现漏解、误报或超时时返回非零退出码，逐项结果仍保留。验证覆盖拆解和虚拟合成电路，不包含实体传送带、吞吐和出货。
+
+## Nabi v7f 指令审计
+
+```text
+python main.py tmam verify-v7f --save "C:\Users\MLJ\AppData\Roaming\shapez.io\saves\savegame-0cde894a9373cd6414ee3432224b6658466e3626.bin"
+```
+
+此命令独立记录每个 tick 的图形片段、控制标志和九组缓存。全量结果已确认无输出和标志丢失问题；详细边界见 [Nabi v7f](nabi_20221128/README.md)。正常退出表示审计完成，不表示制造路径已通过。
 
 ## 本机资料
 

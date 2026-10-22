@@ -43,6 +43,11 @@ def build_parser() -> argparse.ArgumentParser:
     verify.add_argument("--machine", nargs="+", choices=("XianYu-20221129", "BugFix-20210622", "CTMAM"), default=("XianYu-20221129", "BugFix-20210622"), help="选择存档，默认 XianYu-20221129 BugFix-20210622；CTMAM 为 BugFix 旧名")
     verify.add_argument("--workers", type=int, default=8, help="并行进程数，1..32，默认 8")
     verify.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数；超时单独报告")
+    nabi = tmam_commands.add_parser("verify-v7f", help="审计 Nabi v7f 的全部结构、逐 tick 指令和缓存")
+    nabi.add_argument("--save", type=Path, required=True, help="TMAM-Nabi-20221128 的原始存档文件")
+    nabi.add_argument("--output", type=Path, help="新的报告目录；默认保存到 Nabi 目录的 verification 下")
+    nabi.add_argument("--workers", type=int, default=8, help="并行进程数，1..32，默认 8")
+    nabi.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数，默认 4096")
     solve = tmam_commands.add_parser("solve", help="用 XianYu-20221129 的逻辑拆解结构，输出部件与加工树，不查图形数据库")
     solve.add_argument("shape", type=int, help="16 位结构编号，1..65535，低四位为底层")
     solve.add_argument("--events", action="store_true", help="同时输出指令、模式和重试信号的变化 tick")
@@ -55,6 +60,12 @@ def main() -> int:
     args = build_parser().parse_args()
     try:
         if args.tool == "tmam":
+            if args.command == "verify-v7f":
+                from shapez1_tmam.nabi_20221128.verify_v7f import verify_v7f
+                report = verify_v7f(args.save, args.output, args.workers, args.max_ticks)
+                print(json.dumps(report, ensure_ascii=False, indent=2))
+                print("审计完成；候选堆叠结果不代表完整指令语义已经验证通过。")
+                return 0
             if args.command == "solve":
                 from shapez1_tmam.xianyu_20221129.solver import XianYu20221129
                 report = XianYu20221129(args.max_ticks).solve(args.shape, include_events=args.events)

@@ -45,6 +45,11 @@ class MachineProfile(TypedDict):
 PROFILES: dict[str, MachineProfile] = {
     "XianYu-20221129": {"input": (7, 1), "enable": (20, 1), "outputs": ((49, -25), (64, -24), (73, -24), (78, -28)), "checks": ((49, -19), (63, -23), (72, -23), (79, -27))},
     "BugFix-20210622": {"input": (59, 56), "enable": (62, 7), "outputs": ((70, -43), (71, -42)), "checks": ((69, -19),)},
+    "Nabi-v7f-20221128": {
+        "input": (41, -18), "enable": (34, -26),
+        "outputs": tuple((x, y) for x in range(39, 72, 4) for y in (-38, -35)),
+        "checks": (),
+    },
 }
 PROFILES["CTMAM"] = PROFILES["BugFix-20210622"]
 
