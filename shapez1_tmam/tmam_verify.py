@@ -167,7 +167,7 @@ def verify_range(circuit: dict, feasible: set[int], start: int, stop: int, max_t
     return {"name": circuit["name"], "start": start, "stop": stop, "counts": dict(counts), "seconds": time.monotonic() - started}
 
 def verify_saves(save_dir: Path, destination: Path | None, workers: int = 8, max_ticks: int = 4096,
-                 machines: tuple[str, ...] = ("XianYu", "BugFix-20210622")) -> dict:
+                 machines: tuple[str, ...] = ("XianYu-20221129", "BugFix-20210622")) -> dict:
     """并行验证所选存档的全部编号，合并逐项结果与来源摘要。"""
     import hashlib
     from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -179,7 +179,6 @@ def verify_saves(save_dir: Path, destination: Path | None, workers: int = 8, max
     machines = tuple("BugFix-20210622" if name == "CTMAM" else name for name in machines)
     sources = {
         "XianYu-20221129": ("xianyu_20221129", "savegame-916dcc85ebaf5438a5e23cb79d344e2fc28ef2c8.bin"),
-        "XianYu": ("xianyu_legacy", "savegame-72b2f5b7adb052ae84aa78fb4050371107d32eb5.bin"),
         "BugFix-20210622": ("bugfix_20210622", "savegame-3c4c1c08fc4161406e4353e25f06c4b92e824b48.bin"),
     }
     database = Path(__file__).resolve().parent / "data/shapes/shapes.json"
@@ -187,7 +186,7 @@ def verify_saves(save_dir: Path, destination: Path | None, workers: int = 8, max
     if any(not valid_structure(shape) for shape in feasible):
         raise ValueError("对照集合包含非法结构编码")
     if not machines or len(set(machines)) != len(machines) or any(name not in sources for name in machines):
-        raise ValueError("请选择不重复的 TMAM 名称：XianYu、XianYu-20221129、BugFix-20210622（旧名 CTMAM）")
+        raise ValueError("请选择不重复的 TMAM 名称：XianYu-20221129、BugFix-20210622（旧名 CTMAM）")
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     directories = {
         name: (destination / sources[name][0] if destination is not None

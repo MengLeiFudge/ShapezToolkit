@@ -40,7 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     verify = tmam_commands.add_parser("verify", help="按游戏 tick 规则穷举指定 TMAM 存档")
     verify.add_argument("--saves", type=Path, required=True, help="包含所选 TMAM 原始存档的目录")
     verify.add_argument("--output", type=Path, help="自定义报告根目录，按机器分目录；默认写到各机器的 verification 下")
-    verify.add_argument("--machine", nargs="+", choices=("XianYu", "XianYu-20221129", "BugFix-20210622", "CTMAM"), default=("XianYu", "BugFix-20210622"), help="选择存档，默认 XianYu BugFix-20210622；CTMAM 为 BugFix 旧名")
+    verify.add_argument("--machine", nargs="+", choices=("XianYu-20221129", "BugFix-20210622", "CTMAM"), default=("XianYu-20221129", "BugFix-20210622"), help="选择存档，默认 XianYu-20221129 BugFix-20210622；CTMAM 为 BugFix 旧名")
     verify.add_argument("--workers", type=int, default=8, help="并行进程数，1..32，默认 8")
     verify.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数；超时单独报告")
     solve = tmam_commands.add_parser("solve", help="用 XianYu-20221129 的逻辑拆解结构，输出部件与加工树，不查图形数据库")
