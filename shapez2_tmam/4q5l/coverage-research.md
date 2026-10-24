@@ -1,6 +1,6 @@
 # 四象限五层图形的覆盖性研究
 
-本文保留四象限、最多五层的特例研究；任意层数、任意象限的当前研究入口见[参数化模型与反例](general-model.md)，其中允许不稳定的可制作图形。本文基础输入是任意不含结晶的单层图形，包括普通形状、合法配色和顶针组合；空的底层或中间层保留位置。讨论旋转、切割、交换、堆叠、顶针、结晶和染色等实体加工，不把仅用于信号分析的操作自动计入可制造过程。当前先研究可制作性理论，暂不处理向具体机器流程的转换。
+本文限定四象限、最多五层。其他范围见[六象限五层](../6q5l/README.md)和[x 象限 y 层](../general/README.md)，各自的结论不能默认互相外推。基础输入是任意不含结晶的单层图形，包括普通形状、合法配色和顶针组合；空的底层或中间层保留位置。讨论旋转、切割、交换、堆叠、顶针、结晶和染色等实体加工，不把仅用于信号分析的操作自动计入可制造过程。
 
 证据方式为文献核对、当前安装程序集的只读反编译和逐步手推。没有运行枚举、求解器、游戏或蓝图仿真。已对本机 `1.2.0-rc3` 的堆叠、下落、截高、顶针及结晶关键代码进行静态核对；具体范围和程序集指纹见第 8 节。覆盖性定理仍按各节列出的前提判断。
 
@@ -133,7 +133,7 @@
 - 若一直回溯到基础输入，也属于 A。
 - 中间各次堆叠可约化为基础块堆叠；旋转暂保留，标签问题由第 2 节处理。
 
-因此，每个可制作结果都有“从 A 出发，经过旋转、顶针和基础块堆叠”的制造尾部。这是相对完整 H 定义的存在性结论；尚未给出完整 H 的可计算判据及构造。[列内理论](column-theory.md)进一步给出 Q、J 两个必要条件及 K 不充分的具体反例。
+因此，每个可制作结果都有“从 A 出发，经过旋转、顶针和基础块堆叠”的制造尾部。这是相对完整 H 定义的存在性结论；尚未给出完整 H 的可计算判据及构造。[通用列内不变量](../general/column-invariants.md)给出 Q、J 两个必要条件及 K 不充分的具体反例。
 
 ### 5.2 有限阶段形式
 
@@ -217,13 +217,13 @@ shapePartReference.LayerIndex += MaxShapeLayers + 1;
 在已核对的四象限五层规则下，全部可制作状态属于 K、复杂堆叠约化及单段逆向判据均已给出人工证明。剩余证明义务为：
 
 1. **半形集合完备性**：独立单列已精确分类，但两列可能互相支撑。需要判断 K、Q、J 与两列支撑关系之外是否还有制造历史限制，并给出完整 H 的构造或进一步反例。
-2. **有顶破时的完整逆向规则**：[列内理论](column-theory.md)已确定保留晶体的前态位置、输入底层占用掩码，以及输入不超过四层时的唯一候选；仍需处理第五层、被融合删除的晶体及后续下落。
+2. **有顶破时的完整逆向规则**：[通用位置约束](../general/column-invariants.md#4-顶针逆向的通用位置约束)确定保留晶体的前态位置和输入底层占用掩码；[本范围的逆向特例](column-theory.md)确定输入不超过四层时的唯一候选。仍需处理第五层、被融合删除的晶体及后续下落。
 
 颜色消除后，单角五层有 4^5 = 1024 个原始格位编码，其中独立可制作单列恰有 264 种（含空列）；数量由解析公式得到。半形五层仍有 4^10 = 1048576 个原始编码，不能因为某一列无法独立制作就排除整个半形。下一步需要处理邻列支撑与晶体碎裂的相互作用。
 
 ## 8. 来源及核对范围
 
-群资料原件位于本机 `data/group_files/`，不进入 Git。游戏核对使用本机 Steam 安装中的程序集；没有修改或运行游戏。下面的版本号与摘要用于标识本次研究证据。
+群资料原件位于本机 `../data/group_files/`，不进入 Git。Mari 的四象限五层实现资料见[压缩包核对记录](mari-tmam.md)。游戏核对使用本机 Steam 安装中的程序集；没有修改或运行游戏。下面的版本号与摘要用于标识本次研究证据。
 
 - **本机游戏 `1.2.0-rc3`，Steam build `24668948`**：版本来自 `D:\Steam\steamapps\common\shapez 2\version` 和 `appmanifest_2162800.acf`。`shapez 2_Data/Managed/Game.Content.Features.dll` 的 SHA-256 为 `c93f84ebe219d974b4aa778a73311c5d776ff6d5f90e48337671e0ee480bca07`。用 `ilspycmd 9.1.0.7988` 重新反编译 `ShapeOperationStack`、`ShapeLogic`、`ShapeOperationPushPin`、`ShapeOperationCrystallize`，以及本轮补充的 `ShapeOperationCut`、`ShapeOperationSwapHalves`、`ShapeOperationRotate`、`ShapeDefinition`、`StrictShapeDefinitionFactory`；去除工具升级提示后，均与 `D:\project\shapez\DecompiledSource\Game.Content.Features` 中对应文件逐行一致。
 - **源码定位**：`ShapeOperationStack.ExecuteInternal`（上料位移及调用）；`ShapeLogic.Logic_IsConnected/Logic_IsFused`（颜色无关的连接）、`BuildGroups/SplitGroupIntoKeepAndVanish`（分组范围）、`SimulateFallDownPhysics`（阻挡与下落消失）、`RemoveExcessLayers/Collapse`（截高和调用顺序）；`ShapeOperationPushPin.ExecuteInternal`、`ShapeOperationCrystallize.ExecuteInternal`。`ShapeOperationCut` 分别结算两个半形；`ShapeOperationSwapHalves.MergeHalves` 拼接后只折叠输出，不再做重力；`ShapeOperationRotate` 只改变列位置。另静态读取 `ShapeIdManager`、`ShapeRegistry`，结合工厂与定义类核对已有储存路径未额外触发重力；读取 `Game.Content/StackerSimulation.cs` 确认实体堆叠调用同一个 `ShapeOperationStack`。
