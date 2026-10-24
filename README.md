@@ -29,7 +29,7 @@ python main.py --help
 
 Git 仓库只包含源码、必要配置和说明文档。下载的模组、谜题、图形数据库、生成的验证记录以及本机凭据均留在本地，不上传。新克隆后，下载命令会创建所需目录；本地查询需先准备谜题文件，TMAM 存档验证需自行准备 `shapez1_tmam/data/shapes/shapes.json` 对照库。`tmam solve` 使用代码中的控制器，无需图形数据库。
 
-TMAM 提供一代结构拆解和电路验证，以及二代 Mari 的固定候选组合模型。二代调用 `python main.py tmam2 solve CuCuCuCu`；虚拟匹配不代表实体成品或全覆盖，详见 [Mari 模型说明](shapez2_tmam/mari/README.md)。图形渲染与网页入口尚未实现。一代模组已接入 QQBot 群文件同步。
+TMAM 提供一代结构拆解和电路验证，以及二代 Mari 的固定候选组合模型。二代调用 `python main.py tmam2 solve CuCuCuCu`；已找到[整层空隙反例](shapez2_tmam/4q5l/mari-empty-layer.md)，证明原包默认配置不全覆盖。虚拟匹配仍不代表实体成品，详见 [Mari 模型说明](shapez2_tmam/mari/README.md)。图形渲染与网页入口尚未实现。一代模组已接入 QQBot 群文件同步。
 
 ## 资料与历史
 
