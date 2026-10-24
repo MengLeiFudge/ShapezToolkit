@@ -11,7 +11,7 @@ Shapez 工具箱。根目录的 `main.py` 统一管理命令；每个功能目�
 | [shapez1_mmam](shapez1_mmam/README.md) | MMAM（Mini MAM），以尽量小的实体工厂制作图形为目标；存档分析预留目录 |
 | [shapez1_mods](shapez1_mods/README.md) | mod.io 批量下载、本地版本整理、QQBot 群文件同步和模组包 |
 | [shapez1_puzzles](shapez1_puzzles/README.md) | Steam token 获取、谜题下载、本地查询、CSV 导出和历史资料 |
-| [shapez2_tmam](shapez2_tmam/README.md) | 二代 TMAM 群资料、结构分类与拆解研究 |
+| [shapez2_tmam](shapez2_tmam/README.md) | Mari 六候选 Python 模型、接线分析、结构分类与覆盖性研究 |
 | [common](common/README.md) | 本机路径设置、网络请求和文件写入等共用代码 |
 
 ## 使用入口
@@ -29,7 +29,7 @@ python main.py --help
 
 Git 仓库只包含源码、必要配置和说明文档。下载的模组、谜题、图形数据库、生成的验证记录以及本机凭据均留在本地，不上传。新克隆后，下载命令会创建所需目录；本地查询需先准备谜题文件，TMAM 存档验证需自行准备 `shapez1_tmam/data/shapes/shapes.json` 对照库。`tmam solve` 使用代码中的控制器，无需图形数据库。
 
-TMAM 当前提供一代结构拆解和电路验证。图形渲染、网页入口及二代图形功能尚未实现。一代模组已接入 QQBot 群文件同步。
+TMAM 提供一代结构拆解和电路验证，以及二代 Mari 的固定候选组合模型。二代调用 `python main.py tmam2 solve CuCuCuCu`；虚拟匹配不代表实体成品或全覆盖，详见 [Mari 模型说明](shapez2_tmam/mari/README.md)。图形渲染与网页入口尚未实现。一代模组已接入 QQBot 群文件同步。
 
 ## 资料与历史
 

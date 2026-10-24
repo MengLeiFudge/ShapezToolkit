@@ -52,6 +52,11 @@ def build_parser() -> argparse.ArgumentParser:
     solve.add_argument("shape", type=int, help="16 位结构编号，1..65535，低四位为底层")
     solve.add_argument("--events", action="store_true", help="同时输出指令、模式和重试信号的变化 tick")
     solve.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数，默认 4096")
+    tmam2 = tools.add_parser("tmam2", help="二代 Mari 四象限五层 TMAM")
+    tmam2_commands = tmam2.add_subparsers(dest="command", required=True)
+    solve2 = tmam2_commands.add_parser("solve", help="按 Mari 六候选逻辑计算虚拟重建和工厂指令")
+    solve2.add_argument("shape", help="四象限、最多五层的完整图形短代码")
+    solve2.add_argument("--iteration", type=int, choices=range(1, 7), help="只计算指定候选；默认依次选择最小匹配编号")
     return parser
 
 
@@ -59,6 +64,15 @@ def main() -> int:
     """分派命令并报告结果；错误返回非零退出码，不输出 token。"""
     args = build_parser().parse_args()
     try:
+        if args.tool == "tmam2":
+            from shapez2_tmam.mari import Mari, Shape
+            machine = Mari()
+            target = Shape.from_key(args.shape)
+            candidate = machine.candidate(target, args.iteration) if args.iteration else machine.solve(target)
+            report = candidate.as_dict() if candidate is not None else {"target": target.to_key(), "matched": False}
+            report["status"] = "matched" if report["matched"] else "mismatch" if args.iteration else "no_candidate"
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return int(not report["matched"])
         if args.tool == "tmam":
             if args.command == "verify-v7f":
                 from shapez1_tmam.nabi_20221128.verify_v7f import verify_v7f
