@@ -2,10 +2,35 @@
 
 import argparse
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
 from .circuit import Circuit, Literal, Ref
 from .decoder_circuit import height_flags
+
+
+@dataclass(frozen=True)
+class ScannedLayer:
+    """本次最高层、原层号和保留原坐标的下半。"""
+
+    top: Ref
+    lower: Ref
+    original_layer: Ref
+    valid: Ref
+
+
+def scan_step(circuit: Circuit, target: Ref, enable: Ref) -> ScannedLayer:
+    """添加一次拆层测高的数据通路，供组合部件与循环控制器共用。"""
+    split = circuit.add("VirtualUnstacker", target)
+    upper = Ref(split.node, 1)
+    exists = circuit.add("LogicGateCompare", upper, Literal(None), config="Bg==")
+    valid = circuit.add("LogicGateAnd", exists, enable)
+    flags = height_flags(circuit, target, valid)
+    heights = tuple(circuit.add("LogicGateIf", Literal(height), flag) for height, flag in enumerate(flags, 1))
+    circuit.aliases.append(heights)
+    return ScannedLayer(
+        circuit.add("LogicGateIf", upper, valid),
+        circuit.add("LogicGateIf", split, valid), heights[0], valid)
 
 
 def build_scan(channel_base: int = 1_011_000) -> tuple[Circuit, dict]:
@@ -15,23 +40,15 @@ def build_scan(channel_base: int = 1_011_000) -> tuple[Circuit, dict]:
     circuit = Circuit(channel_base + 32)
     target = circuit.add("ControlledSignalReceiver", Literal(channel_base))
     enable = circuit.add("ControlledSignalReceiver", Literal(channel_base + 1))
-    split = circuit.add("VirtualUnstacker", target)
-    upper = Ref(split.node, 1)
-    exists = circuit.add("LogicGateCompare", upper, Literal(None), config="Bg==")
-    valid = circuit.add("LogicGateAnd", exists, enable)
-    flags = height_flags(circuit, target, valid)
-    heights = tuple(circuit.add("LogicGateIf", Literal(height), flag) for height, flag in enumerate(flags, 1))
-    circuit.aliases.append(heights)
-    published_upper = circuit.add("LogicGateIf", upper, valid)
-    published_lower = circuit.add("LogicGateIf", split, valid)
+    scanned = scan_step(circuit, target, enable)
     channels = circuit.channel_map()
     if max(channels.values()) > channel_base + 255:
         raise ValueError("单步扫描部件超出其保留频道范围")
     report = {
         "component": "top_layer_scan", "quadrants": 4, "height": 5,
         "inputs": {"target": channel_base, "enable": channel_base + 1},
-        "outputs": {"has_layer": channels[valid], "top": channels[published_upper],
-                    "lower": channels[published_lower], "original_layer": channels[heights[0]]},
+        "outputs": {"has_layer": channels[scanned.valid], "top": channels[scanned.top],
+                    "lower": channels[scanned.lower], "original_layer": channels[scanned.original_layer]},
         "gate_platforms": len(circuit.gates),
         "reserved_channels": [channel_base, channel_base + 255],
         "scope": "一次扫描最高非空层，保留原坐标的下半及从1开始的原层号；不判断可制作性。",

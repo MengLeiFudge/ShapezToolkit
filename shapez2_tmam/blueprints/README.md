@@ -8,7 +8,7 @@
 
 将目标或其他输入信号接到受控无线发射器，控制端填对应 `.json` 的 `inputs` 频道。使用受控无线接收器读取 `outputs` 频道。`enable` 为整数真值时发布有效结果。每份实例须独占 `reserved_channels` 范围；同一份蓝图复制后会共用原频道，需以新基址重新编译以取得独立实例。
 
-这些部件是组合电路。输入改变时，不同路径可能暂时输出旧结果、空信号或冲突；应保持整组输入直到所有输出稳定。`enable`、`recognized`、`status` 都不是运算完成脉冲。时序控制器须另设稳定输入、等待传播、采样和写回阶段。
+加工、解码及判据部件采用组合电路。输入改变时，不同路径可能暂时输出旧结果、空信号或冲突；应保持整组输入直到所有输出稳定。`enable`、`recognized`、`status` 都不是运算完成脉冲。自动扫描器另含四阶段时钟、寄存器与采样窗口，按下面的独立协议使用。
 
 游戏的无线频道读取十二个信号 tick 以前的数据，每秒十二个信号 tick；本地输入缓冲和导线网络也有延迟。[保守保持期证明](../4q5l/signal-timing.md)覆盖这些因素：按频道依赖的最大深度 D，整组输入保持 `64×(D+2)` 个信号 tick 后可采样全部输出。各 JSON 的 `settling.hold_signal_ticks` 给出对应值。此结论要求本机 Hybrid 或 AlwaysHighUPS 模式的常速连续推进、频道独占、网络与配置保持不变。调试单步、强制低UPS、模拟模式切换和快进不在已证范围内。时间按游戏模拟计，不能改用墙钟或两次相同采样。
 
@@ -51,7 +51,11 @@
 
 `signal-register.spz2bp` 用5平台保存任意信号，包括整数0和空值。输入为 `data`、`load`、`retain`。依次使用 `(load,retain)=(1,0)→(1,1)→(0,1)`，每阶段保持512信号tick，data在三阶段均保持不变。第三阶段结束后才可复用数据总线；保持 `(0,1)` 就持续保存该值。首次使用必须完整写入一次。
 
-重叠阶段两路同时发布同一个值；同值信号合并不会冲突。三阶段协议及反馈保持的[源码证明](../4q5l/register-circuit.md)独立于组合保持期。寄存器没有时钟、地址选择器或完成脉冲，不能省略重叠阶段或用单个控制及其反相直接代替。
+重叠阶段两路同时发布同一个值；同值信号合并不会冲突。三阶段协议及反馈保持的[源码证明](../4q5l/register-circuit.md)独立于组合保持期。该寄存器没有时钟、地址选择器或完成脉冲，不能省略重叠阶段或用单个控制及其反相直接代替。
+
+`four-phase-clock.spz2bp` 提供105平台的自动时钟。每阶段576信号tick，依次循环0、1、2、3。整份批量导入或完整重载后，保持 `enable=0` 至少2432tick，再改为1并保持。复位时阶段3为真，启动先有一段不完整阶段3，随后出现第一个完整阶段0。适用的本地拓扑与常速更新条件、四门等深锁存器见[控制证明](../4q5l/clocked-control.md)。
+
+`iterative-scanner-4q5l.spz2bp` 把同一拆层通路与时钟、主副寄存器接成206平台的自动循环。保持target，执行上述复位再启用；每个阶段3输出一份 `top`、原层号 `original_layer` 和 `sample` 窗口。输出端sample上升后再等24tick，并在本窗口内只采一份。最后一份记录的sample与done同时为真，先接收该层再处理done。最多五份非空层，保留原空层坐标；之后sample为假。详见[循环证明](../4q5l/iterative-scanner.md)。它尚不输出完整制造配方或判断可制作性。
 
 ## 共用虚拟加工核心
 
@@ -89,6 +93,8 @@ python -m shapez2_tmam.decoder_circuit --channel-base 1006000 --output shapez2_t
 python -m shapez2_tmam.half_circuit --channel-base 1008000 --output shapez2_tmam/blueprints/half-4q5l.spz2bp
 python -m shapez2_tmam.scan_circuit --channel-base 1011000 --output shapez2_tmam/blueprints/scan-4q5l.spz2bp
 python -m shapez2_tmam.register_circuit --channel-base 1012000 --output shapez2_tmam/blueprints/signal-register.spz2bp
+python -m shapez2_tmam.sequential_circuit --channel-base 1013000 --output shapez2_tmam/blueprints/four-phase-clock.spz2bp
+python -m shapez2_tmam.iterative_scanner --channel-base 1014000 --output shapez2_tmam/blueprints/iterative-scanner-4q5l.spz2bp
 ```
 
 [`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。
