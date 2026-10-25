@@ -12,7 +12,7 @@
 
 四象限的[电路化简化](4q5l/compact-synthesis.md)包含堆叠段至多五份上料、局部最短配方和尾部旋转归并。[Python 堆叠模块](stacking.py)提供逐层与最短两种规划；无晶体目标可直接从基础原料合成，含晶体目标仍需补齐完整起点与顶破规划。
 
-Mari 主控的六候选逻辑另有 [Python 模型](mari/README.md)，入口为 `python main.py tmam2 solve <图形短代码>`。模型计算虚拟重建和 51 路指令；[整层空隙反例](4q5l/mari-empty-layer.md)已证明默认配置的六候选算法不全覆盖。上述新合成算法尚未实现为该 Python 入口或游戏蓝图。具体原机结论见 [Mari 调查记录](4q5l/mari-tmam.md)。
+Mari 主控的六候选逻辑另有 [Python 模型](mari/README.md)，入口为 `python main.py tmam2 solve <图形短代码>`。模型计算虚拟重建和 51 路指令；[整层空隙反例](4q5l/mari-empty-layer.md)已证明默认配置的六候选算法不全覆盖。新合成方法另有[局部构造 Python 入口](synthesis/README.md)及[原生电路部件](blueprints/README.md)，完整含晶体求解尚未实现。具体原机结论见 [Mari 调查记录](4q5l/mari-tmam.md)。
 
 ## 共用的本机资料
 

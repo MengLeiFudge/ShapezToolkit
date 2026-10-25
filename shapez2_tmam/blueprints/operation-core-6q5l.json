@@ -1,0 +1,41 @@
+{
+  "component": "virtual_operation_core",
+  "quadrants": 6,
+  "height": 5,
+  "inputs": {
+    "opcode": 1001000,
+    "a": 1001001,
+    "b": 1001002,
+    "color": 1001003,
+    "enable": 1001004
+  },
+  "outputs": {
+    "primary": 1001059,
+    "secondary": 1001093,
+    "recognized": 1001113
+  },
+  "opcodes": {
+    "0": "copy",
+    "1": "rotate_cw",
+    "2": "rotate_ccw",
+    "3": "rotate_half",
+    "4": "cut_front",
+    "5": "cut_back",
+    "6": "pin",
+    "7": "stack",
+    "8": "swap_front_a",
+    "9": "swap_front_b",
+    "10": "crystal",
+    "11": "unstack",
+    "12": "analyze",
+    "13": "paint_top"
+  },
+  "gate_platforms": 79,
+  "reserved_channels": [
+    1001000,
+    1001511
+  ],
+  "scope": "虚拟加工核心；不包含可制作性求解、配方存储或时序调度器",
+  "verification": "静态端口、实际占地与几何网络核对；未运行门级模拟或游戏",
+  "timing": "组合电路，无完成脉冲；全部输入须保持到所有输出稳定。"
+}

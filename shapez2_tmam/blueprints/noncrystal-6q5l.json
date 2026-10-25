@@ -1,0 +1,38 @@
+{
+  "component": "noncrystal_solver",
+  "quadrants": 6,
+  "height": 5,
+  "inputs": {
+    "target": 1004000,
+    "enable": 1004001
+  },
+  "outputs": {
+    "status": 1004218,
+    "solvable": 1004213,
+    "unsolvable": 1004215,
+    "unknown": 1004217,
+    "reconstructed": 1004226,
+    "layers_top_to_bottom": [
+      1004221,
+      1004222,
+      1004223,
+      1004224,
+      1004225
+    ]
+  },
+  "statuses": {
+    "1": "solved",
+    "2": "unsolvable",
+    "3": "unknown",
+    "null": "输入不是非空图形，或 enable 为假"
+  },
+  "recipe": "非空层输出按逆序取基础单层原料，逐层堆叠；空信号跳过。",
+  "gate_platforms": 160,
+  "reserved_channels": [
+    1004000,
+    1005023
+  ],
+  "scope": "无晶体目标的完整判定与配方；含晶体目标返回 unknown。",
+  "verification": "静态端口、实际占地与几何网络核对；未运行门级模拟或游戏",
+  "timing": "组合电路，无完成脉冲；目标和 enable 须保持到所有输出稳定。"
+}
