@@ -14,6 +14,27 @@ OPERATIONS = (
 )
 
 
+def physical_results(circuit: Circuit, a: Ref, b: Ref, color: Ref, quadrants: int) -> tuple[Ref, ...]:
+    """添加实体对应的虚拟加工通路，输出顺序沿用opcode0～10。"""
+    if quadrants not in (4, 6):
+        raise ValueError("加工通路需要四或六象限配置")
+    clockwise = circuit.add("VirtualRotator", a)
+    counterclockwise = circuit.add("VirtualRotatorCCW", a)
+    half = a
+    for _ in range(quadrants // 2):
+        half = circuit.add("VirtualRotator", half)
+    front = circuit.add("VirtualHalfCutter", a)
+    back = circuit.add("VirtualHalfCutter", half)
+    for _ in range(quadrants // 2):
+        back = circuit.add("VirtualRotator", back)
+    pin = circuit.add("VirtualPinPusher", a)
+    stacked = circuit.add("VirtualStacker", a, b)
+    swapped = circuit.add("VirtualHalvesSwapper", a, b)
+    crystal = circuit.add("VirtualCrystalGenerator", a, color)
+    return (a, clockwise, counterclockwise, half, front, back, pin, stacked,
+            swapped, Ref(swapped.node, 1), crystal)
+
+
 def build_core(quadrants: int, channel_base: int = 1_000_000) -> tuple[Circuit, dict]:
     """构建共用加工单元及其频道表；输入须保持到组合路径传播完成。
 
@@ -29,24 +50,11 @@ def build_core(quadrants: int, channel_base: int = 1_000_000) -> tuple[Circuit, 
     inputs = {name: circuit.add("ControlledSignalReceiver", Literal(channel_base + i))
               for i, name in enumerate(("opcode", "a", "b", "color", "enable"))}
     a, b = inputs["a"], inputs["b"]
-    clockwise = circuit.add("VirtualRotator", a)
-    counterclockwise = circuit.add("VirtualRotatorCCW", a)
-    half = a
-    for _ in range(quadrants // 2):
-        half = circuit.add("VirtualRotator", half)
-    front = circuit.add("VirtualHalfCutter", a)
-    back = circuit.add("VirtualHalfCutter", half)
-    for _ in range(quadrants // 2):
-        back = circuit.add("VirtualRotator", back)
-    pin = circuit.add("VirtualPinPusher", a)
-    stacked = circuit.add("VirtualStacker", a, b)
-    swapped = circuit.add("VirtualHalvesSwapper", a, b)
-    crystal = circuit.add("VirtualCrystalGenerator", a, inputs["color"])
+    physical = physical_results(circuit, a, b, inputs["color"], quadrants)
     unstacked = circuit.add("VirtualUnstacker", a)
     analyzed = circuit.add("VirtualAnalyzer", a)
     painted = circuit.add("VirtualPainter", a, inputs["color"])
-    primary = (a, clockwise, counterclockwise, half, front, back, pin, stacked,
-               swapped, Ref(swapped.node, 1), crystal, unstacked, analyzed, painted)
+    primary = (*physical, unstacked, analyzed, painted)
     secondary = {11: Ref(unstacked.node, 1), 12: Ref(analyzed.node, 1)}
     selected = []
     published = []

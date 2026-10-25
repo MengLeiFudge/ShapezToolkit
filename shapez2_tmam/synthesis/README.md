@@ -10,7 +10,7 @@
 python -m shapez2_tmam.synthesis 'CuCu----:Cu------' --quadrants 4
 ```
 
-四象限完整逆推在命令末尾加 `--complete`；此选项不支持六象限。输出是 JSON。`status` 有三种值：
+四象限完整逆推在命令末尾加 `--complete`；此选项不支持六象限。另加 `--instructions` 可同时导出六寄存器消费式指令；只支持四象限。输出是 JSON。`status` 有三种值：
 
 | 状态 | 含义 | 退出码 |
 |---|---|---|
@@ -31,6 +31,8 @@ python -m shapez2_tmam.synthesis 'CuCu----:Cu------' --quadrants 4
 | `crystal` | 一个物品；参数为颜色代码 |
 | `stack` | 两个物品，按下料、上料排列 |
 | `swap` | 两个物品；参数 0 取前半 A＋后半 B，参数 1 取前半 B＋后半 A |
+
+`recipe.instructions()`沿原后序逐项输出`opcode,a,b,destination,base,color,request,result`。基础料占最低空槽，其他操作消费输入并复用第一个源槽；当前四象限构造及完整尾部至多同时需要六个物品槽。请求从1开始交替为0/1，重新执行前完整复位。接口及445平台电路回放器见[六寄存器证明](../4q5l/recipe-registers.md)；它不包含游戏内候选搜索或角宏发令。
 
 ## 从 Python 调用
 

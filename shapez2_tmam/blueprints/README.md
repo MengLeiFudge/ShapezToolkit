@@ -67,6 +67,12 @@
 
 这两份部件保留原层位，不生成任意候选的原生图形信号，也不把耗尽一列当作目标不可制作。八位覆盖证明、晶体屏障前缀等式、一热标签路由、主副状态与三阶段传播余量见[单列候选证明](../4q5l/pin-column-circuit.md)。
 
+## 六寄存器配方回放
+
+`recipe-processor-4q5l.spz2bp`用445平台接受加工指令包，在六个物品槽中顺序回放。Python配方的`instructions()`或CLI的`--instructions`输出对应包；操作1～10沿用下表，14取无晶体单层基础料。操作消费源槽，结果写入空槽或被消费槽，拒绝覆盖其他物品；无效新请求确认后status=2且物品槽不变。
+
+复位enable=0、request=0至少848tick，再启用。每个window上升后24tick可读取ack/status并提交下一份翻转请求；整包须在该阶段3开始后96tick以前到达内部接收器输出，保持到下一窗口确认。每阶段180tick、每周期60模拟秒。六槽覆盖当前四象限构造的证明、完整协议和字段见[配方寄存器说明](../4q5l/recipe-registers.md)。它不自动搜索或生成角宏指令，不能单独判定目标可解性。
+
 ## 共用虚拟加工核心
 
 使用 `operation-core-4q5l.spz2bp` 或 `operation-core-6q5l.spz2bp`。输入为 `opcode`、图形 `a`、图形 `b`、流体颜色信号 `color` 和 `enable`。
@@ -108,6 +114,7 @@ python -m shapez2_tmam.iterative_scanner --channel-base 1014000 --output shapez2
 python -m shapez2_tmam.material_half_circuit --channel-base 1016000 --output shapez2_tmam/blueprints/material-half-4q5l.spz2bp
 python -m shapez2_tmam.pin_column_circuit --channel-base 1019000 --output shapez2_tmam/blueprints/pin-column-4q5l.spz2bp
 python -m shapez2_tmam.pin_column_iterator --channel-base 1022000 --output shapez2_tmam/blueprints/pin-column-iterator-4q5l.spz2bp
+python -m shapez2_tmam.recipe_processor --channel-base 1025000 --output shapez2_tmam/blueprints/recipe-processor-4q5l.spz2bp
 ```
 
 [`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。

@@ -35,6 +35,40 @@ class Recipe:
             outputs.append(index)
             index += 1
 
+    def instructions(self, registers: int = 6) -> Iterator[dict]:
+        """把四象限制造树流式编为消费输入的寄存器指令，不复制实体。"""
+        if len(self.result.layers[0]) != 4 or registers < 1:
+            raise ValueError("寄存器指令当前需要四象限和至少一个寄存器")
+        live: dict[int, int] = {}
+        occupied: set[int] = set()
+        for step in self.steps():
+            operation = step["operation"]
+            parameter = step["parameter"]
+            if operation == "base":
+                opcode = 14
+            elif operation == "rotate" and isinstance(parameter, int) and parameter % 4:
+                opcode = {1: 1, 2: 3, 3: 2}[parameter % 4]
+            elif operation in ("cut", "swap") and parameter in (0, 1):
+                opcode = (4 if operation == "cut" else 8) + parameter
+            elif operation in ("pin", "stack", "crystal"):
+                opcode = {"pin": 6, "stack": 7, "crystal": 10}[operation]
+            else:
+                raise ValueError(f"制造步骤无法编码为寄存器指令：{operation!r}, {parameter!r}")
+            operands = [live[index] for index in step["inputs"]]
+            destination = operands[0] if operands else next((i for i in range(registers) if i not in occupied), None)
+            if destination is None:
+                raise ValueError(f"制造树需要超过{registers}个同时存活的物品寄存器")
+            for index in step["inputs"]:
+                del live[index]
+            occupied.difference_update(operands)
+            occupied.add(destination)
+            live[step["id"]] = destination
+            yield {"id": step["id"], "opcode": opcode, "destination": destination,
+                   "a": operands[0] if operands else 0, "b": operands[1] if len(operands) == 2 else 0,
+                   "base": step["result"] if operation == "base" else None,
+                   "color": f"color:{parameter}" if operation == "crystal" else None,
+                   "request": (step["id"] + 1) % 2, "result": step["result"]}
+
 
 class Builder:
     """以精确物理计算每个节点，提供基础层、紧柱和半形拼接构造。"""
