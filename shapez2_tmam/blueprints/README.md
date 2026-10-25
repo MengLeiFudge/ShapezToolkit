@@ -53,6 +53,12 @@
 
 target全程保持，enable=0至少992tick后启用。每个window上升后等48tick，窗口内读一次；sample为真先保存instruction包，再处理同窗done/status。每阶段216tick，每周期72模拟秒；初始化加全部程序行的保守上界为9小时12模拟分，仍需压缩，尚未通过实用性能验收。它不带背压，也未接全四象限逆推控制。范围、宏证明、复位及完整接口见[自动半形说明](../4q5l/automatic-half.md)。
 
+## 双半形起点
+
+`startpoint-4q5l.spz2bp`用9042平台判断两个切向的互补原格半面，稳定且满足A就分两遍制造并拼接。两遍共用一份465行角程序和六个物品槽，覆盖有界尾部的全部起点A；尚未含S/顶针搜索。状态3表示需要尾部或cu范围外，不能判不可制作。
+
+target保持，enable=0至少1420tick后启用；window上升后48tick采样，sample为真先收指令，再处理done/status。阶段228tick、周期76模拟秒，最多931周期的保守上界约19小时39分，仍需继续压缩。切向选择、空半形、两遍及六槽证明见[双半形起点](../4q5l/two-half-startpoint.md)。
+
 ## 时序复用的数据通路与寄存器
 
 `scan-4q5l.spz2bp` 用38平台读取当前最高非空层。输出原始 `top` 单层、保留原层位的 `lower` 下半，以及从1开始的 `original_layer`。控制器可锁存这些结果，再把新下半作为下一次输入，最多调用五次。它是供循环调用的共用数据通路，未包含写回和阶段控制。
@@ -122,6 +128,7 @@ python -m shapez2_tmam.pin_column_circuit --channel-base 1019000 --output shapez
 python -m shapez2_tmam.pin_column_iterator --channel-base 1022000 --output shapez2_tmam/blueprints/pin-column-iterator-4q5l.spz2bp
 python -m shapez2_tmam.recipe_processor --channel-base 1025000 --output shapez2_tmam/blueprints/recipe-processor-4q5l.spz2bp
 python -m shapez2_tmam.half_synthesizer --channel-base 1028000 --output shapez2_tmam/blueprints/automatic-half-4q5l.spz2bp
+python -m shapez2_tmam.startpoint_circuit --channel-base 1061000 --output shapez2_tmam/blueprints/startpoint-4q5l.spz2bp
 ```
 
 [`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。

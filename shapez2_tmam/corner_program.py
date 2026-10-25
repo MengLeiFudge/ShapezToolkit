@@ -22,7 +22,7 @@ class CellRef:
 
 @dataclass(frozen=True)
 class Instruction:
-    """条件成立才执行的消费式指令；所有条件只依赖固定目标。"""
+    """条件成立才执行的消费式指令；条件依赖目标及上层固定的调用状态。"""
 
     condition: Ref
     opcode: int
@@ -348,10 +348,10 @@ class CornerProgram:
         self.end(block)
 
 
-def half_program(circuit: Circuit, decoded: DecodedShape) -> tuple[Instruction, ...]:
-    """两列标准半形：先造两角，必要时拼接，再切去外侧NPC助手。"""
-    program = CornerProgram(circuit)
-    columns = [tuple(program.original(row[q]) for row in decoded.cells) for q in (0, 1)]
+def half_body(program: CornerProgram, columns: tuple[tuple[CellRef, ...], ...]) -> tuple[Ref, Ref]:
+    """在槽0起制造两角并合并；调用者另发最后半切，可按遍次复用本体。"""
+    if len(columns) != 2 or any(len(column) != 5 for column in columns):
+        raise ValueError("半形程序需要两列，每列五个原层位")
     present = [program.or_(*(cell.occupied for cell in column)) for column in columns]
     block = program.begin(present[0])
     program.angle(columns[0], 3, 0, present[0])
@@ -362,5 +362,13 @@ def half_program(circuit: Circuit, decoded: DecodedShape) -> tuple[Instruction, 
     program.rotate(1, 1, present[1], destination=destination)
     program.end(block)
     program.join(0, 1, 3, program.and_(*present))
+    return present[0], present[1]
+
+
+def half_program(circuit: Circuit, decoded: DecodedShape) -> tuple[Instruction, ...]:
+    """两列标准半形：先造两角，必要时拼接，再切去外侧NPC助手。"""
+    program = CornerProgram(circuit)
+    columns = tuple(tuple(program.original(row[q]) for row in decoded.cells) for q in (0, 1))
+    half_body(program, columns)
     program.emit(program.one, 4, 0)
     return tuple(program.instructions)
