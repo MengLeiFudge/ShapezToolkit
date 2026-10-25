@@ -32,6 +32,33 @@ class PinFamily:
                 yield result
 
 
+def pin_column(target: tuple[str, ...], keep_mask: int, crystal_mask: int) -> tuple[str, ...] | None:
+    """由两个四位掩码恢复一列前四层；只判结构约束，不计算Pin物理。"""
+    if len(target) != 5 or not 0 <= keep_mask < 16 or not 0 <= crystal_mask < 16:
+        raise ValueError("顶针单列候选需要五格目标和两个0～15掩码")
+    if target[0][0] == "c":
+        return None
+    new_pin = target[0] == PIN
+    retained = [(z, cell) for z, cell in enumerate(target)
+                if cell != EMPTY and cell[0] != "c" and not (z == 0 and new_pin)]
+    sources = [r for r in range(4) if keep_mask & (1 << r)]
+    if len(sources) != len(retained):
+        return None
+    forced = {z - 1: cell for z, cell in enumerate(target) if cell[0] == "c"}
+    forced_mask = sum(1 << r for r in forced)
+    if keep_mask & forced_mask or crystal_mask & (keep_mask | forced_mask):
+        return None
+    if any(z > r + 1 for r, (z, _) in zip(sources, retained)):
+        return None
+    column = [forced.get(r, "cr" if crystal_mask & (1 << r) else EMPTY) for r in range(4)]
+    for r, (_, cell) in zip(sources, retained):
+        column[r] = cell
+    result = tuple(column)
+    if (result[0] != EMPTY) != new_pin or not CornerBuilder.admissible(result):
+        return None
+    return result
+
+
 def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> Iterator[PinFamily]:
     """生成覆盖全部可制作顶针前态结构的候选族，默认每族先检查一次正向 Π。
 

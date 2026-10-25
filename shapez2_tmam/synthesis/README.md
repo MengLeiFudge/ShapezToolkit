@@ -56,4 +56,6 @@ if result.recipe is not None:
 
 面向游戏寄存器的实现还可用 `Solver4(rules, certificate_first=True)`：先对结构候选取得制造证书，再在真实产物上执行Pin检查。`pin_families(..., check_output=False)`只生成结构候选超集，调用者必须补这项检查。该次序与默认求解接受同一集合，允许候选保存在材料格中；两列稳定性已改成[按层扫描](../4q5l/half-row-stability.md)。这项变化减少原生信号编码需求，可能增加搜索时间，不构成实用性能承诺。CLI仍使用默认先检查逆像的次序。
 
+`pin_column(target_column, keep_mask, crystal_mask)`接收五格目标和两个0～15掩码，返回一份前四层结构候选或None。它不计算整图Pin，也不判可制作性；晶体掩码只标记强制保留C以外的辅助红C。相应[八位数据通路与自动迭代器](../4q5l/pin-column-circuit.md)已编译为原生蓝图，材料格与标签直接路由，四列组合、第五层及完整配方控制仍待完成。
+
 [原生电路部件及频道接法](../blueprints/README.md) · [返回总目录](../README.md)
