@@ -1,0 +1,188 @@
+{
+  "component": "shape_decoder",
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "target": 1006000,
+    "enable": 1006001
+  },
+  "outputs": {
+    "valid": 1006045,
+    "rows_bottom_to_top": [
+      1006077,
+      1006078,
+      1006079,
+      1006080,
+      1006081
+    ],
+    "cells_bottom_to_top": [
+      [
+        {
+          "shape": 1006156,
+          "color": 1006157,
+          "occupied": 1006158,
+          "pin": 1006159,
+          "crystal": 1006160
+        },
+        {
+          "shape": 1006162,
+          "color": 1006163,
+          "occupied": 1006164,
+          "pin": 1006165,
+          "crystal": 1006166
+        },
+        {
+          "shape": 1006168,
+          "color": 1006169,
+          "occupied": 1006170,
+          "pin": 1006171,
+          "crystal": 1006172
+        },
+        {
+          "shape": 1006174,
+          "color": 1006175,
+          "occupied": 1006176,
+          "pin": 1006177,
+          "crystal": 1006178
+        }
+      ],
+      [
+        {
+          "shape": 1006179,
+          "color": 1006180,
+          "occupied": 1006181,
+          "pin": 1006182,
+          "crystal": 1006183
+        },
+        {
+          "shape": 1006185,
+          "color": 1006186,
+          "occupied": 1006187,
+          "pin": 1006188,
+          "crystal": 1006189
+        },
+        {
+          "shape": 1006191,
+          "color": 1006192,
+          "occupied": 1006193,
+          "pin": 1006194,
+          "crystal": 1006195
+        },
+        {
+          "shape": 1006197,
+          "color": 1006198,
+          "occupied": 1006199,
+          "pin": 1006200,
+          "crystal": 1006201
+        }
+      ],
+      [
+        {
+          "shape": 1006202,
+          "color": 1006203,
+          "occupied": 1006204,
+          "pin": 1006205,
+          "crystal": 1006206
+        },
+        {
+          "shape": 1006208,
+          "color": 1006209,
+          "occupied": 1006210,
+          "pin": 1006211,
+          "crystal": 1006212
+        },
+        {
+          "shape": 1006214,
+          "color": 1006215,
+          "occupied": 1006216,
+          "pin": 1006217,
+          "crystal": 1006218
+        },
+        {
+          "shape": 1006220,
+          "color": 1006221,
+          "occupied": 1006222,
+          "pin": 1006223,
+          "crystal": 1006224
+        }
+      ],
+      [
+        {
+          "shape": 1006225,
+          "color": 1006226,
+          "occupied": 1006227,
+          "pin": 1006228,
+          "crystal": 1006229
+        },
+        {
+          "shape": 1006231,
+          "color": 1006232,
+          "occupied": 1006233,
+          "pin": 1006234,
+          "crystal": 1006235
+        },
+        {
+          "shape": 1006237,
+          "color": 1006238,
+          "occupied": 1006239,
+          "pin": 1006240,
+          "crystal": 1006241
+        },
+        {
+          "shape": 1006243,
+          "color": 1006244,
+          "occupied": 1006245,
+          "pin": 1006246,
+          "crystal": 1006247
+        }
+      ],
+      [
+        {
+          "shape": 1006248,
+          "color": 1006249,
+          "occupied": 1006250,
+          "pin": 1006251,
+          "crystal": 1006252
+        },
+        {
+          "shape": 1006254,
+          "color": 1006255,
+          "occupied": 1006256,
+          "pin": 1006257,
+          "crystal": 1006258
+        },
+        {
+          "shape": 1006260,
+          "color": 1006261,
+          "occupied": 1006262,
+          "pin": 1006263,
+          "crystal": 1006264
+        },
+        {
+          "shape": 1006266,
+          "color": 1006267,
+          "occupied": 1006268,
+          "pin": 1006269,
+          "crystal": 1006270
+        }
+      ]
+    ]
+  },
+  "gate_platforms": 199,
+  "reserved_channels": [
+    1006000,
+    1007023
+  ],
+  "scope": "保留原始空层的四象限五层逐格解码；不判断目标是否可制作。",
+  "cell_encoding": "cells[z][q] 使用从零开始的原层号和原象限；shape 为去色 q0 单格，color 为原颜色。",
+  "null_rows": "原始空底层、空中间层及最高层以上的位置输出空信号。",
+  "verification": "静态端口、实际占地与几何网络核对；未运行门级模拟或游戏",
+  "timing": "组合电路，无完成脉冲；整组输入保持不少于 settling.hold_signal_ticks。",
+  "settling": {
+    "max_gate_depth": 16,
+    "hold_signal_ticks": 1152,
+    "hold_simulation_seconds": 96.0,
+    "conditions": "本机源码的12信号tick/秒、每批最多4tick及正常更新策略；频道独占、配置不变、整组输入保持。",
+    "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"
+  }
+}

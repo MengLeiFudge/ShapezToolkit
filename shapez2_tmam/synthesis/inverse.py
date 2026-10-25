@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from itertools import combinations, product
 from typing import Iterator
 
+from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
 
 
@@ -21,7 +22,10 @@ class PinFamily:
             top = ["cr" if self.top_crystals & (1 << q) else EMPTY for q in range(rules.quadrants)]
             for q, cell in zip(free, choices):
                 top[q] = cell
-            cells = {(z, q): cell for z, row in enumerate((*self.lower, tuple(top)))
+            rows = (*self.lower, tuple(top))
+            if any(not CornerBuilder.admissible(tuple(row[q] for row in rows)) for q in range(rules.quadrants)):
+                continue
+            cells = {(z, q): cell for z, row in enumerate(rows)
                      for q, cell in enumerate(row) if cell != EMPTY}
             result = rules.fold(cells)
             if result is not None:
@@ -59,7 +63,7 @@ def pin_families(rules: Rules, target: Shape) -> Iterator[PinFamily]:
                 column = [cells.get(r, EMPTY) for r in range(height)]
                 for r, cell in zip(free, filling):
                     column[r] = cell
-                if (column[0] != EMPTY) == new_pin:
+                if (column[0] != EMPTY) == new_pin and CornerBuilder.admissible(tuple(column)):
                     candidates.append(tuple(column))
         if not candidates:
             return
@@ -67,7 +71,10 @@ def pin_families(rules: Rules, target: Shape) -> Iterator[PinFamily]:
     for selected in product(*columns):
         lower = tuple(tuple(selected[q][z] for q in range(rules.quadrants)) for z in range(height))
         fixed = {(z, q): cell for z, row in enumerate(lower) for q, cell in enumerate(row) if cell != EMPTY}
+        capped = [CornerBuilder.admissible((*column, "cr")) for column in selected]
         for mask in range(1 << rules.quadrants):
+            if any(mask & (1 << q) and not capped[q] for q in range(rules.quadrants)):
+                continue
             cells = dict(fixed)
             cells.update({(height, q): "cr" for q in range(rules.quadrants) if mask & (1 << q)})
             representative = rules.fold(cells)

@@ -76,7 +76,8 @@ def build_noncrystal(quadrants: int, channel_base: int = 1_002_000) -> tuple[Cir
         "reserved_channels": [channel_base, channel_base + 1023],
         "scope": "无晶体目标的完整判定与配方；含晶体目标返回 unknown。",
         "verification": "静态端口、实际占地与几何网络核对；未运行门级模拟或游戏",
-        "timing": "组合电路，无完成脉冲；目标和 enable 须保持到所有输出稳定。",
+        "timing": "组合电路，无完成脉冲；整组输入保持不少于 settling.hold_signal_ticks。",
+        "settling": circuit.settling_bound(),
     }
     return circuit, report
 

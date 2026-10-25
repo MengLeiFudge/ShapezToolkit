@@ -1,6 +1,6 @@
 """将信号门网表布置为带平台、无线连线的原生二代蓝图。
 
-每门一块 1x1 平台，端口布局固定且静态核对；显式互斥别名可共用频道。
+每门一块 1x1 平台，端口布局固定且静态核对；显式兼容多驱动可共用频道。
 这里编译生产电路，不运行游戏、门级模拟或目标求解。
 """
 
@@ -8,6 +8,7 @@ import base64
 import gzip
 import json
 import struct
+from collections import deque
 from dataclasses import dataclass
 
 from .mari.blueprint import Wiring
@@ -99,7 +100,7 @@ class Circuit:
         return Ref(index)
 
     def channel_map(self) -> dict[Ref, int]:
-        """确定全部输出的频道；显式别名表示多个互斥驱动源共用总线。"""
+        """确定全部输出的频道；显式别名要求非空驱动互斥或具有相同值。"""
         refs = [Ref(i, port) for i, gate in enumerate(self.gates) for port in range(len(PORTS[gate.kind][0]))]
         channels = {ref: self.channel_base + i for i, ref in enumerate(refs)}
         if self.channel_base < 1 or self.channel_base + len(refs) >= 1 << 24:
@@ -119,6 +120,43 @@ class Circuit:
                 if isinstance(source, Ref) and source not in channels:
                     raise ValueError(f"门输入引用了不存在的输出：{source}")
         return channels
+
+    def settling_bound(self) -> dict:
+        """按频道依赖给无环电路计算保守保持期，反馈或动态选频不适用。"""
+        channels = self.channel_map()
+        dependencies: dict[int, set[int]] = {channel: set() for channel in channels.values()}
+        for index, gate in enumerate(self.gates):
+            incoming = {channels[source] for source in gate.inputs if isinstance(source, Ref)}
+            if gate.kind == "ControlledSignalReceiver":
+                control = gate.inputs[0]
+                if not isinstance(control, Literal) or not isinstance(control.value, int):
+                    raise ValueError("动态选频接收器不适用此组合传播上界")
+                if control.value in dependencies:
+                    incoming.add(control.value)
+            for port in range(len(PORTS[gate.kind][0])):
+                dependencies[channels[Ref(index, port)]].update(incoming)
+        remaining = {channel: len(sources) for channel, sources in dependencies.items()}
+        consumers: dict[int, list[int]] = {channel: [] for channel in dependencies}
+        for channel, sources in dependencies.items():
+            for source in sources:
+                consumers[source].append(channel)
+        queue = deque(channel for channel, count in remaining.items() if count == 0)
+        depths = {channel: 1 for channel in queue}
+        while queue:
+            source = queue.popleft()
+            for channel in consumers[source]:
+                depths[channel] = max(depths.get(channel, 1), depths[source] + 1)
+                remaining[channel] -= 1
+                if remaining[channel] == 0:
+                    queue.append(channel)
+        if len(depths) != len(dependencies) or any(remaining.values()):
+            raise ValueError("反馈电路没有本组合传播上界")
+        depth = max(depths.values(), default=0)
+        ticks = 64 * (depth + 2)
+        return {"max_gate_depth": depth, "hold_signal_ticks": ticks,
+                "hold_simulation_seconds": ticks / 12,
+                "conditions": "本机源码的12信号tick/秒、每批最多4tick及正常更新策略；频道独占、配置不变、整组输入保持。",
+                "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"}
 
     def document(self) -> dict:
         """生成原生 Island 蓝图文档，同时核对实际占地和信号网络。"""

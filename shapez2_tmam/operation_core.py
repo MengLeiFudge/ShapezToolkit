@@ -78,7 +78,8 @@ def build_core(quadrants: int, channel_base: int = 1_000_000) -> tuple[Circuit, 
         "reserved_channels": [channel_base, channel_base + 511],
         "scope": "虚拟加工核心；不包含可制作性求解、配方存储或时序调度器",
         "verification": "静态端口、实际占地与几何网络核对；未运行门级模拟或游戏",
-        "timing": "组合电路，无完成脉冲；全部输入须保持到所有输出稳定。",
+        "timing": "组合电路，无完成脉冲；整组输入保持不少于 settling.hold_signal_ticks。",
+        "settling": circuit.settling_bound(),
     }
     return circuit, report
 

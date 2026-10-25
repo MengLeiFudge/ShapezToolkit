@@ -1,0 +1,33 @@
+{
+  "component": "top_layer_scan",
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "target": 1011000,
+    "enable": 1011001
+  },
+  "outputs": {
+    "has_layer": 1011037,
+    "top": 1011074,
+    "lower": 1011075,
+    "original_layer": 1011069
+  },
+  "gate_platforms": 38,
+  "reserved_channels": [
+    1011000,
+    1011255
+  ],
+  "scope": "一次扫描最高非空层，保留原坐标的下半及从1开始的原层号；不判断可制作性。",
+  "iteration": "保持当前输入并等待 settling；同时锁存 top、original_layer、lower；将锁存的 lower 写回 target 再调用。最多五次。",
+  "termination": "has_layer 为假时无可读取层；有效输入的最后一层扫描后 lower 为空。",
+  "controller": "本部件只有共用组合数据通路；时钟、寄存器、写回和配方控制器尚未包含。",
+  "verification": "静态端口、实际占地与几何网络核对；未运行门级模拟或游戏",
+  "timing": "无完成脉冲；整组输入保持不少于 settling.hold_signal_ticks。",
+  "settling": {
+    "max_gate_depth": 11,
+    "hold_signal_ticks": 832,
+    "hold_simulation_seconds": 69.33333333333333,
+    "conditions": "本机源码的12信号tick/秒、每批最多4tick及正常更新策略；频道独占、配置不变、整组输入保持。",
+    "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"
+  }
+}

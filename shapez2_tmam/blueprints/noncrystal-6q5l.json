@@ -34,5 +34,12 @@
   ],
   "scope": "无晶体目标的完整判定与配方；含晶体目标返回 unknown。",
   "verification": "静态端口、实际占地与几何网络核对；未运行门级模拟或游戏",
-  "timing": "组合电路，无完成脉冲；目标和 enable 须保持到所有输出稳定。"
+  "timing": "组合电路，无完成脉冲；整组输入保持不少于 settling.hold_signal_ticks。",
+  "settling": {
+    "max_gate_depth": 22,
+    "hold_signal_ticks": 1536,
+    "hold_simulation_seconds": 128.0,
+    "conditions": "本机源码的12信号tick/秒、每批最多4tick及正常更新策略；频道独占、配置不变、整组输入保持。",
+    "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"
+  }
 }

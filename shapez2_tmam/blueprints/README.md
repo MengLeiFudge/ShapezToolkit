@@ -10,7 +10,7 @@
 
 这些部件是组合电路。输入改变时，不同路径可能暂时输出旧结果、空信号或冲突；应保持整组输入直到所有输出稳定。`enable`、`recognized`、`status` 都不是运算完成脉冲。时序控制器须另设稳定输入、等待传播、采样和写回阶段。
 
-游戏的无线频道读取十二个信号 tick 以前的数据，每秒十二个信号 tick；门输入缓冲还使用批次自适应延迟。因此不能把一门当作一个 tick，也不能用两个相邻采样相同就证明整个组合网络已经稳定。本文没有给出经过证明的固定等待周期。
+游戏的无线频道读取十二个信号 tick 以前的数据，每秒十二个信号 tick；本地输入缓冲和导线网络也有延迟。[保守保持期证明](../4q5l/signal-timing.md)覆盖这些因素：按频道依赖的最大深度 D，整组输入保持 `64×(D+2)` 个信号 tick 后可采样全部输出。各 JSON 的 `settling.hold_signal_ticks` 给出对应值。此结论要求本机正常更新策略、频道独占、网络与配置保持不变；时间按游戏模拟计，不能改用墙钟或两次相同采样。
 
 ## 无晶体目标的判定与配方
 
@@ -34,6 +34,24 @@
 电路从最后拆出的底层开始，按逆序做最多四次虚拟堆叠。输入为空时旁路另一份物品；两份都有值才取得堆叠结果。重建结果与原目标完全相同才发布状态 1。若目标有底部或整层空隙，拆层、重建无法恢复原层号，比较拒绝；不会把压缩空层后的目标当成原目标。
 
 这里的拆层与分析只用于信号求解。实体配方只有基础单层和堆叠，不把虚拟拆层当作免费的实体材料。
+
+## 原层号解码与半形判定
+
+`decoder-4q5l.spz2bp` 使用199块平台。输入为 `target`、`enable`；输出 `valid`、五个 `rows_bottom_to_top`，以及 `cells_bottom_to_top[z][q]` 的去色单格、原颜色和占用/针/晶体标志。空底层与中间整层空隙保留在原输出口；层号和象限均从零开始。内部使用15次密集拆层测高，把原始拆出的层安放回原层号，详见[解码证明](../4q5l/circuit-decoding.md)。
+
+`half-4q5l.spz2bp` 使用458块平台并内含解码器。它完整判断 q2、q3 全空的标准 q0/q1 半形。`status=1/2/3` 表示可制作、不可制作、超出范围；输入无效或关闭时为空。非标准全图、未界定供料的 `cu` 返回3。输出还包括五个原始层位、标准半形标志、稳定性及列条件结果；诊断标志应在输入有效且保持稳定后读取。
+
+半形判据为“两列满足 A AND 自身分组稳定”，由[逐列角构造](../4q5l/corner-synthesis.md)证明。稳定性通过原生半切与原目标比较取得。本部件不输出完整制造指令流；成功半形的逐步制造树由 Python `Constructor.half` 生成，完整游戏控制器仍待实现。
+
+两份部件的频道和保留范围见对应 JSON。解码器的保守保持期为1152信号tick（96模拟秒）；半形判定器为2304信号tick（192模拟秒）。这些是充分等待期，并非实测耗时或最短时间。两份部件没有完成脉冲，`valid` 和状态值不表示新输入已经传播完成。
+
+## 时序复用的数据通路与寄存器
+
+`scan-4q5l.spz2bp` 用38平台读取当前最高非空层。输出原始 `top` 单层、保留原层位的 `lower` 下半，以及从1开始的 `original_layer`。控制器可锁存这些结果，再把新下半作为下一次输入，最多调用五次。它是供循环调用的共用数据通路，未包含写回和阶段控制。
+
+`signal-register.spz2bp` 用5平台保存任意信号，包括整数0和空值。输入为 `data`、`load`、`retain`。依次使用 `(load,retain)=(1,0)→(1,1)→(0,1)`，每阶段保持512信号tick，data在三阶段均保持不变。第三阶段结束后才可复用数据总线；保持 `(0,1)` 就持续保存该值。首次使用必须完整写入一次。
+
+重叠阶段两路同时发布同一个值；同值信号合并不会冲突。三阶段协议及反馈保持的[源码证明](../4q5l/register-circuit.md)独立于组合保持期。寄存器没有时钟、地址选择器或完成脉冲，不能省略重叠阶段或用单个控制及其反相直接代替。
 
 ## 共用虚拟加工核心
 
@@ -67,6 +85,10 @@ python -m shapez2_tmam.operation_core --quadrants 4 --channel-base 1000000 --out
 python -m shapez2_tmam.operation_core --quadrants 6 --channel-base 1001000 --output shapez2_tmam/blueprints/operation-core-6q5l.spz2bp
 python -m shapez2_tmam.noncrystal_circuit --quadrants 4 --channel-base 1002000 --output shapez2_tmam/blueprints/noncrystal-4q5l.spz2bp
 python -m shapez2_tmam.noncrystal_circuit --quadrants 6 --channel-base 1004000 --output shapez2_tmam/blueprints/noncrystal-6q5l.spz2bp
+python -m shapez2_tmam.decoder_circuit --channel-base 1006000 --output shapez2_tmam/blueprints/decoder-4q5l.spz2bp
+python -m shapez2_tmam.half_circuit --channel-base 1008000 --output shapez2_tmam/blueprints/half-4q5l.spz2bp
+python -m shapez2_tmam.scan_circuit --channel-base 1011000 --output shapez2_tmam/blueprints/scan-4q5l.spz2bp
+python -m shapez2_tmam.register_circuit --channel-base 1012000 --output shapez2_tmam/blueprints/signal-register.spz2bp
 ```
 
 [`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。

@@ -1,0 +1,48 @@
+{
+  "component": "standard_half_classifier",
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "target": 1008000,
+    "enable": 1008001
+  },
+  "outputs": {
+    "status": 1008527,
+    "solvable": 1008521,
+    "unsolvable": 1008523,
+    "unknown": 1008526,
+    "standard_half": 1008280,
+    "stable": 1008487,
+    "columns_admissible": 1008485,
+    "rows_bottom_to_top": [
+      1008077,
+      1008078,
+      1008079,
+      1008080,
+      1008081
+    ]
+  },
+  "statuses": {
+    "1": "solved",
+    "2": "unsolvable",
+    "3": "unknown",
+    "null": "输入不是非空图形，或 enable 为假"
+  },
+  "gate_platforms": 458,
+  "reserved_channels": [
+    1008000,
+    1010047
+  ],
+  "scope": "q2/q3 全空的标准半形完整判定；非标准全图或未界定 cu 供料返回 unknown。",
+  "proof": "标准半形可制作 iff 两列满足 A 且自身分组稳定；原生半切与原目标比较检查稳定性。",
+  "recipe": "本部件输出判定和原始五层；逐列角制造树由 Python CornerBuilder/Constructor.half 生成，未包含游戏配方流控制器。",
+  "verification": "静态端口、实际占地与几何网络核对；未运行门级模拟或游戏",
+  "timing": "组合电路，无完成脉冲；整组输入保持不少于 settling.hold_signal_ticks。",
+  "settling": {
+    "max_gate_depth": 34,
+    "hold_signal_ticks": 2304,
+    "hold_simulation_seconds": 192.0,
+    "conditions": "本机源码的12信号tick/秒、每批最多4tick及正常更新策略；频道独占、配置不变、整组输入保持。",
+    "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"
+  }
+}
