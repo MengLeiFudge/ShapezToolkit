@@ -71,6 +71,8 @@ target保持，enable=0至少1636tick后启用；window上升后48tick采一次�
 
 另输入一份实际原生加工结果，逐格比较位置、材料、部件和颜色，matches为真才完全相同。输入全组保持2368信号tick后读取；无完成脉冲。它供Pin递归控制使用，不判可制作性。固定标签闭包、空格及比较证明见[标签目标网格](../4q5l/tagged-goal-grid.md)。
 
+`tagged-leaf-4q5l.spz2bp`进一步把这些ID直接接入A→S叶端，使用16639平台、同一475行程序及六物品槽，输出制造指令与真实结果。无需先提供候选目标的原生信号。换ID须完整复位至少1720tick；每周期76模拟秒，末端另等一周期逐格比较。它仍缺Pin递归，当前通用2248周期上界尚未通过实用性能验收。完整接口与等待证明见[编号目标叶端](../4q5l/tagged-leaf.md)。
+
 ## 时序复用的数据通路与寄存器
 
 `scan-4q5l.spz2bp` 用38平台读取当前最高非空层。输出原始 `top` 单层、保留原层位的 `lower` 下半，以及从1开始的 `original_layer`。控制器可锁存这些结果，再把新下半作为下一次输入，最多调用五次。它是供循环调用的共用数据通路，未包含写回和阶段控制。
@@ -150,6 +152,7 @@ python -m shapez2_tmam.startpoint_circuit --channel-base 1061000 --output shapez
 python -m shapez2_tmam.startpoint_circuit --s-tail --channel-base 1094000 --output shapez2_tmam/blueprints/s-tail-4q5l.spz2bp
 python -m shapez2_tmam.tagged_goal_circuit --channel-base 1127000 --output shapez2_tmam/blueprints/tagged-goal-4q5l.spz2bp
 python -m shapez2_tmam.pin_image_circuit --channel-base 1144000 --output shapez2_tmam/blueprints/pin-image-4q5l.spz2bp
+python -m shapez2_tmam.startpoint_circuit --tagged-goal --channel-base 1161000 --output shapez2_tmam/blueprints/tagged-leaf-4q5l.spz2bp
 ```
 
 [`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。

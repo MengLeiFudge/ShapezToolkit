@@ -4,16 +4,18 @@ import argparse
 import json
 from pathlib import Path
 
-from .circuit import Circuit, Literal, constant
-from .corner_program import CornerProgram, half_body
+from .circuit import Circuit, Literal, Ref, constant
+from .corner_program import CellRef, CornerProgram, half_body
 from .decoder_circuit import DecodedCell, decode
 from .half_circuit import MaterialCell, column_admissible, half_stable
 from .prefix_search import PrefixSearch
 from .program_controller import execute_program
 from .synthesis.physics import Rules
+from .tag_palette import TagPalette, same_grid
 
 
-def build_startpoint(channel_base: int = 1_061_000, *, search_prefixes: bool = False) -> tuple[Circuit, dict]:
+def build_startpoint(channel_base: int = 1_061_000, *, search_prefixes: bool = False,
+                     tagged_goal: bool = False) -> tuple[Circuit, dict]:
     """生成目标到双半形制造流；未覆盖的尾部返回unknown，不判不可制作。"""
     reserve = 32_768
     if not 1 <= channel_base < (1 << 24) - reserve:
@@ -25,15 +27,29 @@ def build_startpoint(channel_base: int = 1_061_000, *, search_prefixes: bool = F
     null = circuit.add("ConstantSignal", config=constant(None))
     decoded = decode(circuit, target, one, Rules(4))
     program = CornerProgram(circuit)
-    admissible = program.and_(*(column_admissible(circuit, tuple(row[q] for row in decoded.cells))
+    cells: tuple[tuple[DecodedCell | CellRef, ...], ...] = decoded.cells
+    geometry: tuple[tuple[DecodedCell | MaterialCell, ...], ...] = decoded.cells
+    valid = decoded.valid
+    grid = None
+    if tagged_goal:
+        search_prefixes = True
+        tags = tuple(tuple(circuit.add("ControlledSignalReceiver", Literal(channel_base + 2 + 4 * z + q))
+                           for z in range(5)) for q in range(4))
+        grid = TagPalette(program, decoded).grid(tags)
+        original = grid.columns
+        cells = tuple(tuple(original[q][z] for q in range(4)) for z in range(5))
+        geometry = tuple(tuple(MaterialCell(cell.occupied, cell.pin, cell.crystal) for cell in row) for row in cells)
+        valid = program.and_(decoded.valid, grid.valid, program.or_(*(cell.occupied for row in cells for cell in row)))
+    admissible = program.and_(*(column_admissible(circuit, tuple(row[q] for row in geometry))
                                 for q in range(4)))
     uncolored = program.or_(*(program.and_(cell.crystal, circuit.add(
         "LogicGateCompare", cell.color, Literal("color:u"), config="AQ=="))
-        for row in decoded.cells for cell in row))
+        for row in cells for cell in row))
     finder = None
-    rows: tuple[tuple[DecodedCell | MaterialCell, ...], ...] = decoded.cells
+    rows = geometry
     if search_prefixes:
-        original = tuple(tuple(program.original(row[q]) for row in decoded.cells) for q in range(4))
+        if grid is None:
+            original = tuple(tuple(program.original(row[q]) for row in decoded.cells) for q in range(4))
         finder = PrefixSearch(program, original)
         rows = tuple(tuple(MaterialCell(finder.columns[q][z].occupied, finder.columns[q][z].pin,
                                         finder.columns[q][z].crystal) for q in range(4)) for z in range(5))
@@ -43,22 +59,22 @@ def build_startpoint(channel_base: int = 1_061_000, *, search_prefixes: bool = F
                                             for row in rows)) for side in (0, 2)]
         partitions.append(program.and_(*halves))
     available = program.or_(*partitions)
-    legal = program.and_(decoded.valid, program.not_(uncolored))
+    legal = program.and_(valid, program.not_(uncolored))
     solved = program.and_(legal, admissible, available)
     unsolvable = program.and_(legal, program.not_(admissible))
-    unknown = program.and_(decoded.valid, program.or_(uncolored,
+    unknown = program.and_(valid, program.or_(uncolored,
                           program.and_(admissible, program.not_(available))))
     extra_state = ()
     if finder is not None:
-        has_crystal = program.or_(*(cell.crystal for row in decoded.cells for cell in row))
+        has_crystal = program.or_(*(cell.crystal for row in cells for cell in row))
         extra_state = finder.finish(available, program.and_(legal, admissible))
         solved = finder.found
         exhausted = program.and_(legal, admissible, finder.exhausted)
         unsolvable = program.or_(unsolvable, program.and_(exhausted, program.not_(has_crystal)))
-        unknown = program.and_(decoded.valid, program.or_(uncolored, program.and_(exhausted, has_crystal)))
+        unknown = program.and_(valid, program.or_(uncolored, program.and_(exhausted, has_crystal)))
     # 0号切向优先；格片段始终在q0，因此材料路由不改变它的颜色或标签。
     shifted = program.not_(partitions[0])
-    if finder is None:
+    if finder is None and grid is None:
         original = tuple(tuple(program.original(row[q]) for row in decoded.cells) for q in range(4))
     source = finder.columns if finder is not None else original
     aligned = tuple(tuple(program.choose(shifted, source[(q + 1) % 4][z], source[q][z])
@@ -87,9 +103,17 @@ def build_startpoint(channel_base: int = 1_061_000, *, search_prefixes: bool = F
             program.emit(active, 14, destination=1, base=program.layer(row))
             program.emit(active, 7, 0, 1)
     instructions = tuple(program.instructions)
-    control = execute_program(circuit, target, enable, decoded.valid, solved, unsolvable, unknown,
+    result_test = None
+    if grid is not None:
+        expected = grid
+
+        def match_goal(actual: Ref) -> Ref:
+            return same_grid(program, decode(circuit, actual, one, Rules(4)), expected)
+
+        result_test = match_goal
+    control = execute_program(circuit, target, enable, valid, solved, unsolvable, unknown,
                               instructions, one, null, second_pass, extra_state,
-                              finder.bits if finder is not None else ())
+                              finder.bits if finder is not None else (), result_test)
     channels = circuit.channel_map()
     if max(channels.values()) > channel_base + reserve - 1:
         raise ValueError("双半形起点构造超出其保留频道范围")
@@ -123,6 +147,18 @@ def build_startpoint(channel_base: int = 1_061_000, *, search_prefixes: bool = F
         report["statuses"]["1"] = "起点与S追加制造成功，已与完整目标比较"
         report["statuses"]["2"] = "违反列A，或无C目标穷尽全部S起点后不可制作"
         report["statuses"]["3"] = "需要顶针尾部搜索，或cu供料未界定"
+    if grid is not None:
+        report.update({
+            "component": "tagged_goal_startpoint_and_s_tail",
+            "inputs": {"original_target": channel_base, "enable": channel_base + 1,
+                       "goal_tags_bottom_to_top": [[channel_base + 2 + 4 * z + q for q in range(4)] for z in range(5)]},
+            "input_protocol": "固定原目标表；每次查询保持20份目标ID，enable=0完成完整复位后启用，直到done。换目标ID须重新完整复位。",
+            "termination": f"至多1296次前缀检查、两遍各{len(instructions)}行及初始化/末端比较，共至多{1298 + 2 * len(instructions)}周期。",
+            "scope": "从固定原目标标签表指向非空目标网格，完整覆盖该网格的A→S制造；含C未命中仍需Pin递归。无须事先有候选原生图形。",
+            "proof": "4q5l/tagged-leaf.md；s-tail-circuit.md；tagged-goal-grid.md。",
+        })
+        report["statuses"]["1"] = "候选目标已制造，原生结果与完整编号网格相同"
+        report["statuses"]["null"] = "原目标、目标ID或非空范围无效，停机或窗口之外"
     return circuit, report
 
 
@@ -131,10 +167,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="生成共用一份角程序的四象限双半形起点电路")
     parser.add_argument("--channel-base", type=int)
     parser.add_argument("--s-tail", action="store_true", help="先完整遍历S前缀，再制造起点及追加层")
+    parser.add_argument("--tagged-goal", action="store_true", help="用固定原目标表和20份ID指定候选目标，自动启用S搜索")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    channel_base = args.channel_base if args.channel_base is not None else (1_094_000 if args.s_tail else 1_061_000)
-    circuit, report = build_startpoint(channel_base, search_prefixes=args.s_tail)
+    default_base = 1_161_000 if args.tagged_goal else (1_094_000 if args.s_tail else 1_061_000)
+    channel_base = args.channel_base if args.channel_base is not None else default_base
+    circuit, report = build_startpoint(channel_base, search_prefixes=args.s_tail, tagged_goal=args.tagged_goal)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(circuit.encode() + "\n", encoding="utf-8")
     args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -1,5 +1,6 @@
 """有限制造程序的共用时序控制：条件ROM、六槽回放、快照及可选双遍调用。"""
 
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 
 from .circuit import Circuit, Gate, Literal, Ref, constant
@@ -75,7 +76,7 @@ def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
                     solved: Ref, unsolvable: Ref, unknown: Ref,
                     program: tuple[Instruction, ...], one: Ref, null: Ref,
                     second_pass: Ref | None = None, extra_state: tuple[StateUpdate, ...] = (),
-                    precomputed_state: tuple[Ref, ...] = ()) -> dict:
+                    precomputed_state: tuple[Ref, ...] = (), result_test: Callable[[Ref], Ref] | None = None) -> dict:
     """单遍程序，或以second_pass切换数据源的两遍共享程序；不执行目标。"""
     if not program:
         raise ValueError("制造程序至少需要一行")
@@ -88,6 +89,13 @@ def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
     if second_pass is not None:
         reads += (second_pass,)
         initial += (0,)
+    ready_index = None
+    checked = None
+    if result_test is not None:
+        ready_index = len(reads)
+        reads += (circuit.add("LogicGateIf", Literal(0), Literal(1)),)
+        initial += (0,)
+        checked = result_test(reads[0])
     if len({state.read for state in extra_state}) != len(extra_state) or any(
             state.read in reads for state in extra_state):
         raise ValueError("调用者状态入口必须独立，且不能与程序状态重复")
@@ -128,6 +136,8 @@ def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
     next_state = (*next_items, *next_pc, next_finished, next_failed, Literal(1))
     if second_pass is not None:
         next_state += (circuit.add("LogicGateOr", second_pass, repeat),)
+    if result_test is not None:
+        next_state += (finished,)
     next_state += tuple(state.source for state in extra_state)
     accepted = circuit.add("LogicGateAnd", packet["enable"], circuit.add("LogicGateNot", error))
     record_data = tuple(packet[name] for name in RECORD_FIELDS) + (accepted,)
@@ -166,9 +176,10 @@ def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
     final_finished, final_failed, final_started = states[8 + width:11 + width]
     running = circuit.add("LogicGateAnd", enable, final_started)
     window = circuit.add("LogicGateAnd", timing.phases[3], running)
-    matches = circuit.add("LogicGateCompare", states[0], target, config="AQ==")
-    success = circuit.add("LogicGateAnd", final_finished, matches)
-    mismatch = circuit.add("LogicGateAnd", final_finished, circuit.add("LogicGateNot", matches))
+    matches = checked if checked is not None else circuit.add("LogicGateCompare", states[0], target, config="AQ==")
+    ready = final_finished if ready_index is None else states[ready_index]
+    success = circuit.add("LogicGateAnd", ready, matches)
+    mismatch = circuit.add("LogicGateAnd", ready, circuit.add("LogicGateNot", matches))
     internal_error = circuit.add("LogicGateOr", final_failed, mismatch)
     terminal = _combine(circuit, "LogicGateOr", [success, internal_error, unsolvable, unknown])
     done = circuit.add("LogicGateAnd", window, terminal)
@@ -194,4 +205,6 @@ def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
     if precomputed_state:
         report.update({"search_max_gate_depth": search_depth,
                        "precompute_max_gate_depth": precompute_depth, "precompute_handoff_phases": 7})
+    if result_test is not None:
+        report["verification_wait_cycles"] = 1
     return report
