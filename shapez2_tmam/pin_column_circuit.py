@@ -16,6 +16,8 @@ class PinColumn:
     materials: tuple[Ref, ...]
     tags: tuple[Ref, ...]
     valid: Ref
+    flags: tuple[MaterialCell, ...] = ()
+    landings: tuple[tuple[Ref, ...], ...] = ()
 
 
 def _prefix_counts(circuit: Circuit, bits: list[Ref]) -> list[list[Ref]]:
@@ -43,7 +45,7 @@ def _bus(circuit: Circuit, sources: list[Ref]) -> Ref:
 
 
 def column_candidate(circuit: Circuit, materials: tuple[Ref, ...], tags: tuple[Ref, ...],
-                     mask_bits: tuple[Ref, ...], enable: Ref) -> PinColumn:
+                     mask_bits: tuple[Ref, ...], enable: Ref, *, with_landings: bool = False) -> PinColumn:
     """添加共用单列数据通路；不调用Pin或把本地通过当作全图可解性。"""
     if len(materials) != 5 or len(tags) != 5 or len(mask_bits) != 8:
         raise ValueError("单列候选需要五格材料、五个标签和八个控制位")
@@ -86,17 +88,21 @@ def column_candidate(circuit: Circuit, materials: tuple[Ref, ...], tags: tuple[R
     source_materials = []
     source_tags = []
     source_flags = []
+    rank_picks = []
     for r in range(4):
         npc_materials = []
         npc_tags = []
         positions = []
+        picks = []
         for rank in range(r + 1):
             pick = circuit.add("LogicGateAnd", keep[r], source_counts[r][rank])
+            picks.append(pick)
             npc_materials.append(circuit.add("LogicGateIf", compact_materials[rank], pick))
             npc_tags.append(circuit.add("LogicGateIf", compact_tags[rank], pick))
             allowed = [choice for z, choice in selected[rank] if z <= r + 1]
             allowed_position = _combine(circuit, "LogicGateOr", allowed) if allowed else zero
             positions.append(circuit.add("LogicGateAnd", pick, allowed_position))
+        rank_picks.append(picks)
         not_kept = circuit.add("LogicGateNot", keep[r])
         clauses.append(circuit.add("LogicGateOr", not_kept, _combine(circuit, "LogicGateOr", positions)))
         forced = flags[r + 1][3]
@@ -126,7 +132,17 @@ def column_candidate(circuit: Circuit, materials: tuple[Ref, ...], tags: tuple[R
     valid = _combine(circuit, "LogicGateAnd", clauses)
     published_materials = [circuit.add("LogicGateIf", value, valid) for value in source_materials]
     published_tags = [circuit.add("LogicGateIf", value, valid) for value in source_tags]
-    return PinColumn(tuple(published_materials), tuple(published_tags), valid)
+    landings = []
+    if with_landings:
+        for picks in rank_picks:
+            row = []
+            for z in range(5):
+                choices = [circuit.add("LogicGateAnd", pick, chosen) for rank, pick in enumerate(picks)
+                           for height, chosen in selected[rank] if height == z]
+                row.append(_combine(circuit, "LogicGateOr", choices) if choices else zero)
+            landings.append(tuple(row))
+    return PinColumn(tuple(published_materials), tuple(published_tags), valid,
+                     tuple(source_flags) if with_landings else (), tuple(landings))
 
 
 def build_pin_column(channel_base: int = 1_019_000) -> tuple[Circuit, dict]:
