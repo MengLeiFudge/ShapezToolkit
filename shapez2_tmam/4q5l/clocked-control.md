@@ -65,7 +65,9 @@ R(t) = load(t−24) 为真 ? data(t−12) : R(t−12)。
 
 使用上述时钟时，可以令主寄存器组在阶段0透明写入，副寄存器组在阶段2透明复制主组；阶段1和3让两组关闭并留出传播余量。下一状态只由副组计算。副组在阶段2改变之后，距下次主组写入尚有阶段3；主组在阶段0改变之后，距副组写入尚有阶段1。
 
-只要下一状态路径、选择控制、初始化和输出路径都在阶段长度内稳定，且关写后的数据保持至少十二 tick，这个安排消除了状态边写边参与本轮计算的问题。默认P=576给目前单步拆层测高路径留出了余量。更深的完整搜索电路仍需对自身路径计算界，不能因为有时钟就自动判定满足。
+下一状态必须在主组关闭前连续十二tick保持正确，关写后数据还须保持至少十二tick。若相位经一级OR和等深选择，主副组的实际开关均比阶段边界晚36tick：副组在阶段2后36tick改变，到下一周期阶段1后36tick的主组关闭，相隔3P。数据路径上界加十二tick历史小于3P，就允许阶段0前半段暂时写入旧计算；无需要求所有数据在单个阶段内完成。初始化和输出窗口还须单独证明。
+
+独立时钟默认P=576；自动拆层器用复位预计算把P缩到96，顶针单列迭代器用P=156，分别见各部件证明。更深的完整搜索电路仍须计算自身路径界，不能因为有时钟就自动判定满足。
 
 源码依据：`ConnectableBuildingSimulation`、`SignalProviderConnector`、`SignalReceiverConnector`、`SignalNetworkConnector`、`SimulationGraph`、`SimulationCluster`、`Simulator`、`MapLayout`、`ActionModifyIsland`、`SignalBuffer`、`SignalNetworkSimulation`、`SignalChannelRingBuffer`、`ProcessingUpdateStrategy` 以及前页核实的正常推进调用链。结论来自静态源码与递推证明，未运行时钟、门级模拟或游戏。
 

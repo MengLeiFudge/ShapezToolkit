@@ -28,46 +28,46 @@
     "enable": 1022010
   },
   "outputs": {
-    "sample": 1022865,
-    "exhausted": 1022867,
+    "sample": 1022859,
+    "exhausted": 1022861,
     "source_bottom_four": [
       {
-        "material": 1022868,
-        "tag": 1022872
+        "material": 1022862,
+        "tag": 1022866
       },
       {
-        "material": 1022869,
-        "tag": 1022873
+        "material": 1022863,
+        "tag": 1022867
       },
       {
-        "material": 1022870,
-        "tag": 1022874
+        "material": 1022864,
+        "tag": 1022868
       },
       {
-        "material": 1022871,
-        "tag": 1022875
+        "material": 1022865,
+        "tag": 1022869
       }
     ],
     "control_word_bits_low_to_high": [
+      1022870,
+      1022871,
+      1022872,
+      1022873,
+      1022874,
+      1022875,
       1022876,
-      1022877,
-      1022878,
-      1022879,
-      1022880,
-      1022881,
-      1022882,
-      1022883
+      1022877
     ]
   },
-  "gate_platforms": 852,
+  "gate_platforms": 846,
   "reserved_channels": [
     1022000,
     1024047
   ],
   "timing": {
-    "phase_signal_ticks": 192,
-    "cycle_signal_ticks": 768,
-    "reset_hold_signal_ticks": 896,
+    "phase_signal_ticks": 156,
+    "cycle_signal_ticks": 624,
+    "reset_hold_signal_ticks": 752,
     "reference_edge_signal_ticks": 12,
     "conditions": "整份蓝图批量导入或完整重载后固定接线；Hybrid/AlwaysHighUPS常速连续推进，每批最多4信号tick；频道独占。调试单步、模式切换、强制低UPS及快进不适用。",
     "reset": "enable=0持续不少于reset_hold_signal_ticks，再一次改为1并保持。复位时阶段3为真；启动先出现一小段阶段3，随后依次完整循环0、1、2、3。",
@@ -77,7 +77,7 @@
   "sample_protocol": "每个阶段3最多一份本地有效候选。输出端sample上升后再等24信号tick，在窗口内只采一次；sample为假继续等后续窗口。",
   "termination": "依次处理控制字0～255，256轮后exhausted在阶段3为真，之后不再发布sample。耗尽不代表完整目标不可制作。",
   "resource_bound": "一份单列数据通路、八个二进制计数位、一个活动位、九项结果的主副锁存；不保存256份候选或完整半形目录。",
-  "time_bound": "每轮64模拟秒，256轮约4小时33分；这是当前保守参数的整列遍历界，尚未优化为实用搜索等待时间。",
+  "time_bound": "每轮52模拟秒，256轮约3小时42分；这是当前保守参数的整列遍历界，尚未优化为实用搜索等待时间。",
   "scope": "自动单列结构候选流；不含四列笛卡尔组合、第五层补全、递归回退、制造配方流或完整可制作性判定。",
   "proof": "4q5l/pin-column-circuit.md；四阶段控制使用该文的三阶段传播界。",
   "verification": "静态端口、实际占地与几何网络核对；未运行目标、枚举循环、门级模拟或游戏"

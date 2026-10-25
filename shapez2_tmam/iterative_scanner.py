@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .circuit import Circuit, Gate, Literal, Ref
+from .circuit import Circuit, Gate, Literal, Ref, constant
 from .scan_circuit import scan_step
 from .sequential_circuit import clock, latch, select, timing_contract
 
@@ -16,14 +16,15 @@ def build_scanner(channel_base: int = 1_014_000) -> tuple[Circuit, dict]:
     circuit = Circuit(channel_base + 32)
     target = circuit.add("ControlledSignalReceiver", Literal(channel_base))
     enable = circuit.add("ControlledSignalReceiver", Literal(channel_base + 1))
-    timing = clock(circuit, enable)
+    timing = clock(circuit, enable, phase_steps=8)
     reset = circuit.add("LogicGateNot", enable)
     master_load = circuit.add("LogicGateOr", timing.phases[0], reset)
     slave_load = circuit.add("LogicGateOr", timing.phases[2], reset)
     master_working = latch(circuit, Literal(None), master_load)
     slave_data = select(circuit, enable, master_working, target)
     working = latch(circuit, slave_data, slave_load)
-    scanned = scan_step(circuit, working, enable)
+    always = circuit.add("ConstantSignal", config=constant(1))
+    scanned = scan_step(circuit, working, always)
     next_working = select(circuit, enable, scanned.lower, target)
     # 此处闭合真实无线反馈；latch返回的就是写入IF的输出节点。
     pending = circuit.gates[master_working.node]

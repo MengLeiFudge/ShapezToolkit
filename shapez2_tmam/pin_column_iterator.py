@@ -18,7 +18,7 @@ def build_pin_iterator(channel_base: int = 1_022_000) -> tuple[Circuit, dict]:
     materials = tuple(circuit.add("ControlledSignalReceiver", Literal(channel_base + 2 * z)) for z in range(5))
     tags = tuple(circuit.add("ControlledSignalReceiver", Literal(channel_base + 2 * z + 1)) for z in range(5))
     enable = circuit.add("ControlledSignalReceiver", Literal(channel_base + 10))
-    timing = clock(circuit, enable, phase_steps=16)
+    timing = clock(circuit, enable, phase_steps=13)
     reset = circuit.add("LogicGateNot", enable)
     master_load = circuit.add("LogicGateOr", timing.phases[0], reset)
     slave_load = circuit.add("LogicGateOr", timing.phases[2], reset)
@@ -77,7 +77,7 @@ def build_pin_iterator(channel_base: int = 1_022_000) -> tuple[Circuit, dict]:
         "sample_protocol": "每个阶段3最多一份本地有效候选。输出端sample上升后再等24信号tick，在窗口内只采一次；sample为假继续等后续窗口。",
         "termination": "依次处理控制字0～255，256轮后exhausted在阶段3为真，之后不再发布sample。耗尽不代表完整目标不可制作。",
         "resource_bound": "一份单列数据通路、八个二进制计数位、一个活动位、九项结果的主副锁存；不保存256份候选或完整半形目录。",
-        "time_bound": "每轮64模拟秒，256轮约4小时33分；这是当前保守参数的整列遍历界，尚未优化为实用搜索等待时间。",
+        "time_bound": "每轮52模拟秒，256轮约3小时42分；这是当前保守参数的整列遍历界，尚未优化为实用搜索等待时间。",
         "scope": "自动单列结构候选流；不含四列笛卡尔组合、第五层补全、递归回退、制造配方流或完整可制作性判定。",
         "proof": "4q5l/pin-column-circuit.md；四阶段控制使用该文的三阶段传播界。",
         "verification": "静态端口、实际占地与几何网络核对；未运行目标、枚举循环、门级模拟或游戏",
