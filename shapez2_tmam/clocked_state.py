@@ -1,0 +1,69 @@
+"""先建立无反馈组合步，再以同一四阶段时钟闭合全部主副寄存器。"""
+
+from dataclasses import replace
+
+from .circuit import Gate, Literal, Ref
+from .corner_program import CornerProgram
+from .sequential_circuit import Clock, clock, latch, select
+
+
+class ClockedState:
+    """put按调用顺序覆盖；后写条件优先，所有状态在同一周期同时更新。"""
+
+    def __init__(self, program: CornerProgram):
+        self.program = program
+        self.initial: dict[Ref, Ref | Literal] = {}
+        self.next: dict[Ref, Ref] = {}
+        self.closed = False
+
+    def add(self, value: int | None | Ref = 0) -> Ref:
+        """建立读占位；目标相关初值必须在完整复位期间保持。"""
+        if self.closed:
+            raise ValueError("主副寄存器已闭合，不能再增加状态")
+        initial = value if isinstance(value, Ref) else Literal(value)
+        read = self.program.circuit.add("LogicGateIf", initial, Literal(1))
+        self.initial[read] = initial
+        self.next[read] = read
+        return read
+
+    def put(self, read: Ref, value: Ref | int | None, condition: Ref | None = None) -> None:
+        """条件写入一项next；不改变本周期读取的旧状态。"""
+        if self.closed or read not in self.next:
+            raise ValueError("只能更新尚未闭合的本组寄存器")
+        source = value if isinstance(value, Ref) else self.program.const(value)
+        self.next[read] = source if condition is None else self.program.pick(condition, source, self.next[read])
+
+    def put_exclusive(self, read: Ref, choices: tuple[tuple[Ref, Ref | int | None], ...]) -> None:
+        """调用者证明条件互斥；并行选择写值，未选中时保留此前next。"""
+        if self.closed or read not in self.next or not choices:
+            raise ValueError("并行条件写入需要本组未闭合寄存器及至少一项选择")
+        circuit = self.program.circuit
+        branches = tuple(circuit.add("LogicGateIf", value if isinstance(value, Ref) else Literal(value), condition)
+                         for condition, value in choices)
+        keep = self.program.not_(self.program.or_(*(condition for condition, _ in choices)))
+        retained = circuit.add("LogicGateIf", self.next[read], keep)
+        circuit.aliases.append((*branches, retained))
+        self.next[read] = branches[0]
+
+
+    def close(self, enable: Ref) -> tuple[Clock, dict]:
+        """将全组合DAG计入传播界；不模拟反馈或执行状态机。"""
+        if self.closed:
+            raise ValueError("同一组主副寄存器只能闭合一次")
+        circuit = self.program.circuit
+        full_depth = circuit.settling_bound()["max_gate_depth"]
+        depth = circuit.changing_depth(tuple(self.initial))
+        timing = clock(circuit, enable, phase_steps=max(8, (depth + 7) // 3))
+        timing = replace(timing, reset_ticks=max(timing.reset_ticks, 12 * full_depth + 256))
+        reset = self.program.not_(enable)
+        master_load = self.program.or_(timing.phases[0], reset)
+        slave_load = self.program.or_(timing.phases[2], reset)
+        for read, initial in self.initial.items():
+            data = select(circuit, enable, self.next[read], initial)
+            master = latch(circuit, data, master_load)
+            slave_data = select(circuit, enable, master, initial)
+            slave = latch(circuit, slave_data, slave_load)
+            circuit.gates[read.node] = Gate("LogicGateIf", (slave, Literal(1)))
+        self.closed = True
+        return timing, {"state_registers": len(self.initial), "step_max_gate_depth": depth,
+                        "initial_max_gate_depth": full_depth}

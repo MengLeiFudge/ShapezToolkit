@@ -10,9 +10,9 @@
 
 四象限与六象限已有有限搜索合成方式的人工覆盖证明，尚无实用复杂度保证，也未运行全量目录计算。一般研究限定偶数象限，按明确参数与操作约定继续推进；固定范围的结构约化不能默认跨范围成立。
 
-四象限的[电路化简化](4q5l/compact-synthesis.md)包含堆叠段至多五份上料、局部最短配方和尾部旋转归并。[Python 堆叠模块](stacking.py)提供逐层与最短两种规划；无晶体目标可直接从基础原料合成，含晶体目标仍需补齐完整起点与顶破规划。
+四象限的[电路化简化](4q5l/compact-synthesis.md)包含堆叠段至多五份上料、局部最短配方和尾部旋转归并。[Python 堆叠模块](stacking.py)提供逐层与最短两种规划；无晶体目标可直接从基础原料合成；含晶体的完整逆推及五帧电路控制已有首版，搜索规模和耗时仍须压缩。
 
-Mari 主控的六候选逻辑另有 [Python 模型](mari/README.md)，入口为 `python main.py tmam2 solve <图形短代码>`。模型计算虚拟重建和 51 路指令；[整层空隙反例](4q5l/mari-empty-layer.md)已证明默认配置的六候选算法不全覆盖。新合成方法另有[局部构造 Python 入口](synthesis/README.md)及[原生电路部件](blueprints/README.md)，完整含晶体求解尚未实现。具体原机结论见 [Mari 调查记录](4q5l/mari-tmam.md)。
+Mari 主控的六候选逻辑另有 [Python 模型](mari/README.md)，入口为 `python main.py tmam2 solve <图形短代码>`。模型计算虚拟重建和 51 路指令；[整层空隙反例](4q5l/mari-empty-layer.md)已证明默认配置的六候选算法不全覆盖。新合成方法另有[Python 合成入口](synthesis/README.md)及[原生电路部件](blueprints/README.md)；[完整四象限电路](4q5l/full-tail-circuit.md)已接五帧搜索及成功路径重放，尚未通过实用性能验收，六象限完整实现仍缺。具体原机结论见 [Mari 调查记录](4q5l/mari-tmam.md)。
 
 ## 共用的本机资料
 

@@ -1,6 +1,6 @@
 # 原生纯电路部件
 
-这些 `.spz2bp` 文件采用游戏的 `SHAPEZ2-4` 岛蓝图格式。每份蓝图旁的 `.json` 文件给出输入、输出、频道保留范围和部件规模。无晶体部件有完整子类判据；标准四象限半形已有自动制造流，其他加工核心提供虚拟操作。含晶体全图TMAM的搜索控制仍待实现。
+这些 `.spz2bp` 文件采用游戏的 `SHAPEZ2-4` 岛蓝图格式。每份蓝图旁的 `.json` 文件给出输入、输出、频道保留范围和部件规模。无晶体部件有完整子类判据；标准四象限半形已有自动制造流，其他加工核心提供虚拟操作。四象限含晶体全图已有五帧完整控制首版，规模和耗时仍须压缩；六象限完整控制仍未实现。
 
 ## 导入与频道连接
 
@@ -64,6 +64,12 @@ target保持，enable=0至少1420tick后启用；window上升后48tick采样，s
 `s-tail-4q5l.spz2bp`用11269平台完整遍历允许S前缀，再制造双半形起点并补齐目标。每列跳过空层重复、保留全部C，最多1296个不同组合，含C时最多1080。475行制造程序仍共用两遍，使用六物品槽及14位搜索状态。含C搜索失败只返回3，仍须顶针尾部；无C范围可完整判不可制作。
 
 target保持，enable=0至少1636tick后启用；window上升后48tick采一次，sample为真先收指令，再处理done/status。每周期76模拟秒，通用最坏上界约47小时26分，含C约42小时52分；它尚未通过实用规模/性能验收。搜索与冻结预计算分别按39/89级路径计时，制造按52级，证明见[完整S段](../4q5l/s-tail-circuit.md)。
+
+## 完整四象限尾部控制
+
+`full-tail-4q5l.spz2bp`接收任意原目标与enable，在既定供料模型内先搜完整有界尾部，成功后才发布消费式制造流。五帧保存目标及游标，搜索期间不发包；根成功后重放叶端，再逐层Pin/追加，最终原生结果等于原目标才返回1。状态2只在全部分支真正穷尽后发布，cu返回3，内部失配返回4。
+
+当前33945平台、336状态、486行ROM、六物品槽。target保持，enable=0至少2576tick；每完整window上升后96tick读一次，sample为真先收包再处理done。周期204模拟秒，最坏分支数仍过大，尚未通过实用性能验收。完整覆盖、帧回退、重放及互斥选择证明见[五帧控制](../4q5l/full-tail-circuit.md)。
 
 ## 递归候选的固定标签网格
 
@@ -159,6 +165,7 @@ python -m shapez2_tmam.startpoint_circuit --s-tail --channel-base 1094000 --outp
 python -m shapez2_tmam.tagged_goal_circuit --channel-base 1127000 --output shapez2_tmam/blueprints/tagged-goal-4q5l.spz2bp
 python -m shapez2_tmam.pin_image_circuit --channel-base 1144000 --output shapez2_tmam/blueprints/pin-image-4q5l.spz2bp
 python -m shapez2_tmam.pin_source_circuit --channel-base 1194000 --output shapez2_tmam/blueprints/pin-source-4q5l.spz2bp
+python -m shapez2_tmam.full_solver_circuit --channel-base 1211000 --output shapez2_tmam/blueprints/full-tail-4q5l.spz2bp
 python -m shapez2_tmam.startpoint_circuit --tagged-goal --channel-base 1161000 --output shapez2_tmam/blueprints/tagged-leaf-4q5l.spz2bp
 ```
 
