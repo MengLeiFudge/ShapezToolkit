@@ -19,6 +19,8 @@ class PinSource:
     materials: tuple[tuple[Ref, ...], ...]
     tags: tuple[tuple[Ref, ...], ...]
     valid: Ref
+    column_valid: tuple[Ref, ...]
+    image_passed: Ref
 
 
 def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
@@ -46,7 +48,7 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
                              for column, top in zip(columns, top_values))
     source_tags = tuple(tuple(circuit.add("LogicGateIf", value, valid) for value in (*column.tags, top))
                        for column, top in zip(columns, top_values))
-    return PinSource(source_materials, source_tags, valid)
+    return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image.passed)
 
 
 def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:

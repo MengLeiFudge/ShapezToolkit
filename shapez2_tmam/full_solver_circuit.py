@@ -48,6 +48,7 @@ class Frame:
     prefix: tuple[Ref, ...]
     slots: tuple[tuple[Ref, ...], ...]
     top: tuple[tuple[Ref, ...], ...]
+    crystals: tuple[Ref, ...]
     pin_search: Ref
 
 
@@ -91,7 +92,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         tuple(tuple(bank.add(root_tags[q][z] if i == 0 else 0) for z in range(5)) for q in range(4)),
         tuple(bank.add() for _ in range(12)),
         tuple(tuple(bank.add() for _ in range(5)) for _ in range(4)),
-        tuple(tuple(bank.add() for _ in range(2)) for _ in range(4)), bank.add()) for i in range(5))
+        tuple(tuple(bank.add() for _ in range(2)) for _ in range(4)),
+        tuple(bank.add() for _ in range(4)), bank.add()) for i in range(5))
     phase = bank.add(int(Phase.ENTRY))
     depth = bank.add()
     leaf_depth = bank.add()
@@ -108,6 +110,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     prefix = tuple(active(tuple(frame.prefix[k] for frame in frames)) for k in range(12))
     slots = tuple(tuple(active(tuple(frame.slots[q][k] for frame in frames)) for k in range(5)) for q in range(4))
     top = tuple(tuple(active(tuple(frame.top[q][k] for frame in frames)) for k in range(2)) for q in range(4))
+    crystals = tuple(active(tuple(frame.crystals[q] for frame in frames)) for q in range(4))
     pin_search = active(tuple(frame.pin_search for frame in frames))
     grid = palette.grid(tags)
     original = grid.columns
@@ -144,7 +147,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                               for z in range(5)) for q in range(4))
     candidate = pin_source(program, materials, pushed_tags,
                            tuple(_value(program, bits, 20) for bits in slots),
-                           tuple(_value(program, bits, 4) for bits in top), program.one)
+                           tuple(program.pick(crystal, program.const(3), _value(program, bits, 3))
+                                 for crystal, bits in zip(crystals, top)), program.one)
 
     items = tuple(bank.add(None) for _ in range(6))
     ack, item_status = bank.add(), bank.add()
@@ -252,16 +256,29 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         program.and_(replay_check, program.not_(program.and_(cpu_matches,
                      program.or_(program.not_(root), original_matches)))))
 
-    # 最快位是四个顶格，随后是四列的二十进制槽；到末码才换S前缀。
-    carry = modes[Phase.SOURCE_NEXT]
+    # 同一C掩码的NPC顶盖共享Pin物理；坏列可跳过全部更快地址。
+    counter_event = program.or_(modes[Phase.SOURCE_NEXT], parent_reject)
+    bad_columns = tuple(program.not_(valid) for valid in candidate.column_valid)
+    bad_column = program.or_(*bad_columns)
+    skip_at = tuple(program.and_(counter_event, bad_columns[q], program.not_(program.or_(*bad_columns[q + 1:])))
+                    for q in range(4))
+    skip_columns = program.or_(*skip_at)
+    family_jump = program.and_(counter_event, program.not_(bad_column),
+                               program.or_(program.not_(candidate.image_passed), parent_reject))
+    carry = program.and_(counter_event, program.not_(bad_column), program.not_(family_jump))
     next_top = []
-    for bits in top:
-        values, carry = _increment(program, bits, carry, 4)
-        next_top.append(values)
+    for bits, crystal in zip(top, crystals):
+        values, overflow = _increment(program, bits, carry, 3)
+        next_top.append(tuple(program.pick(program.or_(crystal, family_jump, skip_columns), program.zero, value)
+                              for value in values))
+        carry = program.pick(crystal, carry, overflow)
+    next_crystals, carry = _increment(program, crystals, program.or_(carry, family_jump), 16)
+    next_crystals = tuple(program.pick(skip_columns, program.zero, value) for value in next_crystals)
     next_slots = []
-    for bits in slots:
-        values, carry = _increment(program, bits, carry, 20)
-        next_slots.append(values)
+    for q, bits in enumerate(slots):
+        values, carry = _increment(program, bits, program.or_(carry, skip_at[q]), 20)
+        reset_lower = program.or_(*skip_at[q + 1:])
+        next_slots.append(tuple(program.pick(reset_lower, program.zero, value) for value in values))
     sources_finished = carry
     depth_choices: list[tuple[Ref, Ref | int | None]] = []
     for i, frame in enumerate(frames):
@@ -271,7 +288,10 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         bank.put(frame.pin_search, 1, program.and_(begin_pin_search, selected_frame))
         next_s = program.and_(move_prefix, selected_frame)
         reset_source = program.and_(start_source, selected_frame)
-        next_d = program.and_(modes[Phase.SOURCE_NEXT], selected_frame)
+        next_d = program.and_(counter_event, selected_frame)
+        for read, value in zip(frame.crystals, next_crystals):
+            bank.put(read, value, next_d)
+            bank.put(read, 0, reset_source)
         for k, read in enumerate(frame.prefix):
             bank.put(read, finder.initial[k], initialize)
             bank.put(read, next_prefix[k], next_s)
@@ -316,11 +336,11 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         (start_leaf, Phase.LEAF), (start_source, Phase.SOURCE), (skip_prefix, Phase.PREFIX_NEXT),
         (move_prefix, Phase.PREFIX), (begin_pin_search, Phase.PREFIX), (prefixes_finished, Phase.FAIL),
         (descend, Phase.ENTRY), (skip_source, Phase.SOURCE_NEXT),
-        (program.and_(modes[Phase.SOURCE_NEXT], program.not_(sources_finished)), Phase.SOURCE),
+        (program.and_(counter_event, program.not_(sources_finished)), Phase.SOURCE),
         (sources_finished, Phase.PREFIX_NEXT),
         (program.and_(modes[Phase.LEAF], macro_done), Phase.LEAF_CHECK),
         (leaf_checked, Phase.RETURN), (search_pop, Phase.PARENT_CHECK), (root_solved, Phase.REPLAY_LEAF),
-        (fail_pop, Phase.SOURCE_NEXT), (parent_reject, Phase.SOURCE_NEXT), (parent_checked, Phase.RETURN),
+        (fail_pop, Phase.SOURCE_NEXT), (parent_checked, Phase.RETURN),
         (program.and_(modes[Phase.REPLAY_LEAF], macro_done), Phase.REPLAY_LEAF_CHECK),
         (program.and_(modes[Phase.REPLAY_PARENT], parent_done), Phase.REPLAY_PARENT_CHECK),
         (replay_up, Phase.REPLAY_PARENT),
@@ -357,7 +377,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-        "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8顶盖位和1遍次位；共享一份制造ROM及六槽。成功参数留帧，重放一次，不保存数百条指令。",
+        "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位和1遍次位；共享一份制造ROM及六槽。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最低C每次下降至少一层，递归至多四边；每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
         "proof": "4q5l/full-tail-circuit.md；tail-solver.md；pin-patterns.md；s-tail-circuit.md；clocked-control.md。",
