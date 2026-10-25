@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .circuit import Circuit, Literal, Ref
-from .decoder_circuit import DecodedCell, decode
+from .decoder_circuit import DecodedCell, DecodedShape, decode
 from .synthesis.physics import Rules
 
 
@@ -105,15 +105,20 @@ def half_stable(circuit: Circuit, rows: tuple[tuple[DecodedCell | MaterialCell, 
     return circuit.add("LogicGateNot", _combine(circuit, "LogicGateOr", failures))
 
 
-def build_half(channel_base: int = 1_008_000) -> tuple[Circuit, dict]:
-    """生成标准 q0/q1 半形的三态完整判定及原层号数据。"""
-    if not 1 <= channel_base < (1 << 24) - 2048:
-        raise ValueError("频道基址需要为实例保留后续 2048 个频道，并保持低于 2^24")
-    rules = Rules(4)
-    circuit = Circuit(channel_base + 32)
-    target = circuit.add("ControlledSignalReceiver", Literal(channel_base))
-    enable = circuit.add("ControlledSignalReceiver", Literal(channel_base + 1))
-    decoded = decode(circuit, target, enable, rules)
+@dataclass(frozen=True)
+class HalfFlags:
+    """标准半形的完整局部判据与范围标志，均须在目标稳定后读取。"""
+
+    standard: Ref
+    stable: Ref
+    admissible: Ref
+    solved: Ref
+    unsolvable: Ref
+    unknown: Ref
+
+
+def classify_half(circuit: Circuit, target: Ref, decoded: DecodedShape) -> HalfFlags:
+    """共用原生半切稳定性、两列A及合法颜色范围，避免构造端另设判据。"""
     outside = [row[q].occupied for row in decoded.cells for q in (2, 3)]
     standard = circuit.add("LogicGateNot", _combine(circuit, "LogicGateOr", outside))
     admissible = _combine(circuit, "LogicGateAnd", [
@@ -136,6 +141,21 @@ def build_half(channel_base: int = 1_008_000) -> tuple[Circuit, dict]:
     not_standard = circuit.add("LogicGateNot", standard)
     outside_scope = circuit.add("LogicGateOr", not_standard, has_uncolored)
     unknown = circuit.add("LogicGateAnd", decoded.valid, outside_scope)
+    return HalfFlags(standard, stable, admissible, solved, unsolvable, unknown)
+
+
+def build_half(channel_base: int = 1_008_000) -> tuple[Circuit, dict]:
+    """生成标准 q0/q1 半形的三态完整判定及原层号数据。"""
+    if not 1 <= channel_base < (1 << 24) - 2048:
+        raise ValueError("频道基址需要为实例保留后续 2048 个频道，并保持低于 2^24")
+    rules = Rules(4)
+    circuit = Circuit(channel_base + 32)
+    target = circuit.add("ControlledSignalReceiver", Literal(channel_base))
+    enable = circuit.add("ControlledSignalReceiver", Literal(channel_base + 1))
+    decoded = decode(circuit, target, enable, rules)
+    flags = classify_half(circuit, target, decoded)
+    standard, stable, admissible = flags.standard, flags.stable, flags.admissible
+    solved, unsolvable, unknown = flags.solved, flags.unsolvable, flags.unknown
     statuses = (circuit.add("LogicGateIf", Literal(1), solved),
                 circuit.add("LogicGateIf", Literal(2), unsolvable),
                 circuit.add("LogicGateIf", Literal(3), unknown))

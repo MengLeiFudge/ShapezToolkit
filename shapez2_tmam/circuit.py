@@ -121,9 +121,12 @@ class Circuit:
                     raise ValueError(f"门输入引用了不存在的输出：{source}")
         return channels
 
-    def settling_bound(self) -> dict:
-        """按频道依赖给无环电路计算保守保持期，反馈或动态选频不适用。"""
+    def _max_depth(self, changing: tuple[Ref, ...] | None = None) -> int:
+        """频道DAG最长路径；指定源时，未被变化源触及的路径深度为零。"""
         channels = self.channel_map()
+        if changing is not None and any(source not in channels for source in changing):
+            raise ValueError("变化源引用了不存在的输出")
+        origins = set(channels.values()) if changing is None else {channels[source] for source in changing}
         dependencies: dict[int, set[int]] = {channel: set() for channel in channels.values()}
         for index, gate in enumerate(self.gates):
             incoming = {channels[source] for source in gate.inputs if isinstance(source, Ref)}
@@ -141,17 +144,26 @@ class Circuit:
             for source in sources:
                 consumers[source].append(channel)
         queue = deque(channel for channel, count in remaining.items() if count == 0)
-        depths = {channel: 1 for channel in queue}
+        depths = {channel: int(channel in origins) for channel in queue}
         while queue:
             source = queue.popleft()
             for channel in consumers[source]:
-                depths[channel] = max(depths.get(channel, 1), depths[source] + 1)
+                candidate = depths[source] + 1 if depths[source] else 0
+                depths[channel] = max(depths.get(channel, int(channel in origins)), candidate)
                 remaining[channel] -= 1
                 if remaining[channel] == 0:
                     queue.append(channel)
         if len(depths) != len(dependencies) or any(remaining.values()):
             raise ValueError("反馈电路没有本组合传播上界")
-        depth = max(depths.values(), default=0)
+        return max(depths.values(), default=0)
+
+    def changing_depth(self, changing: tuple[Ref, ...]) -> int:
+        """变化源本身计一级；其他输入须已稳定，反馈和动态选频仍拒绝。"""
+        return self._max_depth(changing)
+
+    def settling_bound(self) -> dict:
+        """按全部频道依赖计算保守保持期，不忽略任何输入的变化。"""
+        depth = self._max_depth()
         ticks = 64 * (depth + 2)
         return {"max_gate_depth": depth, "hold_signal_ticks": ticks,
                 "hold_simulation_seconds": ticks / 12,

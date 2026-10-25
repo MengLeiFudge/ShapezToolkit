@@ -43,7 +43,7 @@ def _base_valid(circuit: Circuit, source: Ref) -> Ref:
     return _combine(circuit, "LogicGateAnd", [exists, single, *no_crystals])
 
 
-def _step(circuit: Circuit, values: tuple[Ref, ...], ack: Ref, status: Ref,
+def recipe_step(circuit: Circuit, values: tuple[Ref, ...], ack: Ref, status: Ref,
           packet: dict[str, Ref]) -> tuple[Ref, ...]:
     """纯组合事务：合法新请求消费源槽并写一槽，错误只更新确认与状态。"""
     first_picks = _address(circuit, packet["a"])
@@ -115,7 +115,7 @@ def build_processor(channel_base: int = 1_025_000) -> tuple[Circuit, dict]:
               for i, name in enumerate(PACKET_FIELDS)}
     initial = (None,) * 6 + (0, 0, 0)
     reads = tuple(circuit.add("LogicGateIf", Literal(value), Literal(1)) for value in initial)
-    next_state = _step(circuit, reads[:6], reads[6], reads[7], packet)
+    next_state = recipe_step(circuit, reads[:6], reads[6], reads[7], packet)
     # 此时所有状态入口仍为常量，只有组合DAG；下面仅闭合已计入的一级读入口。
     depth = circuit.settling_bound()["max_gate_depth"]
     timing = clock(circuit, packet["enable"], phase_steps=max(8, (depth + 13) // 2))

@@ -1,6 +1,6 @@
 # 原生纯电路部件
 
-这些 `.spz2bp` 文件采用游戏的 `SHAPEZ2-4` 岛蓝图格式。每份蓝图旁的 `.json` 文件给出输入、输出、频道保留范围和部件规模。无晶体部件有完整子类判据；加工核心提供虚拟操作。含晶体完整 TMAM 的搜索控制、配方存储及完成握手仍待实现。
+这些 `.spz2bp` 文件采用游戏的 `SHAPEZ2-4` 岛蓝图格式。每份蓝图旁的 `.json` 文件给出输入、输出、频道保留范围和部件规模。无晶体部件有完整子类判据；标准四象限半形已有自动制造流，其他加工核心提供虚拟操作。含晶体全图TMAM的搜索控制仍待实现。
 
 ## 导入与频道连接
 
@@ -41,11 +41,17 @@
 
 `half-4q5l.spz2bp` 使用458块平台并内含解码器。它完整判断 q2、q3 全空的标准 q0/q1 半形。`status=1/2/3` 表示可制作、不可制作、超出范围；输入无效或关闭时为空。非标准全图、未界定供料的 `cu` 返回3。输出还包括五个原始层位、标准半形标志、稳定性及列条件结果；诊断标志应在输入有效且保持稳定后读取。
 
-半形判据为“两列满足 A AND 自身分组稳定”，由[逐列角构造](../4q5l/corner-synthesis.md)证明。稳定性通过原生半切与原目标比较取得。本部件不输出完整制造指令流；成功半形的逐步制造树由 Python `Constructor.half` 生成，完整游戏控制器仍待实现。
+半形判据为“两列满足 A AND 自身分组稳定”，由[逐列角构造](../4q5l/corner-synthesis.md)证明。稳定性通过原生半切与原目标比较取得。独立判定器不输出制造指令；自动制造部件见下一段，Python制造树由 `Constructor.half` 生成。
 
 两份部件的频道和保留范围见对应 JSON。解码器的保守保持期为1152信号tick（96模拟秒）；半形判定器为2304信号tick（192模拟秒）。这些是充分等待期，并非实测耗时或最短时间。两份部件没有完成脉冲，`valid` 和状态值不表示新输入已经传播完成。
 
 `material-half-4q5l.spz2bp` 用461平台直接读取十个材料整数：0空、1普通、2针、3晶体，按原层号每层q0/q1排列。输入有效、非空且启用时，status=1/2精确表示材料结构可制作/不可制作；其他输入为空状态。它用[按层稳定性判据](../4q5l/half-row-stability.md)与列A工作，无需先把逆推候选编码成原生图形信号。晶体3以rgbcmyw合法供料为前提，cu须由调用者另行排除；标签与配方流仍由制造端处理。
+
+## 标准半形自动制造
+
+`automatic-half-4q5l.spz2bp`接受任意原生输入，范围内的q0/q1标准半形自动输出消费式指令并回放到目标。它共用半形判据、459行条件程序及六个物品槽，使用7502平台；状态0运行、1已制造且与目标相同、2判据否定、3非标准半形或cu、4内部失配。4不能作为不可制作结论。
+
+target全程保持，enable=0至少992tick后启用。每个window上升后等48tick，窗口内读一次；sample为真先保存instruction包，再处理同窗done/status。每阶段216tick，每周期72模拟秒；初始化加全部程序行的保守上界为9小时12模拟分，仍需压缩，尚未通过实用性能验收。它不带背压，也未接全四象限逆推控制。范围、宏证明、复位及完整接口见[自动半形说明](../4q5l/automatic-half.md)。
 
 ## 时序复用的数据通路与寄存器
 
@@ -115,6 +121,7 @@ python -m shapez2_tmam.material_half_circuit --channel-base 1016000 --output sha
 python -m shapez2_tmam.pin_column_circuit --channel-base 1019000 --output shapez2_tmam/blueprints/pin-column-4q5l.spz2bp
 python -m shapez2_tmam.pin_column_iterator --channel-base 1022000 --output shapez2_tmam/blueprints/pin-column-iterator-4q5l.spz2bp
 python -m shapez2_tmam.recipe_processor --channel-base 1025000 --output shapez2_tmam/blueprints/recipe-processor-4q5l.spz2bp
+python -m shapez2_tmam.half_synthesizer --channel-base 1028000 --output shapez2_tmam/blueprints/automatic-half-4q5l.spz2bp
 ```
 
 [`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。
