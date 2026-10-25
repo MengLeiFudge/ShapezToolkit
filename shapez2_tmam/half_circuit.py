@@ -2,11 +2,21 @@
 
 import argparse
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
 from .circuit import Circuit, Literal, Ref
 from .decoder_circuit import DecodedCell, decode
 from .synthesis.physics import Rules
+
+
+@dataclass(frozen=True)
+class MaterialCell:
+    """不需要原生图形编码的逐格材料布尔信号。"""
+
+    occupied: Ref
+    pin: Ref
+    crystal: Ref
 
 
 def _combine(circuit: Circuit, kind: str, values: list[Ref]) -> Ref:
@@ -19,7 +29,7 @@ def _combine(circuit: Circuit, kind: str, values: list[Ref]) -> Ref:
     return values[0]
 
 
-def column_admissible(circuit: Circuit, cells: tuple[DecodedCell, ...]) -> Ref:
+def column_admissible(circuit: Circuit, cells: tuple[DecodedCell | MaterialCell, ...]) -> Ref:
     """将五格列条件 A 写为布尔门；不将该必要条件当作全图可制作判据。"""
     if len(cells) != 5:
         raise ValueError("列判据需要五个原层位")
@@ -60,6 +70,39 @@ def column_admissible(circuit: Circuit, cells: tuple[DecodedCell, ...]) -> Ref:
                 filled = circuit.add("LogicGateOr", filled, separated)
             clauses.append(_combine(circuit, "LogicGateOr", [not_crystal[lower], not_crystal[upper], filled]))
     return _combine(circuit, "LogicGateAnd", clauses)
+
+
+def half_stable(circuit: Circuit, rows: tuple[tuple[DecodedCell | MaterialCell, ...], ...]) -> Ref:
+    """两列各层的非针组沿晶体竖边构成区间，只在区间末端检查支撑。"""
+    if not 1 <= len(rows) <= 5 or any(len(row) != 2 for row in rows):
+        raise ValueError("半形稳定性需要1～5个原层位，每层两个材料格")
+    nonpins = [[circuit.add("LogicGateAnd", cell.occupied, circuit.add("LogicGateNot", cell.pin))
+                for cell in row] for row in rows]
+    links = [circuit.add("LogicGateOr", *[
+        circuit.add("LogicGateAnd", rows[z][q].crystal, rows[z - 1][q].crystal) for q in (0, 1)])
+        for z in range(1, len(rows))]
+    failures = []
+    supported = circuit.add("LogicGateOr", *nonpins[0])
+    for z, row in enumerate(rows):
+        occupied = circuit.add("LogicGateOr", *nonpins[z])
+        if z:
+            for q in (0, 1):
+                below_empty = circuit.add("LogicGateNot", rows[z - 1][q].occupied)
+                failures.append(circuit.add("LogicGateAnd", row[q].pin, below_empty))
+            bottom = circuit.add("LogicGateOr", *[
+                circuit.add("LogicGateAnd", nonpins[z][q], rows[z - 1][q].occupied) for q in (0, 1)])
+            pins_below = circuit.add("LogicGateOr", *[
+                circuit.add("LogicGateAnd", nonpins[z][q], rows[z - 1][q].pin) for q in (0, 1)])
+            carried = circuit.add("LogicGateAnd", links[z - 1], supported)
+            starts = circuit.add("LogicGateNot", links[z - 1])
+            starts = circuit.add("LogicGateAnd", starts, bottom)
+            supported = circuit.add("LogicGateOr", circuit.add("LogicGateOr", carried, starts), pins_below)
+        unsupported = circuit.add("LogicGateAnd", occupied, circuit.add("LogicGateNot", supported))
+        if z < len(rows) - 1:
+            ends = circuit.add("LogicGateNot", links[z])
+            unsupported = circuit.add("LogicGateAnd", unsupported, ends)
+        failures.append(unsupported)
+    return circuit.add("LogicGateNot", _combine(circuit, "LogicGateOr", failures))
 
 
 def build_half(channel_base: int = 1_008_000) -> tuple[Circuit, dict]:

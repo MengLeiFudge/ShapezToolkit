@@ -32,13 +32,14 @@ class PinFamily:
                 yield result
 
 
-def pin_families(rules: Rules, target: Shape) -> Iterator[PinFamily]:
-    """生成覆盖全部可制作顶针前态结构的物理逆像族，每族只计算一次正向 Π。
+def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> Iterator[PinFamily]:
+    """生成覆盖全部可制作顶针前态结构的候选族，默认每族先检查一次正向 Π。
 
     目标保留格的标签逐格恢复；最终消失的辅助晶体用红色，顶层删除的
     普通块用 Cu。它们的具体标签不影响可制作性的结构判定。
     返回成员未必可制作；族耗尽只表示不存在可制作的顶针前态。
     族内空/N/P 顶盖不能相互替代来证明可制作性；每个成员须另找配方。
+    check_output=False 仅生成结构候选；调用者须在取得真实制造证书后再核对输出。
     不保存整个候选集，不调用全图可制作判定，也不隐式接受递归环。
     """
     if rules.quadrants != 4:
@@ -78,7 +79,7 @@ def pin_families(rules: Rules, target: Shape) -> Iterator[PinFamily]:
             cells = dict(fixed)
             cells.update({(height, q): "cr" for q in range(rules.quadrants) if mask & (1 << q)})
             representative = rules.fold(cells)
-            if representative is not None and rules.pin(representative) == target:
+            if representative is not None and (not check_output or rules.pin(representative) == target):
                 yield PinFamily(lower, mask)
 
 

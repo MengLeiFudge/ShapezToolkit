@@ -45,11 +45,27 @@ class CornerBuilder:
             raise ValueError("半形判据只接受索引前半")
         if any(not self.admissible(tuple(row[q] for row in target.layers)) for q in (0, 1)):
             return False
-        cells = self.rules.cells(target)
-        groups = self.rules.groups(cells)
-        owner = {pos: i for i, group in enumerate(groups) for pos in group}
-        return all(any(z == 0 or ((z - 1, q) in owner and owner[z - 1, q] != i)
-                       for z, q in group) for i, group in enumerate(groups))
+        return self.stable_half(tuple(row[:2] for row in target.layers))
+
+    @staticmethod
+    def stable_half(rows: tuple[tuple[str, ...], ...]) -> bool:
+        """两列每层至多一个非针组；沿晶体竖边扫描各组的外部支撑。"""
+        if not rows or any(len(row) != 2 for row in rows):
+            raise ValueError("半形稳定性需要非空的两列原层位网格")
+        links = [False] + [any(rows[z][q][0] == "c" and rows[z - 1][q][0] == "c"
+                               for q in (0, 1)) for z in range(1, len(rows))]
+        supported = False
+        for z, row in enumerate(rows):
+            nonpins = [q for q in (0, 1) if row[q] not in (EMPTY, PIN)]
+            if z and any(row[q] == PIN and rows[z - 1][q] == EMPTY for q in (0, 1)):
+                return False
+            if not links[z]:
+                supported = z == 0 or any(rows[z - 1][q] != EMPTY for q in nonpins)
+            else:
+                supported |= any(rows[z - 1][q] == PIN for q in nonpins)
+            if nonpins and not supported and (z + 1 == len(rows) or not links[z + 1]):
+                return False
+        return True
 
     def _shape(self, main: tuple[str, ...], helper: tuple[str, ...], near: int) -> Shape:
         """主列固定为 q0，辅助列为 q1 或 q3，保留空底层。"""

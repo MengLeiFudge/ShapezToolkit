@@ -45,6 +45,8 @@
 
 两份部件的频道和保留范围见对应 JSON。解码器的保守保持期为1152信号tick（96模拟秒）；半形判定器为2304信号tick（192模拟秒）。这些是充分等待期，并非实测耗时或最短时间。两份部件没有完成脉冲，`valid` 和状态值不表示新输入已经传播完成。
 
+`material-half-4q5l.spz2bp` 用461平台直接读取十个材料整数：0空、1普通、2针、3晶体，按原层号每层q0/q1排列。输入有效、非空且启用时，status=1/2精确表示材料结构可制作/不可制作；其他输入为空状态。它用[按层稳定性判据](../4q5l/half-row-stability.md)与列A工作，无需先把逆推候选编码成原生图形信号。晶体3以rgbcmyw合法供料为前提，cu须由调用者另行排除；标签与配方流仍由制造端处理。
+
 ## 时序复用的数据通路与寄存器
 
 `scan-4q5l.spz2bp` 用38平台读取当前最高非空层。输出原始 `top` 单层、保留原层位的 `lower` 下半，以及从1开始的 `original_layer`。控制器可锁存这些结果，再把新下半作为下一次输入，最多调用五次。它是供循环调用的共用数据通路，未包含写回和阶段控制。
@@ -95,6 +97,7 @@ python -m shapez2_tmam.scan_circuit --channel-base 1011000 --output shapez2_tmam
 python -m shapez2_tmam.register_circuit --channel-base 1012000 --output shapez2_tmam/blueprints/signal-register.spz2bp
 python -m shapez2_tmam.sequential_circuit --channel-base 1013000 --output shapez2_tmam/blueprints/four-phase-clock.spz2bp
 python -m shapez2_tmam.iterative_scanner --channel-base 1014000 --output shapez2_tmam/blueprints/iterative-scanner-4q5l.spz2bp
+python -m shapez2_tmam.material_half_circuit --channel-base 1016000 --output shapez2_tmam/blueprints/material-half-4q5l.spz2bp
 ```
 
 [`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。

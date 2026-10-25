@@ -12,13 +12,14 @@ from .recipe import Recipe
 class Solver4:
     """穷尽有限 S/顶针尾部，不设置会将未完成搜索误报为不可解的预算。"""
 
-    def __init__(self, rules: Rules | None = None):
-        """共用一个四象限规则实例；递归沿最低晶体严格下降。"""
+    def __init__(self, rules: Rules | None = None, *, certificate_first: bool = False):
+        """共用四象限规则；可选择先制造候选，再在其真实产物上核对顶针。"""
         self.rules = rules or Rules(4)
         if self.rules.quadrants != 4:
             raise ValueError("完整尾部求解目前限定四象限五层")
         self.constructor = Constructor(self.rules)
         self.builder = self.constructor.builder
+        self.certificate_first = certificate_first
 
     def predecessors(self, target: Shape) -> Iterator[Shape]:
         """按非空格前缀惰性生成全部 S 前态，保留原层号与全部晶体。"""
@@ -70,7 +71,7 @@ class Solver4:
             # 不可制作的中间输出不能成为尾部节点；unknown 则继续完整逆推。
             if self.constructor.construct(pushed).status == "unsolvable":
                 continue
-            for family in pin_families(self.rules, pushed):
+            for family in pin_families(self.rules, pushed, check_output=not self.certificate_first):
                 for source in family.members(self.rules):
                     direct = self.constructor.construct(source)
                     if direct.status == "unsolvable":
@@ -81,6 +82,8 @@ class Solver4:
                         raise RuntimeError("顶针逆像没有使最低保留晶体严格降低")
                     previous = direct.recipe if direct.recipe is not None else self._tail(source)
                     if previous is None:
+                        continue
+                    if self.certificate_first and self.rules.pin(previous.result) != pushed:
                         continue
                     result = self.builder.apply("pin", previous)
                     if result.result != pushed:
