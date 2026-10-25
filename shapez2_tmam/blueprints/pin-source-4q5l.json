@@ -1,0 +1,224 @@
+{
+  "component": "four_column_pin_source",
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "target_bottom_to_top": [
+      [
+        {
+          "material": 1194000,
+          "tag": 1194001
+        },
+        {
+          "material": 1194002,
+          "tag": 1194003
+        },
+        {
+          "material": 1194004,
+          "tag": 1194005
+        },
+        {
+          "material": 1194006,
+          "tag": 1194007
+        }
+      ],
+      [
+        {
+          "material": 1194008,
+          "tag": 1194009
+        },
+        {
+          "material": 1194010,
+          "tag": 1194011
+        },
+        {
+          "material": 1194012,
+          "tag": 1194013
+        },
+        {
+          "material": 1194014,
+          "tag": 1194015
+        }
+      ],
+      [
+        {
+          "material": 1194016,
+          "tag": 1194017
+        },
+        {
+          "material": 1194018,
+          "tag": 1194019
+        },
+        {
+          "material": 1194020,
+          "tag": 1194021
+        },
+        {
+          "material": 1194022,
+          "tag": 1194023
+        }
+      ],
+      [
+        {
+          "material": 1194024,
+          "tag": 1194025
+        },
+        {
+          "material": 1194026,
+          "tag": 1194027
+        },
+        {
+          "material": 1194028,
+          "tag": 1194029
+        },
+        {
+          "material": 1194030,
+          "tag": 1194031
+        }
+      ],
+      [
+        {
+          "material": 1194032,
+          "tag": 1194033
+        },
+        {
+          "material": 1194034,
+          "tag": 1194035
+        },
+        {
+          "material": 1194036,
+          "tag": 1194037
+        },
+        {
+          "material": 1194038,
+          "tag": 1194039
+        }
+      ]
+    ],
+    "source_slots": [
+      1194040,
+      1194041,
+      1194042,
+      1194043
+    ],
+    "source_top_values": [
+      1194044,
+      1194045,
+      1194046,
+      1194047
+    ],
+    "enable": 1194048
+  },
+  "outputs": {
+    "candidate_valid": 1201509,
+    "source_bottom_to_top": [
+      [
+        {
+          "material": 1201510,
+          "tag": 1201530
+        },
+        {
+          "material": 1201515,
+          "tag": 1201535
+        },
+        {
+          "material": 1201520,
+          "tag": 1201540
+        },
+        {
+          "material": 1201525,
+          "tag": 1201545
+        }
+      ],
+      [
+        {
+          "material": 1201511,
+          "tag": 1201531
+        },
+        {
+          "material": 1201516,
+          "tag": 1201536
+        },
+        {
+          "material": 1201521,
+          "tag": 1201541
+        },
+        {
+          "material": 1201526,
+          "tag": 1201546
+        }
+      ],
+      [
+        {
+          "material": 1201512,
+          "tag": 1201532
+        },
+        {
+          "material": 1201517,
+          "tag": 1201537
+        },
+        {
+          "material": 1201522,
+          "tag": 1201542
+        },
+        {
+          "material": 1201527,
+          "tag": 1201547
+        }
+      ],
+      [
+        {
+          "material": 1201513,
+          "tag": 1201533
+        },
+        {
+          "material": 1201518,
+          "tag": 1201538
+        },
+        {
+          "material": 1201523,
+          "tag": 1201543
+        },
+        {
+          "material": 1201528,
+          "tag": 1201548
+        }
+      ],
+      [
+        {
+          "material": 1201514,
+          "tag": 1201534
+        },
+        {
+          "material": 1201519,
+          "tag": 1201539
+        },
+        {
+          "material": 1201524,
+          "tag": 1201544
+        },
+        {
+          "material": 1201529,
+          "tag": 1201549
+        }
+      ]
+    ]
+  },
+  "gate_platforms": 7486,
+  "reserved_channels": [
+    1194000,
+    1210383
+  ],
+  "settling": {
+    "max_gate_depth": 125,
+    "hold_signal_ticks": 8128,
+    "hold_simulation_seconds": 677.3333333333334,
+    "conditions": "本机Hybrid或AlwaysHighUPS模式的常速连续推进，每批最多4信号tick；频道独占、接线及配置固定。调试单步、模式切换、强制低UPS和快进不适用。",
+    "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"
+  },
+  "encoding": "材料0空1N2P3C；每列槽号0～19；顶格0空1Cu2P3红C。标签继承固定原目标表，辅助顶格标签同其整数。",
+  "scope": "完整覆盖四列及顶盖结构候选，并筛融合/组位移必要条件；仍须真实制造、原生Pin及完整目标比较。没有内部迭代或完成脉冲。",
+  "resource_bound": "四份共用二十槽选址和单列路由；每列最多20个槽而非256个控制字；不保存候选表或完整图形目录。",
+  "proof": "4q5l/pin-patterns.md；pin-image-constraints.md；pin-column-circuit.md。",
+  "verification": "仅静态DAG、端口和实际占地生产编译；未运行目标、候选遍历、制造、模拟或测试"
+}

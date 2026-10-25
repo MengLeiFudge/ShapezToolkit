@@ -99,6 +99,12 @@ target保持，enable=0至少1636tick后启用；window上升后48tick采一次�
 
 necessary_pass只表示必要条件通过，仍须制造前态并原生Pin完整比较。全输入保持6656信号tick后读取；没有完成脉冲。第五层NPC不影响本次Pin物理，同一晶体掩码族可先共用筛选。Python取证优先模式已接入同样规则；证明及未检查的F最大性边界见[顶针像筛选](../4q5l/pin-image-constraints.md)。
 
+## 四列及完整顶盖的压缩前态
+
+`pin-source-4q5l.spz2bp`用7486平台，四列分别输入0～19槽号，第五层四格分别输入0空、1Cu、2P、3红C。它输出完整五层材料与标签，覆盖全部规范化顶针输入结构，并检查完整列A及融合/组位移必要条件。Python与电路共用固定模式表；二十槽上界来自组合计数，不是目标枚举。
+
+全输入保持8128信号tick后读取candidate_valid及网格，没有完成脉冲。通过仍须递归制造前态、原生Pin及完整目标比较。四列与顶盖现已组合，内部游标和帧回退仍待接入；范围、唯一性及覆盖证明见[二十槽前态](../4q5l/pin-patterns.md)。
+
 ## 六寄存器配方回放
 
 `recipe-processor-4q5l.spz2bp`用445平台接受加工指令包，在六个物品槽中顺序回放。Python配方的`instructions()`或CLI的`--instructions`输出对应包；操作1～10沿用下表，14取无晶体单层基础料。操作消费源槽，结果写入空槽或被消费槽，拒绝覆盖其他物品；无效新请求确认后status=2且物品槽不变。
@@ -152,6 +158,7 @@ python -m shapez2_tmam.startpoint_circuit --channel-base 1061000 --output shapez
 python -m shapez2_tmam.startpoint_circuit --s-tail --channel-base 1094000 --output shapez2_tmam/blueprints/s-tail-4q5l.spz2bp
 python -m shapez2_tmam.tagged_goal_circuit --channel-base 1127000 --output shapez2_tmam/blueprints/tagged-goal-4q5l.spz2bp
 python -m shapez2_tmam.pin_image_circuit --channel-base 1144000 --output shapez2_tmam/blueprints/pin-image-4q5l.spz2bp
+python -m shapez2_tmam.pin_source_circuit --channel-base 1194000 --output shapez2_tmam/blueprints/pin-source-4q5l.spz2bp
 python -m shapez2_tmam.startpoint_circuit --tagged-goal --channel-base 1161000 --output shapez2_tmam/blueprints/tagged-leaf-4q5l.spz2bp
 ```
 

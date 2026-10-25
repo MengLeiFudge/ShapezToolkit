@@ -7,6 +7,7 @@ from typing import Iterator
 from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
 from .pin_constraints import pin_image_possible
+from .pin_patterns import SOURCE_PATTERNS
 
 
 @dataclass(frozen=True)
@@ -67,6 +68,25 @@ def pin_column(target: tuple[str, ...], keep_mask: int, crystal_mask: int) -> tu
     return result
 
 
+def pin_column_at(target: tuple[str, ...], slot: int) -> tuple[str, ...] | None:
+    """二十槽直接选址，与电路共用来源模式；空余槽和不合结构的模式返回None。"""
+    if len(target) != 5 or not 0 <= slot < 20:
+        raise ValueError("顶针单列选址需要五格目标及0～19槽号")
+    new_pin = target[0] == PIN
+    count = sum(cell != EMPTY and cell[0] != "c" and not (z == 0 and new_pin)
+                for z, cell in enumerate(target))
+    if count > 4:
+        return None
+    patterns = SOURCE_PATTERNS[int(new_pin)][count]
+    if slot >= len(patterns):
+        return None
+    keep, crystals = patterns[slot]
+    forced = sum(1 << (z - 1) for z, cell in enumerate(target) if z and cell[0] == "c")
+    if forced & ~crystals:
+        return None
+    return pin_column(target, keep, crystals & ~forced)
+
+
 def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> Iterator[PinFamily]:
     """生成覆盖全部可制作顶针前态结构的候选族，默认每族先检查一次正向 Π。
 
@@ -84,23 +104,10 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
     height = rules.height - 1
     columns: list[list[tuple[str, ...]]] = []
     for q in range(rules.quadrants):
-        new_pin = target.layers[0][q] == PIN
-        forced = {z - 1: row[q] for z, row in enumerate(target.layers) if row[q][0] == "c"}
-        retained = [(z, row[q]) for z, row in enumerate(target.layers)
-                    if row[q] != EMPTY and row[q][0] != "c" and not (z == 0 and new_pin)]
-        candidates = []
-        for sources in combinations(range(height), len(retained)):
-            if any(r in forced for r in sources) or not _sources_fit(sources, retained, forced):
-                continue
-            cells = dict(forced)
-            cells.update({r: cell for r, (_, cell) in zip(sources, retained)})
-            free = [r for r in range(height) if r not in cells]
-            for filling in product((EMPTY, "cr"), repeat=len(free)):
-                column = [cells.get(r, EMPTY) for r in range(height)]
-                for r, cell in zip(free, filling):
-                    column[r] = cell
-                if (column[0] != EMPTY) == new_pin and CornerBuilder.admissible(tuple(column)):
-                    candidates.append(tuple(column))
+        # Shape省略空顶层；选址仍按五个原层位工作。
+        target_column = tuple(target.layers[z][q] if z < len(target.layers) else EMPTY for z in range(5))
+        candidates = [column for slot in range(20)
+                      if (column := pin_column_at(target_column, slot)) is not None]
         if not candidates:
             return
         columns.append(candidates)
