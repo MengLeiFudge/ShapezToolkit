@@ -1,4 +1,4 @@
-"""输入目标并导出局部构造证书；unknown 始终与不可制作区分。"""
+"""输入目标并导出制造证书；完整四象限逆推由 --complete 显式启用。"""
 
 import argparse
 import json
@@ -9,16 +9,23 @@ from .physics import Rules
 
 def main() -> int:
     """输出 JSON 制造步骤；退出码 0/2/3 分别为成功/不可制作/未覆盖。"""
-    parser = argparse.ArgumentParser(description="四/六象限局部合成构造，尚非完整 TMAM 求解器")
+    parser = argparse.ArgumentParser(description="四/六象限局部构造，可选完整四象限有限尾部搜索")
     parser.add_argument("target", help="保留原层号的图形短代码")
     parser.add_argument("--quadrants", type=int, choices=(4, 6), default=4)
+    parser.add_argument("--complete", action="store_true", help="完整四象限逆推，最坏搜索时间很大")
     args = parser.parse_args()
+    if args.complete and args.quadrants != 4:
+        parser.error("--complete 当前只支持 --quadrants 4")
     rules = Rules(args.quadrants)
     try:
         target = rules.parse(args.target)
     except ValueError as error:
         parser.error(str(error))
-    result = Constructor(rules).construct(target)
+    if args.complete:
+        from .solver4 import Solver4
+        result = Solver4(rules).solve(target)
+    else:
+        result = Constructor(rules).construct(target)
     document = {"status": result.status, "reason": result.reason, "target": target.to_key(),
                 "quadrants": rules.quadrants, "height": rules.height,
                 "steps": list(result.recipe.steps()) if result.recipe is not None else []}

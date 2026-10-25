@@ -9,7 +9,7 @@ from .recipe import Builder, Recipe
 
 @dataclass(frozen=True)
 class Result:
-    """三态结果；unsolvable 来自必要条件或完整无晶体判据的否定。"""
+    """三态结果；unsolvable 必须来自已证必要条件或完整搜索耗尽。"""
 
     status: str
     recipe: Recipe | None
