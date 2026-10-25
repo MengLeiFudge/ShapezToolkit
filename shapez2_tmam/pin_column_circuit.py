@@ -66,6 +66,13 @@ def column_candidate(circuit: Circuit, materials: tuple[Ref, ...], tags: tuple[R
     source_counts = _prefix_counts(circuit, keep)
     same_count = [circuit.add("LogicGateAnd", target_counts[-1][k], source_counts[-1][k]) for k in range(5)]
     clauses.append(_combine(circuit, "LogicGateOr", same_count))
+    barriers = []
+    for r in range(4):
+        same_side = [circuit.add("LogicGateAnd", source_counts[r][k], target_counts[r + 1][k])
+                     for k in range(r + 1)]
+        no_crystal = circuit.add("LogicGateNot", flags[r + 1][3])
+        barriers.append(circuit.add("LogicGateOr", no_crystal, _combine(circuit, "LogicGateOr", same_side)))
+    clauses.append(_combine(circuit, "LogicGateAnd", barriers))
     selected = []
     compact_materials = []
     compact_tags = []
@@ -148,7 +155,7 @@ def build_pin_column(channel_base: int = 1_019_000) -> tuple[Circuit, dict]:
         "reserved_channels": [channel_base, channel_base + 2047],
         "encoding": "材料0空/1普通/2针/3晶体；八控制位须是整数0或1。tag为调用者管理的原目标标签编号，0为空、3为辅助红晶体，保留格继承原tag。",
         "scope": "目标单列到顶针前四层的结构候选；不输出第五层，不检查整图Pin物理或可制作性。candidate_valid不能当作solved。",
-        "enumeration": "八位共256种赋值；逐列先取有效候选再组合，单列至多32个。四列候选及第五层掩码/成员仍须由外部控制器迭代。",
+        "enumeration": "八位共256种赋值；地面掩码使单列至多20个，有保留C时至多12个。晶体屏障前缀等式再排除穿越来源；四列及第五层仍须外部迭代。",
         "proof": "4q5l/pin-column-circuit.md；Python对应synthesis.inverse.pin_column。",
         "timing": "组合电路，整组输入保持不少于settling.hold_signal_ticks；仅candidate_valid为真时读取四格输出。",
         "settling": circuit.settling_bound(),

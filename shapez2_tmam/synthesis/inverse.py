@@ -32,6 +32,13 @@ class PinFamily:
                 yield result
 
 
+def _sources_fit(sources: tuple[int, ...] | list[int], retained: list[tuple[int, str]],
+                 forced: dict[int, str]) -> bool:
+    """抬升后只能向下落，且保留N/P不能穿过同列保留晶体。"""
+    return all(z <= r + 1 and not any(z <= crystal <= r for crystal in forced)
+               for r, (z, _) in zip(sources, retained))
+
+
 def pin_column(target: tuple[str, ...], keep_mask: int, crystal_mask: int) -> tuple[str, ...] | None:
     """由两个四位掩码恢复一列前四层；只判结构约束，不计算Pin物理。"""
     if len(target) != 5 or not 0 <= keep_mask < 16 or not 0 <= crystal_mask < 16:
@@ -48,7 +55,7 @@ def pin_column(target: tuple[str, ...], keep_mask: int, crystal_mask: int) -> tu
     forced_mask = sum(1 << r for r in forced)
     if keep_mask & forced_mask or crystal_mask & (keep_mask | forced_mask):
         return None
-    if any(z > r + 1 for r, (z, _) in zip(sources, retained)):
+    if not _sources_fit(sources, retained, forced):
         return None
     column = [forced.get(r, "cr" if crystal_mask & (1 << r) else EMPTY) for r in range(4)]
     for r, (_, cell) in zip(sources, retained):
@@ -82,7 +89,7 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
                     if row[q] != EMPTY and row[q][0] != "c" and not (z == 0 and new_pin)]
         candidates = []
         for sources in combinations(range(height), len(retained)):
-            if any(r in forced or z > r + 1 for r, (z, _) in zip(sources, retained)):
+            if any(r in forced for r in sources) or not _sources_fit(sources, retained, forced):
                 continue
             cells = dict(forced)
             cells.update({r: cell for r, (_, cell) in zip(sources, retained)})

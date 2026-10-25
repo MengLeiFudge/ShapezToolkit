@@ -40,34 +40,34 @@
     "enable": 1019018
   },
   "outputs": {
-    "candidate_valid": 1019513,
+    "candidate_valid": 1019541,
     "source_bottom_four": [
       {
-        "material": 1019514,
-        "tag": 1019518
+        "material": 1019542,
+        "tag": 1019546
       },
       {
-        "material": 1019515,
-        "tag": 1019519
+        "material": 1019543,
+        "tag": 1019547
       },
       {
-        "material": 1019516,
-        "tag": 1019520
+        "material": 1019544,
+        "tag": 1019548
       },
       {
-        "material": 1019517,
-        "tag": 1019521
+        "material": 1019545,
+        "tag": 1019549
       }
     ]
   },
-  "gate_platforms": 490,
+  "gate_platforms": 518,
   "reserved_channels": [
     1019000,
     1021047
   ],
   "encoding": "材料0空/1普通/2针/3晶体；八控制位须是整数0或1。tag为调用者管理的原目标标签编号，0为空、3为辅助红晶体，保留格继承原tag。",
   "scope": "目标单列到顶针前四层的结构候选；不输出第五层，不检查整图Pin物理或可制作性。candidate_valid不能当作solved。",
-  "enumeration": "八位共256种赋值；逐列先取有效候选再组合，单列至多32个。四列候选及第五层掩码/成员仍须由外部控制器迭代。",
+  "enumeration": "八位共256种赋值；地面掩码使单列至多20个，有保留C时至多12个。晶体屏障前缀等式再排除穿越来源；四列及第五层仍须外部迭代。",
   "proof": "4q5l/pin-column-circuit.md；Python对应synthesis.inverse.pin_column。",
   "timing": "组合电路，整组输入保持不少于settling.hold_signal_ticks；仅candidate_valid为真时读取四格输出。",
   "settling": {
