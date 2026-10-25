@@ -59,6 +59,12 @@ target全程保持，enable=0至少992tick后启用。每个window上升后等48
 
 target保持，enable=0至少1420tick后启用；window上升后48tick采样，sample为真先收指令，再处理done/status。阶段228tick、周期76模拟秒，最多931周期的保守上界约19小时39分，仍需继续压缩。切向选择、空半形、两遍及六槽证明见[双半形起点](../4q5l/two-half-startpoint.md)。
 
+## 起点与纯N/P追加尾部
+
+`s-tail-4q5l.spz2bp`用11269平台完整遍历允许S前缀，再制造双半形起点并补齐目标。每列跳过空层重复、保留全部C，最多1296个不同组合，含C时最多1080。475行制造程序仍共用两遍，使用六物品槽及14位搜索状态。含C搜索失败只返回3，仍须顶针尾部；无C范围可完整判不可制作。
+
+target保持，enable=0至少1636tick后启用；window上升后48tick采一次，sample为真先收指令，再处理done/status。每周期76模拟秒，通用最坏上界约47小时26分，含C约42小时52分；它尚未通过实用规模/性能验收。搜索与冻结预计算分别按39/89级路径计时，制造按52级，证明见[完整S段](../4q5l/s-tail-circuit.md)。
+
 ## 时序复用的数据通路与寄存器
 
 `scan-4q5l.spz2bp` 用38平台读取当前最高非空层。输出原始 `top` 单层、保留原层位的 `lower` 下半，以及从1开始的 `original_layer`。控制器可锁存这些结果，再把新下半作为下一次输入，最多调用五次。它是供循环调用的共用数据通路，未包含写回和阶段控制。
@@ -129,6 +135,7 @@ python -m shapez2_tmam.pin_column_iterator --channel-base 1022000 --output shape
 python -m shapez2_tmam.recipe_processor --channel-base 1025000 --output shapez2_tmam/blueprints/recipe-processor-4q5l.spz2bp
 python -m shapez2_tmam.half_synthesizer --channel-base 1028000 --output shapez2_tmam/blueprints/automatic-half-4q5l.spz2bp
 python -m shapez2_tmam.startpoint_circuit --channel-base 1061000 --output shapez2_tmam/blueprints/startpoint-4q5l.spz2bp
+python -m shapez2_tmam.startpoint_circuit --s-tail --channel-base 1094000 --output shapez2_tmam/blueprints/s-tail-4q5l.spz2bp
 ```
 
 [`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。

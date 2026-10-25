@@ -1,6 +1,6 @@
 """有限制造程序的共用时序控制：条件ROM、六槽回放、快照及可选双遍调用。"""
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 
 from .circuit import Circuit, Gate, Literal, Ref, constant
 from .corner_program import Instruction
@@ -62,21 +62,39 @@ def _rom(circuit: Circuit, program: tuple[Instruction, ...], bits: tuple[Ref, ..
     return fields, _combine(circuit, "LogicGateOr", chosen), addresses[-1], jumps
 
 
+@dataclass(frozen=True)
+class StateUpdate:
+    """由调用者建立组合步、交给共用时钟锁存的一份状态。"""
+
+    read: Ref
+    source: Ref
+    initial: int | None | Ref
+
+
 def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
                     solved: Ref, unsolvable: Ref, unknown: Ref,
                     program: tuple[Instruction, ...], one: Ref, null: Ref,
-                    second_pass: Ref | None = None) -> dict:
+                    second_pass: Ref | None = None, extra_state: tuple[StateUpdate, ...] = (),
+                    precomputed_state: tuple[Ref, ...] = ()) -> dict:
     """单遍程序，或以second_pass切换数据源的两遍共享程序；不执行目标。"""
     if not program:
         raise ValueError("制造程序至少需要一行")
     width = max(1, (len(program) - 1).bit_length())
-    initial = (None,) * 6 + (0,) * (width + 5)
-    reads = tuple(circuit.add("LogicGateIf", Literal(value), Literal(1)) for value in initial)
+    initial: tuple[int | None | Ref, ...] = (None,) * 6 + (0,) * (width + 5)
+    reads = tuple(circuit.add("LogicGateIf", value if isinstance(value, Ref) else Literal(value), Literal(1))
+                  for value in initial)
     pc = reads[8:8 + width]
     finished, failed, started = reads[8 + width:]
     if second_pass is not None:
         reads += (second_pass,)
         initial += (0,)
+    if len({state.read for state in extra_state}) != len(extra_state) or any(
+            state.read in reads for state in extra_state):
+        raise ValueError("调用者状态入口必须独立，且不能与程序状态重复")
+    reads += tuple(state.read for state in extra_state)
+    initial += tuple(state.initial for state in extra_state)
+    if any(read not in {state.read for state in extra_state} for read in precomputed_state):
+        raise ValueError("制造前冻结的状态必须属于调用者状态")
     halted = circuit.add("LogicGateOr", finished, failed)
     machine = _combine(circuit, "LogicGateAnd", [enable, solved, started,
                                                circuit.add("LogicGateNot", halted)])
@@ -110,21 +128,31 @@ def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
     next_state = (*next_items, *next_pc, next_finished, next_failed, Literal(1))
     if second_pass is not None:
         next_state += (circuit.add("LogicGateOr", second_pass, repeat),)
+    next_state += tuple(state.source for state in extra_state)
     accepted = circuit.add("LogicGateAnd", packet["enable"], circuit.add("LogicGateNot", error))
     record_data = tuple(packet[name] for name in RECORD_FIELDS) + (accepted,)
     # 固定目标在复位期间预计算；首周期只设置started。
     full_depth = circuit.settling_bound()["max_gate_depth"]
-    depth = circuit.changing_depth(reads)
-    timing = clock(circuit, enable, phase_steps=max(8, (depth + 7) // 3))
+    dynamic = tuple(read for read in reads if read not in precomputed_state)
+    depth = circuit.changing_depth(dynamic)
+    phase_steps = max(8, (depth + 7) // 3)
+    precompute_depth = search_depth = 0
+    if precomputed_state:
+        # 调用者须保证：计数冻结一整周期后才放开发令；对应通路有7P。
+        search_depth = circuit.changing_depth(reads, tuple(state.source for state in extra_state))
+        precompute_depth = circuit.changing_depth(reads)
+        phase_steps = max(phase_steps, (search_depth + 7) // 3, (precompute_depth + 10) // 7)
+    timing = clock(circuit, enable, phase_steps=phase_steps)
     timing = replace(timing, reset_ticks=max(timing.reset_ticks, 12 * full_depth + 256))
     reset = circuit.add("LogicGateNot", enable)
     master_load = circuit.add("LogicGateOr", timing.phases[0], reset)
     slave_load = circuit.add("LogicGateOr", timing.phases[2], reset)
     states = []
     for read, source, value in zip(reads, next_state, initial):
-        data = select(circuit, enable, source, Literal(value))
+        initial_value = value if isinstance(value, Ref) else Literal(value)
+        data = select(circuit, enable, source, initial_value)
         master = latch(circuit, data, master_load)
-        slave_data = select(circuit, enable, master, Literal(value))
+        slave_data = select(circuit, enable, master, initial_value)
         slave = latch(circuit, slave_data, slave_load)
         states.append(slave)
         circuit.gates[read.node] = Gate("LogicGateIf", (slave, Literal(1)))
@@ -155,7 +183,7 @@ def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
     circuit.aliases.append(tuple(statuses))
     output = circuit.add("LogicGateIf", states[0], circuit.add("LogicGateAnd", window, success))
     channels = circuit.channel_map()
-    return {
+    report = {
         "outputs": {"window": channels[window], "sample": channels[sample], "done": channels[done],
                     "status": channels[statuses[0]], "result": channels[output],
                     "instruction": {name: channels[value] for name, value in zip(RECORD_FIELDS, records)}},
@@ -163,3 +191,7 @@ def execute_program(circuit: Circuit, target: Ref, enable: Ref, valid: Ref,
         "item_registers": 6, "step_max_gate_depth": depth, "initial_max_gate_depth": full_depth,
         "timing": timing_contract(timing),
     }
+    if precomputed_state:
+        report.update({"search_max_gate_depth": search_depth,
+                       "precompute_max_gate_depth": precompute_depth, "precompute_handoff_phases": 7})
+    return report
