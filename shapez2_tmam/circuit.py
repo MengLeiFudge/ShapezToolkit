@@ -155,7 +155,7 @@ class Circuit:
         ticks = 64 * (depth + 2)
         return {"max_gate_depth": depth, "hold_signal_ticks": ticks,
                 "hold_simulation_seconds": ticks / 12,
-                "conditions": "本机源码的12信号tick/秒、每批最多4tick及正常更新策略；频道独占、配置不变、整组输入保持。",
+                "conditions": "本机Hybrid或AlwaysHighUPS模式的常速连续推进，每批最多4信号tick；频道独占、接线及配置固定。调试单步、模式切换、强制低UPS和快进不适用。",
                 "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"}
 
     def document(self) -> dict:

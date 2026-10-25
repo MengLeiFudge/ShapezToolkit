@@ -1,6 +1,6 @@
 # 共用电路的保守传播保持期
 
-本页针对本仓库 `Circuit` 编译器生成的一门一平台、固定频道、无反馈组合电路。以本机已核对的游戏源码为前提，给出从输入保持到可安全采样输出的保守上界。它不把门数等同于实际 tick 延迟，也不替代游戏运行验证。
+本页针对本仓库 `Circuit` 编译器生成的一门一平台、固定频道、无反馈组合电路。以本机已核对的游戏源码、Hybrid或AlwaysHighUPS模式的常速连续推进为前提，给出从输入保持到可安全采样输出的保守上界。它不把门数等同于实际 tick 延迟，也不替代游戏运行验证。
 
 设合并互斥输出频道后的依赖图最大门深度为 D，则采用：
 
@@ -15,11 +15,13 @@
 
 `SimulationConstants` 给出最大模拟增量1/30秒、最大集群更新跨度1/3秒。`ProcessingUpdateStrategy` 的强制更新阈值为二者之差；下次模拟推进至多再加1/30秒，所以正常更新中集群跨度不超过1/3秒。
 
-`GameSessionOrchestrator` 在常规、强制高 UPS、强制低 UPS 三种处理模式中，都用这两个常量建立策略。`SimulationGraph.UpdateClusters` 会完成全部强制更新后才返回；可选提前更新只会缩短间隔。因此不能因为低 LOD 就无限延迟某个本电路集群。
+这里还必须核对调用者实际推进量，而不能只看策略的构造参数。`GameSessionOrchestrator.Tick` 在 Hybrid 或 AlwaysHighUPS 模式的常速连续推进分支，把传给 `StartLogicUpdate` 的增量限制为 `MaxSimulatorIncrement`。因此前述“阈值加一次最大推进量”的界成立。
+
+`SimulationGraph.UpdateClusters` 会完成全部强制更新后才返回；可选提前更新只会缩短间隔。因此不能因为低 LOD 就无限延迟某个本电路集群。强制低UPS、调试单步和快进存在不同推进路径，不在本页已证范围内；单看它们仍使用相同策略常量，不足以套用本证明。
 
 `SignalSimulation.SignalsPerSecond=12`，`MaxSignalsPerUpdate=4`。单次集群更新产生至多四个连续信号 tick，集群之间也至多相差这一批次；暂停或慢速影响墙钟时间，不改变此处模拟时间论证。
 
-不在修改建筑、重连网络或处理中途更改模拟规则期间采样；这些操作会改变本页依赖的网络及更新前提。
+不在修改建筑、重连网络、切换模拟模式、调试单步或快进期间采样；这些操作会改变本页依赖的网络或更新前提。启用该协议前须在上述常速连续推进模式保持足够时间，完成一次完整写入或组合保持期。
 
 ## 2. 一条本地缓冲边至多预留八 tick
 
@@ -72,6 +74,6 @@
 
 循环控制器可以在稳定寄存器输出下调用这些组合部件，等待保持期，再采样、写回和转阶段。寄存器、时钟、阶段锁存及完整配方流仍须各自证明；不能把组合部件的上界当成整个反馈网络的上界。
 
-源码核对包括 `SignalBuffer`、`SignalSimulation`、`SignalChannelRingBuffer`、受控无线收发器、`SignalNetworkSimulation/System`、`ConnectableSignalNetwork`、`SimulationCluster.Update`、`SimulationGraph.UpdateClusters`、`ProcessingUpdateStrategy`、`SimulationConstants` 以及 `GameSessionOrchestrator` 的策略实例。结论为源码静态推导，未运行门级模拟、时序探针或游戏。
+源码核对包括 `SignalBuffer`、`SignalSimulation`、`SignalChannelRingBuffer`、受控无线收发器、`SignalNetworkSimulation/System`、`ConnectableSignalNetwork`、`SimulationCluster.Update`、`SimulationGraph.UpdateClusters`、`ProcessingUpdateStrategy`、`SimulationConstants` 以及 `GameSessionOrchestrator.Tick` 的推进分支及策略实例。结论为源码静态推导，未运行门级模拟、时序探针或游戏。
 
 [蓝图频道表与接法](../blueprints/README.md) · [原层号解码](circuit-decoding.md) · [返回四象限目录](README.md)

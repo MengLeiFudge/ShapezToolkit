@@ -34,7 +34,7 @@ def build_register(channel_base: int = 1_012_000) -> tuple[Circuit, dict]:
         "initialization": "首次使用前完整执行一次写入；清零可写整数0，清空可写空信号。",
         "idle": "load=0、retain=1 持续保持；load=0、retain=0 会清空寄存器。",
         "scope": "保存整数、图形、颜色及空信号；不包含地址选择器、时钟或阶段控制器。",
-        "proof": "4q5l/register-circuit.md；前提沿用 signal-timing.md 的正常更新策略和固定接线。",
+        "proof": "4q5l/register-circuit.md；仅本机Hybrid/AlwaysHighUPS常速连续推进与固定接线；不适用于调试单步、模式切换、强制低UPS或快进。",
         "timing": "反馈网络不调用组合 DAG 保持期；按明确的三阶段写入协议使用，无完成脉冲。",
         "verification": "静态端口、实际占地与几何网络核对；未运行写入循环、门级模拟或游戏",
     }
