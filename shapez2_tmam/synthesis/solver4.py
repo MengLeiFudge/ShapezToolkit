@@ -7,6 +7,7 @@ from .construct import Constructor, Result
 from .inverse import pin_families
 from .physics import Rules, Shape
 from .recipe import Recipe
+from .support import in_support_class
 
 
 class Solver4:
@@ -22,7 +23,7 @@ class Solver4:
         self.certificate_first = certificate_first
 
     def predecessors(self, target: Shape) -> Iterator[Shape]:
-        """按非空格前缀惰性生成全部 S 前态，保留原层号与全部晶体。"""
+        """按非空格前缀生成K中的S前态，保留原层号与全部晶体。"""
         desired = self.rules.cells(target)
         columns = [sorted((z, cell) for (z, column), cell in desired.items() if column == q)
                    for q in range(4)]
@@ -33,7 +34,7 @@ class Solver4:
         for counts in product(*ranges):
             original = {(z, q): cell for q, count in enumerate(counts) for z, cell in columns[q][:count]}
             source = self.rules.fold(original)
-            if source is None:
+            if source is None or not in_support_class(self.rules, source):
                 continue
             delta = {pos: cell for pos, cell in desired.items() if pos not in original}
             # 分组只读取新增格；与下料的新接触不能把独立上料块合并。

@@ -7,22 +7,22 @@
     "enable": 1211001
   },
   "outputs": {
-    "window": 1245883,
-    "sample": 1245884,
-    "done": 1245886,
-    "status": 1245895,
-    "result": 1245898,
+    "window": 1248460,
+    "sample": 1248461,
+    "done": 1248463,
+    "status": 1248472,
+    "result": 1248475,
     "instruction": {
-      "opcode": 1245887,
-      "a": 1245888,
-      "b": 1245889,
-      "destination": 1245890,
-      "base": 1245891,
-      "color": 1245892,
-      "request": 1245893
+      "opcode": 1248464,
+      "a": 1248465,
+      "b": 1248466,
+      "destination": 1248467,
+      "base": 1248468,
+      "color": 1248469,
+      "request": 1248470
     }
   },
-  "gate_platforms": 34701,
+  "gate_platforms": 37278,
   "reserved_channels": [
     1211000,
     1276535
@@ -57,6 +57,6 @@
   "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位和1遍次位；共享一份制造ROM及六槽。成功参数留帧，重放一次，不保存数百条指令。",
   "termination": "最低C每次下降至少一层，递归至多四边；每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-  "proof": "4q5l/full-tail-circuit.md；tail-solver.md；pin-patterns.md；s-tail-circuit.md；clocked-control.md。",
+  "proof": "4q5l/full-tail-circuit.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏"
 }

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from .corners import CornerBuilder
 from .physics import EMPTY, Rules, Shape
 from .recipe import Builder, Recipe
+from .support import in_support_class
 
 
 @dataclass(frozen=True)
@@ -61,8 +62,8 @@ class Constructor:
         if any(not CornerBuilder.admissible(tuple(row[q] for row in target.layers))
                for q in range(self.rules.quadrants)):
             return Result("unsolvable", None, "目标违反列内针支撑、针前缀或晶体间隙必要条件")
-        if self.rules.quadrants == 4 and self.rules.collapse(self.rules.cells(target)) != target:
-            return Result("unsolvable", None, "四象限五层可制作状态必须稳定，目标重新分组后会下落")
+        if self.rules.quadrants == 4 and not in_support_class(self.rules, target):
+            return Result("unsolvable", None, "四象限五层可制作状态必须通向地面或含针支撑环，目标不属于K")
         if not any(cell[0] == "c" for row in target.layers for cell in row):
             recipe = self.builder.noncrystal(target)
             return Result("solved" if recipe else "unsolvable", recipe,

@@ -16,6 +16,7 @@ from .prefix_search import PrefixSearch
 from .program_controller import RECORD_FIELDS, _rom
 from .recipe_processor import _read, recipe_step
 from .sequential_circuit import timing_contract
+from .support_circuit import in_support_class
 from .synthesis.physics import Rules
 from .tag_palette import TagPalette, TaggedGrid, same_grid
 
@@ -132,6 +133,14 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     next_prefix = tuple(state.source for state in prefix_step[:12])
     last_prefix = prefix_step[-1].source
     pushed = TaggedGrid(finder.columns, grid.valid)
+    checking_prefix = modes[Phase.PREFIX]
+    support_grid = tuple(tuple(MaterialCell(
+        program.pick(checking_prefix, finder.columns[q][z].occupied, original[q][z].occupied),
+        program.pick(checking_prefix, finder.columns[q][z].pin, original[q][z].pin),
+        program.pick(checking_prefix, finder.columns[q][z].crystal, original[q][z].crystal))
+        for z in range(5)) for q in range(4))
+    anchored = in_support_class(program, support_grid)
+    appendable = program.and_(finder.appendable, anchored)
     partitions = []
     for start in range(2):
         halves = [half_stable(circuit, tuple(tuple(MaterialCell(
@@ -221,12 +230,13 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
 
     entry = modes[Phase.ENTRY]
     valid_goal = program.and_(grid.valid, nonempty)
-    enter = program.and_(entry, in_scope, valid_goal, admissible)
-    entry_fail = program.and_(entry, in_scope, valid_goal, program.not_(admissible))
+    necessary = program.and_(admissible, anchored)
+    enter = program.and_(entry, in_scope, valid_goal, necessary)
+    entry_fail = program.and_(entry, in_scope, valid_goal, program.not_(necessary))
     bad_goal = program.and_(entry, in_scope, program.not_(valid_goal))
-    start_leaf = program.and_(modes[Phase.PREFIX], program.not_(pin_search), finder.appendable, available)
-    start_source = program.and_(modes[Phase.PREFIX], pin_search, finder.appendable, pin_allowed)
-    skip_prefix = program.and_(modes[Phase.PREFIX], program.or_(program.not_(finder.appendable),
+    start_leaf = program.and_(modes[Phase.PREFIX], program.not_(pin_search), appendable, available)
+    start_source = program.and_(modes[Phase.PREFIX], pin_search, appendable, pin_allowed)
+    skip_prefix = program.and_(modes[Phase.PREFIX], program.or_(program.not_(appendable),
                               program.and_(program.not_(pin_search), program.not_(available)),
                               program.and_(pin_search, program.not_(pin_allowed))))
     move_prefix = program.and_(modes[Phase.PREFIX_NEXT], program.not_(last_prefix))
@@ -380,7 +390,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位和1遍次位；共享一份制造ROM及六槽。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最低C每次下降至少一层，递归至多四边；每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/full-tail-circuit.md；tail-solver.md；pin-patterns.md；s-tail-circuit.md；clocked-control.md。",
+        "proof": "4q5l/full-tail-circuit.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 
