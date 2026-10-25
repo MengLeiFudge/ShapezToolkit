@@ -1,0 +1,216 @@
+{
+  "component": "original_tag_goal_grid",
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "original_target": 1127000,
+    "actual_result": 1127022,
+    "enable": 1127023,
+    "tags_bottom_to_top": [
+      [
+        1127002,
+        1127003,
+        1127004,
+        1127005
+      ],
+      [
+        1127006,
+        1127007,
+        1127008,
+        1127009
+      ],
+      [
+        1127010,
+        1127011,
+        1127012,
+        1127013
+      ],
+      [
+        1127014,
+        1127015,
+        1127016,
+        1127017
+      ],
+      [
+        1127018,
+        1127019,
+        1127020,
+        1127021
+      ]
+    ]
+  },
+  "outputs": {
+    "valid": 1132417,
+    "matches": 1132779,
+    "cells_bottom_to_top": [
+      [
+        {
+          "npc": 1132780,
+          "occupied": 1132781,
+          "pin": 1132782,
+          "crystal": 1132783,
+          "color": 1132784
+        },
+        {
+          "npc": 1132785,
+          "occupied": 1132786,
+          "pin": 1132787,
+          "crystal": 1132788,
+          "color": 1132789
+        },
+        {
+          "npc": 1132790,
+          "occupied": 1132791,
+          "pin": 1132792,
+          "crystal": 1132793,
+          "color": 1132794
+        },
+        {
+          "npc": 1132795,
+          "occupied": 1132796,
+          "pin": 1132797,
+          "crystal": 1132798,
+          "color": 1132799
+        }
+      ],
+      [
+        {
+          "npc": 1132800,
+          "occupied": 1132801,
+          "pin": 1132802,
+          "crystal": 1132803,
+          "color": 1132804
+        },
+        {
+          "npc": 1132805,
+          "occupied": 1132806,
+          "pin": 1132807,
+          "crystal": 1132808,
+          "color": 1132809
+        },
+        {
+          "npc": 1132810,
+          "occupied": 1132811,
+          "pin": 1132812,
+          "crystal": 1132813,
+          "color": 1132814
+        },
+        {
+          "npc": 1132815,
+          "occupied": 1132816,
+          "pin": 1132817,
+          "crystal": 1132818,
+          "color": 1132819
+        }
+      ],
+      [
+        {
+          "npc": 1132820,
+          "occupied": 1132821,
+          "pin": 1132822,
+          "crystal": 1132823,
+          "color": 1132824
+        },
+        {
+          "npc": 1132825,
+          "occupied": 1132826,
+          "pin": 1132827,
+          "crystal": 1132828,
+          "color": 1132829
+        },
+        {
+          "npc": 1132830,
+          "occupied": 1132831,
+          "pin": 1132832,
+          "crystal": 1132833,
+          "color": 1132834
+        },
+        {
+          "npc": 1132835,
+          "occupied": 1132836,
+          "pin": 1132837,
+          "crystal": 1132838,
+          "color": 1132839
+        }
+      ],
+      [
+        {
+          "npc": 1132840,
+          "occupied": 1132841,
+          "pin": 1132842,
+          "crystal": 1132843,
+          "color": 1132844
+        },
+        {
+          "npc": 1132845,
+          "occupied": 1132846,
+          "pin": 1132847,
+          "crystal": 1132848,
+          "color": 1132849
+        },
+        {
+          "npc": 1132850,
+          "occupied": 1132851,
+          "pin": 1132852,
+          "crystal": 1132853,
+          "color": 1132854
+        },
+        {
+          "npc": 1132855,
+          "occupied": 1132856,
+          "pin": 1132857,
+          "crystal": 1132858,
+          "color": 1132859
+        }
+      ],
+      [
+        {
+          "npc": 1132860,
+          "occupied": 1132861,
+          "pin": 1132862,
+          "crystal": 1132863,
+          "color": 1132864
+        },
+        {
+          "npc": 1132865,
+          "occupied": 1132866,
+          "pin": 1132867,
+          "crystal": 1132868,
+          "color": 1132869
+        },
+        {
+          "npc": 1132870,
+          "occupied": 1132871,
+          "pin": 1132872,
+          "crystal": 1132873,
+          "color": 1132874
+        },
+        {
+          "npc": 1132875,
+          "occupied": 1132876,
+          "pin": 1132877,
+          "crystal": 1132878,
+          "color": 1132879
+        }
+      ]
+    ]
+  },
+  "tag_encoding": "0空、1辅助Cu、2P、3辅助红C；4+4*z+q引用原目标(z,q)格。原目标空格编号无效。",
+  "cell_encoding": "npc是q0无C片段，C仅用P占位；crystal/color供真实后续结晶指令，不是免费C原料。",
+  "gate_platforms": 5768,
+  "reserved_channels": [
+    1127000,
+    1143383
+  ],
+  "settling": {
+    "max_gate_depth": 35,
+    "hold_signal_ticks": 2368,
+    "hold_simulation_seconds": 197.33333333333334,
+    "conditions": "本机Hybrid或AlwaysHighUPS模式的常速连续推进，每批最多4信号tick；频道独占、接线及配置固定。调试单步、模式切换、强制低UPS和快进不适用。",
+    "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"
+  },
+  "protocol": "组合通路，无完成脉冲。原目标、20份ID、actual和enable均保持settling给出的时间再读。",
+  "scope": "供递归控制器使用的材料/标签路由及完整结果比较；不判可制作性，不制造原生候选图形。空actual不匹配。",
+  "proof": "4q5l/tagged-goal-grid.md；pin-column-circuit.md的固定标签表归纳。",
+  "verification": "逐输入端口、别名及实际建筑占地静态编译；未运行目标、测试、指令或游戏"
+}
