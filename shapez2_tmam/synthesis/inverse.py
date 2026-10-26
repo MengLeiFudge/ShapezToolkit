@@ -68,16 +68,19 @@ def pin_column(target: tuple[str, ...], keep_mask: int, crystal_mask: int) -> tu
     return result
 
 
+def _source_patterns(target: tuple[str, ...]) -> tuple[tuple[int, int], ...]:
+    """按地面新针及保留NPC数量选固定模式桶；不生成目标图形。"""
+    new_pin = target[0] == PIN
+    count = sum(cell != EMPTY and cell[0] != "c" and not (z == 0 and new_pin)
+                for z, cell in enumerate(target))
+    return SOURCE_PATTERNS[int(new_pin)][count] if count <= 4 else ()
+
+
 def pin_column_at(target: tuple[str, ...], slot: int) -> tuple[str, ...] | None:
     """二十槽直接选址，与电路共用来源模式；空余槽和不合结构的模式返回None。"""
     if len(target) != 5 or not 0 <= slot < 20:
         raise ValueError("顶针单列选址需要五格目标及0～19槽号")
-    new_pin = target[0] == PIN
-    count = sum(cell != EMPTY and cell[0] != "c" and not (z == 0 and new_pin)
-                for z, cell in enumerate(target))
-    if count > 4:
-        return None
-    patterns = SOURCE_PATTERNS[int(new_pin)][count]
+    patterns = _source_patterns(target)
     if slot >= len(patterns):
         return None
     keep, crystals = patterns[slot]
@@ -109,7 +112,7 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
     for q in range(rules.quadrants):
         # Shape省略空顶层；选址仍按五个原层位工作。
         target_column = tuple(target.layers[z][q] if z < len(target.layers) else EMPTY for z in range(5))
-        candidates = [column for slot in range(20)
+        candidates = [column for slot in range(len(_source_patterns(target_column)))
                       if (column := pin_column_at(target_column, slot)) is not None]
         if not candidates:
             return

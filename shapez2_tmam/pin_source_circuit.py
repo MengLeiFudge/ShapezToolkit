@@ -23,6 +23,8 @@ class PinSource:
     image: PinImageFlags
     # 横边冲突归入两端较快的列；该槽不变时，全部更快地址均无解。
     slot_conflicts: tuple[Ref, ...]
+    last_slots: tuple[Ref, ...]
+    has_slots: Ref
 
 
 def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
@@ -33,8 +35,9 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
             or any(len(column) != 5 for column in (*materials, *tags))):
         raise ValueError("顶针前态需要四列五格材料/标签、四个来源槽号与四个顶格")
     circuit = program.circuit
-    columns = tuple(pattern_column(program, material, tag, slot, enable, with_landings=True)
-                    for material, tag, slot in zip(materials, tags, slots))
+    patterns = tuple(pattern_column(program, material, tag, slot, enable, with_landings=True)
+                     for material, tag, slot in zip(materials, tags, slots))
+    columns = tuple(pattern.column for pattern in patterns)
     tops = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==")
                        for kind in range(4)) for value in top_values)
     top_flags = tuple(MaterialCell(program.not_(kinds[0]), kinds[2], kinds[3]) for kinds in tops)
@@ -59,7 +62,8 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
                              for column, top in zip(columns, top_values))
     source_tags = tuple(tuple(circuit.add("LogicGateIf", value, valid) for value in (*column.tags, top))
                        for column, top in zip(columns, top_values))
-    return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image, slot_conflicts)
+    return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image, slot_conflicts,
+                     tuple(pattern.last_slot for pattern in patterns), program.and_(*(pattern.has_slots for pattern in patterns)))
 
 
 def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:

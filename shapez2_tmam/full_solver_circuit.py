@@ -68,12 +68,13 @@ def _value(program: CornerProgram, bits: tuple[Ref, ...], limit: int) -> Ref:
     return branches[0]
 
 
-def _increment(program: CornerProgram, bits: tuple[Ref, ...], advance: Ref, modulus: int) -> tuple[tuple[Ref, ...], Ref]:
-    """布尔二进制加一，非二幂模数在末码归零；返回传到下一位的进位。"""
-    wrap = program.and_(advance, _equals(program, bits, modulus - 1))
+def _increment(program: CornerProgram, bits: tuple[Ref, ...], advance: Ref, modulus: int, *,
+               last: Ref | None = None) -> tuple[tuple[Ref, ...], Ref]:
+    """布尔加一；动态末槽或固定模数决定归零及传给下一位的进位。"""
+    wrap = program.and_(advance, last if last is not None else _equals(program, bits, modulus - 1))
     values = tuple(program.circuit.add("LogicGateXOr", bit, program.and_(advance, *bits[:k]))
                    for k, bit in enumerate(bits))
-    if modulus != 1 << len(bits):
+    if last is not None or modulus != 1 << len(bits):
         values = tuple(program.pick(wrap, program.zero, value) for value in values)
     return values, wrap
 
@@ -258,14 +259,14 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     bad_goal = program.and_(entry, in_scope, program.not_(valid_goal))
     leaf_found = program.and_(modes[Phase.PREFIX], program.not_(pin_search), appendable, available)
     commit_top = program.and_(leaf_found, optional_top)
-    start_source = program.and_(modes[Phase.PREFIX], pin_search, appendable, pin_allowed)
+    start_source = program.and_(modes[Phase.PREFIX], pin_search, appendable, pin_allowed, candidate.has_slots)
     leaf_active = program.and_(modes[Phase.PREFIX], program.not_(pin_search), program.not_(leaf_found))
     grow_prefix = program.and_(leaf_active, program.not_(closure.impossible), closure.changed)
     cut_finished = program.and_(leaf_active, program.or_(closure.impossible, program.not_(closure.changed)))
     next_cut = program.and_(cut_finished, program.not_(leaf_direction))
     leaf_finished = program.and_(cut_finished, leaf_direction)
     skip_prefix = program.and_(modes[Phase.PREFIX], pin_search,
-                               program.or_(program.not_(appendable), program.not_(pin_allowed)))
+                               program.or_(program.not_(appendable), program.not_(pin_allowed), program.not_(candidate.has_slots)))
     move_prefix = program.and_(modes[Phase.PREFIX_NEXT], program.not_(last_prefix))
     prefix_scan_finished = program.and_(modes[Phase.PREFIX_NEXT], last_prefix)
     begin_pin_search = program.and_(leaf_finished, tail_candidate)
@@ -323,7 +324,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     carry = program.and_(cap_advance, *cap_pass)
     next_slots = []
     for q, bits in enumerate(slots):
-        values, carry = _increment(program, bits, program.or_(carry, skip_at[q]), 20)
+        values, carry = _increment(program, bits, program.or_(carry, skip_at[q]), 20, last=candidate.last_slots[q])
         reset_lower = program.or_(*skip_at[q + 1:])
         next_slots.append(tuple(program.pick(reset_lower, program.zero, value) for value in values))
     sources_finished = carry
@@ -448,7 +449,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         **state_report, "timing": timing_contract(timing),
         "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
         "support_row_closures": 10, "pin_base_precheck": True, "crystal_conflict_slot_skip": True,
-        "top_crystal_forbidden_above_retained": True,
+        "top_crystal_forbidden_above_retained": True, "source_slots_use_bucket_lengths": True,
         "search_frames": 4, "tail_pin_limit": "max(0, 最高原目标C层号-1)，层号从0开始",
         "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,

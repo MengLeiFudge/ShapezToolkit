@@ -7,22 +7,22 @@
     "enable": 1277001
   },
   "outputs": {
-    "window": 1306923,
-    "sample": 1306924,
-    "done": 1306926,
-    "status": 1306935,
-    "result": 1306938,
+    "window": 1306993,
+    "sample": 1306994,
+    "done": 1306996,
+    "status": 1307005,
+    "result": 1307008,
     "instruction": {
-      "opcode": 1306927,
-      "a": 1306928,
-      "b": 1306929,
-      "destination": 1306930,
-      "base": 1306931,
-      "color": 1306932,
-      "request": 1306933
+      "opcode": 1306997,
+      "a": 1306998,
+      "b": 1306999,
+      "destination": 1307000,
+      "base": 1307001,
+      "color": 1307002,
+      "request": 1307003
     }
   },
-  "gate_platforms": 9922,
+  "gate_platforms": 9945,
   "reserved_channels": [
     1277000,
     1342535
@@ -50,6 +50,7 @@
   "pin_base_precheck": true,
   "crystal_conflict_slot_skip": true,
   "top_crystal_forbidden_above_retained": true,
+  "source_slots_use_bucket_lengths": true,
   "search_frames": 4,
   "tail_pin_limit": "max(0, 最高原目标C层号-1)，层号从0开始",
   "item_registers": 6,
@@ -90,7 +91,7 @@
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
   "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
-  "logical_gates": 29817,
+  "logical_gates": 29887,
   "local_constant_inputs": true,
   "layout": "未参与别名的固定常量输入就地复制；其余连接保持，复用旧平台的行内及上方空位，组件间隔一格、平台边缘两格，方阵排列。",
   "platform_grid": [
