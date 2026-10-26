@@ -1,0 +1,180 @@
+{
+  "name": "2q6l-crystal-prefix",
+  "title": "两象限的连续前缀与上方跨列支撑",
+  "mechanism": "最高晶体以下先造两根连续柱；再用双普通格跨过较短列的空隙，最后补针。最高晶体上方允许这种间隙。",
+  "quadrants": 2,
+  "height": 6,
+  "target": "P-Cu:crP-:CuCu:cr--:CuCu:--P-",
+  "register_count": 3,
+  "evidence": "按既有证明构造并由Python加工模型计算中间产物；未在游戏或Mod中验证。",
+  "milestones": [
+    {
+      "name": "最高晶体以下前缀",
+      "result": "P-Cu:crP-:CuCu:cr--"
+    },
+    {
+      "name": "跨列普通上层",
+      "result": "P-Cu:crP-:CuCu:cr--:CuCu"
+    },
+    {
+      "name": "补针后的目标",
+      "result": "P-Cu:crP-:CuCu:cr--:CuCu:--P-"
+    }
+  ],
+  "steps": [
+    {
+      "id": 0,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "P-Cu"
+    },
+    {
+      "id": 1,
+      "operation": "crystal",
+      "inputs": [
+        0
+      ],
+      "parameter": "r",
+      "result": "crCu"
+    },
+    {
+      "id": 2,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "CuCu"
+    },
+    {
+      "id": 3,
+      "operation": "stack",
+      "inputs": [
+        1,
+        2
+      ],
+      "parameter": null,
+      "result": "crCu:CuCu"
+    },
+    {
+      "id": 4,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "P-Cu"
+    },
+    {
+      "id": 5,
+      "operation": "stack",
+      "inputs": [
+        3,
+        4
+      ],
+      "parameter": null,
+      "result": "crCu:CuCu:P-Cu"
+    },
+    {
+      "id": 6,
+      "operation": "crystal",
+      "inputs": [
+        5
+      ],
+      "parameter": "r",
+      "result": "crCu:CuCu:crCu"
+    },
+    {
+      "id": 7,
+      "operation": "cut",
+      "inputs": [
+        6
+      ],
+      "parameter": 0,
+      "result": "cr--:Cu--:cr--"
+    },
+    {
+      "id": 8,
+      "operation": "pin",
+      "inputs": [
+        7
+      ],
+      "parameter": null,
+      "result": "P---:cr--:Cu--:cr--"
+    },
+    {
+      "id": 9,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "--Cu"
+    },
+    {
+      "id": 10,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "--Cu"
+    },
+    {
+      "id": 11,
+      "operation": "pin",
+      "inputs": [
+        10
+      ],
+      "parameter": null,
+      "result": "--P-:--Cu"
+    },
+    {
+      "id": 12,
+      "operation": "stack",
+      "inputs": [
+        9,
+        11
+      ],
+      "parameter": null,
+      "result": "--Cu:--P-:--Cu"
+    },
+    {
+      "id": 13,
+      "operation": "swap",
+      "inputs": [
+        8,
+        12
+      ],
+      "parameter": 0,
+      "result": "P-Cu:crP-:CuCu:cr--"
+    },
+    {
+      "id": 14,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "CuCu"
+    },
+    {
+      "id": 15,
+      "operation": "stack",
+      "inputs": [
+        13,
+        14
+      ],
+      "parameter": null,
+      "result": "P-Cu:crP-:CuCu:cr--:CuCu"
+    },
+    {
+      "id": 16,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "--P-"
+    },
+    {
+      "id": 17,
+      "operation": "stack",
+      "inputs": [
+        15,
+        16
+      ],
+      "parameter": null,
+      "result": "P-Cu:crP-:CuCu:cr--:CuCu:--P-"
+    }
+  ]
+}

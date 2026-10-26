@@ -132,6 +132,47 @@ def interleaved_stack_example() -> Example:
                    6, result, (("原下料", lower), ("补C交错上料", result.inputs[1]), ("一次堆叠成品", result)))
 
 
+def two_quadrant_example() -> Example:
+    """两象限六层：先拼连续晶体以下前缀，再让普通上层跨列支撑。"""
+    builder = Builder(Rules(2, 6))
+    prefix = builder.independent_columns(builder.rules.parse("P-Cu:crP-:CuCu:cr--"))
+    assert prefix is not None
+    bridged = builder.apply("stack", prefix, builder.base(("Cu", "Cu")))
+    result = builder.apply("stack", bridged, builder.base((EMPTY, PIN)))
+    expected = builder.rules.parse("P-Cu:crP-:CuCu:cr--:CuCu:--P-")
+    if result.result != expected:
+        raise RuntimeError("两象限连续前缀与跨列上层未产生目标；不能导出该配方")
+    return Example("2q6l-crystal-prefix", "两象限的连续前缀与上方跨列支撑",
+                   "最高晶体以下先造两根连续柱；再用双普通格跨过较短列的空隙，最后补针。最高晶体上方允许这种间隙。",
+                   2, result, (("最高晶体以下前缀", prefix), ("跨列普通上层", bridged), ("补针后的目标", result)))
+
+
+def protected_half_example() -> Example:
+    """展开八象限W_4；内块两侧列顶封住后续普通块的粘合入口。"""
+    builder = Builder(Rules(8))
+    spine = builder.dense_column(("cr", "Cu", "cr", "cr", "cr"), 0)
+    fuse = builder.dense_column(("cr",), 1)
+    support = builder.column(("Cu", PIN, "Cu", "Cu", "Cu"), 7)
+    assert support is not None
+    prepared = builder.join(builder.join(spine, fuse, 5), support, 0)
+    released = builder.window(prepared, 5)
+    scaffold = None
+    for columns in ((4,), (4,), (1, 2, 3, 4), (2,), (1, 2, 3)):
+        layer = builder.base(tuple("Cu" if q in columns else EMPTY for q in range(8)))
+        scaffold = layer if scaffold is None else builder.apply("stack", scaffold, layer)
+    assert scaffold is not None
+    merged = builder.join(released, scaffold, 5)
+    result = builder.window(merged, 0)
+    expected = builder.rules.parse(
+        "Cu--------------:----------------:crCuCuCu--------:cr--Cu----------:crCuCuCu--------")
+    if result.result != expected:
+        raise RuntimeError("八象限受保护普通块构造未产生W_4；不能导出该配方")
+    return Example("8q-protected-loop", "普通内块受列顶保护的悬空环",
+                   "外组与q2第四层普通块互相支撑；内块两侧q1、q3列顶均在第五层，后续从上方加料无法粘到内块。它不属于K，但可安全逐层追加。",
+                   8, result, (("独立柱准备形", prepared), ("切掉牺牲晶体的A", released),
+                               ("带q2内块的脚手架", scaffold), ("切掉外侧支撑前", merged), ("受保护悬空环W_4", result)))
+
+
 def general_stack_example() -> Example:
     """八象限八层的非K下料；双层普通上料必须保持同一次堆叠。"""
     builder = Builder(Rules(8, 8))
@@ -189,10 +230,11 @@ def export(example: Example, output: Path) -> tuple[str, str, int]:
 
 def main() -> int:
     """导出固定例子，供用户手工复现特殊制造机制。"""
-    parser = argparse.ArgumentParser(description="导出四/六象限五层及八象限八层代表图形的制造步骤")
+    parser = argparse.ArgumentParser(description="导出二/四/六/八象限代表图形的制造步骤")
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
     args = parser.parse_args()
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
+    examples.extend((protected_half_example(), two_quadrant_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)

@@ -14,7 +14,7 @@
 
 Mari 主控的六候选逻辑另有 [Python 模型](mari/README.md)，入口为 `python main.py tmam2 solve <图形短代码>`。模型计算虚拟重建和 51 路指令；[整层空隙反例](4q5l/mari-empty-layer.md)已证明默认配置的六候选算法不全覆盖。新合成方法另有[Python 合成入口](synthesis/README.md)及[原生电路部件](blueprints/README.md)；[完整四象限电路](4q5l/full-tail-circuit.md)已接四帧搜索及成功路径重放，尚未通过实用性能验收，六象限完整实现仍缺。具体原机结论见 [Mari 调查记录](4q5l/mari-tmam.md)。
 
-当前按“理论→Python→建筑与时序统计→走线”推进。跨参数化简包括[K下料的n²+1种基础块](general/conditional-stacking.md)、[交换的半形凭据](general/swap-witnesses.md)、[任意下料不新增针时的直接上料构造](general/ordinary-stack.md)、[新增针尾推广](general/pin-tail-stack.md)、[任意堆叠的输入摘要](general/stack-summaries.md)及[交错N/P上料](general/interleaved-stack.md)；[Python物理与局部构造](general/python-model.md)已支持偶数n≥2、H≥2，尚不构成实用完整六象限或通用求解器。[网表报告](reports/README.md)可直接统计非线缆建筑，不生成走线；[十四个特殊图形配方](examples/README.md)提供完整步骤，供手工在游戏中复现。
+当前按“理论→Python→建筑与时序统计→走线”推进。一般理论新增[两象限任意层数的直接充要构造](general/two-quadrant-synthesis.md)、[Stack/Pin主干线性界](general/stack-progress.md)及[更大的安全堆叠范围K_add](general/addition-components.md)，后者也覆盖六象限非K半形H。新结论尚未接入求解器；[Python物理与局部构造](general/python-model.md)支持偶数n≥2、H≥2，尚不构成实用完整六象限或通用求解器。[网表报告](reports/README.md)可直接统计非线缆建筑，不生成走线；[十六个特殊图形配方](examples/README.md)提供完整步骤。后续游戏电路采用时序调度，复用判定、搜索和回放模块。
 
 ## 共用的本机资料
 
