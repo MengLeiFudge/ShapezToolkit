@@ -26,6 +26,7 @@ class PinSource:
     last_slots: tuple[Ref, ...]
     has_slots: Ref
     top_pin_allowed: tuple[Ref, ...]
+    slot_addresses: tuple[tuple[Ref, ...], ...]
 
 
 def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
@@ -65,7 +66,7 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
                        for column, top in zip(columns, top_values))
     return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image, slot_conflicts,
                      tuple(pattern.last_slot for pattern in patterns), program.and_(*(pattern.has_slots for pattern in patterns)),
-                     tuple(column.flags[3].occupied for column in columns))
+                     tuple(column.flags[3].occupied for column in columns), tuple(pattern.addresses for pattern in patterns))
 
 
 def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:

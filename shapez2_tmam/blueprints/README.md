@@ -69,7 +69,7 @@ target保持，enable=0至少1636tick后启用；window上升后48tick采一次�
 
 `full-tail-4q5l.spz2bp`接收任意原目标与enable，在既定供料模型内先搜完整有界尾部，成功后才发布消费式制造流。四帧保存目标及游标，目标先过K必要筛选；零Pin闭包失败后先要求完整目标属于G，Pin轮前缀也要求G；K/G共用通路，搜索只按材料格和[精确Pin关系](../4q5l/pin-image-exact.md)取得存在性证书，不执行制造ROM；根成功后制造叶端，再逐层Pin/追加，最终原生结果等于原目标才返回1。状态2只在全部分支真正穷尽后发布，cu返回3，内部失配返回4。
 
-当前每格只查本列9项标签，使用299状态、265行ROM、六物品槽；具体规模见生产JSON。target保持，enable=0至少2056tick；每完整window上升后96tick读一次，sample为真先收包再处理done。采用[慢更新冻结协议](../4q5l/multicycle-control.md)，制造周期84模拟秒，慢状态更新后额外等待一轮。[两角共用](../4q5l/shared-angle.md)压缩制造ROM，[强制闭包](../4q5l/prefix-closure.md)把首轮改成每切向至多21次检查；[可选顶格](../4q5l/optional-top.md)让每族共用A→S检查，失败后再用[全族G筛选](../4q5l/family-grounding.md)排除没有地面可达成员的族，其余才逐成员搜Pin尾部。Pin分支仍过大，尚未通过实用性能验收。完整覆盖、帧回退、重放及互斥选择证明见[四帧控制](../4q5l/full-tail-circuit.md)。
+当前每格只查本列9项标签，使用219状态、265行ROM、六物品槽；具体规模见生产JSON。target保持，enable=0至少2056tick；每完整window上升后96tick读一次，sample为真先收包再处理done。采用[慢更新冻结协议](../4q5l/multicycle-control.md)，制造周期84模拟秒，慢状态更新后额外等待一轮。[两角共用](../4q5l/shared-angle.md)压缩制造ROM，[强制闭包](../4q5l/prefix-closure.md)把首轮改成每切向至多21次检查；[可选顶格](../4q5l/optional-top.md)让每族共用A→S检查，失败后再用[全族G筛选](../4q5l/family-grounding.md)排除没有地面可达成员的族，其余才逐成员搜Pin尾部。Pin分支仍过大，尚未通过实用性能验收。完整覆盖、帧回退、重放及互斥选择证明见[四帧控制](../4q5l/full-tail-circuit.md)。
 
 `full-tail-packed-4q5l.spz2bp`把固定常量放到输入旁，合并单消费者的内部组合门，再按真实占地装箱。平台数量和外框见旁置JSON，独占频道1277000～1342535。被合并的私有中间频道不再发射；JSON公共接口、时钟和寄存器反馈、周期及搜索界保持。逐端口核对及[装箱证明](../4q5l/packed-circuit.md)说明占地与时序边界。它同样尚未通过实用性能验收。
 

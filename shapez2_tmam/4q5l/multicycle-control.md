@@ -6,7 +6,7 @@
 
 ## 状态分类
 
-270项慢状态为四帧全部264项状态，以及depth、second_pass、second_corner、support_prefix、leaf_direction、leaf_mode。其余为快状态，包括CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计299项状态，六个物品槽、265行ROM。
+190项慢状态为四帧全部184项状态，以及depth、second_pass、second_corner、support_prefix、leaf_direction、leaf_mode。其余为快状态，包括CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计219项状态，六个物品槽、265行ROM。
 
 K/G共用通路由慢状态support_prefix选择目标或前缀，由当前帧pin_search选择种子。下降同步清新子帧pin_search及support_prefix，ENTRY读目标K；可选模式1暂不以模板整体K失败否定该族。enter_leaf设为前缀通路，实际P仍检查K；commit_top确定精确目标并清模式。begin_pin_search或模式2的enter_pin置pin_search=1并清support_prefix，PIN_PREFLIGHT读完整目标G；精确目标grounded_ready后再选前缀。可选模板的整体G仅要求固定格可达，其放宽掩码来自leaf_mode、pin_search及support_prefix，均为慢状态；模板预检一律转FAIL，保留结果供回父选择SOURCE或FAMILY_NEXT。Phase不直接驱动洪泛。
 

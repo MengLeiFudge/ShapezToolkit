@@ -15,6 +15,7 @@ class PatternColumn:
     column: PinColumn
     last_slot: Ref
     has_slots: Ref
+    addresses: tuple[Ref, ...]
 
 
 def pattern_column(program: CornerProgram, materials: tuple[Ref, ...], tags: tuple[Ref, ...],
@@ -51,4 +52,4 @@ def pattern_column(program: CornerProgram, materials: tuple[Ref, ...], tags: tup
                          *(program.or_(program.not_(forced[r]), crystal_bits[r]) for r in range(4)))
     column = column_candidate(circuit, materials, tags, (*keep_bits, *extra), valid,
                               with_landings=with_landings)
-    return PatternColumn(column, program.or_(*last), program.or_(*available))
+    return PatternColumn(column, program.or_(*last), program.or_(*available), addresses)
