@@ -7,37 +7,37 @@
     "enable": 1277001
   },
   "outputs": {
-    "window": 1311020,
-    "sample": 1311021,
-    "done": 1311023,
-    "status": 1311032,
-    "result": 1311035,
+    "window": 1308780,
+    "sample": 1308781,
+    "done": 1308783,
+    "status": 1308792,
+    "result": 1308795,
     "instruction": {
-      "opcode": 1311024,
-      "a": 1311025,
-      "b": 1311026,
-      "destination": 1311027,
-      "base": 1311028,
-      "color": 1311029,
-      "request": 1311030
+      "opcode": 1308784,
+      "a": 1308785,
+      "b": 1308786,
+      "destination": 1308787,
+      "base": 1308788,
+      "color": 1308789,
+      "request": 1308790
     }
   },
-  "gate_platforms": 11370,
+  "gate_platforms": 10623,
   "reserved_channels": [
     1277000,
     1342535
   ],
   "state_registers": 365,
   "step_max_gate_depth": 58,
-  "initial_max_gate_depth": 151,
-  "slow_max_gate_depth": 134,
+  "initial_max_gate_depth": 148,
+  "slow_max_gate_depth": 133,
   "slow_handoff_phases": 7,
   "slow_update_wait_cycles": 1,
   "slow_state_registers": 336,
   "timing": {
     "phase_signal_ticks": 252,
     "cycle_signal_ticks": 1008,
-    "reset_hold_signal_ticks": 2068,
+    "reset_hold_signal_ticks": 2032,
     "reference_edge_signal_ticks": 12,
     "conditions": "整份蓝图批量导入或完整重载后固定接线；Hybrid/AlwaysHighUPS常速连续推进，每批最多4信号tick；频道独占。调试单步、模式切换、强制低UPS及快进不适用。",
     "reset": "enable=0持续不少于reset_hold_signal_ticks，再一次改为1并保持。复位时阶段3为真；启动先出现一小段阶段3，随后依次完整循环0、1、2、3。",
@@ -46,6 +46,7 @@
   "palette_entries_per_cell": 9,
   "grounded_pin_tail_required": true,
   "shared_family_grounding_check": true,
+  "support_row_closures": 10,
   "search_frames": 5,
   "item_registers": 6,
   "program_rom_rows": 265,
@@ -83,13 +84,13 @@
   "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
   "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-  "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+  "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
-  "logical_gates": 33914,
+  "logical_gates": 31674,
   "local_constant_inputs": true,
   "layout": "未参与别名的固定常量输入就地复制；其余连接保持，复用旧平台的行内及上方空位，组件间隔一格、平台边缘两格，方阵排列。",
   "platform_grid": [
-    107,
-    107
+    104,
+    103
   ]
 }
