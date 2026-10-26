@@ -4,7 +4,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 
 from .circuit import Circuit, Gate, Literal, Ref, constant
-from .corner_program import Instruction
+from .corner_program import CornerProgram, Instruction
 from .half_circuit import _combine
 from .recipe_processor import PACKET_FIELDS, recipe_step
 from .sequential_circuit import clock, latch, select, timing_contract
@@ -13,49 +13,38 @@ from .sequential_circuit import clock, latch, select, timing_contract
 RECORD_FIELDS = PACKET_FIELDS[:-1]
 
 
-def skip_inactive_runs(program: tuple[Instruction, ...], one: Ref, *, boundaries: tuple[int, ...] = ()) -> tuple[Instruction, ...]:
-    """仅段首附加跳转；同条件空行可跳过，原行号和调用边界保持。"""
-    if any(not 0 <= index < len(program) for index in boundaries):
-        raise ValueError("制造程序的受保护控制行必须位于ROM内")
-    protected = {*boundaries, len(program) - 1}
-    result = list(program)
-    start = 0
-    while start < len(program):
-        instruction = program[start]
-        if start in protected or instruction.branch is not None or instruction.skip_to is not None or instruction.condition == one:
-            start += 1
-            continue
-        end = start + 1
-        while end < len(program) and end not in protected:
-            following = program[end]
-            if following.branch is not None or following.skip_to is not None or following.condition != instruction.condition:
-                break
-            end += 1
-        if end > start + 1:
-            result[start] = replace(instruction, skip_to=end)
-        start = end
-    return tuple(result)
+def active_rows(program: CornerProgram, boundaries: tuple[int, ...]) -> tuple[tuple[Instruction, ...], tuple[Ref | None, ...]]:
+    """把嵌套前向分支合入行条件；保留可达调用边界，供直接有效行后继使用。"""
+    instructions = tuple(program.instructions)
+    protected = {*boundaries, len(instructions) - 1}
+    if any(not 0 <= index < len(instructions) or instructions[index].branch is not None for index in protected):
+        raise ValueError("制造程序的调用边界必须指向普通指令行")
+    scopes: list[tuple[int, Ref]] = []
+    normalized = []
+    visits: list[Ref | None] = []
+    for index, instruction in enumerate(instructions):
+        while scopes and index == scopes[-1][0]:
+            scopes.pop()
+        outer = program.and_(*(guard for _, guard in scopes))
+        if instruction.branch is not None:
+            end = instruction.skip_to
+            if end is None or not index < end < len(instructions) or scopes and end > scopes[-1][0]:
+                raise ValueError("有效行后继需要正确嵌套的前向宏跳转")
+            scopes.append((end, instruction.branch))
+            normalized.append(instruction)
+            visits.append(None)
+        else:
+            if instruction.skip_to is not None:
+                raise ValueError("有效行后继应读取尚未附加普通行跳转的制造程序")
+            condition = program.and_(outer, instruction.condition)
+            normalized.append(replace(instruction, condition=condition))
+            visits.append(outer if index in protected else condition)
+    return tuple(normalized), tuple(visits)
 
 
-def _rom(circuit: Circuit, program: tuple[Instruction, ...], bits: tuple[Ref, ...],
-         one: Ref, null: Ref) -> tuple[dict[str, Ref], Ref, Ref, list[tuple[Ref, int]]]:
-    """共用分段地址译码，并把同值字段的地址合为一组。"""
-    inverted = [circuit.add("LogicGateNot", bit) for bit in bits]
-    segments: dict[tuple[int, int, int], Ref] = {}
-
-    def decode_segment(lo: int, hi: int, index: int) -> Ref:
-        if lo == hi:
-            return one
-        if hi - lo == 1:
-            return bits[lo] if index & (1 << lo) else inverted[lo]
-        key = (lo, hi, (index >> lo) & ((1 << (hi - lo)) - 1))
-        if key not in segments:
-            middle = (lo + hi) // 2
-            segments[key] = circuit.add("LogicGateAnd", decode_segment(lo, middle, index), decode_segment(middle, hi, index))
-        return segments[key]
-
-    addresses = [decode_segment(0, len(bits), index) for index in range(len(program))]
-    zero = circuit.add("ConstantSignal", config=constant(0))
+def _rom_fields(circuit: Circuit, program: tuple[Instruction, ...], addresses: list[Ref],
+                zero: Ref, null: Ref) -> tuple[dict[str, Ref], list[Ref]]:
+    """按地址共用同值字段；普通行是否执行另由condition决定。"""
     chosen = [circuit.add("LogicGateAnd", address, instruction.condition) if instruction.branch is None else zero
               for address, instruction in zip(addresses, program)]
     fields = {}
@@ -78,6 +67,60 @@ def _rom(circuit: Circuit, program: tuple[Instruction, ...], bits: tuple[Ref, ..
             fields[name] = branches[0]
         else:
             fields[name] = null
+    return fields, chosen
+
+
+def active_rom(program: CornerProgram, instructions: tuple[Instruction, ...], pc: Ref,
+               visits: tuple[Ref | None, ...]) -> tuple[dict[str, Ref], Ref, Ref, Ref]:
+    """整数PC及平衡优先树；下一地址为严格大于当前地址的首个可访问行。"""
+    if not instructions or len(visits) != len(instructions):
+        raise ValueError("有效行标志必须与非空制造ROM逐行对应")
+    circuit = program.circuit
+    addresses = [circuit.add("LogicGateCompare", pc, Literal(index), config="AQ==") for index in range(len(instructions))]
+    fields, chosen = _rom_fields(circuit, instructions, addresses, program.zero, program.const(None))
+    eligible = [(program.and_(visit, circuit.add("LogicGateCompare", pc, Literal(index), config="BA==")), Literal(index))
+                for index, visit in enumerate(visits) if visit is not None]
+
+    def first(lo: int, hi: int) -> tuple[Ref, Ref | Literal]:
+        """子树返回存在标志及最小地址；不存在时地址值不参与外部选择。"""
+        if hi - lo == 1:
+            return eligible[lo]
+        middle = (lo + hi) // 2
+        left, left_value = first(lo, middle)
+        right, right_value = first(middle, hi)
+        # 内部组合选择只要求稳定值；时钟上界覆盖正反条件不同延迟的过渡。
+        take_left = circuit.add("LogicGateIf", left_value, left)
+        take_right = circuit.add("LogicGateIf", right_value, program.not_(left))
+        circuit.aliases.append((take_left, take_right))
+        return program.or_(left, right), take_left
+
+    if not eligible:
+        raise ValueError("有效行ROM必须至少包含一个可访问的调用边界")
+    has_next, next_pc = first(0, len(eligible))
+    next_pc = program.control(has_next).select(next_pc, pc)
+    return fields, program.or_(*chosen), addresses[-1], next_pc
+
+
+def _rom(circuit: Circuit, program: tuple[Instruction, ...], bits: tuple[Ref, ...],
+         one: Ref, null: Ref) -> tuple[dict[str, Ref], Ref, Ref, list[tuple[Ref, int]]]:
+    """共用分段地址译码，并把同值字段的地址合为一组。"""
+    inverted = [circuit.add("LogicGateNot", bit) for bit in bits]
+    segments: dict[tuple[int, int, int], Ref] = {}
+
+    def decode_segment(lo: int, hi: int, index: int) -> Ref:
+        if lo == hi:
+            return one
+        if hi - lo == 1:
+            return bits[lo] if index & (1 << lo) else inverted[lo]
+        key = (lo, hi, (index >> lo) & ((1 << (hi - lo)) - 1))
+        if key not in segments:
+            middle = (lo + hi) // 2
+            segments[key] = circuit.add("LogicGateAnd", decode_segment(lo, middle, index), decode_segment(middle, hi, index))
+        return segments[key]
+
+    addresses = [decode_segment(0, len(bits), index) for index in range(len(program))]
+    zero = circuit.add("ConstantSignal", config=constant(0))
+    fields, chosen = _rom_fields(circuit, program, addresses, zero, null)
     jumps = []
     for index, (address, instruction) in enumerate(zip(addresses, program)):
         if instruction.branch is None and instruction.skip_to is None:

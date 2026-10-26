@@ -6,7 +6,7 @@
 
 ## 状态分类
 
-124项慢状态为四帧全部118项状态，以及depth、second_pass、second_corner、support_prefix、leaf_direction、leaf_mode。其余为快状态，包括CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计153项状态，六个物品槽、276行ROM。
+124项慢状态为四帧全部118项状态，以及depth、second_pass、second_corner、support_prefix、leaf_direction、leaf_mode。其余为快状态，包括CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计145项状态，六个物品槽、276行ROM。
 
 K/G共用通路由慢状态support_prefix选择目标或前缀，由当前帧pin_search选择种子。下降同步清新子帧pin_search及support_prefix，ENTRY读目标K；可选模式1暂不以模板整体K失败否定该族。enter_leaf设为前缀通路，实际P仍检查K；commit_top确定精确目标并清模式。begin_pin_search或模式2的enter_pin置pin_search=1并清support_prefix，PIN_PREFLIGHT读完整目标G；精确目标grounded_ready后再选前缀。可选模板的整体G仅要求固定格可达，其放宽掩码来自leaf_mode、pin_search及support_prefix，均为慢状态；模板预检一律转FAIL，保留结果供回父选择SOURCE或FAMILY_NEXT。Phase不直接驱动洪泛。
 
@@ -36,14 +36,14 @@ K/G共用通路由慢状态support_prefix选择目标或前缀，由当前帧pin
 
 以发生慢更新的副组写回时刻为0。下一主组关写在3P，此时正在冻结，业务next只需保留旧读值。随后冷却位在4P清0，下一次允许业务写入的主组关写在7P。故快变化必须满足 `3P > 12D_fast+36`；慢变化可以使用 `7P > 12D_slow+36`。同一个ready变化对掩码和保持路径的影响计入快路径，不能用“冻结”忽略掩码传播。
 
-闭合反馈前，对包含所有写入掩码的组合DAG分别计算快根和慢根传播深度；没有裁掉路径。未压缩版D_fast=51，D_slow=132，P=240tick：
+闭合反馈前，对包含所有写入掩码的组合DAG分别计算快根和慢根传播深度；没有裁掉路径。未压缩版D_fast=47，D_slow=132，P=240tick：
 
-- `3P=720 > 648=12×51+36`。
+- `3P=720 > 600=12×47+36`。
 - `7P=1680 > 1620=12×132+36`。
 
 初始最大路径148级，复位保持至少 `12×148+256=2032tick`。阶段240tick，周期960tick，即80模拟秒。主副锁存及外部常速模式前提沿用[等深锁存证明](clocked-control.md)。
 
-固定局部压缩版先冻结配对，内部局部边权为0，其余边权为1，得到D_fast=43、D_slow=114、D_init=128。P=204tick时，`3P=612 > 552=12×43+36`，`7P=1428 > 1404=12×114+36`；复位至少`12×128+256=1792tick`。周期816tick即68模拟秒，冻结和脉冲规则完全相同。最终配对核对失败时拒绝导出，不能退回无线布局而沿用较短周期。
+固定局部压缩版先冻结配对，内部局部边权为0，其余边权为1，得到D_fast=39、D_slow=114、D_init=128。P=204tick时，`3P=612 > 504=12×39+36`，`7P=1428 > 1404=12×114+36`；复位至少`12×128+256=1792tick`。周期816tick即68模拟秒，冻结和脉冲规则完全相同。最终配对核对失败时拒绝导出，不能退回无线布局而沿用较短周期。
 
 ## 发令不重复
 

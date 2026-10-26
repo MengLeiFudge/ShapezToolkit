@@ -2,7 +2,7 @@
 
 完整控制器可用 `python -m shapez2_tmam.full_solver_circuit --pack --output shapez2_tmam/blueprints/full-tail-packed-4q5l.spz2bp` 编译压缩布局。产物为[蓝图](../blueprints/full-tail-packed-4q5l.spz2bp)及[接口](../blueprints/full-tail-packed-4q5l.json)。默认频道1277000～1342535，与未压缩版独立。
 
-实际平台数和方阵尺寸由生产接口JSON记录。153项状态、276行ROM和六物品槽保持。两版采用[慢更新冻结协议](multicycle-control.md)，压缩版按[固定局部边的加权上界](packed-timing.md)使用816信号tick、68模拟秒的控制周期，慢更新后额外等待一轮。未压缩版仍为960tick、80模拟秒；最坏搜索复杂度仍须压缩，尚未通过游戏实用性能验收。
+现有蓝图为24d0a62快照：153项状态、276行ROM、六物品槽。当前源代码已改为145项状态及直接有效行后继，先输出[网表报告](../reports/README.md)，暂缓重新布局。两者均采用[慢更新冻结协议](multicycle-control.md)，固定局部模板版周期816信号tick、68模拟秒，未压缩版960tick、80模拟秒；慢更新后额外等待一轮。最坏搜索复杂度仍须压缩，尚未通过游戏实用性能验收。
 
 ## 组件内连接
 
@@ -32,6 +32,6 @@
 
 ## 静态证据
 
-固定局部计时涉及的三个Python文件LSP零诊断；装箱版生产编译通过逐输入接线及实际占地检查，合并5320对内部组合门。[等深控制共享](shared-controls.md)及[整数游标](pin-cursor.md)压缩后，两版均已重新编译；独立来源部件与完整控制共用顶格合法性判据。没有运行目标、求解、制造指令、反馈模拟、测试或游戏导入。
+现有24d0a62蓝图快照曾通过逐输入接线及实际占地编译，合并5320对内部组合门。当前源代码LSP零诊断，网表报告固定5491对局部门，但未重新生成几何；旧平台数不能当作当前占地。没有运行搜索、制造指令、反馈模拟、测试或游戏导入。
 
 [返回目录](README.md) · [局部门证明](local-gate-pairs.md) · [蓝图使用](../blueprints/README.md)

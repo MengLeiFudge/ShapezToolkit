@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from collections import Counter
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
@@ -15,7 +16,7 @@ from .pin_column_circuit import column_target
 from .pin_source_circuit import pin_source
 from .prefix_closure_circuit import prefix_closure
 from .prefix_search import PrefixSearch
-from .program_controller import RECORD_FIELDS, _rom, skip_inactive_runs
+from .program_controller import RECORD_FIELDS, active_rom, active_rows
 from .recipe_processor import _read, recipe_step
 from .sequential_circuit import timing_contract
 from .shared_angle import mirror_packet, shared_half_body
@@ -55,10 +56,6 @@ class Frame:
     cap_exclusions: tuple[Ref, ...]
     pin_search: Ref
     family_checked: Ref
-
-
-def _equals(program: CornerProgram, bits: tuple[Ref, ...], value: int) -> Ref:
-    return program.and_(*(bit if value & (1 << k) else program.not_(bit) for k, bit in enumerate(bits)))
 
 
 def _increment_value(program: CornerProgram, value: Ref, advance: Ref,
@@ -210,13 +207,10 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
     for exists, layer in zip(delta_present, layers):
         program.emit(exists, 14, destination=1, base=layer)
         program.emit(exists, 7, 0, 1)
-    instructions = skip_inactive_runs(tuple(program.instructions), program.one, boundaries=(corner_last, macro_last))
-    width = (len(instructions) - 1).bit_length()
-    pc = tuple(bank.add() for _ in range(width))
-    packet, selected, last, jumps = _rom(circuit, instructions, pc, program.one, program.const(None))
-    in_corner = program.or_(*(program.and_(program.not_(pc[k]), *(
-        pc[j] if mirror_limit & (1 << j) else program.not_(pc[j]) for j in range(k + 1, width)))
-        for k in range(width) if mirror_limit & (1 << k)))
+    instructions, visits = active_rows(program, (corner_last, macro_last))
+    pc = bank.add()
+    packet, selected, last, next_pc = active_rom(program, instructions, pc, visits)
+    in_corner = circuit.add("LogicGateCompare", pc, Literal(mirror_limit), config="BA==")
     mirror_packet(program, packet, program.and_(second_corner, in_corner))
     replay = program.or_(modes[Phase.REPLAY_LEAF], modes[Phase.REPLAY_PARENT])
     packet["enable"] = program.and_(enable, replay, selected)
@@ -224,22 +218,16 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
     next_items = recipe_step(circuit, items, ack, item_status, packet)
     error = program.and_(packet["enable"], circuit.add("LogicGateCompare", next_items[7], Literal(2), config="AQ=="))
     advance = program.and_(replay, program.not_(error))
-    next_pc = [circuit.add("LogicGateXOr", bit, program.and_(advance, *pc[:k])) for k, bit in enumerate(pc)]
-    if jumps:
-        jump_selected = program.or_(*(event for event, _ in jumps))
-        take_jump = program.and_(advance, jump_selected)
-        next_pc = [program.pick(take_jump, program.or_(*(event for event, destination in jumps if destination & (1 << k))), value)
-                   for k, value in enumerate(next_pc)]
-    end_macro = program.and_(advance, _equals(program, pc, macro_last))
+    end_macro = program.and_(advance, circuit.add("LogicGateCompare", pc, Literal(macro_last), config="AQ=="))
     repeat = program.and_(end_macro, program.not_(second_pass))
-    repeat_corner = program.and_(advance, _equals(program, pc, corner_last), program.not_(second_corner))
-    next_pc = [program.pick(program.or_(repeat, repeat_corner), program.zero, bit) for bit in next_pc]
+    repeat_corner = program.and_(advance, circuit.add("LogicGateCompare", pc, Literal(corner_last), config="AQ=="),
+                                 program.not_(second_corner))
     macro_done = program.and_(end_macro, second_pass)
     parent_done = program.and_(advance, last)
     for read, source in zip((*items, ack, item_status), next_items):
         bank.put(read, source)
-    for read, source in zip(pc, next_pc):
-        bank.put(read, source)
+    bank.put(pc, next_pc, advance)
+    bank.put(pc, 0, program.or_(repeat, repeat_corner))
     bank.put(second_pass, program.or_(second_pass, repeat))
     bank.put(second_corner, 1, repeat_corner)
     bank.put(second_corner, 0, repeat)
@@ -398,8 +386,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
     bank.put(item_status, 0, reset_cpu)
     bank.put(second_pass, 0, reset_cpu)
     bank.put(second_corner, 0, reset_cpu)
-    for k, read in enumerate(pc):
-        bank.put_exclusive(read, ((reset_cpu, 0), (replay_up, int(bool(parent_start & (1 << k))))))
+    bank.put_exclusive(pc, ((reset_cpu, 0), (replay_up, parent_start)))
 
     transitions = (
         (enter_leaf, Phase.PREFIX), (enter_pin, Phase.PIN_PREFLIGHT), (entry_fail, Phase.FAIL),
@@ -453,7 +440,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
         "shared_condition_controls": True, "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
         "support_row_closures": 10, "pin_base_precheck": True, "crystal_conflict_slot_skip": True,
         "top_crystal_forbidden_above_retained": True, "source_slots_use_valid_successors": True, "integer_source_cursors": True,
-        "inactive_instruction_runs": sum(instruction.branch is None and instruction.skip_to is not None for instruction in instructions),
+        "direct_active_instruction_successor": True,
         "search_frames": 4, "tail_pin_limit": "max(0, 最高原目标C层号-1)，层号从0开始",
         "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,
@@ -480,14 +467,27 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
 
 
 def main() -> int:
-    """仅编译生产蓝图及接口，不执行求解。"""
+    """编译网表统计，或生成生产蓝图及接口；不执行目标求解。"""
     parser = argparse.ArgumentParser(description="生成四帧递归及成功路径重放的完整四象限尾部电路")
     parser.add_argument("--channel-base", type=int)
     parser.add_argument("--pack", action="store_true", help="合并内部组合门并装箱；默认使用独立频道1277000")
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--report-only", action="store_true", help="仅输出JSON网表统计和理论时序，不生成布局或蓝图")
+    parser.add_argument("--output", type=Path, required=True, help="蓝图路径；使用--report-only时为JSON报告路径")
     args = parser.parse_args()
     default_base = 1_277_000 if args.pack else 1_211_000
     circuit, report = build_solver(args.channel_base if args.channel_base is not None else default_base, packed=args.pack)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    if args.report_only:
+        report.pop("gate_platforms")
+        report.update({"mode": "netlist_report", "logical_gates": len(circuit.gates),
+                       "logical_gate_counts": dict(sorted(Counter(gate.kind for gate in circuit.gates).items())),
+                       "local_gate_pairs": len(circuit.local_pairs()) if args.pack else 0,
+                       "layout_generated": False,
+                       "timing_basis": "网表DAG与固定局部模板；实际布局尚未核对。" if args.pack else "全部Ref按无线边计算的网表DAG。",
+                       "verification": "仅静态网表、频道依赖及理论时序；没有布线、装箱或占地检查，未运行目标、模拟或测试。"})
+        args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"网表统计已生成：{args.output}；{len(circuit.gates)} 个逻辑门；未生成布局。")
+        return 0
     document = circuit.document(packed=args.pack)
     if args.pack:
         platforms = document["BP"]["Entries"]
@@ -496,7 +496,6 @@ def main() -> int:
                        "layout": "固定常量就地复制；私有组合门固定两两本地连接并按实际无线级数计时，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
                        "platform_grid": [max(platform["X"] for platform in platforms) + 1,
                                          max(platform["Y"] for platform in platforms) + 1]})
-    args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(encode_document(document) + "\n", encoding="utf-8")
     args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"完整四象限尾部电路已编译：{args.output}；{report['gate_platforms']} 块平台。")
