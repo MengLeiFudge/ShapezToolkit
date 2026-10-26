@@ -219,13 +219,30 @@ class CornerProgram:
             prefix = self.and_(prefix, cell.pin)
             prefixes.append(prefix)
         higher = [self.or_(*(cell.crystal for cell in cells[z:])) for z in range(5)]
+        color_ends = []
+        next_color = self.const(None)
+        for z in range(4, -1, -1):
+            cell = cells[z]
+            if self.booleans.get(cell.crystal) == 0:
+                color_ends.append(self.zero)
+                continue
+            if next_color == self.const(None):
+                different = self.one
+            elif cell.color == next_color:
+                different = self.zero
+            else:
+                different = self.circuit.add("LogicGateCompare", cell.color, next_color, config="Bg==")
+            color_ends.append(self.and_(cell.crystal, different))
+            if z:
+                next_color = self.pick(cell.crystal, cell.color, next_color)
+        color_ends.reverse()
         for z, cell in enumerate(cells):
             active = self.and_(crystal_mode, higher[z], self.not_(prefixes[z]))
             first = self.and_(prefixes[z - 1] if z else self.one, self.not_(cell.pin))
             destination = self.pick(first, self.const(work), self.const(work + 1))
             self.emit(active, 14, destination=destination, base=self.layer((cell, copper, copper, copper)))
             self.emit(self.and_(active, self.not_(first)), 7, work, work + 1)
-            self.emit(self.and_(active, cell.crystal), 10, work, color=cell.color)
+            self.emit(self.and_(active, color_ends[z]), 10, work, color=cell.color)
         self.window(work, 3, crystal_mode)
         self.window(work, 0, crystal_mode)
         for prefix in prefixes:
