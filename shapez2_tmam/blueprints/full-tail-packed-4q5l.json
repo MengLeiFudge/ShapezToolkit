@@ -7,33 +7,33 @@
     "enable": 1277001
   },
   "outputs": {
-    "window": 1299935,
-    "sample": 1299936,
-    "done": 1299938,
-    "status": 1299947,
-    "result": 1299950,
+    "window": 1299223,
+    "sample": 1299224,
+    "done": 1299226,
+    "status": 1299235,
+    "result": 1299238,
     "instruction": {
-      "opcode": 1299939,
-      "a": 1299940,
-      "b": 1299941,
-      "destination": 1299942,
-      "base": 1299943,
-      "color": 1299944,
-      "request": 1299945
+      "opcode": 1299227,
+      "a": 1299228,
+      "b": 1299229,
+      "destination": 1299230,
+      "base": 1299231,
+      "color": 1299232,
+      "request": 1299233
     }
   },
-  "gate_platforms": 8563,
+  "gate_platforms": 8219,
   "reserved_channels": [
     1277000,
     1342535
   ],
-  "state_registers": 219,
+  "state_registers": 187,
   "step_max_gate_depth": 58,
   "initial_max_gate_depth": 150,
-  "slow_max_gate_depth": 135,
+  "slow_max_gate_depth": 133,
   "slow_handoff_phases": 7,
   "slow_update_wait_cycles": 1,
-  "slow_state_registers": 190,
+  "slow_state_registers": 158,
   "timing": {
     "phase_signal_ticks": 252,
     "cycle_signal_ticks": 1008,
@@ -88,17 +88,17 @@
   },
   "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
   "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-  "resource_bound": "每格只查本列5个原标签及4种辅助料；四帧各20目标ID、12前缀位、4整数来源槽、4整数NPC顶盖、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+  "resource_bound": "每格只查本列5个原标签及4种辅助料；四帧各20目标ID、4整数前缀高度、4整数来源槽、4整数NPC顶盖、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
   "termination": "最高原目标C层号H给出max(0,H-1)条尾部Pin边，至多三边；达到H次的历史可改写为A→S；最低C沿边仍严格下降；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
   "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
-  "logical_gates": 22829,
+  "logical_gates": 22117,
   "local_constant_inputs": true,
-  "local_gate_pairs": 4645,
+  "local_gate_pairs": 4677,
   "layout": "固定常量就地复制；单消费者私有组合门两两本地连接，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
   "platform_grid": [
-    93,
-    93
+    91,
+    91
   ]
 }

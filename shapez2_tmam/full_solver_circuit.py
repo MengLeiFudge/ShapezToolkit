@@ -87,7 +87,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                             for z in range(5)) for q in range(4))
     frames = tuple(Frame(
         tuple(tuple(bank.add(root_tags[q][z] if i == 0 else 0) for z in range(5)) for q in range(4)),
-        tuple(bank.add() for _ in range(12)),
+        tuple(bank.add() for _ in range(4)),
         tuple(bank.add() for _ in range(4)),
         tuple(bank.add() for _ in range(4)),
         tuple(bank.add() for _ in range(4)), bank.add(), bank.add()) for i in range(4))
@@ -108,7 +108,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         return _read(circuit, values, levels)
 
     tags = tuple(tuple(active(tuple(frame.goal[q][z] for frame in frames)) for z in range(5)) for q in range(4))
-    prefix = tuple(active(tuple(frame.prefix[k] for frame in frames)) for k in range(12))
+    prefix = tuple(active(tuple(frame.prefix[q] for frame in frames)) for q in range(4))
     slots = tuple(active(tuple(frame.slots[q] for frame in frames)) for q in range(4))
     top = tuple(active(tuple(frame.top[q] for frame in frames)) for q in range(4))
     crystals = tuple(active(tuple(frame.crystals[q] for frame in frames)) for q in range(4))
@@ -133,11 +133,11 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     pin_allowed = program.and_(tail_candidate, program.not_(optional_top))
 
     finder = PrefixSearch(program, original, optional_top=optional_top)
-    for read, source in zip(finder.bits, prefix):
+    for read, source in zip(finder.values, prefix):
         circuit.gates[read.node] = Gate("LogicGateIf", (source, Literal(1)))
     # 此处found/exhausted保持常0；复用finish的单步游标计算，由帧控制是否写回。
     prefix_step = finder.finish(program.zero, program.one)
-    next_prefix = tuple(state.source for state in prefix_step[:12])
+    next_prefix = tuple(state.source for state in prefix_step[:4])
     last_prefix = prefix_step[-1].source
     closure = prefix_closure(program, finder, leaf_direction)
     checking_prefix = support_prefix
@@ -339,7 +339,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
             bank.put(read, 0, reset_source)
         for k, read in enumerate(frame.prefix):
             bank.put(read, closure.initial[k], initialize)
-            bank.put(read, closure.next_bits[k], grow_s)
+            bank.put(read, closure.next_values[k], grow_s)
             bank.put(read, finder.initial[k], initialize_pin)
             bank.put(read, next_prefix[k], next_s)
         for read, value in zip((*frame.top, *frame.slots), (*next_top, *next_slots)):
@@ -459,7 +459,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-        "resource_bound": "每格只查本列5个原标签及4种辅助料；四帧各20目标ID、12前缀位、4整数来源槽、4整数NPC顶盖、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+        "resource_bound": "每格只查本列5个原标签及4种辅助料；四帧各20目标ID、4整数前缀高度、4整数来源槽、4整数NPC顶盖、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最高原目标C层号H给出max(0,H-1)条尾部Pin边，至多三边；达到H次的历史可改写为A→S；最低C沿边仍严格下降；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
         "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",

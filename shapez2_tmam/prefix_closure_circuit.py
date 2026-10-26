@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from .circuit import Ref
 from .corner_program import CornerProgram
-from .prefix_search import PrefixSearch
+from .prefix_search import PrefixSearch, height_value
 
 
 @dataclass(frozen=True)
@@ -12,7 +12,7 @@ class PrefixClosure:
     """当前切向的一轮结果；初值保留全部C，无C时保留完整地面层。"""
 
     initial: tuple[Ref, ...]
-    next_bits: tuple[Ref, ...]
+    next_values: tuple[Ref, ...]
     changed: Ref
     impossible: Ref
 
@@ -23,10 +23,8 @@ def prefix_closure(program: CornerProgram, finder: PrefixSearch, direction: Ref)
     has_crystal = program.or_(*(cell.crystal for column in target for cell in column))
     minimum = tuple(tuple(program.and_(valid[height], program.not_(program.or_(*valid[:height])))
                           for height in range(6)) for valid in finder.valid_heights)
-    initial = tuple(program.pick(has_crystal, program.or_(*(minimum[q][height] for height in range(6)
-                                                           if height & (1 << bit))),
-                                 target[q][0].occupied if bit == 0 else program.zero)
-                    for q in range(4) for bit in range(3))
+    initial = tuple(program.pick(has_crystal, height_value(program, minimum[q]), target[q][0].occupied)
+                    for q in range(4))
     forced = [[program.zero for _ in range(5)] for _ in range(4)]
     failures = []
     for first in range(4):
@@ -73,10 +71,9 @@ def prefix_closure(program: CornerProgram, finder: PrefixSearch, direction: Ref)
             forced[q][z] = program.or_(forced[q][z], bad)
     additions = tuple(tuple(program.and_(forced[q][z], finder.delta[q][z]) for z in range(5)) for q in range(4))
     changed = program.or_(*(cell for column in additions for cell in column))
-    next_bits = []
-    for q in range(4):
+    next_values = []
+    for q, old in enumerate(finder.values):
         highest = tuple(program.and_(additions[q][z], program.not_(program.or_(*additions[q][z + 1:]))) for z in range(5))
-        for bit, old in enumerate(finder.bits[q * 3:q * 3 + 3]):
-            value = program.or_(*(highest[z] for z in range(5) if (z + 1) & (1 << bit)))
-            next_bits.append(program.pick(program.or_(*additions[q]), value, old))
-    return PrefixClosure(initial, tuple(next_bits), changed, program.or_(*failures))
+        value = height_value(program, highest, first=1)
+        next_values.append(program.pick(program.or_(*additions[q]), value, old))
+    return PrefixClosure(initial, tuple(next_values), changed, program.or_(*failures))

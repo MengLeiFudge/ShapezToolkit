@@ -2,7 +2,7 @@
 
 完整控制器可用 `python -m shapez2_tmam.full_solver_circuit --pack --output shapez2_tmam/blueprints/full-tail-packed-4q5l.spz2bp` 编译压缩布局。产物为[蓝图](../blueprints/full-tail-packed-4q5l.spz2bp)及[接口](../blueprints/full-tail-packed-4q5l.json)。默认频道1277000～1342535，与未压缩版独立。
 
-实际平台数和方阵尺寸由生产接口JSON记录。逻辑门、219项状态、265行ROM和六物品槽没有因布局减少。两版采用[慢更新冻结协议](multicycle-control.md)，控制周期1008信号tick，即84模拟秒，慢更新后额外等待一轮。局部合并使用旧传播上界，不缩短周期；最坏搜索复杂度仍须压缩，尚未通过游戏实用性能验收。
+实际平台数和方阵尺寸由生产接口JSON记录。逻辑门、187项状态、265行ROM和六物品槽没有因布局减少。两版采用[慢更新冻结协议](multicycle-control.md)，控制周期1008信号tick，即84模拟秒，慢更新后额外等待一轮。局部合并使用旧传播上界，不缩短周期；最坏搜索复杂度仍须压缩，尚未通过游戏实用性能验收。
 
 ## 组件内连接
 
@@ -32,6 +32,6 @@
 
 ## 静态证据
 
-三个相关Python文件LSP零诊断；装箱版生产编译通过逐输入接线及实际占地检查，合并4645对内部组合门。[等深控制共享](shared-controls.md)及[整数游标](pin-cursor.md)压缩后，两版均已重新编译；未启用共享的独立来源部件保持原产物。没有运行目标、求解、制造指令、反馈模拟、测试或游戏导入。
+四个相关Python文件LSP零诊断；装箱版生产编译通过逐输入接线及实际占地检查，合并4677对内部组合门。[等深控制共享](shared-controls.md)及[整数游标](pin-cursor.md)压缩后，两版均已重新编译；未启用共享的独立来源部件保持原产物。没有运行目标、求解、制造指令、反馈模拟、测试或游戏导入。
 
 [返回目录](README.md) · [局部门证明](local-gate-pairs.md) · [蓝图使用](../blueprints/README.md)

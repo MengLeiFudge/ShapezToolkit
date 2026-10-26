@@ -113,7 +113,7 @@ def build_startpoint(channel_base: int = 1_061_000, *, search_prefixes: bool = F
         result_test = match_goal
     control = execute_program(circuit, target, enable, valid, solved, unsolvable, unknown,
                               instructions, one, null, second_pass, extra_state,
-                              finder.bits if finder is not None else (), result_test)
+                              finder.values if finder is not None else (), result_test)
     channels = circuit.channel_map()
     if max(channels.values()) > channel_base + reserve - 1:
         raise ValueError("双半形起点构造超出其保留频道范围")
@@ -137,9 +137,10 @@ def build_startpoint(channel_base: int = 1_061_000, *, search_prefixes: bool = F
         report.update({
             "component": "automatic_startpoint_and_s_tail",
             "s_prefix_height_choices": 6 ** 4, "s_prefix_choices_with_crystals": 1080, "search_state_bits": 14,
+            "search_state_registers": 6,
             "s_prefix_domain": "每列只保留最高C以上的不同非空格前缀，另含无C列的空前缀；跳过空层重复。",
             "input_protocol": "target全程保持；enable=0完成timing规定复位后启用。搜索命中后冻结前态，下一完整周期才发令。",
-            "resource_bound": f"一份{len(instructions)}行制造ROM、六物品槽、十二位前缀高度及found/exhausted；不存全量候选。",
+            "resource_bound": f"一份{len(instructions)}行制造ROM、六物品槽、四个整数前缀高度及found/exhausted；不存全量候选。",
             "termination": f"至多1296次前缀判据及两遍各{len(instructions)}行，加初始化共至多{1297 + 2 * len(instructions)}周期；失败不判含C目标不可制作。",
             "scope": "完整覆盖A→S，含C未命中仍需顶针尾部。无C目标在本部件有完整可制作性判据。",
             "proof": "4q5l/s-tail-circuit.md；two-half-startpoint.md；stacking-proof.md。",

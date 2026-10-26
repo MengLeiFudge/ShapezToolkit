@@ -6,6 +6,14 @@ from .program_controller import StateUpdate
 from .synthesis.physics import EMPTY
 
 
+def height_value(program: CornerProgram, choices: tuple[Ref, ...], *, first: int = 0) -> Ref:
+    """把互斥的高度选择编码为整数；全未选时为空，只可用于未采用的分支。"""
+    branches = tuple(program.circuit.add("LogicGateIf", Literal(first + index), choice)
+                     for index, choice in enumerate(choices))
+    program.circuit.aliases.append(branches)
+    return branches[0]
+
+
 class PrefixSearch:
     """四列仅遍历保留全部C的不同前缀；命中后冻结前态供制造程序使用。"""
 
@@ -22,14 +30,12 @@ class PrefixSearch:
             for height in range(6)) for column in target)
         highest = tuple(tuple(program.and_(valid[height], program.not_(program.or_(*valid[height + 1:])))
                               for height in range(6)) for valid in self.valid_heights)
-        self.initial = tuple(program.or_(*(highest[q][height] for height in range(6) if height & (1 << bit)))
-                             for q in range(4) for bit in range(3))
-        self.bits = tuple(circuit.add("LogicGateIf", value, Literal(1)) for value in self.initial)
+        self.initial = tuple(height_value(program, choices) for choices in highest)
+        self.values = tuple(circuit.add("LogicGateIf", value, Literal(1)) for value in self.initial)
         self.found = circuit.add("LogicGateIf", Literal(0), Literal(1))
         self.exhausted = circuit.add("LogicGateIf", Literal(0), Literal(1))
-        self.digits = tuple(tuple(program.and_(*(bit if height & (1 << k) else program.not_(bit)
-                                                for k, bit in enumerate(self.bits[3 * q:3 * q + 3])))
-                                  for height in range(6)) for q in range(4))
+        self.digits = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(height), config="AQ==")
+                                  for height in range(6)) for value in self.values)
         keep = tuple(tuple(program.or_(*self.digits[q][z + 1:]) for z in range(5)) for q in range(4))
         empty = program.cell(EMPTY)
         self.columns = tuple(tuple(program.choose(keep[q][z], target[q][z], empty)
@@ -75,16 +81,14 @@ class PrefixSearch:
         last = program.and_(*at_bottom)
         exhausted = program.or_(self.exhausted, program.and_(advance, last))
         carry = advance
-        next_bits = []
-        for q in range(4):
+        next_values = []
+        for q, value in enumerate(self.values):
             wrap = program.and_(carry, at_bottom[q])
-            for bit_index, bit in enumerate(self.bits[3 * q:3 * q + 3]):
-                lower_bit = program.or_(*(lower_choices[q][height] for height in range(6)
-                                         if height & (1 << bit_index)))
-                next_value = program.pick(at_bottom[q], self.initial[3 * q + bit_index], lower_bit)
-                next_bits.append(program.pick(carry, next_value, bit))
+            lower = height_value(program, lower_choices[q])
+            next_value = program.pick(at_bottom[q], self.initial[q], lower)
+            next_values.append(program.pick(carry, next_value, value))
             carry = wrap
         updates = [StateUpdate(read, source, initial)
-                   for read, source, initial in zip(self.bits, next_bits, self.initial)]
+                   for read, source, initial in zip(self.values, next_values, self.initial)]
         updates.extend((StateUpdate(self.found, found, 0), StateUpdate(self.exhausted, exhausted, 0)))
         return tuple(updates)
