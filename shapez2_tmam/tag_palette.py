@@ -25,40 +25,46 @@ class TagPalette:
         self.program = program
         self.entries = tuple(program.cell(code) for code in (EMPTY, "Cu", PIN, "cr")) + tuple(
             program.original(cell) for row in decoded.cells for cell in row)
-        self.lookups: dict[Ref, tuple[CellRef, Ref]] = {}
+        self.lookups: dict[tuple[Ref, int | None], tuple[CellRef, Ref]] = {}
 
-    def lookup(self, tag: Ref) -> tuple[CellRef, Ref]:
-        """查一格；原目标空格编号和0～23以外的信号都作为无效编号。"""
-        if tag in self.lookups:
-            return self.lookups[tag]
+    def lookup(self, tag: Ref, *, column: int | None = None) -> tuple[CellRef, Ref]:
+        """可限定原列；空目标标签、范围外编号及其他列标签均为无效。"""
+        if column is not None and column not in range(4):
+            raise ValueError("标签列必须在0～3之间")
+        key = tag, column
+        if key in self.lookups:
+            return self.lookups[key]
         program = self.program
         circuit = program.circuit
+        entries = tuple((index, cell) for index, cell in enumerate(self.entries)
+                        if column is None or index < 4 or (index - 4) % 4 == column)
         picks = []
-        for index, cell in enumerate(self.entries):
+        for index, cell in entries:
             chosen = circuit.add("LogicGateCompare", tag, Literal(index), config="AQ==")
             picks.append(chosen if index < 4 else program.and_(chosen, cell.occupied))
         valid = program.or_(*picks)
         flags = [program.or_(*(program.and_(chosen, getattr(cell, name))
-                               for chosen, cell in zip(picks, self.entries)))
+                               for chosen, (_, cell) in zip(picks, entries)))
                  for name in ("occupied", "pin", "crystal")]
         fields = []
         for name in ("npc", "color"):
             groups: dict[Ref, list[Ref]] = {}
-            for chosen, cell in zip(picks, self.entries):
+            for chosen, (_, cell) in zip(picks, entries):
                 groups.setdefault(getattr(cell, name), []).append(chosen)
             branches = [circuit.add("LogicGateIf", source, program.or_(*conditions))
                         for source, conditions in groups.items()]
             circuit.aliases.append(tuple(branches))
             fields.append(branches[0])
         result = CellRef(fields[0], flags[0], flags[1], flags[2], fields[1]), valid
-        self.lookups[tag] = result
+        self.lookups[key] = result
         return result
 
-    def grid(self, tags: tuple[tuple[Ref, ...], ...]) -> TaggedGrid:
+    def grid(self, tags: tuple[tuple[Ref, ...], ...], *, preserve_columns: bool = False) -> TaggedGrid:
         """接收按列排列的20份ID，保持原五个层位；不执行重力或图形编码。"""
         if len(tags) != 4 or any(len(column) != 5 for column in tags):
             raise ValueError("候选网格需要四列、每列五个编号")
-        lookups = tuple(tuple(self.lookup(tag) for tag in column) for column in tags)
+        lookups = tuple(tuple(self.lookup(tag, column=q if preserve_columns else None) for tag in column)
+                        for q, column in enumerate(tags))
         return TaggedGrid(tuple(tuple(cell for cell, _ in column) for column in lookups),
                           self.program.and_(*(valid for column in lookups for _, valid in column)))
 

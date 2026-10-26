@@ -113,7 +113,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     top = tuple(tuple(active(tuple(frame.top[q][k] for frame in frames)) for k in range(2)) for q in range(4))
     crystals = tuple(active(tuple(frame.crystals[q] for frame in frames)) for q in range(4))
     pin_search = active(tuple(frame.pin_search for frame in frames))
-    grid = palette.grid(tags)
+    grid = palette.grid(tags, preserve_columns=True)
     original = grid.columns
     nonempty = program.or_(*(cell.occupied for column in original for cell in column))
     geometry = tuple(tuple(MaterialCell(cell.occupied, cell.pin, cell.crystal) for cell in column) for column in original)
@@ -386,6 +386,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                     "instruction": {name: channels[value] for name, value in zip(RECORD_FIELDS, instruction_outputs)}},
         "gate_platforms": len(circuit.gates), "reserved_channels": [channel_base, channel_base + reserve - 1],
         **state_report, "timing": timing_contract(timing),
+        "palette_entries_per_cell": 9,
         "search_frames": 5, "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,
                            "requires_column_admissibility": True, "iterative_state_registers": 0,
@@ -398,7 +399,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-        "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+        "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
         "proof": "4q5l/prefix-closure.md；full-tail-circuit.md；multicycle-control.md；pin-grounded.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
