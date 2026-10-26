@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .circuit import Circuit, Literal, Ref
 from .corner_program import CornerProgram
-from .half_circuit import MaterialCell, column_admissible
+from .half_circuit import MaterialCell
 from .pin_image_circuit import PinImageFlags, image_constraints
 from .pin_pattern_circuit import pattern_column
 
@@ -27,30 +27,51 @@ class PinSource:
     has_slots: Ref
     top_pin_allowed: tuple[Ref, ...]
     top_crystal_allowed: tuple[Ref, ...]
+    top_crystals: tuple[Ref, ...]
     slot_addresses: tuple[tuple[Ref, ...], ...]
+
+
+def _crystal_cap_allowed(program: CornerProgram, lower: tuple[MaterialCell, ...]) -> Ref:
+    """前四格已满足列A时，只检查在第4层补C新增的条件。"""
+    occupied = tuple(cell.occupied for cell in lower)
+    pins = tuple(cell.pin for cell in lower)
+    crystals = tuple(cell.crystal for cell in lower)
+    ordinary = tuple(program.and_(cell.occupied, program.not_(program.or_(cell.pin, cell.crystal)))
+                     for cell in lower[:3])
+    needle = program.and_(*(program.or_(program.not_(pins[z]), program.and_(*pins[:z])) for z in range(1, 4)))
+    supported_gap = program.or_(occupied[3], *ordinary)
+    intervals = (program.or_(program.not_(crystals[0]), program.and_(occupied[1], program.or_(occupied[2], occupied[3]))),
+                 program.or_(program.not_(crystals[1]), program.and_(occupied[2], occupied[3])),
+                 program.or_(program.not_(crystals[2]), occupied[3]))
+    return program.and_(needle, supported_gap, *intervals)
 
 
 def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
                tags: tuple[tuple[Ref, ...], ...], slots: tuple[Ref, ...],
-               top_values: tuple[Ref, ...], enable: Ref) -> PinSource:
-    """四列各选0～19槽；顶格0空1Cu2P3红C；不执行目标或制造流程。"""
+               top_values: tuple[Ref, ...], enable: Ref, *, excluded_caps: tuple[Ref, ...] | None = None) -> PinSource:
+    """默认顶格0空1Cu2P3红C；内部搜索可由排除位从最大允许C掩码开始。"""
     if (len(materials) != 4 or len(tags) != 4 or len(slots) != 4 or len(top_values) != 4
             or any(len(column) != 5 for column in (*materials, *tags))):
         raise ValueError("顶针前态需要四列五格材料/标签、四个来源槽号与四个顶格")
+    if excluded_caps is not None and len(excluded_caps) != 4:
+        raise ValueError("顶晶体排除位需要四列")
     circuit = program.circuit
     patterns = tuple(pattern_column(program, material, tag, slot, enable, with_landings=True)
                      for material, tag, slot in zip(materials, tags, slots))
     columns = tuple(pattern.column for pattern in patterns)
-    tops = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==")
-                       for kind in range(4)) for value in top_values)
-    top_flags = tuple(MaterialCell(program.not_(kinds[0]), kinds[2], kinds[3]) for kinds in tops)
     top_pin_allowed = tuple(column.flags[3].occupied for column in columns)
-    cap = MaterialCell(program.one, program.zero, program.one)
-    top_crystal_allowed = tuple(column_admissible(circuit, (*column.flags, cap)) for column in columns)
+    top_crystal_allowed = tuple(_crystal_cap_allowed(program, column.flags) for column in columns)
     target = tuple(tuple(MaterialCell(
         program.not_(circuit.add("LogicGateCompare", value, Literal(0), config="AQ==")),
         circuit.add("LogicGateCompare", value, Literal(2), config="AQ=="),
         circuit.add("LogicGateCompare", value, Literal(3), config="AQ==")) for value in column) for column in materials)
+    if excluded_caps is not None:
+        top_values = tuple(program.pick(program.and_(allowed, program.not_(column[4].crystal), program.not_(excluded)),
+                                        program.const(3), value)
+                           for value, allowed, column, excluded in zip(top_values, top_crystal_allowed, target, excluded_caps))
+    tops = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==")
+                       for kind in range(4)) for value in top_values)
+    top_flags = tuple(MaterialCell(program.not_(kinds[0]), kinds[2], kinds[3]) for kinds in tops)
     conflicts: list[list[Ref]] = [[] for _ in range(4)]
     for q in range(4):
         neighbor = (q + 1) % 4
@@ -71,7 +92,8 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
                        for column, top in zip(columns, top_values))
     return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image, slot_conflicts,
                      tuple(pattern.last_slot for pattern in patterns), program.and_(*(pattern.has_slots for pattern in patterns)),
-                     top_pin_allowed, top_crystal_allowed, tuple(pattern.addresses for pattern in patterns))
+                     top_pin_allowed, top_crystal_allowed, tuple(cell.crystal for cell in top_flags),
+                     tuple(pattern.addresses for pattern in patterns))
 
 
 def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:

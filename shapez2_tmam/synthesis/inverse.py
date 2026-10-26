@@ -129,8 +129,9 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
         fixed = {(z, q): cell for z, row in enumerate(lower) for q, cell in enumerate(row) if cell != EMPTY}
         capped = [not (forced_masks[q] & 8) and CornerBuilder.admissible((*column, "cr"))
                   for q, column in enumerate(selected)]
-        for mask in range(1 << rules.quadrants):
-            if any(mask & (1 << q) and not capped[q] for q in range(rules.quadrants)):
+        allowed_mask = sum(1 << q for q, allowed in enumerate(capped) if allowed)
+        for mask in range(allowed_mask, -1, -1):
+            if mask & ~allowed_mask:
                 continue
             cells = dict(fixed)
             cells.update({(height, q): "cr" for q in range(rules.quadrants) if mask & (1 << q)})
@@ -141,6 +142,9 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
                         else pin_image_matches(rules, lower, mask, target))
             if possible:
                 yield PinFamily(lower, mask)
+            elif mask == allowed_mask:
+                # 最大允许顶盖失配时，同一前四层的所有顶盖均无精确Pin像。
+                break
 
 
 @dataclass(frozen=True)

@@ -51,7 +51,7 @@ class Frame:
     prefix: tuple[Ref, ...]
     slots: tuple[Ref, ...]
     top: tuple[Ref, ...]
-    crystals: tuple[Ref, ...]
+    cap_exclusions: tuple[Ref, ...]
     pin_search: Ref
     family_checked: Ref
 
@@ -112,7 +112,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     prefix = tuple(active(tuple(frame.prefix[q] for frame in frames)) for q in range(4))
     slots = tuple(active(tuple(frame.slots[q] for frame in frames)) for q in range(4))
     top = tuple(active(tuple(frame.top[q] for frame in frames)) for q in range(4))
-    crystals = tuple(active(tuple(frame.crystals[q] for frame in frames)) for q in range(4))
+    cap_exclusions = tuple(active(tuple(frame.cap_exclusions[q] for frame in frames)) for q in range(4))
     pin_search = active(tuple(frame.pin_search for frame in frames))
     family_checked = active(tuple(frame.family_checked for frame in frames))
     grid = palette.grid(tags, preserve_columns=True)
@@ -163,9 +163,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                             for cell in column) for column in finder.columns)
     pushed_tags = tuple(tuple(program.pick(finder.delta[q][z], program.zero, tags[q][z])
                               for z in range(5)) for q in range(4))
-    candidate = pin_source(program, materials, pushed_tags, slots,
-                           tuple(program.pick(crystal, program.const(3), value)
-                                 for crystal, value in zip(crystals, top)), program.one)
+    candidate = pin_source(program, materials, pushed_tags, slots, top, program.one, excluded_caps=cap_exclusions)
+    crystals = candidate.top_crystals
     source_ground_crystal = program.or_(*(program.or_(candidate.image.deleted[0][q],
                                                       candidate.image.live[1][q].crystal) for q in range(4)))
 
@@ -297,9 +296,10 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     skip_at = tuple(program.and_(counter_event, bad_slots[q], program.not_(program.or_(*bad_slots[q + 1:])))
                     for q in range(4))
     skip_columns = program.or_(*skip_at)
+    physical_failure = program.or_(program.not_(candidate.image.passed), program.not_(physics_matches))
     family_jump = program.and_(counter_event, program.not_(bad_slot),
-                               program.or_(modes[Phase.FAMILY_NEXT], source_ground_crystal,
-                                           program.not_(candidate.image.passed), program.not_(physics_matches)))
+                               program.or_(modes[Phase.FAMILY_NEXT], source_ground_crystal, physical_failure))
+    skip_caps = program.and_(family_jump, physical_failure, program.not_(program.or_(*cap_exclusions)))
     member_advance = program.and_(counter_event, program.not_(bad_slot), program.not_(family_jump))
     top_pass = []
     next_top = []
@@ -315,10 +315,10 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     cap_advance = program.or_(carry, family_jump)
     forbidden_caps = tuple(program.or_(column[4].crystal, program.not_(allowed))
                            for column, allowed in zip(original, candidate.top_crystal_allowed))
-    cap_pass = tuple(program.or_(bit, forbidden) for bit, forbidden in zip(crystals, forbidden_caps))
-    next_crystals = tuple(program.pick(skip_columns, program.zero, circuit.add("LogicGateXOr", bit,
-        program.and_(cap_advance, program.not_(forbidden_caps[q]), *cap_pass[:q]))) for q, bit in enumerate(crystals))
-    carry = program.and_(cap_advance, *cap_pass)
+    cap_pass = tuple(program.or_(bit, forbidden) for bit, forbidden in zip(cap_exclusions, forbidden_caps))
+    next_exclusions = tuple(program.pick(program.or_(skip_columns, skip_caps), program.zero, circuit.add("LogicGateXOr", bit,
+        program.and_(cap_advance, program.not_(forbidden_caps[q]), *cap_pass[:q]))) for q, bit in enumerate(cap_exclusions))
+    carry = program.or_(skip_caps, program.and_(cap_advance, *cap_pass))
     slot_advances = tuple(program.or_(program.and_(carry, *candidate.last_slots[:q]), *(
         program.and_(skip_at[i], *candidate.last_slots[i:q]) for i in range(min(q + 1, 4)))) for q in range(5))
     next_slots = []
@@ -342,7 +342,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
             bank.put_exclusive(frame.family_checked, (
                 (program.and_(descend, selected_frame), 1),
                 (program.or_(reset_source, program.and_(new_family, next_d)), 0)))
-            for read, value in zip((*frame.crystals, *frame.top, *frame.slots), (*next_crystals, *next_top, *next_slots)):
+            for read, value in zip((*frame.cap_exclusions, *frame.top, *frame.slots), (*next_exclusions, *next_top, *next_slots)):
                 bank.put_exclusive(read, ((next_d, value), (reset_source, 0)))
         for k, read in enumerate(frame.prefix):
             choices = ((initialize, closure.initial[k]), (grow_s, closure.next_values[k]))
@@ -419,7 +419,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                   *(cell for frame in frames[1:] for column in frame.goal for cell in column),
                   *(value for frame in frames for value in frame.prefix),
                   *(read for frame in frames[:3] for read in (
-                      *frame.slots, *frame.top, *frame.crystals, frame.pin_search, frame.family_checked)))
+                      *frame.slots, *frame.top, *frame.cap_exclusions, frame.pin_search, frame.family_checked)))
     slow_event = program.or_(enter, next_cut, grow_prefix, begin_pin_search, grounded_ready, move_prefix, start_source, counter_event,
                              descend, commit_top, search_pop, fail_pop, root_solved, replay_up, repeat, repeat_corner)
     timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,), local_pairs=True)
@@ -461,7 +461,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-        "resource_bound": "每格只查本列5个原标签及4种辅助料；根帧直接读固定目标；其余三帧各20目标ID，四帧各4整数前缀高度，仅前三帧各保存4整数来源槽、4整数NPC顶盖、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+        "resource_bound": "每格只查本列5个原标签及4种辅助料；根帧直接读固定目标；其余三帧各20目标ID，四帧各4整数前缀高度，仅前三帧各保存4整数来源槽、4整数NPC顶盖、4顶层C排除位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最高原目标C层号H给出max(0,H-1)条尾部Pin边，至多三边；达到H次的历史可改写为A→S；最低C沿边仍严格下降；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
         "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",

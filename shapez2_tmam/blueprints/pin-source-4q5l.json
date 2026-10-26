@@ -110,101 +110,101 @@
     "enable": 1194048
   },
   "outputs": {
-    "candidate_valid": 1200480,
+    "candidate_valid": 1200204,
     "source_bottom_to_top": [
       [
         {
-          "material": 1200481,
-          "tag": 1200501
+          "material": 1200205,
+          "tag": 1200225
         },
         {
-          "material": 1200486,
-          "tag": 1200506
+          "material": 1200210,
+          "tag": 1200230
         },
         {
-          "material": 1200491,
-          "tag": 1200511
+          "material": 1200215,
+          "tag": 1200235
         },
         {
-          "material": 1200496,
-          "tag": 1200516
+          "material": 1200220,
+          "tag": 1200240
         }
       ],
       [
         {
-          "material": 1200482,
-          "tag": 1200502
+          "material": 1200206,
+          "tag": 1200226
         },
         {
-          "material": 1200487,
-          "tag": 1200507
+          "material": 1200211,
+          "tag": 1200231
         },
         {
-          "material": 1200492,
-          "tag": 1200512
+          "material": 1200216,
+          "tag": 1200236
         },
         {
-          "material": 1200497,
-          "tag": 1200517
+          "material": 1200221,
+          "tag": 1200241
         }
       ],
       [
         {
-          "material": 1200483,
-          "tag": 1200503
+          "material": 1200207,
+          "tag": 1200227
         },
         {
-          "material": 1200488,
-          "tag": 1200508
+          "material": 1200212,
+          "tag": 1200232
         },
         {
-          "material": 1200493,
-          "tag": 1200513
+          "material": 1200217,
+          "tag": 1200237
         },
         {
-          "material": 1200498,
-          "tag": 1200518
+          "material": 1200222,
+          "tag": 1200242
         }
       ],
       [
         {
-          "material": 1200484,
-          "tag": 1200504
+          "material": 1200208,
+          "tag": 1200228
         },
         {
-          "material": 1200489,
-          "tag": 1200509
+          "material": 1200213,
+          "tag": 1200233
         },
         {
-          "material": 1200494,
-          "tag": 1200514
+          "material": 1200218,
+          "tag": 1200238
         },
         {
-          "material": 1200499,
-          "tag": 1200519
+          "material": 1200223,
+          "tag": 1200243
         }
       ],
       [
         {
-          "material": 1200485,
-          "tag": 1200505
+          "material": 1200209,
+          "tag": 1200229
         },
         {
-          "material": 1200490,
-          "tag": 1200510
+          "material": 1200214,
+          "tag": 1200234
         },
         {
-          "material": 1200495,
-          "tag": 1200515
+          "material": 1200219,
+          "tag": 1200239
         },
         {
-          "material": 1200500,
-          "tag": 1200520
+          "material": 1200224,
+          "tag": 1200244
         }
       ]
     ]
   },
-  "gate_platforms": 6460,
+  "gate_platforms": 6184,
   "reserved_channels": [
     1194000,
     1210383
