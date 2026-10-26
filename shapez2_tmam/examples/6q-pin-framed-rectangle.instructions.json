@@ -1,0 +1,123 @@
+{
+  "name": "6q-pin-framed-rectangle",
+  "quadrants": 6,
+  "height": 5,
+  "target": "P-P-P-P-P-P-:crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu:CuP-CuP-CuP-",
+  "source_steps": 10,
+  "register_budget": 6,
+  "register_count": 2,
+  "packet_count": 10,
+  "instructions": [
+    {
+      "id": 0,
+      "opcode": 14,
+      "destination": 0,
+      "a": 0,
+      "b": 0,
+      "base": "P-CuP-CuP-Cu",
+      "color": null,
+      "request": 1,
+      "result": "P-CuP-CuP-Cu"
+    },
+    {
+      "id": 1,
+      "opcode": 14,
+      "destination": 1,
+      "a": 0,
+      "b": 0,
+      "base": "CuP-CuP-CuP-",
+      "color": null,
+      "request": 0,
+      "result": "CuP-CuP-CuP-"
+    },
+    {
+      "id": 2,
+      "opcode": 7,
+      "destination": 0,
+      "a": 0,
+      "b": 1,
+      "base": null,
+      "color": null,
+      "request": 1,
+      "result": "P-CuP-CuP-Cu:CuP-CuP-CuP-"
+    },
+    {
+      "id": 3,
+      "opcode": 10,
+      "destination": 0,
+      "a": 0,
+      "b": 0,
+      "base": null,
+      "color": "color:r",
+      "request": 0,
+      "result": "crCucrCucrCu:CucrCucrCucr"
+    },
+    {
+      "id": 4,
+      "opcode": 14,
+      "destination": 1,
+      "a": 0,
+      "b": 0,
+      "base": "P-CuP-CuP-Cu",
+      "color": null,
+      "request": 1,
+      "result": "P-CuP-CuP-Cu"
+    },
+    {
+      "id": 5,
+      "opcode": 7,
+      "destination": 0,
+      "a": 0,
+      "b": 1,
+      "base": null,
+      "color": null,
+      "request": 0,
+      "result": "crCucrCucrCu:CucrCucrCucr:P-CuP-CuP-Cu"
+    },
+    {
+      "id": 6,
+      "opcode": 10,
+      "destination": 0,
+      "a": 0,
+      "b": 0,
+      "base": null,
+      "color": "color:b",
+      "request": 1,
+      "result": "crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu"
+    },
+    {
+      "id": 7,
+      "opcode": 6,
+      "destination": 0,
+      "a": 0,
+      "b": 0,
+      "base": null,
+      "color": null,
+      "request": 0,
+      "result": "P-P-P-P-P-P-:crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu"
+    },
+    {
+      "id": 8,
+      "opcode": 14,
+      "destination": 1,
+      "a": 0,
+      "b": 0,
+      "base": "CuP-CuP-CuP-",
+      "color": null,
+      "request": 1,
+      "result": "CuP-CuP-CuP-"
+    },
+    {
+      "id": 9,
+      "opcode": 7,
+      "destination": 0,
+      "a": 0,
+      "b": 1,
+      "base": null,
+      "color": null,
+      "request": 0,
+      "result": "P-P-P-P-P-P-:crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu:CuP-CuP-CuP-"
+    }
+  ],
+  "verification": "从已交付制造树编译消费式指令；未执行回放、反馈模拟或游戏。"
+}

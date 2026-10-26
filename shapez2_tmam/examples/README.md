@@ -67,7 +67,9 @@ V只需独立生产两份H，将第二份转三个象限，再交换拼合。V�
 ## 重新导出
 
 ```bash
-python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples
+python -m shapez2_tmam.synthesis.examples --instructions --output shapez2_tmam/examples
 ```
+
+四/六象限五层的19份代表另有同名`.instructions.json`，可逐包提交到对应[六槽回放器](../blueprints/README.md#六寄存器配方回放)。其中[六象限H](6q-H.instructions.json)为49包、3个活动槽：44个制造表项中的五处净两格旋转各拆成两包。指令id与request按包编号，不能沿用制造步骤编号提交。两象限六层及八象限代表没有此原生指令产品，仍按步骤表使用符合配置的设备。
 
 这些步骤数是当前明确配方的长度，不是最短路径证明，也不是电路元件数。一个rotate表项描述净朝向；若当前机器不能一次转到该角度，需要连续调用旋转设备，因此表项数也不等于原生设备调用次数。长配方可以由同一个旋转/切割/堆叠模块按时序循环执行。对应理论见[四象限角构造](../4q5l/corner-synthesis.md)、[六象限非K半形](../6q5l/non-k-half.md)和[一般偶数象限构造族](../general/wide-half-loops.md)。

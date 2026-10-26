@@ -300,7 +300,7 @@ def general_stack_example() -> Example:
                                ("双层普通上料", result.inputs[1]), ("一次堆叠成品", result)))
 
 
-def export(example: Example, output: Path) -> tuple[str, str, int]:
+def export(example: Example, output: Path, *, instructions: bool = False) -> tuple[str, str, int]:
     """输出消费式步骤及全部中间图形码；同一配方引用展开为独立物品。"""
     recipe = optimize_rotations(example.recipe)
     steps = list(recipe.steps())
@@ -313,6 +313,15 @@ def export(example: Example, output: Path) -> tuple[str, str, int]:
                 "steps": steps}
     stem = output / example.name
     stem.with_suffix(".json").write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if instructions and example.quadrants in (4, 6) and recipe.height == 5:
+        packets = list(recipe.instructions())
+        packet_document = {"name": example.name, "quadrants": example.quadrants, "height": recipe.height,
+                           "target": recipe.result.to_key(), "source_steps": len(steps),
+                           "register_budget": 6, "register_count": recipe.register_count,
+                           "packet_count": len(packets), "instructions": packets,
+                           "verification": "从已交付制造树编译消费式指令；未执行回放、反馈模拟或游戏。"}
+        stem.with_suffix(".instructions.json").write_text(
+            json.dumps(packet_document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     lines = [f"# {example.title}", "", example.mechanism, "", f"配置：{example.quadrants}象限、{example.recipe.height}层上限。",
              "", "目标（从底到顶，q0为每层最左格）：", "", f"`{example.recipe.result.to_key()}`", "",
              f"共{len(steps)}步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。",
@@ -337,6 +346,7 @@ def main() -> int:
     """导出固定例子，供用户手工复现特殊制造机制。"""
     parser = argparse.ArgumentParser(description="导出二/四/六/八象限代表图形的制造步骤")
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
+    parser.add_argument("--instructions", action="store_true", help="另为四/六象限五层代表生成六槽指令包；其他配置仅导出步骤")
     args = parser.parse_args()
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
@@ -344,7 +354,7 @@ def main() -> int:
                      pin_framed_rectangle_example(), grouped_columns_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
-        name, title, count = export(example, args.output)
+        name, title, count = export(example, args.output, instructions=args.instructions)
         print(f"{name}：{title}，{count}步，{example.recipe.register_count}个物品槽 → {args.output / (name + '.md')}")
     return 0
 

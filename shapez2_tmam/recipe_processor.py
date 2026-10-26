@@ -1,4 +1,4 @@
-"""六个物品寄存器顺序回放四象限制造指令，输入被消费，不复制实体。"""
+"""六个物品寄存器顺序回放四/六象限制造指令，输入被消费，不复制实体。"""
 
 import argparse
 import json
@@ -26,16 +26,16 @@ def _read(circuit: Circuit, values: tuple[Ref, ...], picks: list[Ref]) -> Ref:
     return branches[0]
 
 
-def _base_valid(circuit: Circuit, source: Ref) -> Ref:
-    """基础供料必须恰为触地非空单层，且四个象限均不含晶体。"""
+def _base_valid(circuit: Circuit, source: Ref, quadrants: int) -> Ref:
+    """基础供料必须恰为触地非空单层，且全部象限均不含晶体。"""
     split = circuit.add("VirtualUnstacker", source)
     top = Ref(split.node, 1)
     exists = circuit.add("LogicGateCompare", top, Literal(None), config="Bg==")
     single = circuit.add("LogicGateCompare", source, top, config="AQ==")
-    crystal = Rules(4).parse("cu------")
+    crystal = Rules(quadrants).parse("cu" + "--" * (quadrants - 1))
     no_crystals = []
     rotated = source
-    for q in range(4):
+    for q in range(quadrants):
         if q:
             rotated = circuit.add("VirtualRotatorCCW", rotated)
         part = circuit.add("VirtualAnalyzer", rotated)
@@ -44,14 +44,14 @@ def _base_valid(circuit: Circuit, source: Ref) -> Ref:
 
 
 def recipe_step(circuit: Circuit, values: tuple[Ref, ...], ack: Ref, status: Ref,
-          packet: dict[str, Ref]) -> tuple[Ref, ...]:
+          packet: dict[str, Ref], quadrants: int = 4) -> tuple[Ref, ...]:
     """纯组合事务：合法新请求消费源槽并写一槽，错误只更新确认与状态。"""
     first_picks = _address(circuit, packet["a"])
     second_picks = _address(circuit, packet["b"])
     destinations = _address(circuit, packet["destination"])
     first = _read(circuit, values, first_picks)
     second = _read(circuit, values, second_picks)
-    results = physical_results(circuit, first, second, packet["color"], 4)
+    results = physical_results(circuit, first, second, packet["color"], quadrants)
     modes = {code: circuit.add("LogicGateCompare", packet["opcode"], Literal(code), config="AQ==")
              for code in (*range(1, 11), 14)}
     base = modes[14]
@@ -74,7 +74,7 @@ def recipe_step(circuit: Circuit, values: tuple[Ref, ...], ack: Ref, status: Ref
     reusable_second = circuit.add("LogicGateAnd", binary, same_second)
     destination_ok = _combine(circuit, "LogicGateOr", [free_destination, reusable_first, reusable_second])
     destination_ok = circuit.add("LogicGateAnd", destination_ok, _combine(circuit, "LogicGateOr", destinations))
-    base_ok = circuit.add("LogicGateOr", circuit.add("LogicGateNot", base), _base_valid(circuit, packet["base"]))
+    base_ok = circuit.add("LogicGateOr", circuit.add("LogicGateNot", base), _base_valid(circuit, packet["base"], quadrants))
     colors = [circuit.add("LogicGateCompare", packet["color"], Literal(f"color:{color}"), config="AQ==")
               for color in "rgbcmyw"]
     color_ok = circuit.add("LogicGateOr", circuit.add("LogicGateNot", modes[10]),
@@ -106,8 +106,12 @@ def recipe_step(circuit: Circuit, values: tuple[Ref, ...], ack: Ref, status: Ref
     return (*next_values, next_ack, next_status)
 
 
-def build_processor(channel_base: int = 1_025_000) -> tuple[Circuit, dict]:
+def build_processor(channel_base: int | None = None, *, quadrants: int = 4) -> tuple[Circuit, dict]:
     """先核对无反馈步通路深度，再闭合九项主副状态和自动时钟。"""
+    if quadrants not in (4, 6):
+        raise ValueError("配方回放器需要四或六象限配置")
+    if channel_base is None:
+        channel_base = 1_025_000 if quadrants == 4 else 1_343_000
     if not 1 <= channel_base < (1 << 24) - 2048:
         raise ValueError("频道基址需要为实例保留后续2048个频道，并保持低于2^24")
     circuit = Circuit(channel_base + 32)
@@ -115,7 +119,7 @@ def build_processor(channel_base: int = 1_025_000) -> tuple[Circuit, dict]:
               for i, name in enumerate(PACKET_FIELDS)}
     initial = (None,) * 6 + (0, 0, 0)
     reads = tuple(circuit.add("LogicGateIf", Literal(value), Literal(1)) for value in initial)
-    next_state = recipe_step(circuit, reads[:6], reads[6], reads[7], packet)
+    next_state = recipe_step(circuit, reads[:6], reads[6], reads[7], packet, quadrants)
     # 此时所有状态入口仍为常量，只有组合DAG；下面仅闭合已计入的一级读入口。
     depth = circuit.settling_bound()["max_gate_depth"]
     timing = clock(circuit, packet["enable"], phase_steps=max(8, (depth + 13) // 2))
@@ -136,7 +140,7 @@ def build_processor(channel_base: int = 1_025_000) -> tuple[Circuit, dict]:
     if max(channels.values()) > channel_base + 2047:
         raise ValueError("六寄存器配方回放器超出其保留频道范围")
     return circuit, {
-        "component": "six_register_recipe_processor", "quadrants": 4, "height": 5,
+        "component": "six_register_recipe_processor", "quadrants": quadrants, "height": 5,
         "inputs": {name: channel_base + i for i, name in enumerate(PACKET_FIELDS)},
         "outputs": {"window": channels[window], "ack": channels[states[6]], "status": channels[states[7]],
                     "registers": [channels[value] for value in states[:6]]},
@@ -151,18 +155,20 @@ def build_processor(channel_base: int = 1_025_000) -> tuple[Circuit, dict]:
         "register_protocol": "地址为整数0～5；base只能写空槽。单输入和双输入操作消费源槽，可复用被消费槽或写空槽；双输入地址须不同。颜色只启用rgbcmyw。",
         "error_protocol": "操作码、地址、原料或结果无效时确认请求并置status=2，不消费也不改写物品槽。request必须是0/1；其他值不确认。",
         "scope": "流式证书的虚拟回放与消费式寄存器调度；未包含候选搜索、角宏自动发令或目标可解性判定。",
-        "proof": "4q5l/recipe-registers.md；六槽上界只用于当前四象限构造和尾部。",
+        "proof": ("4q5l/recipe-registers.md；六槽上界只用于当前四象限构造和尾部。" if quadrants == 4
+                  else "6q5l/recipe-processor.md；逐树检查六槽预算，不宣称全部六象限构造均满足。"),
         "verification": "组合步DAG深度及原生占地/端口静态编译；未执行指令、目标、反馈、测试或游戏",
     }
 
 
 def main() -> int:
     """编译纯电路回放器及频道合同，不运行任何制造指令。"""
-    parser = argparse.ArgumentParser(description="生成四象限六寄存器配方回放器")
-    parser.add_argument("--channel-base", type=int, default=1_025_000)
+    parser = argparse.ArgumentParser(description="生成四/六象限的六寄存器配方回放器")
+    parser.add_argument("--quadrants", type=int, choices=(4, 6), default=4)
+    parser.add_argument("--channel-base", type=int)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    circuit, report = build_processor(args.channel_base)
+    circuit, report = build_processor(args.channel_base, quadrants=args.quadrants)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(circuit.encode() + "\n", encoding="utf-8")
     args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

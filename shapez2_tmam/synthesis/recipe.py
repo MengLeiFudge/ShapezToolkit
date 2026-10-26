@@ -51,20 +51,28 @@ class Recipe:
             index += 1
 
     def instructions(self, registers: int = 6) -> Iterator[dict]:
-        """把四象限制造树流式编为消费输入的寄存器指令，不复制实体。"""
-        if len(self.result.layers[0]) != 4 or self.height != 5 or registers < 1:
-            raise ValueError("寄存器指令当前需要四象限五层配置和至少一个寄存器")
+        """把四/六象限制造树编为消费式指令；六象限净两格旋转复用两次。"""
+        quadrants = len(self.result.layers[0])
+        if quadrants not in (4, 6) or self.height != 5 or registers < 1:
+            raise ValueError("寄存器指令需要四或六象限五层配置和至少一个寄存器")
         if registers < self.register_count:
             raise ValueError(f"制造树至少需要{self.register_count}个同时存活的物品寄存器")
         live: dict[int, int] = {}
         occupied: set[int] = set()
+        packet_id = 0
         for step in self.steps():
+            repetitions = 1
             operation = step["operation"]
             parameter = step["parameter"]
             if operation == "base":
                 opcode = 14
-            elif operation == "rotate" and isinstance(parameter, int) and parameter % 4:
-                opcode = {1: 1, 2: 3, 3: 2}[parameter % 4]
+            elif operation == "rotate" and isinstance(parameter, int) and parameter % quadrants:
+                turns = parameter % quadrants
+                if turns in (1, quadrants // 2, quadrants - 1):
+                    opcode = {1: 1, quadrants // 2: 3, quadrants - 1: 2}[turns]
+                else:
+                    opcode = 1 if turns < quadrants // 2 else 2
+                    repetitions = 2
             elif operation in ("cut", "swap") and parameter in (0, 1):
                 opcode = (4 if operation == "cut" else 8) + parameter
             elif operation in ("pin", "stack", "crystal"):
@@ -80,11 +88,17 @@ class Recipe:
             occupied.difference_update(operands)
             occupied.add(destination)
             live[step["id"]] = destination
-            yield {"id": step["id"], "opcode": opcode, "destination": destination,
-                   "a": operands[0] if operands else 0, "b": operands[1] if len(operands) == 2 else 0,
-                   "base": step["result"] if operation == "base" else None,
-                   "color": f"color:{parameter}" if operation == "crystal" else None,
-                   "request": (step["id"] + 1) % 2, "result": step["result"]}
+            for call in range(repetitions):
+                result = step["result"]
+                if call + 1 < repetitions:
+                    rules = Rules(quadrants, self.height)
+                    result = rules.rotate(rules.parse(result), -1 if opcode == 1 else 1).to_key()
+                yield {"id": packet_id, "opcode": opcode, "destination": destination,
+                       "a": operands[0] if operands else 0, "b": operands[1] if len(operands) == 2 else 0,
+                       "base": step["result"] if operation == "base" else None,
+                       "color": f"color:{parameter}" if operation == "crystal" else None,
+                       "request": (packet_id + 1) % 2, "result": result}
+                packet_id += 1
 
 
 class Builder:

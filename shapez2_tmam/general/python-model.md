@@ -36,7 +36,7 @@ Recipe保存制造上限height，Builder创建和组合配方时传递并检查�
 python -m shapez2_tmam.synthesis 'cr--------------' --quadrants 8 --height 8
 ```
 
-默认仍为4q5l。--complete及--instructions同时要求--quadrants 4 --height 5；参数不符合时在处理目标前报错。普通结果仍为solved/unsolvable/unknown，其中含晶体局部构造失败返回unknown。
+默认仍为4q5l。--complete要求--quadrants 4 --height 5；--instructions接受--quadrants 4或6及--height 5，六象限净转两格拆成两包，继续复用同一物品槽。参数不符合时在处理目标前报错。普通结果仍为solved/unsolvable/unknown，其中含晶体局部构造失败返回unknown。
 
 Python可直接建立Builder(Rules(8, 8))并调用single_stack或HalfCatalog。所有输入图形须由同一Rules解析、所有输入Recipe须来自同一制造配置。
 

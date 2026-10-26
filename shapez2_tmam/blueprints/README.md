@@ -121,7 +121,9 @@ necessary_pass只表示必要条件通过，仍须制造前态并原生Pin完整
 
 `recipe-processor-4q5l.spz2bp`用445平台接受加工指令包，在六个物品槽中顺序回放。Python配方的`instructions()`或CLI的`--instructions`输出对应包；操作1～10沿用下表，14取无晶体单层基础料。操作消费源槽，结果写入空槽或被消费槽，拒绝覆盖其他物品；无效新请求确认后status=2且物品槽不变。
 
-复位enable=0、request=0至少848tick，再启用。每个window上升后24tick可读取ack/status并提交下一份翻转请求；整包须在该阶段3开始后96tick以前到达内部接收器输出，保持到下一窗口确认。每阶段180tick、每周期60模拟秒。六槽覆盖当前四象限构造的证明、完整协议和字段见[配方寄存器说明](../4q5l/recipe-registers.md)。它不自动搜索或生成角宏指令，不能单独判定目标可解性。
+四象限版复位enable=0、request=0至少848tick，再启用。每个window上升后24tick可读取ack/status并提交下一份翻转请求；整包须在该阶段3开始后96tick以前到达内部接收器输出，保持到下一窗口确认。每阶段180tick、每周期60模拟秒。六槽覆盖当前四象限构造的证明、完整协议和字段见[配方寄存器说明](../4q5l/recipe-registers.md)。它不自动搜索或生成角宏指令，不能单独判定目标可解性。
+
+`recipe-processor-6q5l.spz2bp`为对应的[六象限时序回放器](../6q5l/recipe-processor.md)，457平台，默认独占频道1343000～1345047；阶段192tick、周期64模拟秒、复位至少896tick。其余提交协议相同。它逐树检查六槽预算，没有全部六象限制造树的统一六槽保证；Python将净两格旋转展开为两次原位发令，仍复用同一加工通路。
 
 ## 共用虚拟加工核心
 
@@ -165,6 +167,7 @@ python -m shapez2_tmam.material_half_circuit --channel-base 1016000 --output sha
 python -m shapez2_tmam.pin_column_circuit --channel-base 1019000 --output shapez2_tmam/blueprints/pin-column-4q5l.spz2bp
 python -m shapez2_tmam.pin_column_iterator --channel-base 1022000 --output shapez2_tmam/blueprints/pin-column-iterator-4q5l.spz2bp
 python -m shapez2_tmam.recipe_processor --channel-base 1025000 --output shapez2_tmam/blueprints/recipe-processor-4q5l.spz2bp
+python -m shapez2_tmam.recipe_processor --quadrants 6 --output shapez2_tmam/blueprints/recipe-processor-6q5l.spz2bp
 python -m shapez2_tmam.half_synthesizer --channel-base 1028000 --output shapez2_tmam/blueprints/automatic-half-4q5l.spz2bp
 python -m shapez2_tmam.startpoint_circuit --channel-base 1061000 --output shapez2_tmam/blueprints/startpoint-4q5l.spz2bp
 python -m shapez2_tmam.startpoint_circuit --s-tail --channel-base 1094000 --output shapez2_tmam/blueprints/s-tail-4q5l.spz2bp
