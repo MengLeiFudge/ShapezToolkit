@@ -10,6 +10,7 @@ from .half_catalog import HalfCatalog
 from .physics import EMPTY, PIN, Rules
 from .recipe import Builder, Recipe
 from .stack_reduction import ordinary_stack, single_stack
+from .stack_plan import StackCatalog
 
 
 @dataclass(frozen=True)
@@ -79,6 +80,13 @@ def wide_half_examples() -> list[Example]:
     pin_tail = single_stack(builder, lower, builder.rules.parse("Cu----CuCu--:------Cu----:crCuCuP-----:cr--Cu------:crCuCu------"))
     if pin_tail is None:
         raise RuntimeError("六象限针尾代表未取得单次堆叠配方")
+    stack_catalog = StackCatalog(builder)
+    stack_catalog.add(half)
+    turned = builder.apply("rotate", half, parameter=3)
+    stack_catalog.add(turned)
+    compact = stack_catalog.construct(builder.rules.parse("Cu----Cu----:------------:------crCuCu:------cr--Cu:------crCuCu"))
+    if compact is None:
+        raise RuntimeError("六象限上料摘要未生成代表配方")
     milestones = (("独立柱拼成准备形S", prepared), ("切掉q1辅助晶体得到A", released),
                   ("无晶体阶梯B", scaffold), ("A与B拼接", merged), ("切出非K半形H", half))
     return [
@@ -89,6 +97,9 @@ def wide_half_examples() -> list[Example]:
                 (("加工前的V", whole), ("上料", settled.inputs[1]), ("一次堆叠后的成品", settled))),
         Example("6q-pin-tail", "非K下料追加普通格和针尾", "H旁先准备q3两层普通柱；一次堆叠同时加入q4地面普通格与q3第三层针。上料的辅助晶体在本次下落中碎裂。", 6, pin_tail,
                 (("已有非K下料", lower), ("列前缀上料", pin_tail.inputs[1]), ("一次堆叠成品", pin_tail))),
+        Example("6q-upper-summary", "复杂上料等价替换为单格基础料", "H作上料时，悬空框架永远留在高度上限外；对任意下料仅留下q0普通格。用单格基础料替代56步的H准备，本配方从114步降为59步。", 6, compact,
+                (("原本考虑的复杂上料H", half), ("已有旋转半形下料", turned), ("等价基础上料", compact.inputs[1]),
+                 ("堆叠成品", compact))),
     ]
 
 

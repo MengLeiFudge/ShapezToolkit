@@ -64,7 +64,9 @@ if result.recipe is not None:
 
 `single_stack(builder, lower, target)`把普通追加扩展到新增针：先尝试平移后的无晶体上料；失败时，对每列普通格在下、连续针尾在上的目标构造N/C列前缀及针尾。空列不填C，列顶以上不补C。依据[无环支撑森林证明](../general/pin-tail-stack.md)，实际仍执行一次Stack。普通格和针交错且直接上料失败时返回None，不能视为不可制作。
 
-用户手工复现用的[十一个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
+`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，空/单块上料摘要使用已证极小替换；`construct(target)`只搜索已登记摘要对，成功返回真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
+
+用户手工复现用的[十二个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
 
 面向游戏材料寄存器可用 `Solver4(rules, certificate_first=True)`。`pin_families(..., check_output=False)`用[`pin_image_matches`](pin_constraints.py)按最大静止集合及块支撑精确匹配物理输出，无需先编码任意原生候选；[充要证明](../4q5l/pin-image-exact.md)补齐了原必要筛选。候选仍须递归取得制造证书，实际制造的Pin结果也须与目标相同；物理匹配不代替可制作性。两列判据使用[按层扫描](../4q5l/half-row-stability.md)。CLI保留默认正向Pin检查模式，两种物理检查接受同一规范化逆像族；均没有实用搜索复杂度承诺。
 

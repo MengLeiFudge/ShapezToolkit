@@ -12,6 +12,7 @@ Rules现在接受偶数象限n≥2、制造层数上限H≥2。采用单象限�
 | stack_successors | K下料的n²+1种结构基础块；非K分支仍保留真实上料 |
 | ordinary_stack / single_stack | 给定真实下料的普通追加及针尾构造；不额外结算下料 |
 | HalfCatalog | 保存各切后半形的原输入凭据，按目标投影查询n/2条直径 |
+| StackPlan / StackCatalog | 任意堆叠的精确摘要求值，合并等价输入凭据；摘要缺失不是不可制作证明 |
 | Recipe.steps | 任意本模型配置的消费式加工步骤与完整中间产物 |
 
 物理核心没有改写算法。groups的邻接取模n；collapse的静止组剥离、移动N/P块的层序落点不依赖四象限或五层；cut用n/2；stack与pin使用实例H；rotate按整数列置换。新接触不在本次加工中合组，交换后不追加重力。证明来源见[六象限局部计算](../6q5l/synthesis.md#2-不依赖-k-的精确操作计算)、[一般参数模型](general-model.md)和[通用堆叠证明](pin-tail-stack.md)。
