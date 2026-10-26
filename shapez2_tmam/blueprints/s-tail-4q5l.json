@@ -7,19 +7,19 @@
     "enable": 1094001
   },
   "outputs": {
-    "window": 1105099,
-    "sample": 1105109,
-    "done": 1105108,
-    "status": 1105120,
-    "result": 1105134,
+    "window": 1104693,
+    "sample": 1104703,
+    "done": 1104702,
+    "status": 1104714,
+    "result": 1104728,
     "instruction": {
-      "opcode": 1105110,
-      "a": 1105111,
-      "b": 1105112,
-      "destination": 1105113,
-      "base": 1105114,
-      "color": 1105115,
-      "request": 1105116
+      "opcode": 1104704,
+      "a": 1104705,
+      "b": 1104706,
+      "destination": 1104707,
+      "base": 1104708,
+      "color": 1104709,
+      "request": 1104710
     }
   },
   "program_rom_rows": 475,
@@ -39,7 +39,7 @@
   "search_max_gate_depth": 37,
   "precompute_max_gate_depth": 87,
   "precompute_handoff_phases": 7,
-  "gate_platforms": 11057,
+  "gate_platforms": 10651,
   "program_passes": 2,
   "reserved_channels": [
     1094000,

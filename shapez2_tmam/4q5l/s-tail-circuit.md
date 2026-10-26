@@ -2,7 +2,7 @@
 
 [`s-tail-4q5l.spz2bp`](../blueprints/s-tail-4q5l.spz2bp)输入四象限五层原生目标，完整查找`A→S`，命中后自动输出全部消费式制造指令，并回放比较完整目标。A是[双半形起点](two-half-startpoint.md)，S是逐层无晶体追加；本部件尚不包含顶针逆推。含C未命中返回3，不能判不可制作。
 
-当前11057平台，一份475行ROM共用两遍、六个物品槽、四个整数前缀高度和found/exhausted两位。没有保存半形目录、制造树或全量候选。target全程保持；enable=0至少1612信号tick，再改为1。window上升后48tick在本窗口内读一次；sample为真先接收instruction，再处理同窗done/status。
+当前10651平台，一份475行ROM共用两遍、六个物品槽、四个整数前缀高度和found/exhausted两位。没有保存半形目录、制造树或全量候选。target全程保持；enable=0至少1612信号tick，再改为1。window上升后48tick在本窗口内读一次；sample为真先接收instruction，再处理同窗done/status。
 
 | 状态 | 含义 |
 |---|---|

@@ -33,7 +33,9 @@ def mirror_packet(program: CornerProgram, packet: dict[str, Ref], enabled: Ref) 
     rotated = packet["base"]
     cells = []
     for q in range(4):
-        if q:
+        if q == 3:
+            rotated = circuit.add("VirtualRotator", packet["base"])
+        elif q:
             rotated = circuit.add("VirtualRotatorCCW", rotated)
         analyzed = circuit.add("VirtualAnalyzer", rotated)
         cells.append(program.original(DecodedCell(

@@ -39,19 +39,19 @@
     ]
   },
   "outputs": {
-    "window": 1177510,
-    "sample": 1177519,
-    "done": 1177518,
-    "status": 1177530,
-    "result": 1177544,
+    "window": 1177104,
+    "sample": 1177113,
+    "done": 1177112,
+    "status": 1177124,
+    "result": 1177138,
     "instruction": {
-      "opcode": 1177520,
-      "a": 1177521,
-      "b": 1177522,
-      "destination": 1177523,
-      "base": 1177524,
-      "color": 1177525,
-      "request": 1177526
+      "opcode": 1177114,
+      "a": 1177115,
+      "b": 1177116,
+      "destination": 1177117,
+      "base": 1177118,
+      "color": 1177119,
+      "request": 1177120
     }
   },
   "program_rom_rows": 475,
@@ -72,7 +72,7 @@
   "precompute_max_gate_depth": 87,
   "precompute_handoff_phases": 7,
   "verification_wait_cycles": 1,
-  "gate_platforms": 16427,
+  "gate_platforms": 16021,
   "program_passes": 2,
   "reserved_channels": [
     1161000,

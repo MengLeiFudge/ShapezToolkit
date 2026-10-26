@@ -7,19 +7,19 @@
     "enable": 1061001
   },
   "outputs": {
-    "window": 1070084,
-    "sample": 1070094,
-    "done": 1070093,
-    "status": 1070105,
-    "result": 1070119,
+    "window": 1069686,
+    "sample": 1069696,
+    "done": 1069695,
+    "status": 1069707,
+    "result": 1069721,
     "instruction": {
-      "opcode": 1070095,
-      "a": 1070096,
-      "b": 1070097,
-      "destination": 1070098,
-      "base": 1070099,
-      "color": 1070100,
-      "request": 1070101
+      "opcode": 1069697,
+      "a": 1069698,
+      "b": 1069699,
+      "destination": 1069700,
+      "base": 1069701,
+      "color": 1069702,
+      "request": 1069703
     }
   },
   "program_rom_rows": 465,
@@ -36,7 +36,7 @@
     "reset": "enable=0持续不少于reset_hold_signal_ticks，再一次改为1并保持。复位时阶段3为真；启动先出现一小段阶段3，随后依次完整循环0、1、2、3。",
     "proof": "4q5l/clocked-control.md；精确延迟与锁存器证明不依赖组合DAG保持期。"
   },
-  "gate_platforms": 9042,
+  "gate_platforms": 8644,
   "program_passes": 2,
   "reserved_channels": [
     1061000,

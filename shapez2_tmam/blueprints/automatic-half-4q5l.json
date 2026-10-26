@@ -7,19 +7,19 @@
     "enable": 1028001
   },
   "outputs": {
-    "window": 1035544,
-    "sample": 1035554,
-    "done": 1035553,
-    "status": 1035565,
-    "result": 1035579,
+    "window": 1035150,
+    "sample": 1035160,
+    "done": 1035159,
+    "status": 1035171,
+    "result": 1035185,
     "instruction": {
-      "opcode": 1035555,
-      "a": 1035556,
-      "b": 1035557,
-      "destination": 1035558,
-      "base": 1035559,
-      "color": 1035560,
-      "request": 1035561
+      "opcode": 1035161,
+      "a": 1035162,
+      "b": 1035163,
+      "destination": 1035164,
+      "base": 1035165,
+      "color": 1035166,
+      "request": 1035167
     }
   },
   "statuses": {
@@ -30,20 +30,20 @@
     "4": "内部程序或回放失配，不构成不可制作结论",
     "null": "无效输入、停机或窗口之外"
   },
-  "gate_platforms": 7502,
+  "gate_platforms": 7108,
   "program_rom_rows": 459,
   "program_counter_bits": 9,
   "item_registers": 6,
-  "step_max_gate_depth": 49,
+  "step_max_gate_depth": 44,
   "initial_max_gate_depth": 61,
   "reserved_channels": [
     1028000,
     1060767
   ],
   "timing": {
-    "phase_signal_ticks": 216,
-    "cycle_signal_ticks": 864,
-    "reset_hold_signal_ticks": 992,
+    "phase_signal_ticks": 204,
+    "cycle_signal_ticks": 816,
+    "reset_hold_signal_ticks": 988,
     "reference_edge_signal_ticks": 12,
     "conditions": "整份蓝图批量导入或完整重载后固定接线；Hybrid/AlwaysHighUPS常速连续推进，每批最多4信号tick；频道独占。调试单步、模式切换、强制低UPS及快进不适用。",
     "reset": "enable=0持续不少于reset_hold_signal_ticks，再一次改为1并保持。复位时阶段3为真；启动先出现一小段阶段3，随后依次完整循环0、1、2、3。",

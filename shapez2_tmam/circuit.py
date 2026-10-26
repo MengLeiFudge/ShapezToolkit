@@ -219,8 +219,8 @@ class Circuit:
         return channels
 
     def _max_depth(self, changing: tuple[Ref, ...] | None = None,
-                   outputs: tuple[Ref, ...] | None = None) -> int:
-        """频道DAG最长路径；指定源时，未被变化源触及的路径深度为零。"""
+                   outputs: tuple[Ref, ...] | None = None, *, trace: list[Ref] | None = None) -> int:
+        """频道DAG最长路径；trace记录各频道中承接最长依赖的门输出，不执行信号。"""
         channels = self.channel_map()
         if changing is not None and any(source not in channels for source in changing):
             raise ValueError("变化源引用了不存在的输出")
@@ -228,6 +228,7 @@ class Circuit:
             raise ValueError("传播终点引用了不存在的输出")
         origins = set(channels.values()) if changing is None else {channels[source] for source in changing}
         dependencies: dict[int, set[int]] = {channel: set() for channel in channels.values()}
+        writers: dict[tuple[int, int], Ref] = {}
         for index, gate in enumerate(self.gates):
             incoming = {channels[source] for source in gate.inputs if isinstance(source, Ref)}
             if gate.kind == "ControlledSignalReceiver":
@@ -237,7 +238,11 @@ class Circuit:
                 if control.value in dependencies:
                     incoming.add(control.value)
             for port in range(len(PORTS[gate.kind][0])):
-                dependencies[channels[Ref(index, port)]].update(incoming)
+                output = Ref(index, port)
+                dependencies[channels[output]].update(incoming)
+                if trace is not None:
+                    for source in incoming:
+                        writers.setdefault((channels[output], source), output)
         remaining = {channel: len(sources) for channel, sources in dependencies.items()}
         consumers: dict[int, list[int]] = {channel: [] for channel in dependencies}
         for channel, sources in dependencies.items():
@@ -245,22 +250,39 @@ class Circuit:
                 consumers[source].append(channel)
         queue = deque(channel for channel, count in remaining.items() if count == 0)
         depths = {channel: int(channel in origins) for channel in queue}
+        previous: dict[int, int] = {}
         while queue:
             source = queue.popleft()
             for channel in consumers[source]:
                 candidate = depths[source] + 1 if depths[source] else 0
-                depths[channel] = max(depths.get(channel, int(channel in origins)), candidate)
+                current = depths.get(channel, int(channel in origins))
+                if candidate > current:
+                    previous[channel] = source
+                depths[channel] = max(current, candidate)
                 remaining[channel] -= 1
                 if remaining[channel] == 0:
                     queue.append(channel)
         if len(depths) != len(dependencies) or any(remaining.values()):
             raise ValueError("反馈电路没有本组合传播上界")
-        selected = depths.values() if outputs is None else (depths[channels[output]] for output in outputs)
-        return max(selected, default=0)
+        selected = depths if outputs is None else {channels[output]: depths[channels[output]] for output in outputs}
+        end = max(selected, key=lambda channel: (depths[channel], -channel), default=None)
+        if trace is not None:
+            trace.clear()
+            representatives = {channel: output for output, channel in channels.items()}
+            if changing is not None:
+                representatives.update((channels[source], source) for source in changing)
+            channel = end
+            while channel is not None and depths[channel]:
+                source = previous.get(channel)
+                trace.append(writers[channel, source] if source is not None else representatives[channel])
+                channel = source
+            trace.reverse()
+        return depths[end] if end is not None else 0
 
-    def changing_depth(self, changing: tuple[Ref, ...], outputs: tuple[Ref, ...] | None = None) -> int:
+    def changing_depth(self, changing: tuple[Ref, ...], outputs: tuple[Ref, ...] | None = None,
+                       *, trace: list[Ref] | None = None) -> int:
         """变化源计一级，可限制终点；其他输入须稳定，反馈和动态选频仍拒绝。"""
-        return self._max_depth(changing, outputs)
+        return self._max_depth(changing, outputs, trace=trace)
 
     def settling_bound(self) -> dict:
         """按全部频道依赖计算保守保持期，不忽略任何输入的变化。"""

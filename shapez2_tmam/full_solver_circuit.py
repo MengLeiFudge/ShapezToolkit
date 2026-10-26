@@ -300,14 +300,17 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     family_jump = program.and_(counter_event, program.not_(bad_slot),
                                program.or_(modes[Phase.FAMILY_NEXT], source_ground_crystal,
                                            program.not_(candidate.image.passed), program.not_(physics_matches)))
-    carry = program.and_(counter_event, program.not_(bad_slot), program.not_(family_jump))
+    member_advance = program.and_(counter_event, program.not_(bad_slot), program.not_(family_jump))
+    top_pass = []
     next_top = []
     for value, crystal, allow_pin in zip(top, crystals, candidate.top_pin_allowed):
         addresses = tuple(circuit.add("LogicGateCompare", value, Literal(index), config="AQ==") for index in range(3))
         last = program.or_(addresses[2], program.and_(program.not_(allow_pin), addresses[1]))
-        advanced, overflow = _increment_value(program, value, carry, addresses, last)
+        member_carry = program.and_(member_advance, *top_pass)
+        advanced, _ = _increment_value(program, value, member_carry, addresses, last)
         next_top.append(program.pick(program.or_(crystal, family_jump, skip_columns), program.zero, advanced))
-        carry = program.pick(crystal, carry, overflow)
+        top_pass.append(program.or_(crystal, last))
+    carry = program.and_(member_advance, *top_pass)
     new_family = program.or_(carry, family_jump, skip_columns)
     cap_advance = program.or_(carry, family_jump)
     forbidden_caps = tuple(column[4].crystal for column in original)
@@ -315,13 +318,15 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     next_crystals = tuple(program.pick(skip_columns, program.zero, circuit.add("LogicGateXOr", bit,
         program.and_(cap_advance, program.not_(forbidden_caps[q]), *cap_pass[:q]))) for q, bit in enumerate(crystals))
     carry = program.and_(cap_advance, *cap_pass)
+    slot_advances = tuple(program.or_(program.and_(carry, *candidate.last_slots[:q]), *(
+        program.and_(skip_at[i], *candidate.last_slots[i:q]) for i in range(min(q + 1, 4)))) for q in range(5))
     next_slots = []
     for q, value in enumerate(slots):
-        advanced, carry = _increment_value(program, value, program.or_(carry, skip_at[q]),
-                                           candidate.slot_addresses[q], candidate.last_slots[q])
+        advanced, _ = _increment_value(program, value, slot_advances[q],
+                                       candidate.slot_addresses[q], candidate.last_slots[q])
         reset_lower = program.or_(*skip_at[q + 1:])
         next_slots.append(program.pick(reset_lower, program.zero, advanced))
-    sources_finished = carry
+    sources_finished = slot_advances[4]
     depth_choices: list[tuple[Ref, Ref | int | None]] = []
     for i, frame in enumerate(frames):
         selected_frame = levels[i]

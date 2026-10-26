@@ -70,8 +70,14 @@ class ClockedState:
         full_depth = circuit.settling_bound()["max_gate_depth"]
         all_reads = tuple(self.initial)
         fast_reads = tuple(read for read in all_reads if read not in slow_reads)
-        depth = circuit.changing_depth(fast_reads)
-        slow_depth = circuit.changing_depth(slow_reads) if slow_reads else 0
+        fast_path: list[Ref] = []
+        depth = circuit.changing_depth(fast_reads, trace=fast_path)
+        path_nodes = [{"node": reference.node, "port": reference.port, "kind": circuit.gates[reference.node].kind}
+                      for reference in fast_path]
+        slow_path: list[Ref] = []
+        slow_depth = circuit.changing_depth(slow_reads, trace=slow_path) if slow_reads else 0
+        slow_nodes = [{"node": reference.node, "port": reference.port, "kind": circuit.gates[reference.node].kind}
+                      for reference in slow_path]
         phase_steps = max(8, (depth + 7) // 3, (slow_depth + 10) // 7)
         timing = clock(circuit, enable, phase_steps=phase_steps)
         timing = replace(timing, reset_ticks=max(timing.reset_ticks, 12 * full_depth + 256))
@@ -86,8 +92,10 @@ class ClockedState:
             circuit.gates[read.node] = Gate("LogicGateIf", (slave, Literal(1)))
         self.closed = True
         report = {"state_registers": len(self.initial), "step_max_gate_depth": depth,
-                  "initial_max_gate_depth": full_depth}
+                  "initial_max_gate_depth": full_depth,
+                  "step_critical_path": path_nodes}
         if slow_reads:
             report.update({"slow_max_gate_depth": slow_depth, "slow_handoff_phases": 7,
-                           "slow_update_wait_cycles": 1, "slow_state_registers": len(slow_reads)})
+                           "slow_update_wait_cycles": 1, "slow_state_registers": len(slow_reads),
+                           "slow_critical_path": slow_nodes})
         return timing, report

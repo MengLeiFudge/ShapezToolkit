@@ -15,20 +15,22 @@ RECORD_FIELDS = PACKET_FIELDS[:-1]
 
 def _rom(circuit: Circuit, program: tuple[Instruction, ...], bits: tuple[Ref, ...],
          one: Ref, null: Ref) -> tuple[dict[str, Ref], Ref, Ref, list[tuple[Ref, int]]]:
-    """共用地址前缀，并把同值字段的地址合为一组，压缩指令选择门。"""
+    """共用分段地址译码，并把同值字段的地址合为一组。"""
     inverted = [circuit.add("LogicGateNot", bit) for bit in bits]
-    prefixes: dict[tuple[int, ...], Ref] = {(): one}
-    addresses = []
-    for index in range(len(program)):
-        prefix: tuple[int, ...] = ()
-        for bit_index in reversed(range(len(bits))):
-            digit = (index >> bit_index) & 1
-            previous = prefix
-            prefix += (digit,)
-            if prefix not in prefixes:
-                source = bits[bit_index] if digit else inverted[bit_index]
-                prefixes[prefix] = circuit.add("LogicGateAnd", prefixes[previous], source)
-        addresses.append(prefixes[prefix])
+    segments: dict[tuple[int, int, int], Ref] = {}
+
+    def decode_segment(lo: int, hi: int, index: int) -> Ref:
+        if lo == hi:
+            return one
+        if hi - lo == 1:
+            return bits[lo] if index & (1 << lo) else inverted[lo]
+        key = (lo, hi, (index >> lo) & ((1 << (hi - lo)) - 1))
+        if key not in segments:
+            middle = (lo + hi) // 2
+            segments[key] = circuit.add("LogicGateAnd", decode_segment(lo, middle, index), decode_segment(middle, hi, index))
+        return segments[key]
+
+    addresses = [decode_segment(0, len(bits), index) for index in range(len(program))]
     zero = circuit.add("ConstantSignal", config=constant(0))
     chosen = [circuit.add("LogicGateAnd", address, instruction.condition) if instruction.branch is None else zero
               for address, instruction in zip(addresses, program)]

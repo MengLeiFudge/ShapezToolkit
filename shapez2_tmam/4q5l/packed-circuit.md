@@ -2,7 +2,7 @@
 
 完整控制器可用 `python -m shapez2_tmam.full_solver_circuit --pack --output shapez2_tmam/blueprints/full-tail-packed-4q5l.spz2bp` 编译压缩布局。产物为[蓝图](../blueprints/full-tail-packed-4q5l.spz2bp)及[接口](../blueprints/full-tail-packed-4q5l.json)。默认频道1277000～1342535，与未压缩版独立。
 
-实际平台数和方阵尺寸由生产接口JSON记录。逻辑门、153项状态、265行ROM和六物品槽没有因布局减少。两版采用[慢更新冻结协议](multicycle-control.md)，控制周期1008信号tick，即84模拟秒，慢更新后额外等待一轮。局部合并使用旧传播上界，不缩短周期；最坏搜索复杂度仍须压缩，尚未通过游戏实用性能验收。
+实际平台数和方阵尺寸由生产接口JSON记录。逻辑门、153项状态、265行ROM和六物品槽没有因布局减少。两版采用[慢更新冻结协议](multicycle-control.md)，控制周期912信号tick，即76模拟秒，慢更新后额外等待一轮。局部合并使用旧传播上界，不缩短周期；最坏搜索复杂度仍须压缩，尚未通过游戏实用性能验收。
 
 ## 组件内连接
 
@@ -28,10 +28,10 @@
 
 生产编译用`Wiring`检查最终几何：每个非导线输入必须恰好连到指定提供者，拒绝断线或额外驱动。新常量、局部门内部边及原无线接收器都采用同一标准。
 
-固定常量就地复制只缩短启动传播；局部门合并把选定的内部组合边从12tick缩为0。其余动态无线边仍为12tick，时钟和锁存器逐tick递推保持。批量导入或完整重载的本地拓扑前提、正常信号模式和独占频道要求沿用[时序证明](clocked-control.md)。组合路径使用旧的保守界；target保持、enable关闭至少2044tick，每个完整window上升后96tick采一次，先收sample对应指令，再处理done/status。
+固定常量就地复制只缩短启动传播；局部门合并把选定的内部组合边从12tick缩为0。其余动态无线边仍为12tick，时钟和锁存器逐tick递推保持。批量导入或完整重载的本地拓扑前提、正常信号模式和独占频道要求沿用[时序证明](clocked-control.md)。组合路径使用旧的保守界；target保持、enable关闭至少1936tick，每个完整window上升后96tick采一次，先收sample对应指令，再处理done/status。
 
 ## 静态证据
 
-四个相关Python文件LSP零诊断；装箱版生产编译通过逐输入接线及实际占地检查，合并4658对内部组合门。[等深控制共享](shared-controls.md)及[整数游标](pin-cursor.md)压缩后，两版均已重新编译；未启用共享的独立来源部件保持原产物。没有运行目标、求解、制造指令、反馈模拟、测试或游戏导入。
+四个相关Python文件LSP零诊断；装箱版生产编译通过逐输入接线及实际占地检查，合并4679对内部组合门。[等深控制共享](shared-controls.md)及[整数游标](pin-cursor.md)压缩后，两版均已重新编译；未启用共享的独立来源部件保持原产物。没有运行目标、求解、制造指令、反馈模拟、测试或游戏导入。
 
 [返回目录](README.md) · [局部门证明](local-gate-pairs.md) · [蓝图使用](../blueprints/README.md)
