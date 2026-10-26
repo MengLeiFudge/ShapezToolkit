@@ -1,13 +1,13 @@
-"""制造顶针逆像之前的必要筛选；通过后仍须真实制造及原生Pin比较。"""
+"""规范化顶针族的精确物理匹配；不以物理匹配替代前态可制作性。"""
 
 from .physics import EMPTY, PIN, Position, Rules, Shape
 
 
-def pin_image_possible(rules: Rules, lower: tuple[tuple[str, ...], ...],
+def pin_image_matches(rules: Rules, lower: tuple[tuple[str, ...], ...],
                        top_crystals: int, target: Shape) -> bool:
-    """恢复F/M标记，拒绝融合、同组位移或移动块支撑矛盾；不保证充分。"""
+    """以最大静止集合及块支撑确认Pin结果；不运行前态制造或重力。"""
     if rules.quadrants != 4 or len(lower) != 4 or any(len(row) != 4 for row in lower):
-        raise ValueError("顶针像必要筛选需要四象限、前四层来源")
+        raise ValueError("顶针像精确判据需要四象限、前四层来源")
     if not 0 <= top_crystals < 16:
         raise ValueError("顶层晶体掩码需要在0～15之间")
     desired = rules.cells(target)
@@ -41,12 +41,22 @@ def pin_image_possible(rules: Rules, lower: tuple[tuple[str, ...], ...],
     live.update({(0, q): PIN for q in range(4) if (0, q) in original})
     fixed = {pos for pos, cell in live.items() if pos[0] == 0 or (
         desired.get(pos, EMPTY)[0] == "c" if cell[0] == "c" else landings[pos] == pos[0])}
-    for group in rules.groups(live):
-        if group & fixed and not group <= fixed:
-            return False
-    for z, q in live:
-        if (z, q) not in fixed and (z - 1, q) in fixed:
-            return False
+    groups = rules.groups(live)
+    owner = {pos: index for index, group in enumerate(groups) for pos in group}
+    ground = {owner[pos] for pos in live if pos[0] == 0}
+    edges = [set() for _ in groups]
+    for (z, q), index in owner.items():
+        below = owner.get((z - 1, q))
+        if below is not None and below != index:
+            edges[index].add(below)
+    stationary = set(range(len(groups)))
+    while True:
+        following = {index for index in stationary if index in ground or edges[index] & stationary}
+        if following == stationary:
+            break
+        stationary = following
+    if fixed != {pos for index in stationary for pos in groups[index]}:
+        return False
     moving = {pos: cell for pos, cell in live.items() if pos not in fixed and cell[0] != "c"}
     for block in rules.groups(moving):
         heights = {landings[pos] for pos in block}

@@ -8,7 +8,7 @@ from pathlib import Path
 from .circuit import Circuit, Literal, Ref
 from .corner_program import CornerProgram
 from .half_circuit import MaterialCell, column_admissible
-from .pin_image_circuit import image_constraints
+from .pin_image_circuit import PinImageFlags, image_constraints
 from .pin_pattern_circuit import pattern_column
 
 
@@ -20,7 +20,7 @@ class PinSource:
     tags: tuple[tuple[Ref, ...], ...]
     valid: Ref
     column_valid: tuple[Ref, ...]
-    image_passed: Ref
+    image: PinImageFlags
 
 
 def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
@@ -48,7 +48,7 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
                              for column, top in zip(columns, top_values))
     source_tags = tuple(tuple(circuit.add("LogicGateIf", value, valid) for value in (*column.tags, top))
                        for column, top in zip(columns, top_values))
-    return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image.passed)
+    return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image)
 
 
 def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:

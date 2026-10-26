@@ -1,6 +1,6 @@
 # 顶针逆像：在制造以前筛掉组位移矛盾
 
-[`pin-image-4q5l.spz2bp`](../blueprints/pin-image-4q5l.spz2bp)在给候选找制造证书以前，检查其晶体融合删除、同组静止/移动一致性及移动N/P块的落点支撑。Python对应[`pin_image_possible`](../synthesis/pin_constraints.py)，已接到`pin_families(..., check_output=False)`；默认先做精确正向Pin的模式保持原路径。
+[`pin-image-4q5l.spz2bp`](../blueprints/pin-image-4q5l.spz2bp)在给候选找制造证书以前，检查其晶体融合删除、同组静止/移动一致性及移动N/P块的落点支撑。Python的[`pin_image_matches`](../synthesis/pin_constraints.py)在此基础上另补最大静止集合等式，形成[精确判据](pin-image-exact.md)；本页5037平台独立部件仍只检查必要部分。
 
 这是必要筛选。输出`necessary_pass=1`仍须递归制造来源、在真实产物上做原生Pin并比较目标；它不证明前态可制作，也没有证明推定的F是最大静止集合。
 
@@ -51,10 +51,10 @@ z < r+1  ⇔  该N/P属于移动部分M。
 
 ## 5. 实现与当前边界
 
-Python在族生成时只为`check_output=False`调用此必要筛选；随后`Solver4(..., certificate_first=True)`仍按既有逻辑取得子配方并原生比较Pin结果。`check_output=True`仍使用精确`rules.pin`作族检查。两种模式都没有预算失败即不可制作的分支。
+Python在`check_output=False`族生成中调用补全F等式后的精确判据；候选仍需制造证书，实际制造的Pin结果仍须相同。`check_output=True`继续使用`rules.pin`作族检查。两种方式都没有预算失败即不可制作的分支。
 
 四个相关Python文件LSP零诊断。新5037平台生产蓝图完成DAG深度、端口、别名和实际占地静态核对；原518/874两份部件重编译不变。没有运行任何目标、控制字枚举、物理模拟、测试或游戏。
 
-完整四象限控制还需四列/顶盖游标、动态目标网格叶端、至多五帧回退及成功路径重放。新筛选提供更早的拒绝点，没有给出完整搜索的实用最坏时间保证。六象限及一般偶数参数仍须按顺序另行完成。
+[完整四象限控制](full-tail-circuit.md)已接四列/顶盖游标、五帧回退、精确F检查与成功路径制造。必要筛选提供更早的拒绝点，仍未取得实用最坏搜索保证。六象限及一般偶数参数须按顺序另行完成。
 
 [全部蓝图](../blueprints/README.md) · [完整顶针逆像](pin-inverse.md) · [标签目标网格](tagged-goal-grid.md) · [返回目录](README.md)

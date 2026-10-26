@@ -7,33 +7,33 @@
     "enable": 1211001
   },
   "outputs": {
-    "window": 1249800,
-    "sample": 1249801,
-    "done": 1249803,
-    "status": 1249812,
-    "result": 1249815,
+    "window": 1252976,
+    "sample": 1252977,
+    "done": 1252979,
+    "status": 1252988,
+    "result": 1252991,
     "instruction": {
-      "opcode": 1249804,
-      "a": 1249805,
-      "b": 1249806,
-      "destination": 1249807,
-      "base": 1249808,
-      "color": 1249809,
-      "request": 1249810
+      "opcode": 1252980,
+      "a": 1252981,
+      "b": 1252982,
+      "destination": 1252983,
+      "base": 1252984,
+      "color": 1252985,
+      "request": 1252986
     }
   },
-  "gate_platforms": 38618,
+  "gate_platforms": 41874,
   "reserved_channels": [
     1211000,
     1276535
   ],
-  "state_registers": 358,
-  "step_max_gate_depth": 64,
+  "state_registers": 407,
+  "step_max_gate_depth": 49,
   "initial_max_gate_depth": 184,
   "slow_max_gate_depth": 167,
   "slow_handoff_phases": 7,
   "slow_update_wait_cycles": 1,
-  "slow_state_registers": 328,
+  "slow_state_registers": 333,
   "timing": {
     "phase_signal_ticks": 300,
     "cycle_signal_ticks": 1200,
@@ -46,6 +46,13 @@
   "search_frames": 5,
   "item_registers": 6,
   "program_rom_rows": 486,
+  "physical_check": {
+    "label_rounds_max": 19,
+    "stationary_rounds_max": 20,
+    "motionless_fast_path": true,
+    "per_frame_family_cache": true,
+    "manufacture_during_search": false
+  },
   "leaf_program_rows": 475,
   "parent_tail_rows": 11,
   "statuses": {
@@ -58,9 +65,9 @@
   },
   "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
   "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-  "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位和1遍次位；共享一份制造ROM及六槽；另有K模式和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+  "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族物理证书位；共享20组编号、20静止位、5轮数位、一份制造ROM及六槽；另有K模式和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
   "termination": "最低C每次下降至少一层，递归至多四边；每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-  "proof": "4q5l/full-tail-circuit.md；multicycle-control.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+  "proof": "4q5l/full-tail-circuit.md；multicycle-control.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏"
 }

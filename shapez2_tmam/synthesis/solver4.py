@@ -14,7 +14,7 @@ class Solver4:
     """穷尽有限 S/顶针尾部，不设置会将未完成搜索误报为不可解的预算。"""
 
     def __init__(self, rules: Rules | None = None, *, certificate_first: bool = False):
-        """共用四象限规则；可选择先制造候选，再在其真实产物上核对顶针。"""
+        """共用四象限规则；可选以静止组及块支撑判据代替族的正向Pin检查。"""
         self.rules = rules or Rules(4)
         if self.rules.quadrants != 4:
             raise ValueError("完整尾部求解目前限定四象限五层")
@@ -83,8 +83,6 @@ class Solver4:
                         raise RuntimeError("顶针逆像没有使最低保留晶体严格降低")
                     previous = direct.recipe if direct.recipe is not None else self._tail(source)
                     if previous is None:
-                        continue
-                    if self.certificate_first and self.rules.pin(previous.result) != pushed:
                         continue
                     result = self.builder.apply("pin", previous)
                     if result.result != pushed:

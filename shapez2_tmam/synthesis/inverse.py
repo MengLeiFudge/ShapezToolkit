@@ -6,7 +6,7 @@ from typing import Iterator
 
 from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
-from .pin_constraints import pin_image_possible
+from .pin_constraints import pin_image_matches
 from .pin_patterns import SOURCE_PATTERNS
 
 
@@ -94,7 +94,7 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
     普通块用 Cu。它们的具体标签不影响可制作性的结构判定。
     返回成员未必可制作；族耗尽只表示不存在可制作的顶针前态。
     族内空/N/P 顶盖不能相互替代来证明可制作性；每个成员须另找配方。
-    check_output=False 先筛融合和组位移必要条件；调用者仍须取得真实制造证书再核对输出。
+    check_output=False 用静止集合及块支撑精确匹配物理输出；调用者仍须取得前态制造证书。
     不保存整个候选集，不调用全图可制作判定，也不隐式接受递归环。
     """
     if rules.quadrants != 4:
@@ -124,7 +124,7 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
             if representative is None:
                 continue
             possible = (rules.pin(representative) == target if check_output
-                        else pin_image_possible(rules, lower, mask, target))
+                        else pin_image_matches(rules, lower, mask, target))
             if possible:
                 yield PinFamily(lower, mask)
 

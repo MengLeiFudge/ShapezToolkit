@@ -18,6 +18,7 @@ class PinImageFlags:
     passed: Ref
     deleted: tuple[tuple[Ref, ...], ...]
     claimed_fixed: tuple[tuple[Ref, ...], ...]
+    live: tuple[tuple[MaterialCell, ...], ...]
 
 
 def image_constraints(program: CornerProgram, target: tuple[tuple[MaterialCell, ...], ...],
@@ -96,7 +97,7 @@ def image_constraints(program: CornerProgram, target: tuple[tuple[MaterialCell, 
             supported = tuple(program.or_(supported[q], program.and_(moving[q], program.or_(
                 supported[(q - 1) % 4], supported[(q + 1) % 4]))) for q in range(4))
         clauses.extend(program.or_(program.not_(moving[q]), supported[q]) for q in range(4))
-    return PinImageFlags(program.and_(*clauses), deleted, tuple(fixed))
+    return PinImageFlags(program.and_(*clauses), deleted, tuple(fixed), tuple(live))
 
 
 def build_pin_image(channel_base: int = 1_144_000) -> tuple[Circuit, dict]:

@@ -16,9 +16,10 @@ from .prefix_search import PrefixSearch
 from .program_controller import RECORD_FIELDS, _rom
 from .recipe_processor import _read, recipe_step
 from .sequential_circuit import timing_contract
+from .stationary_circuit import stationary_check
 from .support_circuit import in_support_class
 from .synthesis.physics import Rules
-from .tag_palette import TagPalette, TaggedGrid, same_grid
+from .tag_palette import TagPalette, same_grid
 
 
 class Phase(IntEnum):
@@ -27,13 +28,13 @@ class Phase(IntEnum):
     ENTRY = 0
     PREFIX = 1
     PREFIX_NEXT = 2
-    LEAF = 3
+    LABELS = 3
     SOURCE = 4
-    LEAF_CHECK = 5
+    STATIONARY = 5
     SOURCE_NEXT = 6
     RETURN = 7
     FAIL = 8
-    PARENT_CHECK = 9
+    SOURCE_CHECK = 9
     DONE = 10
     REPLAY_LEAF = 11
     REPLAY_LEAF_CHECK = 12
@@ -51,6 +52,7 @@ class Frame:
     top: tuple[tuple[Ref, ...], ...]
     crystals: tuple[Ref, ...]
     pin_search: Ref
+    pin_verified: Ref
 
 
 def _equals(program: CornerProgram, bits: tuple[Ref, ...], value: int) -> Ref:
@@ -94,11 +96,10 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         tuple(bank.add() for _ in range(12)),
         tuple(tuple(bank.add() for _ in range(5)) for _ in range(4)),
         tuple(tuple(bank.add() for _ in range(2)) for _ in range(4)),
-        tuple(bank.add() for _ in range(4)), bank.add()) for i in range(5))
+        tuple(bank.add() for _ in range(4)), bank.add(), bank.add()) for i in range(5))
     phase = bank.add(int(Phase.ENTRY))
     depth = bank.add()
     leaf_depth = bank.add()
-    result = bank.add(None)
     status = bank.add()
     support_prefix = bank.add()
     modes = {value: circuit.add("LogicGateCompare", phase, Literal(int(value)), config="AQ==") for value in Phase}
@@ -114,6 +115,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     top = tuple(tuple(active(tuple(frame.top[q][k] for frame in frames)) for k in range(2)) for q in range(4))
     crystals = tuple(active(tuple(frame.crystals[q] for frame in frames)) for q in range(4))
     pin_search = active(tuple(frame.pin_search for frame in frames))
+    pin_verified = active(tuple(frame.pin_verified for frame in frames))
     grid = palette.grid(tags)
     original = grid.columns
     nonempty = program.or_(*(cell.occupied for column in original for cell in column))
@@ -133,7 +135,6 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     prefix_step = finder.finish(program.zero, program.one)
     next_prefix = tuple(state.source for state in prefix_step[:12])
     last_prefix = prefix_step[-1].source
-    pushed = TaggedGrid(finder.columns, grid.valid)
     checking_prefix = support_prefix
     support_grid = tuple(tuple(MaterialCell(
         program.pick(checking_prefix, finder.columns[q][z].occupied, original[q][z].occupied),
@@ -160,6 +161,13 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                            tuple(program.pick(crystal, program.const(3), _value(program, bits, 3))
                                  for crystal, bits in zip(crystals, top)), program.one)
 
+    # 当前P已由PREFIX证明属于K；全部活格指定静止时，P本身给出稳定性。
+    motionless = program.and_(*(program.or_(program.not_(cell.occupied), fixed)
+        for row, fixed_row in zip(candidate.image.live, candidate.image.claimed_fixed) for cell, fixed in zip(row, fixed_row)))
+    known_physics = program.or_(pin_verified, motionless)
+    start_physics = program.and_(modes[Phase.SOURCE], candidate.valid, program.not_(known_physics))
+    physics = stationary_check(program, bank, candidate.image, start_physics,
+                               modes[Phase.LABELS], modes[Phase.STATIONARY])
     items = tuple(bank.add(None) for _ in range(6))
     ack, item_status = bank.add(), bank.add()
     second_pass = bank.add()
@@ -196,13 +204,12 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     width = (len(instructions) - 1).bit_length()
     pc = tuple(bank.add() for _ in range(width))
     packet, selected, last, jumps = _rom(circuit, instructions, pc, program.one, program.const(None))
-    cpu_running = program.or_(modes[Phase.LEAF], modes[Phase.REPLAY_LEAF], modes[Phase.REPLAY_PARENT])
     replay = program.or_(modes[Phase.REPLAY_LEAF], modes[Phase.REPLAY_PARENT])
-    packet["enable"] = program.and_(enable, cpu_running, selected)
+    packet["enable"] = program.and_(enable, replay, selected)
     packet["request"] = program.not_(ack)
     next_items = recipe_step(circuit, items, ack, item_status, packet)
     error = program.and_(packet["enable"], circuit.add("LogicGateCompare", next_items[7], Literal(2), config="AQ=="))
-    advance = program.and_(cpu_running, program.not_(error))
+    advance = program.and_(replay, program.not_(error))
     next_pc = [circuit.add("LogicGateXOr", bit, program.and_(advance, *pc[:k])) for k, bit in enumerate(pc)]
     if jumps:
         jump_selected = program.or_(*(event for event, _ in jumps))
@@ -221,13 +228,6 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     bank.put(second_pass, program.or_(second_pass, repeat))
 
     cpu_matches = same_grid(program, decode(circuit, items[0], program.one, Rules(4)), grid)
-    pinned = circuit.add("VirtualPinPusher", result)
-    pin_matches = same_grid(program, decode(circuit, pinned, program.one, Rules(4)), pushed)
-    completed = pinned
-    for exists, layer in zip(delta_present, layers):
-        stacked = circuit.add("VirtualStacker", completed, layer)
-        completed = program.pick(exists, stacked, completed)
-    completed_matches = same_grid(program, decode(circuit, completed, program.one, Rules(4)), grid)
 
     entry = modes[Phase.ENTRY]
     valid_goal = program.and_(grid.valid, nonempty)
@@ -235,7 +235,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     enter = program.and_(entry, in_scope, valid_goal, necessary)
     entry_fail = program.and_(entry, in_scope, valid_goal, program.not_(necessary))
     bad_goal = program.and_(entry, in_scope, program.not_(valid_goal))
-    start_leaf = program.and_(modes[Phase.PREFIX], program.not_(pin_search), appendable, available)
+    leaf_found = program.and_(modes[Phase.PREFIX], program.not_(pin_search), appendable, available)
     start_source = program.and_(modes[Phase.PREFIX], pin_search, appendable, pin_allowed)
     skip_prefix = program.and_(modes[Phase.PREFIX], program.or_(program.not_(appendable),
                               program.and_(program.not_(pin_search), program.not_(available)),
@@ -244,16 +244,16 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     prefix_scan_finished = program.and_(modes[Phase.PREFIX_NEXT], last_prefix)
     begin_pin_search = program.and_(prefix_scan_finished, program.not_(pin_search), pin_allowed)
     prefixes_finished = program.and_(prefix_scan_finished, program.or_(pin_search, program.not_(pin_allowed)))
-    descend = program.and_(modes[Phase.SOURCE], candidate.valid)
+    physical_match = program.or_(program.and_(modes[Phase.SOURCE_CHECK], physics.matches),
+                                 program.and_(modes[Phase.SOURCE], candidate.valid, motionless))
+    descend = program.or_(physical_match, program.and_(modes[Phase.SOURCE], candidate.valid, pin_verified))
     skip_source = program.and_(modes[Phase.SOURCE], program.not_(candidate.valid))
-    leaf_checked = program.and_(modes[Phase.LEAF_CHECK], cpu_matches)
     search_return = modes[Phase.RETURN]
     search_pop = program.and_(search_return, program.not_(root))
     root_solved = program.and_(search_return, root)
     fail_pop = program.and_(modes[Phase.FAIL], program.not_(root))
     root_failed = program.and_(modes[Phase.FAIL], root)
-    parent_checked = program.and_(modes[Phase.PARENT_CHECK], pin_matches, completed_matches)
-    parent_reject = program.and_(modes[Phase.PARENT_CHECK], program.not_(pin_matches))
+    image_reject = program.and_(modes[Phase.SOURCE_CHECK], program.not_(physics.matches))
     replay_check = program.or_(modes[Phase.REPLAY_LEAF_CHECK], modes[Phase.REPLAY_PARENT_CHECK])
     original_matches = circuit.add("LogicGateCompare", items[0], target, config="AQ==")
     replay_ok = program.and_(replay_check, cpu_matches, program.or_(program.not_(root), original_matches))
@@ -262,20 +262,18 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     outside = program.and_(entry, root, decoded.valid, uncolored)
     invalid = program.and_(entry, root, program.not_(decoded.valid))
     internal = program.or_(error, bad_goal,
-        program.and_(modes[Phase.LEAF_CHECK], program.not_(cpu_matches)),
-        program.and_(modes[Phase.PARENT_CHECK], pin_matches, program.not_(completed_matches)),
         program.and_(replay_check, program.not_(program.and_(cpu_matches,
                      program.or_(program.not_(root), original_matches)))))
 
     # 同一C掩码的NPC顶盖共享Pin物理；坏列可跳过全部更快地址。
-    counter_event = program.or_(modes[Phase.SOURCE_NEXT], parent_reject)
+    counter_event = program.or_(modes[Phase.SOURCE_NEXT], image_reject)
     bad_columns = tuple(program.not_(valid) for valid in candidate.column_valid)
     bad_column = program.or_(*bad_columns)
     skip_at = tuple(program.and_(counter_event, bad_columns[q], program.not_(program.or_(*bad_columns[q + 1:])))
                     for q in range(4))
     skip_columns = program.or_(*skip_at)
     family_jump = program.and_(counter_event, program.not_(bad_column),
-                               program.or_(program.not_(candidate.image_passed), parent_reject))
+                               program.or_(program.not_(candidate.image.passed), image_reject))
     carry = program.and_(counter_event, program.not_(bad_column), program.not_(family_jump))
     next_top = []
     for bits, crystal in zip(top, crystals):
@@ -283,6 +281,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         next_top.append(tuple(program.pick(program.or_(crystal, family_jump, skip_columns), program.zero, value)
                               for value in values))
         carry = program.pick(crystal, carry, overflow)
+    family_changed = program.or_(carry, family_jump, skip_columns)
     next_crystals, carry = _increment(program, crystals, program.or_(carry, family_jump), 16)
     next_crystals = tuple(program.pick(skip_columns, program.zero, value) for value in next_crystals)
     next_slots = []
@@ -300,6 +299,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         next_s = program.and_(move_prefix, selected_frame)
         reset_source = program.and_(start_source, selected_frame)
         next_d = program.and_(counter_event, selected_frame)
+        bank.put(frame.pin_verified, 1, program.and_(physical_match, selected_frame))
+        bank.put(frame.pin_verified, 0, program.or_(reset_source, program.and_(next_d, family_changed)))
         for read, value in zip(frame.crystals, next_crystals):
             bank.put(read, value, next_d)
             bank.put(read, 0, reset_source)
@@ -321,18 +322,16 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
             depth_choices.append((popping, i - 1))
     depth_choices.append((root_solved, leaf_depth))
     bank.put_exclusive(depth, tuple(depth_choices))
-    bank.put(leaf_depth, depth, leaf_checked)
-    bank.put(result, items[0], leaf_checked)
-    bank.put(result, completed, parent_checked)
+    bank.put(leaf_depth, depth, leaf_found)
 
-    # 只有重放成功路径时才发布；搜索期间的六槽结果只是信号证书。
+    # 搜索仅保存材料参数与精确Pin关系；根成功后才执行并发布制造流。
     accepted = program.and_(packet["enable"], program.not_(error), replay)
     record = tuple(bank.add(None) for _ in RECORD_FIELDS)
     record_valid = bank.add()
     for read, name in zip(record, RECORD_FIELDS):
         bank.put(read, packet[name])
     bank.put(record_valid, accepted)
-    reset_cpu = program.or_(start_leaf, root_solved)
+    reset_cpu = root_solved
     for read in items:
         bank.put(read, None, reset_cpu)
     bank.put(ack, 0, reset_cpu)
@@ -344,14 +343,15 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
 
     transitions = (
         (enter, Phase.PREFIX), (entry_fail, Phase.FAIL),
-        (start_leaf, Phase.LEAF), (start_source, Phase.SOURCE), (skip_prefix, Phase.PREFIX_NEXT),
+        (leaf_found, Phase.RETURN), (start_source, Phase.SOURCE), (skip_prefix, Phase.PREFIX_NEXT),
         (move_prefix, Phase.PREFIX), (begin_pin_search, Phase.PREFIX), (prefixes_finished, Phase.FAIL),
+        (start_physics, Phase.LABELS), (physics.labels_done, Phase.STATIONARY),
+        (physics.stationary_done, Phase.SOURCE_CHECK),
         (descend, Phase.ENTRY), (skip_source, Phase.SOURCE_NEXT),
         (program.and_(counter_event, program.not_(sources_finished)), Phase.SOURCE),
         (sources_finished, Phase.PREFIX_NEXT),
-        (program.and_(modes[Phase.LEAF], macro_done), Phase.LEAF_CHECK),
-        (leaf_checked, Phase.RETURN), (search_pop, Phase.PARENT_CHECK), (root_solved, Phase.REPLAY_LEAF),
-        (fail_pop, Phase.SOURCE_NEXT), (parent_checked, Phase.RETURN),
+        (search_pop, Phase.RETURN), (root_solved, Phase.REPLAY_LEAF),
+        (fail_pop, Phase.SOURCE_NEXT),
         (program.and_(modes[Phase.REPLAY_LEAF], macro_done), Phase.REPLAY_LEAF_CHECK),
         (program.and_(modes[Phase.REPLAY_PARENT], parent_done), Phase.REPLAY_PARENT_CHECK),
         (replay_up, Phase.REPLAY_PARENT),
@@ -367,8 +367,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     bank.put(support_prefix, 1, program.or_(enter, search_pop, fail_pop, root_solved, replay_up))
     slow_reads = (depth, second_pass, support_prefix, *(read for frame in frames for read in (
         *(cell for column in frame.goal for cell in column), *frame.prefix,
-        *(bit for bits in (*frame.slots, *frame.top) for bit in bits), *frame.crystals, frame.pin_search)))
-    slow_event = program.or_(enter, begin_pin_search, move_prefix, start_leaf, start_source, counter_event,
+        *(bit for bits in (*frame.slots, *frame.top) for bit in bits), *frame.crystals, frame.pin_search, frame.pin_verified)))
+    slow_event = program.or_(enter, begin_pin_search, move_prefix, start_source, counter_event,
                              descend, search_pop, fail_pop, root_solved, replay_up, repeat)
     timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,))
     window = program.and_(timing.phases[3], enable)
@@ -390,16 +390,19 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "gate_platforms": len(circuit.gates), "reserved_channels": [channel_base, channel_base + reserve - 1],
         **state_report, "timing": timing_contract(timing),
         "search_frames": 5, "item_registers": 6, "program_rom_rows": len(instructions),
+        "physical_check": {"label_rounds_max": 19, "stationary_rounds_max": 20,
+                           "motionless_fast_path": True, "per_frame_family_cache": True,
+                           "manufacture_during_search": False},
         "leaf_program_rows": macro_last + 1, "parent_tail_rows": len(instructions) - parent_start,
         "statuses": {"0": "搜索或成功路径重放中", "1": "已输出完整制造流程，原生回放等于原目标",
                      "2": "穷尽全部有界尾部后不可制作", "3": "cu晶体供料未界定", "4": "内部状态或回放失配，不能判不可制作",
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-        "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位和1遍次位；共享一份制造ROM及六槽；另有K模式和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+        "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族物理证书位；共享20组编号、20静止位、5轮数位、一份制造ROM及六槽；另有K模式和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最低C每次下降至少一层，递归至多四边；每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/full-tail-circuit.md；multicycle-control.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+        "proof": "4q5l/full-tail-circuit.md；multicycle-control.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 
