@@ -6,7 +6,8 @@
   "height": 6,
   "target": "P-Cu:crP-:CuCu:cr--:CuCu:--P-",
   "register_count": 3,
-  "evidence": "按既有证明构造并由Python加工模型计算中间产物；未在游戏或Mod中验证。",
+  "evidence": "依据局部物理与已证配方变换生成中间产物；未在游戏或Mod中验证。",
+  "milestone_orientation": "关键阶段按原构造的标准朝向示意，实际方向与物品编号见steps。",
   "milestones": [
     {
       "name": "最高晶体以下前缀",

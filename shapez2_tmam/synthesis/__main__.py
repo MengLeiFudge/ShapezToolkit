@@ -4,6 +4,7 @@ import argparse
 import json
 
 from .construct import Constructor
+from .orientation import optimize_rotations
 from .physics import Rules
 
 
@@ -30,11 +31,12 @@ def main() -> int:
         result = Solver4(rules).solve(target)
     else:
         result = Constructor(rules).construct(target)
+    recipe = optimize_rotations(result.recipe) if result.recipe is not None else None
     document = {"status": result.status, "reason": result.reason, "target": target.to_key(),
                 "quadrants": rules.quadrants, "height": rules.height,
-                "steps": list(result.recipe.steps()) if result.recipe is not None else []}
+                "steps": list(recipe.steps()) if recipe is not None else []}
     if args.instructions:
-        document["instructions"] = list(result.recipe.instructions()) if result.recipe is not None else []
+        document["instructions"] = list(recipe.instructions()) if recipe is not None else []
         document["register_count"] = 6
     print(json.dumps(document, ensure_ascii=False, indent=2))
     return {"solved": 0, "unsolvable": 2, "unknown": 3}[result.status]

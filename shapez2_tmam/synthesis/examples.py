@@ -8,6 +8,7 @@ from pathlib import Path
 from .construct import Constructor
 from .corners import CornerBuilder
 from .half_catalog import HalfCatalog
+from .orientation import optimize_rotations
 from .physics import EMPTY, PIN, Rules
 from .recipe import Builder, Recipe
 from .stack_reduction import ordinary_stack, single_stack
@@ -107,7 +108,7 @@ def wide_half_examples() -> list[Example]:
         Example("6q-pin-tail", "非K下料追加普通格和针尾", "H旁先准备q3两层普通柱；一次堆叠同时加入q4地面普通格与q3第三层针。独立下落把上料缩成一层N/P基础料，无需辅助晶体。", 6, pin_tail,
                 (("已有非K下料", lower), ("紧凑基础上料", pin_tail.inputs[1]), ("一次堆叠成品", pin_tail))),
         Example("6q-upper-summary", "复杂上料等价替换为单格基础料",
-                f"H作上料时，悬空框架永远留在高度上限外；对任意下料仅留下q0普通格。用单格基础料替代{half.step_count}步的H准备，本配方从{turned.step_count + half.step_count + 1}步降为{compact.step_count}步。", 6, compact,
+                "H作上料时，悬空框架永远留在高度上限外；对任意下料仅留下q0普通格。用一份单格基础料替代整个H的上料准备，再堆到原下料。", 6, compact,
                 (("原本考虑的复杂上料H", half), ("已有旋转半形下料", turned), ("等价基础上料", compact.inputs[1]),
                  ("堆叠成品", compact))),
         Example("6q-compact-interleaved", "非K下料上的紧凑交错上料",
@@ -265,11 +266,13 @@ def general_stack_example() -> Example:
 
 def export(example: Example, output: Path) -> tuple[str, str, int]:
     """输出消费式步骤及全部中间图形码；同一配方引用展开为独立物品。"""
-    steps = list(example.recipe.steps())
+    recipe = optimize_rotations(example.recipe)
+    steps = list(recipe.steps())
     document = {"name": example.name, "title": example.title, "mechanism": example.mechanism,
                 "quadrants": example.quadrants, "height": example.recipe.height, "target": example.recipe.result.to_key(),
                 "register_count": example.recipe.register_count,
-                "evidence": "按既有证明构造并由Python加工模型计算中间产物；未在游戏或Mod中验证。",
+                "evidence": "依据局部物理与已证配方变换生成中间产物；未在游戏或Mod中验证。",
+                "milestone_orientation": "关键阶段按原构造的标准朝向示意，实际方向与物品编号见steps。" if example.milestones else None,
                 "milestones": [{"name": name, "result": recipe.result.to_key()} for name, recipe in example.milestones],
                 "steps": steps}
     stem = output / example.name
@@ -281,7 +284,8 @@ def export(example: Example, output: Path) -> tuple[str, str, int]:
              "同一子配方出现两次时分别生产。Cut/Swap的另一个出口弃置；按表中出口继续。", "",
              "[操作与方向说明](README.md)；本配方未在游戏中验证。", ""]
     if example.milestones:
-        lines += ["## 关键阶段", "", "| 阶段 | 结果 |", "|---|---|"]
+        lines += ["## 关键阶段", "", "以下按原构造的标准朝向示意；实际方向及物品编号以完整步骤表为准。",
+                  "", "| 阶段 | 结果 |", "|---|---|"]
         lines += [f"| {name} | `{recipe.result.to_key()}` |" for name, recipe in example.milestones]
         lines.append("")
     lines += ["## 完整步骤", "", "| 编号 | 加工 | 输入编号 | 参数 | 产物 |", "|---:|---|---|---|---|"]

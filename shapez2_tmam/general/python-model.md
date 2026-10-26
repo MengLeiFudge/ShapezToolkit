@@ -40,6 +40,6 @@ python -m shapez2_tmam.synthesis 'cr--------------' --quadrants 8 --height 8
 
 Python可直接建立Builder(Rules(8, 8))并调用single_stack或HalfCatalog。所有输入图形须由同一Rules解析、所有输入Recipe须来自同一制造配置。
 
-[八象限八层代表](../examples/8q8l-single-stack.md)已展开为125步：八层辅助晶体塔顶破后形成非K下料，再将双层普通上料一次堆入。最终只有六层，但全过程要求八层上限。它是既有证明的具体配方导出，不表示默认Constructor已能从任意同类目标自动发现该准备过程。
+[八象限八层代表](../examples/8q8l-single-stack.md)已展开为112步：八层辅助晶体塔顶破后形成非K下料，再将双层普通上料一次堆入。最终只有六层，但全过程要求八层上限。它是既有证明的具体配方导出，不表示默认Constructor已能从任意同类目标自动发现该准备过程。
 
 修改文件LSP零诊断；固定代表配方已导出。未执行完整求解、目录枚举、测试或游戏/Mod验证。Python参数化模型不自动保证具体Mod提供相同旋转、半切及高度规则。

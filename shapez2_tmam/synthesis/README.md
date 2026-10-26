@@ -38,17 +38,20 @@ python -m shapez2_tmam.synthesis 'CuCu----:Cu------' --quadrants 4
 
 `Recipe.register_count`在建立节点时计算当前制造树的物品槽需求。先完整制造槽需求较大的子树，可最小化这类逐子树调度的峰值；具体递推及适用范围见[槽数调度证明](../general/recipe-slots.md)。它不代表完整机器的搜索状态数量。
 
+CLI输出前用[`optimize_rotations`](orientation.py)安排整棵制造树的朝向：基础料直接按所需朝向供给，Pin/Crystal/Stack允许共同旋转，Cut/Swap只使用半圈换出口。它在固定非旋转加工树及这些变换内取得最少净旋转表项，物品槽需求保持；[证明与范围](../general/recipe-orientation.md)。直接Python调用者可在取得证书后显式使用；构造和搜索内部不反复运行此优化。
+
 ## 从 Python 调用
 
 ```python
 from shapez2_tmam.synthesis import Rules
 from shapez2_tmam.synthesis.construct import Constructor
+from shapez2_tmam.synthesis.orientation import optimize_rotations
 
 rules = Rules(quadrants=4)
 target = rules.parse("CuCu----:Cu------")
 result = Constructor(rules).construct(target)
 if result.recipe is not None:
-    for step in result.recipe.steps():
+    for step in optimize_rotations(result.recipe).steps():
         print(step)
 ```
 
