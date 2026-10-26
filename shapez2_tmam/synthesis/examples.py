@@ -132,6 +132,23 @@ def interleaved_stack_example() -> Example:
                    6, result, (("原下料", lower), ("补C交错上料", result.inputs[1]), ("一次堆叠成品", result)))
 
 
+def packed_stack_example() -> Example:
+    """旧两种载体均失败的交错上料；列内压紧后只在列底补晶体。"""
+    builder = Builder(Rules(6))
+    lower = builder.noncrystal(builder.rules.parse(
+        "--Cu----Cu--:--Cu----Cu--:--Cu----Cu--:--Cu--------"))
+    assert lower is not None
+    materials = {"-": EMPTY, "N": "Cu", "P": PIN}
+    rows = ("NN-NN-", "-N-PN-", "-N--N-", "-N-NN-", "-N----")
+    target = builder.rules.parse(":".join("".join(materials[cell] for cell in row) for row in rows))
+    result = single_stack(builder, lower, target)
+    if result is None:
+        raise RuntimeError("六象限列内压紧上料未生成代表配方")
+    return Example("6q-packed-columns", "列内压紧后用晶体前缀对齐普通块",
+                   "q1四层柱与q4三层柱作下料。自由下落会粘错q0/q1，原位补C会产生q3的N-P-C-N；改把q3压成NPN，q4用CCN与其顶端对齐，再一次堆叠。",
+                   6, result, (("原下料", lower), ("压紧后的三层上料", result.inputs[1]), ("一次堆叠成品", result)))
+
+
 def two_quadrant_example() -> Example:
     """两象限六层：先拼连续晶体以下前缀，再让普通上层跨列支撑。"""
     builder = Builder(Rules(2, 6))
@@ -234,7 +251,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
     args = parser.parse_args()
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
-    examples.extend((protected_half_example(), two_quadrant_example()))
+    examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)

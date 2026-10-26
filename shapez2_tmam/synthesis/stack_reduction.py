@@ -2,7 +2,7 @@
 
 from collections.abc import Iterable, Iterator
 
-from .physics import EMPTY, PIN, Rules, Shape
+from .physics import EMPTY, PIN, Position, Rules, Shape
 from .recipe import Builder, Recipe
 from .support import in_support_class
 
@@ -44,8 +44,63 @@ def stack_successors(rules: Rules, lower: Shape, known: Iterable[Shape]) -> Iter
             yield extension
 
 
+def _packed_upper(builder: Builder, delta: dict[Position, str]) -> Recipe | None:
+    """列内N/P压紧，差分约束确定最短C前缀；仅接受能全体释放的最小解。"""
+    rules = builder.rules
+    n = rules.quadrants
+    words: list[list[str]] = [[] for _ in range(n)]
+    ranks = {}
+    for z in range(rules.height):
+        for q in range(n):
+            if (cell := delta.get((z, q))) is not None:
+                ranks[z, q] = len(words[q])
+                words[q].append(cell)
+    edges = []
+    for q in range(n):
+        r = (q + 1) % n
+        previous = None
+        for z in range(rules.height):
+            row = [(column, ranks[z, column]) for column in (q, r)
+                   if (z, column) in delta and delta[z, column] != PIN]
+            if not row:
+                continue
+            column, index = row[0]
+            if len(row) == 2:
+                other, other_index = row[1]
+                edges.extend(((column, other, index - other_index),
+                              (other, column, other_index - index)))
+            if previous is not None:
+                before, before_index = previous
+                edges.append((before, column, before_index - index + 1))
+            previous = column, index
+    starts = [0] * n
+    for _ in range(n):
+        changed = False
+        for before, after, distance in edges:
+            candidate = starts[before] + distance
+            if candidate > starts[after]:
+                if candidate + len(words[after]) > rules.height:
+                    return None
+                starts[after] = candidate
+                changed = True
+        if not changed:
+            break
+    else:
+        return None
+    cells = {(z, q): cell for q, word in enumerate(words) if word
+             for z, cell in enumerate(["cr"] * starts[q] + word)}
+    if rules.stationary(cells, grounded=False):
+        return None
+    source = rules.fold(cells)
+    assert source is not None
+    upper = builder.independent_columns(source)
+    if upper is None:
+        raise RuntimeError("列底晶体与连续N/P后缀未生成独立柱制造证书")
+    return upper
+
+
 def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool) -> Recipe | None:
-    """共用下料一次结算判据；依次检查紧凑无C与连续列补C上料。"""
+    """共用下料一次结算判据；保留旧候选，失败后尝试列内压紧上料。"""
     rules = builder.rules
     collapsed = rules.collapse(rules.cells(lower.result))
     original = rules.cells(collapsed) if collapsed is not None else {}
@@ -73,11 +128,13 @@ def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool)
         for q, top in enumerate(rules.column_tops(shifted)):
             for z in range(top + 1):
                 filled[z, q] = shifted.get((z, q), "cr")
-        if rules.stationary(filled, grounded=False):
-            return None
-        source = rules.fold(filled)
-        assert source is not None
-        upper = builder.independent_columns(source)
+        upper = None
+        if not rules.stationary(filled, grounded=False):
+            source = rules.fold(filled)
+            assert source is not None
+            upper = builder.independent_columns(source)
+        if upper is None:
+            upper = _packed_upper(builder, delta)
         if upper is None:
             return None
     if upper is None:
@@ -94,9 +151,9 @@ def ordinary_stack(builder: Builder, lower: Recipe, target: Shape) -> Recipe | N
 
 
 def single_stack(builder: Builder, lower: Recipe, target: Shape) -> Recipe | None:
-    """新增N/P的单次构造；优先无C下落候选，再用可独立制造的补C连续列。
+    """新增N/P的单次构造；依次检查无C、原位补C及列内压紧载体。
 
-    下料允许非K或不稳定。无C候选检查块数守恒，补C候选排除静止格，保留旧针尾域。
-    返回None仅表示必要条件或这两种候选未通过，不能判目标全局不可制作。
+    下料允许非K或不稳定。每个补C候选均须全体释放并取得独立列制造凭据。
+    返回None仅表示必要条件或三种候选未通过，不能判目标全局不可制作。
     """
     return _single_stack(builder, lower, target, pins=True)
