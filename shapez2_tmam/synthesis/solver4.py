@@ -56,10 +56,11 @@ class Solver4:
         direct = self.constructor.construct(target)
         if direct.status != "unknown" or any(cell == "cu" for row in target.layers for cell in row):
             return direct
-        recipe = self._tail(target)
+        highest = max(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
+        recipe = self._tail(target, remaining_pins=max(0, highest - 1))
         if recipe is not None:
             return Result("solved", recipe, "局部半形起点及完整有界顶针/逐层堆叠尾部")
-        return Result("unsolvable", None, "已穷尽局部半形起点及三次尾部顶针界内的全部顶针/堆叠尾部")
+        return Result("unsolvable", None, "已穷尽局部半形起点及最高晶体推导界内的全部顶针/堆叠尾部")
 
     def _tail(self, target: Shape, *, skip_start: bool = False, remaining_pins: int = 3) -> Recipe | None:
         """三次尾部Pin界保持覆盖；余量为零仍先完成尚未排除的A→S。"""
