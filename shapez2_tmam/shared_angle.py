@@ -6,10 +6,12 @@ from .decoder_circuit import DecodedCell
 
 
 def shared_half_body(program: CornerProgram, columns: tuple[tuple[CellRef, ...], ...], second: Ref) -> tuple[Ref, int, int]:
-    """角宏只用槽0～3；第一角转180°暂存在槽4，另半形可保存在槽5。"""
+    """制造标准半形：无C直接逐层堆叠；含C两角共用槽0～3，第一角暂存槽4。"""
     if len(columns) != 2 or any(len(column) != 5 for column in columns):
         raise ValueError("共用两角程序需要两列各五个原层位")
     present = tuple(program.or_(*(cell.occupied for cell in column)) for column in columns)
+    has_crystal = program.or_(*(cell.crystal for column in columns for cell in column))
+    crystal_block = program.begin(has_crystal)
     selected = tuple(program.choose(second, columns[1][z], columns[0][z]) for z in range(5))
     active = program.pick(second, present[1], present[0])
     block = program.begin(active)
@@ -24,7 +26,20 @@ def shared_half_body(program: CornerProgram, columns: tuple[tuple[CellRef, ...],
     program.emit(both, 8, 4, 0, destination=0)
     program.rotate(0, 3, both)
     program.rotate(4, 2, program.and_(present[0], program.not_(present[1])), destination=0)
-    return program.or_(*present), repeat_at, mirror_limit
+    present_any = program.or_(*present)
+    program.emit(present_any, 4, 0)
+    program.end(crystal_block)
+    direct = program.and_(present_any, program.not_(has_crystal))
+    direct_block = program.begin(direct)
+    empty = program.cell("--")
+    for z in range(5):
+        active = program.and_(direct, program.or_(*(column[z].occupied for column in columns)))
+        layer = program.layer((columns[0][z], columns[1][z], empty, empty))
+        program.emit(active, 14, destination=0 if z == 0 else 1, base=layer)
+        if z:
+            program.emit(active, 7, 0, 1)
+    program.end(direct_block)
+    return present_any, repeat_at, mirror_limit
 
 
 def mirror_packet(program: CornerProgram, packet: dict[str, Ref], enabled: Ref) -> None:

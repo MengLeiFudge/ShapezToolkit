@@ -189,7 +189,6 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
     take_back = circuit.add("LogicGateXOr", flipped, second_pass)
     columns = tuple(tuple(program.choose(take_back, aligned[q + 2][z], aligned[q][z]) for z in range(5)) for q in (0, 1))
     present, corner_last, mirror_limit = shared_half_body(program, columns, second_corner)
-    program.emit(present, 4, 0)
     program.rotate(0, 2, program.not_(second_pass), destination=5)
     with_second = program.and_(second_pass, present)
     program.join(0, 5, 0, with_second)
@@ -464,7 +463,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
                            "final_checks_per_direction": 1, "pin_pass_keeps_full_enumeration": True,
                            "optional_top_for_ground_crystal_families": True,
                            "shared_leaf_check_for_all_families": True},
-        "shared_angle_rows": corner_last + 1, "angle_calls": 4,
+        "shared_angle_rows": corner_last + 1, "angle_calls": 4, "noncrystal_half_max_instructions": 9,
         "instruction_bound": 2 * (macro_last + corner_last + 2) + 3 * (len(instructions) - parent_start),
         "leaf_program_rows": macro_last + 1, "parent_tail_rows": len(instructions) - parent_start,
         "statuses": {"0": "搜索或成功路径重放中", "1": "已输出完整制造流程，原生回放等于原目标",
