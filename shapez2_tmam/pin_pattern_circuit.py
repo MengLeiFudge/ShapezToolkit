@@ -16,6 +16,7 @@ class PatternColumn:
     column: PinColumn
     last_slot: Ref
     has_slots: Ref
+    first_slot: Ref
     next_slot: Ref
 
 
@@ -52,4 +53,4 @@ def pattern_column(program: CornerProgram, materials: tuple[Ref, ...], tags: tup
     column = column_candidate(circuit, materials, tags, (*keep_bits, *extra), valid,
                               with_landings=with_landings, decoded_target=target, keep_counts=keep_counts)
     cursor = slot_cursor(program, target, addresses)
-    return PatternColumn(column, cursor.last, cursor.has, cursor.next)
+    return PatternColumn(column, cursor.last, cursor.has, cursor.first, cursor.next)

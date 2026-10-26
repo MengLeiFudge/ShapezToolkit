@@ -13,6 +13,7 @@ from .synthesis.pin_patterns import SOURCE_PATTERNS
 class SlotCursor:
     """后继回绕到最小合法地址；无合法地址时next为0，has为假。"""
 
+    first: Ref
     next: Ref
     last: Ref
     has: Ref
@@ -102,13 +103,15 @@ def slot_cursor(program: CornerProgram, target: ColumnTarget, addresses: tuple[R
     later = tuple(program.and_(event, address_prefix[i]) for i, event in enumerate(valid))
     later_prefix = _prefix_or(program, later)
     wrap = program.not_(later_prefix[-1])
-    choices = []
+    first_choices = []
+    following_choices = []
     for i, event in enumerate(valid):
         first = program.and_(event, program.not_(valid_prefix[i]))
         following = program.and_(later[i], program.not_(later_prefix[i]))
-        chosen = program.or_(following, program.and_(wrap, first))
-        choices.append(program.circuit.add("LogicGateIf", Literal(i), chosen))
+        first_choices.append(program.circuit.add("LogicGateIf", Literal(i), first))
+        following_choices.append(program.circuit.add("LogicGateIf", Literal(i), following))
     has = valid_prefix[-1]
-    choices.append(program.circuit.add("LogicGateIf", Literal(0), program.not_(has)))
-    program.circuit.aliases.append(tuple(choices))
-    return SlotCursor(choices[0], wrap, has)
+    first_choices.append(program.circuit.add("LogicGateIf", Literal(0), program.not_(has)))
+    program.circuit.aliases.extend((tuple(first_choices), tuple(following_choices)))
+    first = first_choices[0]
+    return SlotCursor(first, program.pick(wrap, first, following_choices[0]), wrap, has)

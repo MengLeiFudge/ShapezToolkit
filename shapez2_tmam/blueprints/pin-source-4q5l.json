@@ -110,114 +110,120 @@
     "enable": 1194048
   },
   "outputs": {
-    "candidate_valid": 1202732,
-    "has_slots": 1202775,
+    "candidate_valid": 1202672,
+    "has_slots": 1202715,
+    "first_slots": [
+      1196023,
+      1197658,
+      1199293,
+      1200928
+    ],
     "next_slots": [
-      1196024,
-      1197674,
-      1199324,
-      1200974
+      1196141,
+      1197776,
+      1199411,
+      1201046
     ],
     "last_slots": [
       1196022,
-      1197672,
-      1199322,
-      1200972
+      1197657,
+      1199292,
+      1200927
     ],
     "source_bottom_to_top": [
       [
         {
-          "material": 1202733,
-          "tag": 1202753
+          "material": 1202673,
+          "tag": 1202693
         },
         {
-          "material": 1202738,
-          "tag": 1202758
+          "material": 1202678,
+          "tag": 1202698
         },
         {
-          "material": 1202743,
-          "tag": 1202763
+          "material": 1202683,
+          "tag": 1202703
         },
         {
-          "material": 1202748,
-          "tag": 1202768
+          "material": 1202688,
+          "tag": 1202708
         }
       ],
       [
         {
-          "material": 1202734,
-          "tag": 1202754
+          "material": 1202674,
+          "tag": 1202694
         },
         {
-          "material": 1202739,
-          "tag": 1202759
+          "material": 1202679,
+          "tag": 1202699
         },
         {
-          "material": 1202744,
-          "tag": 1202764
+          "material": 1202684,
+          "tag": 1202704
         },
         {
-          "material": 1202749,
-          "tag": 1202769
+          "material": 1202689,
+          "tag": 1202709
         }
       ],
       [
         {
-          "material": 1202735,
-          "tag": 1202755
+          "material": 1202675,
+          "tag": 1202695
         },
         {
-          "material": 1202740,
-          "tag": 1202760
+          "material": 1202680,
+          "tag": 1202700
         },
         {
-          "material": 1202745,
-          "tag": 1202765
+          "material": 1202685,
+          "tag": 1202705
         },
         {
-          "material": 1202750,
-          "tag": 1202770
+          "material": 1202690,
+          "tag": 1202710
         }
       ],
       [
         {
-          "material": 1202736,
-          "tag": 1202756
+          "material": 1202676,
+          "tag": 1202696
         },
         {
-          "material": 1202741,
-          "tag": 1202761
+          "material": 1202681,
+          "tag": 1202701
         },
         {
-          "material": 1202746,
-          "tag": 1202766
+          "material": 1202686,
+          "tag": 1202706
         },
         {
-          "material": 1202751,
-          "tag": 1202771
+          "material": 1202691,
+          "tag": 1202711
         }
       ],
       [
         {
-          "material": 1202737,
-          "tag": 1202757
+          "material": 1202677,
+          "tag": 1202697
         },
         {
-          "material": 1202742,
-          "tag": 1202762
+          "material": 1202682,
+          "tag": 1202702
         },
         {
-          "material": 1202747,
-          "tag": 1202767
+          "material": 1202687,
+          "tag": 1202707
         },
         {
-          "material": 1202752,
-          "tag": 1202772
+          "material": 1202692,
+          "tag": 1202712
         }
       ]
     ]
   },
-  "gate_platforms": 8712,
+  "gate_platforms": 8652,
   "reserved_channels": [
     1194000,
     1210383

@@ -333,7 +333,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     for q, value in enumerate(slots):
         advanced = program.pick(slot_advances[q], candidate.next_slots[q], value)
         reset_lower = program.or_(*skip_at[q + 1:])
-        next_slots.append(program.pick(reset_lower, program.zero, advanced))
+        next_slots.append(program.pick(reset_lower, candidate.first_slots[q], advanced))
     sources_finished = slot_advances[4]
     depth_choices: list[tuple[Ref, Ref | int | None]] = []
     for i, frame in enumerate(frames):
@@ -349,8 +349,10 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
             bank.put_exclusive(frame.family_checked, (
                 (program.and_(descend, selected_frame), 1),
                 (program.or_(reset_source, program.and_(new_family, next_d)), 0)))
-            for read, value in zip((*frame.cap_exclusions, *frame.top, *frame.slots), (*next_exclusions, *next_top, *next_slots)):
-                bank.put_exclusive(read, ((next_d, value), (reset_source, 0)))
+            for read, value, initial in zip((*frame.cap_exclusions, *frame.top, *frame.slots),
+                                             (*next_exclusions, *next_top, *next_slots),
+                                             (program.zero,) * 8 + candidate.first_slots):
+                bank.put_exclusive(read, ((next_d, value), (reset_source, initial)))
         for k, read in enumerate(frame.prefix):
             choices = ((initialize, closure.initial[k]), (grow_s, closure.next_values[k]))
             if i < 3:
