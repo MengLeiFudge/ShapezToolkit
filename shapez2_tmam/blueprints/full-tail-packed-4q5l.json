@@ -22,7 +22,7 @@
       "request": 1307015
     }
   },
-  "gate_platforms": 9949,
+  "gate_platforms": 9757,
   "reserved_channels": [
     1277000,
     1342535
@@ -93,9 +93,10 @@
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
   "logical_gates": 29899,
   "local_constant_inputs": true,
-  "layout": "未参与别名的固定常量输入就地复制；其余连接保持，复用旧平台的行内及上方空位，组件间隔一格、平台边缘两格，方阵排列。",
+  "local_gate_pairs": 7975,
+  "layout": "固定常量就地复制；单消费者私有组合门两两本地连接，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
   "platform_grid": [
-    100,
-    100
+    99,
+    99
   ]
 }

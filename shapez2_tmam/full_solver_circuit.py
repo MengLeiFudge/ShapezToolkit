@@ -429,7 +429,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         frame.pin_search, frame.family_checked)))
     slow_event = program.or_(enter, next_cut, grow_prefix, begin_pin_search, grounded_ready, move_prefix, start_source, counter_event,
                              descend, commit_top, search_pop, fail_pop, root_solved, replay_up, repeat, repeat_corner)
-    timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,))
+    timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,), local_pairs=True)
     window = program.and_(timing.phases[3], enable)
     sample = program.and_(window, record_valid)
     done = program.and_(window, modes[Phase.DONE], decoded.valid)
@@ -480,7 +480,7 @@ def main() -> int:
     """仅编译生产蓝图及接口，不执行求解。"""
     parser = argparse.ArgumentParser(description="生成四帧递归及成功路径重放的完整四象限尾部电路")
     parser.add_argument("--channel-base", type=int)
-    parser.add_argument("--pack", action="store_true", help="就地放置固定常量并装箱门组件；默认使用独立频道1277000")
+    parser.add_argument("--pack", action="store_true", help="合并内部组合门并装箱；默认使用独立频道1277000")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     default_base = 1_277_000 if args.pack else 1_211_000
@@ -489,8 +489,8 @@ def main() -> int:
     if args.pack:
         platforms = document["BP"]["Entries"]
         report.update({"logical_gates": len(circuit.gates), "gate_platforms": len(platforms),
-                       "local_constant_inputs": True,
-                       "layout": "未参与别名的固定常量输入就地复制；其余连接保持，复用旧平台的行内及上方空位，组件间隔一格、平台边缘两格，方阵排列。",
+                       "local_constant_inputs": True, "local_gate_pairs": len(circuit.local_pairs()),
+                       "layout": "固定常量就地复制；单消费者私有组合门两两本地连接，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
                        "platform_grid": [max(platform["X"] for platform in platforms) + 1,
                                          max(platform["Y"] for platform in platforms) + 1]})
     args.output.parent.mkdir(parents=True, exist_ok=True)

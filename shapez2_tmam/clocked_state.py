@@ -47,7 +47,7 @@ class ClockedState:
 
 
     def close(self, enable: Ref, *, slow_reads: tuple[Ref, ...] = (), slow_event: Ref | None = None,
-              pulses: tuple[Ref, ...] = ()) -> tuple[Clock, dict]:
+              pulses: tuple[Ref, ...] = (), local_pairs: bool = False) -> tuple[Clock, dict]:
         """慢根更新后冻结一轮，脉冲在冻结期清零；分别核对3P/7P传播窗。"""
         if self.closed:
             raise ValueError("同一组主副寄存器只能闭合一次")
@@ -65,6 +65,8 @@ class ClockedState:
             for read in reads:
                 self.next[read] = (self.program.and_(ready, self.next[read]) if read in pulses else
                                    self.program.pick(ready, self.next[read], read))
+        if local_pairs:
+            circuit.local_nodes.update(set(range(len(circuit.gates))) - {read.node for read in self.initial})
         full_depth = circuit.settling_bound()["max_gate_depth"]
         all_reads = tuple(self.initial)
         fast_reads = tuple(read for read in all_reads if read not in slow_reads)

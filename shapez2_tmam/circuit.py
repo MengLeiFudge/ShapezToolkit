@@ -1,6 +1,6 @@
 """将信号门网表布置为带平台、无线连线的原生二代蓝图。
 
-默认每门一块1x1平台；装箱版就地复制固定常量，再平移门组件。端口均静态核对，显式兼容多驱动可共用频道。
+默认每门一块1x1平台；装箱版复制固定常量，并可合并允许的组合门。端口均静态核对，兼容多驱动可共用频道。
 这里编译生产电路，不运行游戏、门级模拟或目标求解。
 """
 
@@ -9,9 +9,11 @@ import gzip
 import json
 import math
 import struct
-from collections import deque
+from collections import Counter, deque
+from collections.abc import Callable
 from dataclasses import dataclass
 
+from .circuit_packing import pack_components
 from .mari.blueprint import Wiring
 from .mari.ports import PORTS
 from .synthesis.physics import Shape
@@ -136,6 +138,46 @@ def _pack_platforms(platforms: list[dict], bounds: list[tuple[int, int, int, int
     return packed, mapping
 
 
+def _place_pair(gate: Gate, provider: Gate, source: Ref, output_channel: int, channels: dict[Ref, int],
+                fixed: dict[Ref, str], place: Callable[[str, int, int, int, str | None], int]
+                ) -> list[tuple[tuple[int, int], tuple[int, int]]]:
+    """二门固定模板；返回每个输入的预期提供者，由调用者检查占地与最终接线。"""
+    links = []
+    direction = PORTS[gate.kind][1][gate.inputs.index(source)][0]
+    vx, vy = _DIRECTIONS[direction]
+    turns = (direction + 2) % 4
+    child_x, child_y = 11 + 4 * vx, 11 + 4 * vy
+    child = place(provider.kind, child_x, child_y, turns, provider.config)
+    parent = place(gate.kind, 11, 11, 0, gate.config)
+    for distance in (1, 2, 3):
+        place("WireForward", 11 + distance * vx, 11 + distance * vy, turns, None)
+    for current, index, x, y, rotation in ((provider, child, child_x, child_y, turns), (gate, parent, 11, 11, 0)):
+        for port, value in enumerate(current.inputs):
+            if index == parent and value == source:
+                links.append(((parent, port), (child, 0)))
+                continue
+            facing = (PORTS[current.kind][1][port][0] + rotation) % 4
+            dx, dy = _DIRECTIONS[facing]
+            toward = (facing + 2) % 4
+            config = constant(value.value) if isinstance(value, Literal) else fixed.get(value)
+            if config is not None:
+                sender = place("ConstantSignal", x + dx, y + dy, toward, config)
+            else:
+                assert isinstance(value, Ref)
+                rx, ry = x + 4 * dx, y + 4 * dy
+                sender = place("ControlledSignalReceiver", rx, ry, toward, None)
+                cx, cy = _DIRECTIONS[(toward + 3) % 4]
+                control = place("ConstantSignal", rx + 2 * cx, ry + 2 * cy, (toward + 1) % 4, constant(channels[value]))
+                links.append(((sender, 0), (control, 0)))
+                for distance in (1, 2):
+                    place("WireForward", x + distance * dx, y + distance * dy, toward, None)
+            links.append(((index, port), (sender, 0)))
+    transmitter = place("ControlledSignalTransmitter", 13, 11, 0, None)
+    control = place("ConstantSignal", 13, 9, 1, constant(output_channel))
+    links.extend((((transmitter, 0), (control, 0)), ((transmitter, 1), (parent, 0))))
+    return links
+
+
 class Circuit:
     """原生门网表及频道分配；导出时核对每个端口的真实几何驱动源。"""
 
@@ -144,6 +186,7 @@ class Circuit:
         self.gates: list[Gate] = []
         self.channel_base = channel_base
         self.aliases: list[tuple[Ref, ...]] = []
+        self.local_nodes: set[int] = set()
 
     def add(self, kind: str, *inputs: Ref | Literal, config: str | None = None) -> Ref:
         """添加一个门，返回输出零；其他出口用 Ref(node, port) 指定。"""
@@ -228,6 +271,31 @@ class Circuit:
                 "conditions": "本机Hybrid或AlwaysHighUPS模式的常速连续推进，每批最多4信号tick；频道独占、接线及配置固定。调试单步、模式切换、强制低UPS和快进不适用。",
                 "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"}
 
+    def local_pairs(self) -> dict[int, int]:
+        """仅合并显式允许的私有组合门；频道别名及显式选频读者保持无线。"""
+        kinds = {"LogicGateAnd", "LogicGateOr", "LogicGateXOr", "LogicGateCompare", "LogicGateIf", "LogicGateNot"}
+        uses = Counter(source for gate in self.gates for source in gate.inputs if isinstance(source, Ref))
+        aliased = {reference for group in self.aliases for reference in group}
+        channels = self.channel_map()
+        received = {gate.inputs[0].value for gate in self.gates if gate.kind == "ControlledSignalReceiver"
+                    and isinstance(gate.inputs[0], Literal)}
+        pairs: dict[int, int] = {}
+        used: set[int] = set()
+        for node in sorted(self.local_nodes, reverse=True):
+            gate = self.gates[node]
+            if node in used or gate.kind not in kinds:
+                continue
+            for port, source in enumerate(gate.inputs):
+                if (not isinstance(source, Ref) or source.port or source.node not in self.local_nodes
+                        or source.node in used or source.node >= node or uses[source] != 1
+                        or source in aliased or channels[source] in received or self.gates[source.node].kind not in kinds
+                        or PORTS[gate.kind][1][port] not in ((2, 0, 0, 0), (3, 0, 0, 0))):
+                    continue
+                pairs[node] = source.node
+                used.update((node, source.node))
+                break
+        return pairs
+
     def document(self, *, packed: bool = False) -> dict:
         """生成原生 Island 蓝图文档，同时核对实际占地和信号网络。"""
         channels = self.channel_map()
@@ -235,7 +303,14 @@ class Circuit:
         bounds: list[tuple[int, int, int, int]] = []
         expected = []
         aliased = {reference for group in self.aliases for reference in group}
+        pairs = self.local_pairs() if packed else {}
+        absorbed = set(pairs.values())
+        fixed_values = {Ref(node): gate.config for node, gate in enumerate(self.gates)
+                        if gate.kind == "ConstantSignal" and Ref(node) not in aliased and gate.config is not None}
         for i, gate in enumerate(self.gates):
+            if i in absorbed:
+                continue
+            component = len(platforms)
             entries = []
             occupied = set()
 
@@ -260,6 +335,15 @@ class Circuit:
                 entries.append(entry)
                 return len(entries) - 1
 
+            if i in pairs:
+                links = _place_pair(gate, self.gates[pairs[i]], Ref(pairs[i]), channels[Ref(i)], channels, fixed_values, place)
+                expected.extend(((component, local, port), (component, sender, sport))
+                                for (local, port), (sender, sport) in links)
+                platforms.append({"T": "Foundation_1x1", "B": {
+                    "$type": "Building", "BinaryVersion": 1137, "Entries": entries}})
+                bounds.append((min(x for x, _, _ in occupied), min(y for _, y, _ in occupied),
+                               max(x for x, _, _ in occupied), max(y for _, y, _ in occupied)))
+                continue
             gate_index = place(gate.kind, 10, 10, config=gate.config)
             for port, source in enumerate(gate.inputs):
                 direction, dx, dy, _ = PORTS[gate.kind][1][port]
@@ -273,7 +357,7 @@ class Circuit:
                     vx, vy = _DIRECTIONS[direction]
                     sender = place("ConstantSignal", 10 + dx + vx, 10 + dy + vy,
                                    (direction + 2) % 4, config)
-                    expected.append(((i, gate_index, port), (i, sender, 0)))
+                    expected.append(((component, gate_index, port), (component, sender, 0)))
                     continue
                 channel = channels[source]
                 if (direction, dx, dy) == (2, 0, 0):
@@ -300,8 +384,8 @@ class Circuit:
                     place("WireForward", 9, 9)
                 else:
                     raise ValueError(f"没有布局的门输入：{gate.kind}:{port}")
-                expected.append(((i, receiver, 0), (i, control, 0)))
-                expected.append(((i, gate_index, port), (i, receiver, 0)))
+                expected.append(((component, receiver, 0), (component, control, 0)))
+                expected.append(((component, gate_index, port), (component, receiver, 0)))
             for port, (direction, dx, dy, _) in enumerate(PORTS[gate.kind][0]):
                 if direction == 0 and dy == 0:
                     if gate.kind in ("VirtualHalvesSwapper", "VirtualAnalyzer", "VirtualUnstacker"):
@@ -319,14 +403,14 @@ class Circuit:
                     control = place("ConstantSignal", 9, 6, 0, constant(channels[Ref(i, port)]))
                 else:
                     raise ValueError(f"没有布局的门输出：{gate.kind}:{port}")
-                expected.append(((i, transmitter, 0), (i, control, 0)))
-                expected.append(((i, transmitter, 1), (i, gate_index, port)))
+                expected.append(((component, transmitter, 0), (component, control, 0)))
+                expected.append(((component, transmitter, 1), (component, gate_index, port)))
             platforms.append({"X": i % 12, "Y": i // 12, "T": "Foundation_1x1", "B": {
                 "$type": "Building", "BinaryVersion": 1137, "Entries": entries}})
             bounds.append((min(x for x, _, _ in occupied), min(y for _, y, _ in occupied),
                            max(x for x, _, _ in occupied), max(y for _, y, _ in occupied)))
         if packed:
-            platforms, mapping = _pack_platforms(platforms, bounds)
+            platforms, mapping = pack_components(platforms) if self.local_nodes else _pack_platforms(platforms, bounds)
             expected = [((mapping[pi][0], mapping[pi][1] + local, port),
                          (mapping[si][0], mapping[si][1] + slocal, sport))
                         for (pi, local, port), (si, slocal, sport) in expected]
