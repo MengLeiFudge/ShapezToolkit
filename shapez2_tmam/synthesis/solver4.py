@@ -4,7 +4,7 @@ from itertools import product
 from typing import Iterator
 
 from .construct import Constructor, Result
-from .inverse import pin_families
+from .inverse import PinFamily, pin_families
 from .physics import Rules, Shape
 from .prefix_closure import minimal_start
 from .recipe import Recipe
@@ -79,19 +79,42 @@ class Solver4:
             if self.constructor.construct(pushed).status == "unsolvable":
                 continue
             for family in pin_families(self.rules, pushed, check_output=not self.certificate_first):
-                for source in family.members(self.rules):
-                    direct = self.constructor.construct(source)
-                    if direct.status == "unsolvable":
-                        continue
-                    source_lowest = min(z for z, row in enumerate(source.layers)
-                                        if any(cell[0] == "c" for cell in row))
-                    if source_lowest >= lowest:
-                        raise RuntimeError("顶针逆像没有使最低保留晶体严格降低")
-                    previous = direct.recipe if direct.recipe is not None else self._tail(source)
-                    if previous is None:
-                        continue
-                    result = self.builder.apply("pin", previous)
-                    if result.result != pushed:
-                        raise RuntimeError("顶针逆像族成员的制造证书未产生指定中间输出")
-                    return self._finish(result, target)
+                previous = self._family_recipe(family, lowest)
+                if previous is None:
+                    continue
+                result = self.builder.apply("pin", previous)
+                if result.result != pushed:
+                    raise RuntimeError("顶针逆像族成员的制造证书未产生指定中间输出")
+                return self._finish(result, target)
+        return None
+
+    def _family_recipe(self, family: PinFamily, lowest: int) -> Recipe | None:
+        """地面C族共用两次可选顶格闭包；其他族仍恢复每个真实成员。"""
+        if any(cell[0] == "c" for cell in family.lower[0]):
+            template = Shape((*family.lower, tuple("cr" if family.top_crystals & (1 << q) else "Cu"
+                                                  for q in range(4))))
+            desired = self.rules.cells(template)
+            for start in range(2):
+                initial = minimal_start(self.rules, template, start, optional_top=True)
+                if initial is None:
+                    continue
+                direct = self.constructor.construct(initial)
+                if direct.recipe is None:
+                    raise RuntimeError("可选顶格闭包已证明A起点，但角构造未生成证书")
+                selected = self.rules.cells(initial)
+                completed = self.rules.fold({pos: cell for pos, cell in desired.items()
+                                             if pos[0] < 4 or cell[0] == "c" or pos in selected})
+                assert completed is not None
+                return self._finish(direct.recipe, completed)
+            return None
+        for source in family.members(self.rules):
+            direct = self.constructor.construct(source)
+            if direct.status == "unsolvable":
+                continue
+            source_lowest = min(z for z, row in enumerate(source.layers) if any(cell[0] == "c" for cell in row))
+            if source_lowest >= lowest:
+                raise RuntimeError("顶针逆像没有使最低保留晶体严格降低")
+            previous = direct.recipe if direct.recipe is not None else self._tail(source)
+            if previous is not None:
+                return previous
         return None

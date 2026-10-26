@@ -61,14 +61,15 @@ def prefix_closure(program: CornerProgram, finder: PrefixSearch, direction: Ref)
                     program.and_(same[z][r], bad[r]) for r in range(5))))
                 forced[q][z] = program.or_(forced[q][z], add)
     for z in range(5):
-        ordinary = tuple(program.and_(finder.delta[q][z], program.not_(target[q][z].pin)) for q in range(4))
+        ordinary = tuple(program.and_(finder.required_delta[q][z], program.not_(target[q][z].pin)) for q in range(4))
         below = tuple(target[q][z - 1].occupied if z else program.one for q in range(4))
         supported = tuple(program.and_(ordinary[q], below[q]) for q in range(4))
         for _ in range(3):
             supported = tuple(program.or_(supported[q], program.and_(ordinary[q], program.or_(
                 supported[(q - 1) % 4], supported[(q + 1) % 4]))) for q in range(4))
         for q in range(4):
-            bad = program.and_(finder.delta[q][z], program.not_(program.pick(target[q][z].pin, below[q], supported[q])))
+            bad = program.and_(finder.required_delta[q][z],
+                               program.not_(program.pick(target[q][z].pin, below[q], supported[q])))
             forced[q][z] = program.or_(forced[q][z], bad)
     additions = tuple(tuple(program.and_(forced[q][z], finder.delta[q][z]) for z in range(5)) for q in range(4))
     changed = program.or_(*(cell for column in additions for cell in column))

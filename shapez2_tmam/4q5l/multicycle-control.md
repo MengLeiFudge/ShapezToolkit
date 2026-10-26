@@ -6,9 +6,9 @@
 
 ## 状态分类
 
-330项慢状态为五帧全部325项状态，以及depth、second_pass、second_corner、support_prefix、leaf_direction。其余为快状态，包括CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计359项状态，六个物品槽、265行ROM。
+331项慢状态为五帧全部325项状态，以及depth、second_pass、second_corner、support_prefix、leaf_direction、optional_top。其余为快状态，包括CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计360项状态，六个物品槽、265行ROM。
 
-K/G共用通路由慢状态support_prefix选择目标或前缀，由当前帧pin_search选择种子。下降写新子帧时同步清该帧pin_search及support_prefix，ENTRY读完整目标K；成功进入PREFIX后support_prefix置1。begin_pin_search置pin_search=1并清support_prefix，PIN_PREFLIGHT读完整目标G；grounded_ready后再选前缀。回父或根重放也设为前缀；Phase不直接驱动洪泛。
+K/G共用通路由慢状态support_prefix选择目标或前缀，由当前帧pin_search选择种子。下降写新子帧时同步清该帧pin_search及support_prefix，ENTRY读完整目标K；成功进入PREFIX后support_prefix置1。可选顶格子帧暂不以模板整体K失败否定该族，实际前缀仍检查K；commit_top确定精确目标并清模式。begin_pin_search置pin_search=1并清support_prefix，PIN_PREFLIGHT读完整目标G；grounded_ready后再选前缀。回父或根重放也设为前缀；Phase不直接驱动洪泛。
 
 每次可能改慢状态的事件均触发slow_event：
 
@@ -18,6 +18,7 @@ K/G共用通路由慢状态support_prefix选择目标或前缀，由当前帧pin
 | 初始化前缀及遍次 | enter、next_cut、begin_pin_search |
 | 前缀推进或强制补格 | move_prefix、grow_prefix |
 | 首轮切向 | enter清零、next_cut置一 |
+| 可选顶格模式及精确目标提交 | descend置模式、commit_top写顶格并清模式、fail_pop清模式 |
 | 清来源游标 | start_source |
 | 来源推进及整段跳过 | counter_event |
 | 回父或跳成功叶端depth | search_pop、fail_pop、root_solved、replay_up |
@@ -55,6 +56,6 @@ record_valid列入pulses，next为 `ready AND 原accepted`，冻结时写0；它
 
 当前规模由[完整控制器](full-tail-circuit.md)及生产JSON记录。新增掩码会增加占地，换取较短的制造周期。最坏来源数与递归分支界保持，必须继续压缩搜索。
 
-本次四个Python文件LSP零诊断，两版完整蓝图通过组合DAG、逐端口和实际占地静态编译。通用标签及独立半形部件沿用原产物。未运行目标、搜索、指令、模拟、测试或游戏。
+本次五个Python文件LSP零诊断，两版完整蓝图通过组合DAG、逐端口和实际占地静态编译。通用标签及独立半形部件沿用原产物。未运行目标、搜索、指令、模拟、测试或游戏。
 
 [完整控制器](full-tail-circuit.md) · [蓝图接口](../blueprints/README.md) · [返回目录](README.md)

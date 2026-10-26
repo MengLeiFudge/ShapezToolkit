@@ -5,8 +5,8 @@ from .physics import EMPTY, PIN, Rules, Shape
 from .support import in_support_class
 
 
-def minimal_start(rules: Rules, target: Shape, start: int) -> Shape | None:
-    """求固定半切方向下最小A→S前态；无C时以完整地面层作非空种子。"""
+def minimal_start(rules: Rules, target: Shape, start: int, *, optional_top: bool = False) -> Shape | None:
+    """求最小A→S前态；可将第4层普通格作为只在A中保留的可选助手。"""
     if rules.quadrants != 4 or start not in (0, 1):
         raise ValueError("前缀强制闭包需要四象限及切向0或1")
     desired = rules.cells(target)
@@ -46,7 +46,8 @@ def minimal_start(rules: Rules, target: Shape, start: int) -> Shape | None:
                         if lowest is not None:
                             forced.add(lowest)
                 lower = upper + 1
-        delta = {pos: cell for pos, cell in desired.items() if pos not in original}
+        delta = {pos: cell for pos, cell in desired.items() if pos not in original
+                 and not (optional_top and pos[0] == 4 and cell[0] != "c")}
         for block in rules.groups(delta):
             if not any(z == 0 or (z - 1, q) in desired for z, q in block):
                 forced.update(block)

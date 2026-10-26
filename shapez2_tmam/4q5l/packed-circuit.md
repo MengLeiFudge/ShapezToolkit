@@ -2,7 +2,7 @@
 
 完整控制器可用 `python -m shapez2_tmam.full_solver_circuit --pack --output shapez2_tmam/blueprints/full-tail-packed-4q5l.spz2bp` 编译压缩布局。产物为 [蓝图](../blueprints/full-tail-packed-4q5l.spz2bp)及[接口](../blueprints/full-tail-packed-4q5l.json)。默认频道1277000～1342535，与未压缩版独立。
 
-实际平台数和方阵尺寸由[生产接口JSON](../blueprints/full-tail-packed-4q5l.json)记录。逻辑门、359项状态、265行ROM和六物品槽没有因装箱减少。本优化只减占地；两版均采用[慢更新冻结协议](multicycle-control.md)，控制周期1008信号tick，即84模拟秒，慢更新后额外等待一轮。搜索复杂度保持原界，尚未通过游戏实用性能验收。
+实际平台数和方阵尺寸由[生产接口JSON](../blueprints/full-tail-packed-4q5l.json)记录。逻辑门、360项状态、265行ROM和六物品槽没有因装箱减少。本优化只减占地；两版均采用[慢更新冻结协议](multicycle-control.md)，控制周期1008信号tick，即84模拟秒，慢更新后额外等待一轮。搜索复杂度保持原界，尚未通过游戏实用性能验收。
 
 ## 装箱规则
 

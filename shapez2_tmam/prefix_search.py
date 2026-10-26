@@ -9,7 +9,8 @@ from .synthesis.physics import EMPTY
 class PrefixSearch:
     """四列仅遍历保留全部C的不同前缀；命中后冻结前态供制造程序使用。"""
 
-    def __init__(self, program: CornerProgram, target: tuple[tuple[CellRef, ...], ...]):
+    def __init__(self, program: CornerProgram, target: tuple[tuple[CellRef, ...], ...], *,
+                 optional_top: Ref | None = None):
         if len(target) != 4 or any(len(column) != 5 for column in target):
             raise ValueError("S前缀搜索需要四列，每列五个原层位")
         self.program = program
@@ -35,11 +36,15 @@ class PrefixSearch:
                                    for z in range(5)) for q in range(4))
         self.delta = tuple(tuple(program.and_(cell.occupied, program.not_(keep[q][z]))
                                  for z, cell in enumerate(column)) for q, column in enumerate(target))
+        self.required_delta = tuple(tuple(
+            program.and_(value, program.or_(program.not_(optional_top), target[q][z].crystal))
+            if z == 4 and optional_top is not None else value
+            for z, value in enumerate(column)) for q, column in enumerate(self.delta))
         clauses = [program.or_(program.not_(cell.crystal), keep[q][z])
                    for q, column in enumerate(target) for z, cell in enumerate(column)]
         clauses.append(program.or_(*(cell.occupied for column in self.columns for cell in column)))
         for z in range(5):
-            ordinary = tuple(program.and_(self.delta[q][z], program.not_(target[q][z].pin),
+            ordinary = tuple(program.and_(self.required_delta[q][z], program.not_(target[q][z].pin),
                                          program.not_(target[q][z].crystal)) for q in range(4))
             below = tuple(target[q][z - 1].occupied if z else program.one for q in range(4))
             supported = tuple(program.and_(ordinary[q], below[q]) for q in range(4))
@@ -48,7 +53,7 @@ class PrefixSearch:
                 supported = tuple(program.or_(supported[q], program.and_(ordinary[q], program.or_(
                     supported[(q - 1) % 4], supported[(q + 1) % 4]))) for q in range(4))
             clauses.extend(program.or_(program.not_(ordinary[q]), supported[q]) for q in range(4))
-            clauses.extend(program.or_(program.not_(program.and_(self.delta[q][z], target[q][z].pin)), below[q])
+            clauses.extend(program.or_(program.not_(program.and_(self.required_delta[q][z], target[q][z].pin)), below[q])
                            for q in range(4))
         self.appendable = program.and_(*clauses)
 
