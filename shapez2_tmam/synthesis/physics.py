@@ -3,6 +3,7 @@
 规则实例支持偶数象限及至少两层的参数化模型，独立于 Mari 的固定四象限电路。
 """
 
+from collections import deque
 from dataclasses import dataclass
 
 
@@ -68,11 +69,12 @@ class Rules:
         return Shape(tuple(tuple(row) for row in rows))
 
     def groups(self, cells: dict[Position, str], *, fused: bool = False) -> list[set[Position]]:
-        """划分最大粘连组或仅含晶体的融合组，颜色不影响连接。"""
+        """划分粘连组或晶体融合组，按最小格位排序；颜色不影响连接。"""
         pending = {pos for pos, cell in cells.items() if not fused or cell[0] == "c"}
         groups = []
-        while pending:
-            first = min(pending)
+        for first in sorted(pending):
+            if first not in pending:
+                continue
             pending.remove(first)
             group = {first}
             queue = [first]
@@ -93,35 +95,52 @@ class Rules:
             groups.append(group)
         return groups
 
+    def stationary(self, cells: dict[Position, str], *, grounded: bool = True) -> set[Position]:
+        """反向支撑队列求最大静止格集合；抬高的上料使用空地面种子。"""
+        groups = self.groups(cells)
+        owner = {pos: index for index, group in enumerate(groups) for pos in group}
+        ground = {owner[pos] for pos in cells if grounded and pos[0] == 0}
+        supports: list[set[int]] = [set() for _ in groups]
+        for (z, q), index in owner.items():
+            below = owner.get((z - 1, q))
+            if below is not None and below != index:
+                supports[index].add(below)
+        dependents: list[set[int]] = [set() for _ in groups]
+        for index, edges in enumerate(supports):
+            for below in edges:
+                dependents[below].add(index)
+        counts = [len(edges) for edges in supports]
+        queue = deque(index for index, count in enumerate(counts) if not count and index not in ground)
+        removed = set()
+        while queue:
+            index = queue.popleft()
+            removed.add(index)
+            for above in dependents[index]:
+                counts[above] -= 1
+                if not counts[above] and above not in ground:
+                    queue.append(above)
+        return {pos for pos, index in owner.items() if index not in removed}
+
     def collapse(self, cells: dict[Position, str], fused: tuple | list[set[Position]] = ()) -> Shape | None:
         """用静止组及落点公式计算一次重力，最后截高，不合并下落中的新接触。"""
         vanished = set().union(*(group for group in fused if not group <= cells.keys()))
         live = {pos: cell for pos, cell in cells.items() if pos not in vanished}
-        groups = self.groups(live)
-        owner = {pos: index for index, group in enumerate(groups) for pos in group}
-        ground = {owner[pos] for pos in live if pos[0] == 0}
-        edges: list[set[int]] = [set() for _ in groups]
-        for (z, q), index in owner.items():
-            below = owner.get((z - 1, q))
-            if below is not None and below != index:
-                edges[index].add(below)
-        fixed = set(range(len(groups)))
-        while True:
-            keep = {index for index in fixed if index in ground or edges[index] & fixed}
-            if keep == fixed:
-                break
-            fixed = keep
-        result = {pos: live[pos] for index in fixed for pos in groups[index]}
-        moving = {pos: cell for pos, cell in live.items()
-                  if owner[pos] not in fixed and cell[0] != "c"}
-        blocks = sorted(self.groups(moving), key=lambda block: min(block))
-        for block in blocks:
+        fixed = self.stationary(live)
+        result = {pos: live[pos] for pos in fixed}
+        moving = {pos: cell for pos, cell in live.items() if pos not in fixed and cell[0] != "c"}
+        barriers = iter(sorted(fixed))
+        barrier = next(barriers, None)
+        tops = [-1] * self.quadrants
+        for block in self.groups(moving):
             source = next(iter(block))[0]
+            while barrier is not None and barrier[0] < source:
+                z, q = barrier
+                tops[q] = max(tops[q], z)
+                barrier = next(barriers, None)
             columns = {q for _, q in block}
-            # result 含全部固定格和已落下的更低来源块；同层块列集合互斥。
-            barriers = [z for z, q in result if q in columns and z < source]
-            z = 1 + max(barriers, default=-1)
-            for _, q in block:
+            z = 1 + max(tops[q] for q in columns)
+            for q in columns:
+                tops[q] = z
                 result[z, q] = moving[source, q]
         return self.fold(result)
 

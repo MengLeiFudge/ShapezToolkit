@@ -52,25 +52,14 @@ class StackPlan:
 def stack_plan(rules: Rules, upper: Shape) -> StackPlan:
     """空地面种子求上料静止组，再剔除必超高块，规范化独立块的顺序。"""
     cells = rules.cells(upper)
-    groups = rules.groups(cells)
-    owner = {pos: index for index, group in enumerate(groups) for pos in group}
-    edges: list[set[int]] = [set() for _ in groups]
-    for (z, q), index in owner.items():
-        below = owner.get((z - 1, q))
-        if below is not None and below != index:
-            edges[index].add(below)
-    fixed = set(range(len(groups)))
-    while True:
-        following = {index for index in fixed if edges[index] & fixed}
-        if following == fixed:
-            break
-        fixed = following
-    blocked = [min((z for (z, column), index in owner.items() if column == q and index in fixed), default=rules.height)
-               for q in range(rules.quadrants)]
-    moving = {pos: cell for pos, cell in cells.items() if owner[pos] not in fixed and cell[0] != "c"}
+    fixed = rules.stationary(cells, grounded=False)
+    blocked = [rules.height] * rules.quadrants
+    for z, q in fixed:
+        blocked[q] = min(blocked[q], z)
+    moving = {pos: cell for pos, cell in cells.items() if pos not in fixed and cell[0] != "c"}
     ranks = [0] * rules.quadrants
     pieces = []
-    for block in sorted(rules.groups(moving), key=min):
+    for block in rules.groups(moving):
         source = min(block)[0]
         columns = tuple(sorted(q for _, q in block))
         if any(blocked[q] < source for q in columns):
