@@ -1,10 +1,9 @@
-"""条件堆叠约化：K下料的基础块域，以及摘要确认的单次N/P上料构造。"""
+"""条件堆叠约化：K下料的基础块域，以及直接判据确认的单次N/P上料。"""
 
 from collections.abc import Iterable, Iterator
 
 from .physics import EMPTY, PIN, Rules, Shape
 from .recipe import Builder, Recipe
-from .stack_plan import stack_plan
 from .support import in_support_class
 
 
@@ -75,10 +74,10 @@ def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool)
             top = max((z for z, column in shifted if column == q), default=-1)
             for z in range(top + 1):
                 filled[z, q] = shifted.get((z, q), "cr")
+        if rules.stationary(filled, grounded=False):
+            return None
         source = rules.fold(filled)
         assert source is not None
-        if sum(len(piece) for piece in stack_plan(rules, source).pieces) != len(delta):
-            return None
         upper = builder.independent_columns(source)
         if upper is None:
             return None
@@ -98,7 +97,7 @@ def ordinary_stack(builder: Builder, lower: Recipe, target: Shape) -> Recipe | N
 def single_stack(builder: Builder, lower: Recipe, target: Shape) -> Recipe | None:
     """新增N/P的单次构造；优先无C下落候选，再用可独立制造的补C连续列。
 
-    下料允许非K或不稳定。无C候选检查块数守恒，补C候选检查摘要，保留旧针尾域。
+    下料允许非K或不稳定。无C候选检查块数守恒，补C候选排除静止格，保留旧针尾域。
     返回None仅表示必要条件或这两种候选未通过，不能判目标全局不可制作。
     """
     return _single_stack(builder, lower, target, pins=True)

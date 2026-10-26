@@ -1,4 +1,6 @@
-"""以格位可达性判断K支撑类；四象限可用作制造前必要筛选。"""
+"""以支撑可达队列判断K/G类；四象限可用作制造前必要筛选。"""
+
+from collections import deque
 
 from .physics import PIN, Rules, Shape
 
@@ -9,21 +11,20 @@ def in_support_class(rules: Rules, target: Shape, *, grounded: bool = False, opt
     if any(cell == PIN and z and (z - 1, q) not in cells for (z, q), cell in cells.items()):
         return False
     reachable = {pos for pos, cell in cells.items() if pos[0] == 0 or (not grounded and cell == PIN)}
-    for _ in range(max(0, len(cells) - 1)):
-        following = set(reachable)
-        for (z, q), cell in cells.items():
-            if (z, q) in reachable:
-                continue
-            supported = (z - 1, q) in reachable
-            if cell != PIN:
-                supported |= any((z, neighbor) in reachable and cells[(z, neighbor)] != PIN
-                                 for neighbor in ((q - 1) % rules.quadrants, (q + 1) % rules.quadrants))
-                above = (z + 1, q)
-                supported |= cell[0] == "c" and above in reachable and cells[above][0] == "c"
-            if supported:
-                following.add((z, q))
-        if following == reachable:
-            break
-        reachable = following
+    queue = deque(reachable)
+    while queue:
+        z, q = queue.popleft()
+        cell = cells[z, q]
+        neighbors = [(z + 1, q)]
+        if cell != PIN:
+            neighbors.extend((z, column) for column in ((q - 1) % rules.quadrants, (q + 1) % rules.quadrants)
+                             if cells.get((z, column), PIN) != PIN)
+        below = (z - 1, q)
+        if cell[0] == "c" and cells.get(below, PIN)[0] == "c":
+            neighbors.append(below)
+        for pos in neighbors:
+            if pos in cells and pos not in reachable:
+                reachable.add(pos)
+                queue.append(pos)
     return all(pos in reachable or (optional_top and pos[0] == rules.height - 1
                                     and cell != PIN and cell[0] != "c") for pos, cell in cells.items())

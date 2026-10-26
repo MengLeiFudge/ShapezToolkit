@@ -64,7 +64,7 @@ if result.recipe is not None:
 
 `ordinary_stack(builder, lower, target)`允许非K及不稳定下料。当目标相对下料一次结算结果只增加普通格时，直接检查列顶与新增块支撑，构造一份紧密N/C上料并执行一次Stack；不搜索任意上料，也不把一次加工拆成多次。失败仅表示固定下料的这一子问题不满足条件，见[证明](../general/ordinary-stack.md)。
 
-`single_stack(builder, lower, target)`把普通追加扩展到新增针：先令新增N/P独立下落，若前后块数相等，就用紧凑的无晶体上料；否则确认补C连续列的摘要保留全部新增N/P格，并取得独立列制造凭据。这个[块数守恒判据及交错上料构造](../general/interleaved-stack.md)保留旧[针尾域](../general/pin-tail-stack.md)，也覆盖部分N/P交错目标；实际始终只对原下料执行一次Stack。两种候选均失败时返回None，不能视为目标全局不可制作。
+`single_stack(builder, lower, target)`把普通追加扩展到新增针：先令新增N/P独立下落，若前后块数相等，就用紧凑的无晶体上料；否则检查补C连续列在抬高后没有静止格，并取得独立列制造凭据。这个[块数守恒判据及交错上料构造](../general/interleaved-stack.md)保留旧[针尾域](../general/pin-tail-stack.md)，也覆盖部分N/P交错目标；实际始终只对原下料执行一次Stack。两种候选均失败时返回None，不能视为目标全局不可制作。
 
 `stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，每键保留已知步数最少者，空/单块上料摘要使用已证极小替换。`construct(target)`先筛下料，再逐块检查新增格；可见格不匹配时立即停止该候选，成功返回已登记摘要对中总步数最少的真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
 
