@@ -1,6 +1,7 @@
 """直接构造制造证书：两象限完整判定，其他参数未覆盖的含晶体目标返回unknown。"""
 
 from dataclasses import dataclass
+from math import gcd
 
 from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Rules, Shape
@@ -53,6 +54,37 @@ class Constructor:
             raise RuntimeError("两角拼接结果与通过判据的目标半形不一致")
         self.halves[target] = result
         return result
+
+    def _replicated(self, target: Shape) -> Recipe | None:
+        """按完全相同的相邻列压缩商图；只提升成功证书，不传播商图的否定。"""
+        n = self.rules.quadrants
+        columns = [tuple(row[q] for row in target.layers) for q in range(n)]
+        start = next((q for q in range(n) if columns[q] != columns[(q - 1) % n]), 0)
+        factor = n // 2
+        length = 1
+        for offset in range(1, n):
+            if columns[(start + offset) % n] == columns[(start + offset - 1) % n]:
+                length += 1
+            else:
+                factor = gcd(factor, length)
+                length = 1
+        factor = gcd(factor, length)
+        if factor == 1:
+            return None
+        factors = [factor]
+        if n > 4 and n % 4 == 0 and factor % (n // 4) == 0 and factor != n // 4:
+            factors.append(n // 4)
+        for factor in factors:
+            small = Shape(tuple(tuple(row[(start + offset) % n] for offset in range(0, n, factor))
+                                for row in target.layers))
+            source = Constructor(Rules(n // factor, self.rules.height)).construct(small).recipe
+            if source is None:
+                continue
+            result = self.builder.apply("rotate", self.builder.replicate(source), parameter=start)
+            if result.result != target:
+                raise RuntimeError("复制商图的制造证书未还原目标朝向与格位")
+            return result
+        return None
 
     def _two_quadrant(self, target: Shape) -> Result:
         """对含晶体两象限目标检查充要条件；完整前缀和无C上层直接制造。"""
@@ -129,4 +161,7 @@ class Constructor:
                 if recipe.result != target:
                     raise RuntimeError("两半构造证书与目标不一致")
                 return Result("solved", recipe, "逐列角构造的半形拼接")
+        recipe = self._replicated(target)
+        if recipe is not None:
+            return Result("solved", recipe, "相邻象限等宽复制的制造证书")
         return Result("unknown", None, "含晶体目标未被当前局部构造覆盖；尚无完整实用求解器")

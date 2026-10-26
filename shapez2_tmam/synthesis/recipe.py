@@ -88,7 +88,7 @@ class Recipe:
 
 
 class Builder:
-    """以精确物理计算每个节点，提供基础层、紧柱和半形拼接构造。"""
+    """以局部物理及已证配方变换生成节点，提供基础层、紧柱和半形拼接。"""
 
     def __init__(self, rules: Rules):
         """保存此制造树唯一的物理配置。"""
@@ -143,6 +143,38 @@ class Builder:
         if len(inputs) == 1 and result == inputs[0].result:
             return inputs[0]
         return Recipe(operation, result, inputs, parameter, self.rules.height)
+
+    def replicate(self, source: Recipe) -> Recipe:
+        """按相邻象限等宽复制提升同高度配方；由操作对应定理直接变换各节点。"""
+        width = len(source.result.layers[0])
+        if (source.height != self.rules.height or width < 2 or width % 2
+                or self.rules.quadrants % width):
+            raise ValueError("配方提升需要相同高度上限，目标象限数为原偶数象限的整数倍")
+        factor = self.rules.quadrants // width
+        if factor == 1:
+            return source
+        lifted: dict[Recipe, Recipe] = {}
+        pending = [(source, False)]
+        while pending:
+            node, ready = pending.pop()
+            if node in lifted:
+                continue
+            if not ready:
+                pending.append((node, True))
+                pending.extend((child, False) for child in reversed(node.inputs))
+                continue
+            parameter = node.parameter
+            if node.operation == "rotate":
+                if not isinstance(parameter, int):
+                    raise ValueError("旋转配方需要整数参数才能提升")
+                parameter *= factor
+            elif node.operation not in ("base", "cut", "swap", "pin", "stack", "crystal"):
+                raise ValueError(f"尚未证明此加工的象限复制规则：{node.operation!r}")
+            result = Shape(tuple(tuple(cell for cell in row for _ in range(factor))
+                                 for row in node.result.layers))
+            lifted[node] = Recipe(node.operation, result, tuple(lifted[child] for child in node.inputs),
+                                  parameter, self.rules.height)
+        return lifted[source]
 
     def window(self, source: Recipe, start: int) -> Recipe:
         """旋转到原生方向、保留连续半面，再恢复世界方向。"""

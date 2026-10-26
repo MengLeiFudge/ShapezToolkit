@@ -56,6 +56,8 @@ if result.recipe is not None:
 
 `Builder` 提供基础层、无晶体逐层构造、独立单列、独立晶体前缀、逐层 N/P 追加和列拼接。多层晶体原料通过基础原料、结晶和切割展开，不能作为免费的实体输入。
 
+`Builder.replicate(source)`把相同H、较少偶数象限的真实配方提升到整数倍象限：每格扩张成相邻副本，旋转参数按倍数换算，其余操作保持。它根据[操作对应证明](../general/sector-replication.md)直接变换全部中间产物，不重新运行每个大图节点的物理。`Constructor`在旧构造失败后自动识别这种连续列结构，尝试较小商图并提升成功证书；小图不可制作不会被传为大图不可制作。
+
 两象限的`Constructor.construct`检查稳定性、针前缀和全图最高C以下的连续列，随后先制造完整两列前缀，再追加上方N/P。它在已界定供料内直接返回solved或unsolvable，不查完整状态目录；`cu`仍返回unknown。配方长度O(H)、物品槽至多3，原生`--instructions`仍保持4q5l范围。
 
 四象限的 `Constructor.half` 使用[逐列角构造](../4q5l/corner-synthesis.md)，在合法颜色范围内精确判半形，成功时至多285个制造节点。`CornerBuilder.accepts_half` 只检查列条件和新分组的稳定性；`CornerBuilder.build` 准备单列及其 N/P 助手，处理八种顶针难列。`Solver4.solve` 使用这些局部起点及完整顶针/堆叠尾部；零Pin首轮由[`minimal_start`](prefix_closure.py)求两个切向的[强制最小前缀](../4q5l/prefix-closure.md)，每切向至多20次补格及一次最终检查。Pin后的S仍完整遍历，由[四次尾部Pin改写定理](../4q5l/three-pin-tail.md)按最高C的零基层号H限定max(0,H−1)条递归边、最多三条，实际搜索分支仍需压缩。理论上每个可制作四象限目标存在至多616节点的制造树。六象限目前只启用无晶体及独立柱构造，不能据此判断全部六象限含晶体目标。
@@ -74,7 +76,7 @@ if result.recipe is not None:
 
 `Recipe.step_count`在建立节点时计算`1+sum(输入.step_count)`，等于消费式步骤展开的条数。共享子配方引用仍按每份实体分别计数。这个指标用于选配方，不代表建筑数量或游戏耗时，也不保证全局最短。
 
-用户手工复现用的[十九个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
+用户手工复现用的[二十个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
 
 面向游戏材料寄存器可用 `Solver4(rules, certificate_first=True)`。`pin_families(..., check_output=False)`用[`pin_image_matches`](pin_constraints.py)按最大静止集合及块支撑精确匹配物理输出，无需先编码任意原生候选；[充要证明](../4q5l/pin-image-exact.md)补齐了原必要筛选。候选仍须递归取得制造证书，实际制造的Pin结果也须与目标相同；物理匹配不代替可制作性。两列判据使用[按层扫描](../4q5l/half-row-stability.md)。CLI保留默认正向Pin检查模式，两种物理检查接受同一规范化逆像族；均没有实用搜索复杂度承诺。
 

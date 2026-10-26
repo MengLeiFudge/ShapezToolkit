@@ -198,6 +198,20 @@ def two_quadrant_example() -> Example:
                    2, result, (("最高晶体以下前缀", prefix), ("跨列普通上层", bridged), ("补针后的目标", result)))
 
 
+def replicated_stack_example() -> Example:
+    """四象限间隙构造扩张到八象限，复制块边界相对q0偏移一列。"""
+    rules = Rules(8)
+    small = Rules(4).parse("CuCu----:--P-----:crCu----:--Cu----:--Cu----")
+    expanded = rules.parse(":".join("".join(cell * 2 for cell in row) for row in small.layers))
+    target = rules.rotate(expanded, 1)
+    result = Constructor(rules).construct(target).recipe
+    if result is None or result.result != target:
+        raise RuntimeError("八象限复制商图未生成间隙代表配方")
+    return Example("8q-replicated-gap", "把四象限晶体间隙配方提升到八象限",
+                   "目标每两列相同，复制块从q1开始。先压回四象限求角构造，再逐节点复制象限并把旋转参数乘二，最后恢复目标方向。中间图形由已证操作对应直接扩张。",
+                   8, result)
+
+
 def protected_half_example() -> Example:
     """展开八象限W_4；内块两侧列顶封住后续普通块的粘合入口。"""
     builder = Builder(Rules(8))
@@ -286,7 +300,7 @@ def main() -> int:
     args = parser.parse_args()
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
-                     layered_stack_example(), pin_prefix_stack_example()))
+                     layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)
