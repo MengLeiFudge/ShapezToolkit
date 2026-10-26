@@ -110,101 +110,114 @@
     "enable": 1194048
   },
   "outputs": {
-    "candidate_valid": 1199880,
+    "candidate_valid": 1202732,
+    "has_slots": 1202775,
+    "next_slots": [
+      1196024,
+      1197674,
+      1199324,
+      1200974
+    ],
+    "last_slots": [
+      1196022,
+      1197672,
+      1199322,
+      1200972
+    ],
     "source_bottom_to_top": [
       [
         {
-          "material": 1199881,
-          "tag": 1199901
+          "material": 1202733,
+          "tag": 1202753
         },
         {
-          "material": 1199886,
-          "tag": 1199906
+          "material": 1202738,
+          "tag": 1202758
         },
         {
-          "material": 1199891,
-          "tag": 1199911
+          "material": 1202743,
+          "tag": 1202763
         },
         {
-          "material": 1199896,
-          "tag": 1199916
+          "material": 1202748,
+          "tag": 1202768
         }
       ],
       [
         {
-          "material": 1199882,
-          "tag": 1199902
+          "material": 1202734,
+          "tag": 1202754
         },
         {
-          "material": 1199887,
-          "tag": 1199907
+          "material": 1202739,
+          "tag": 1202759
         },
         {
-          "material": 1199892,
-          "tag": 1199912
+          "material": 1202744,
+          "tag": 1202764
         },
         {
-          "material": 1199897,
-          "tag": 1199917
+          "material": 1202749,
+          "tag": 1202769
         }
       ],
       [
         {
-          "material": 1199883,
-          "tag": 1199903
+          "material": 1202735,
+          "tag": 1202755
         },
         {
-          "material": 1199888,
-          "tag": 1199908
+          "material": 1202740,
+          "tag": 1202760
         },
         {
-          "material": 1199893,
-          "tag": 1199913
+          "material": 1202745,
+          "tag": 1202765
         },
         {
-          "material": 1199898,
-          "tag": 1199918
+          "material": 1202750,
+          "tag": 1202770
         }
       ],
       [
         {
-          "material": 1199884,
-          "tag": 1199904
+          "material": 1202736,
+          "tag": 1202756
         },
         {
-          "material": 1199889,
-          "tag": 1199909
+          "material": 1202741,
+          "tag": 1202761
         },
         {
-          "material": 1199894,
-          "tag": 1199914
+          "material": 1202746,
+          "tag": 1202766
         },
         {
-          "material": 1199899,
-          "tag": 1199919
+          "material": 1202751,
+          "tag": 1202771
         }
       ],
       [
         {
-          "material": 1199885,
-          "tag": 1199905
+          "material": 1202737,
+          "tag": 1202757
         },
         {
-          "material": 1199890,
-          "tag": 1199910
+          "material": 1202742,
+          "tag": 1202762
         },
         {
-          "material": 1199895,
-          "tag": 1199915
+          "material": 1202747,
+          "tag": 1202767
         },
         {
-          "material": 1199900,
-          "tag": 1199920
+          "material": 1202752,
+          "tag": 1202772
         }
       ]
     ]
   },
-  "gate_platforms": 5860,
+  "gate_platforms": 8712,
   "reserved_channels": [
     1194000,
     1210383
@@ -218,7 +231,7 @@
   },
   "encoding": "材料0空1N2P3C；每列槽号0～19；顶格0空1Cu2P3红C。标签继承固定原目标表，辅助顶格标签同其整数。",
   "scope": "完整覆盖四列及顶盖结构候选，并筛融合/组位移必要条件；仍须真实制造、原生Pin及完整目标比较。没有内部迭代或完成脉冲。",
-  "resource_bound": "四份共用二十槽选址和单列路由；每列最多20个槽而非256个控制字；不保存候选表或完整图形目录。",
-  "proof": "4q5l/pin-patterns.md；pin-source-conflicts.md；pin-image-constraints.md；pin-column-circuit.md。",
+  "resource_bound": "四份共用二十槽选址和单列路由；按单列合法槽直接后继，跳过非法槽；不保存目标图形目录。",
+  "proof": "4q5l/pin-patterns.md；valid-slot-cursor.md；pin-source-conflicts.md；pin-image-constraints.md；pin-column-circuit.md。",
   "verification": "仅静态DAG、端口和实际占地生产编译；未运行目标、候选遍历、制造、模拟或测试"
 }

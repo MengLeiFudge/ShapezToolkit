@@ -29,7 +29,7 @@ class PinSource:
     top_pin_allowed: tuple[Ref, ...]
     top_crystal_allowed: tuple[Ref, ...]
     top_crystals: tuple[Ref, ...]
-    slot_addresses: tuple[tuple[Ref, ...], ...]
+    next_slots: tuple[Ref, ...]
 
 
 def _crystal_cap_allowed(program: CornerProgram, lower: tuple[MaterialCell, ...]) -> Ref:
@@ -96,7 +96,7 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
     return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image, slot_conflicts,
                      tuple(pattern.last_slot for pattern in patterns), program.and_(*(pattern.has_slots for pattern in patterns)),
                      top_pin_allowed, top_crystal_allowed, tuple(cell.crystal for cell in top_flags),
-                     tuple(pattern.addresses for pattern in patterns))
+                     tuple(pattern.next_slot for pattern in patterns))
 
 
 def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:
@@ -123,14 +123,17 @@ def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:
                    "source_slots": [channel_base + 40 + q for q in range(4)],
                    "source_top_values": [channel_base + 44 + q for q in range(4)], "enable": channel_base + 48},
         "outputs": {"candidate_valid": channels[source.valid],
+                    "has_slots": channels[source.has_slots],
+                    "next_slots": [channels[value] for value in source.next_slots],
+                    "last_slots": [channels[value] for value in source.last_slots],
                     "source_bottom_to_top": [[{"material": channels[source.materials[q][z]],
                                                "tag": channels[source.tags[q][z]]} for q in range(4)] for z in range(5)]},
         "gate_platforms": len(circuit.gates), "reserved_channels": [channel_base, channel_base + reserve - 1],
         "settling": circuit.settling_bound(),
         "encoding": "材料0空1N2P3C；每列槽号0～19；顶格0空1Cu2P3红C。标签继承固定原目标表，辅助顶格标签同其整数。",
         "scope": "完整覆盖四列及顶盖结构候选，并筛融合/组位移必要条件；仍须真实制造、原生Pin及完整目标比较。没有内部迭代或完成脉冲。",
-        "resource_bound": "四份共用二十槽选址和单列路由；每列最多20个槽而非256个控制字；不保存候选表或完整图形目录。",
-        "proof": "4q5l/pin-patterns.md；pin-source-conflicts.md；pin-image-constraints.md；pin-column-circuit.md。",
+        "resource_bound": "四份共用二十槽选址和单列路由；按单列合法槽直接后继，跳过非法槽；不保存目标图形目录。",
+        "proof": "4q5l/pin-patterns.md；valid-slot-cursor.md；pin-source-conflicts.md；pin-image-constraints.md；pin-column-circuit.md。",
         "verification": "仅静态DAG、端口和实际占地生产编译；未运行目标、候选遍历、制造、模拟或测试",
     }
 

@@ -331,8 +331,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         program.and_(skip_at[i], *candidate.last_slots[i:q]) for i in range(min(q + 1, 4)))) for q in range(5))
     next_slots = []
     for q, value in enumerate(slots):
-        advanced, _ = _increment_value(program, value, slot_advances[q],
-                                       candidate.slot_addresses[q], candidate.last_slots[q])
+        advanced = program.pick(slot_advances[q], candidate.next_slots[q], value)
         reset_lower = program.or_(*skip_at[q + 1:])
         next_slots.append(program.pick(reset_lower, program.zero, advanced))
     sources_finished = slot_advances[4]
