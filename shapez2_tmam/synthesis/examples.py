@@ -5,6 +5,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from .construct import Constructor
 from .corners import CornerBuilder
 from .half_catalog import HalfCatalog
 from .physics import EMPTY, PIN, Rules
@@ -168,14 +169,13 @@ def layered_stack_example() -> Example:
 
 def two_quadrant_example() -> Example:
     """两象限六层：先拼连续晶体以下前缀，再让普通上层跨列支撑。"""
-    builder = Builder(Rules(2, 6))
-    prefix = builder.independent_columns(builder.rules.parse("P-Cu:crP-:CuCu:cr--"))
-    assert prefix is not None
-    bridged = builder.apply("stack", prefix, builder.base(("Cu", "Cu")))
-    result = builder.apply("stack", bridged, builder.base((EMPTY, PIN)))
-    expected = builder.rules.parse("P-Cu:crP-:CuCu:cr--:CuCu:--P-")
-    if result.result != expected:
-        raise RuntimeError("两象限连续前缀与跨列上层未产生目标；不能导出该配方")
+    rules = Rules(2, 6)
+    expected = rules.parse("P-Cu:crP-:CuCu:cr--:CuCu:--P-")
+    result = Constructor(rules).construct(expected).recipe
+    if result is None or result.result != expected:
+        raise RuntimeError("两象限完整构造未产生代表目标；不能导出该配方")
+    bridged = result.inputs[0]
+    prefix = bridged.inputs[0]
     return Example("2q6l-crystal-prefix", "两象限的连续前缀与上方跨列支撑",
                    "最高晶体以下先造两根连续柱；再用双普通格跨过较短列的空隙，最后补针。最高晶体上方允许这种间隙。",
                    2, result, (("最高晶体以下前缀", prefix), ("跨列普通上层", bridged), ("补针后的目标", result)))

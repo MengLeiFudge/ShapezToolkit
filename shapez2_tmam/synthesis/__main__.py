@@ -9,7 +9,7 @@ from .physics import Rules
 
 def main() -> int:
     """输出 JSON 制造步骤；退出码 0/2/3 分别为成功/不可制作/未覆盖。"""
-    parser = argparse.ArgumentParser(description="偶数象限局部构造，可选完整四象限五层尾部搜索")
+    parser = argparse.ArgumentParser(description="偶数象限合成：两象限直接判定，可选完整四象限五层尾部搜索")
     parser.add_argument("target", help="保留原层号的图形短代码")
     parser.add_argument("--quadrants", type=int, default=4, help="偶数象限数，至少2")
     parser.add_argument("--height", type=int, default=5, help="整个制造过程的层数上限，至少2")
