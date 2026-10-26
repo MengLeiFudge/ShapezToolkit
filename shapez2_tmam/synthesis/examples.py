@@ -9,7 +9,7 @@ from .corners import CornerBuilder
 from .half_catalog import HalfCatalog
 from .physics import EMPTY, PIN, Rules
 from .recipe import Builder, Recipe
-from .stack_reduction import ordinary_stack
+from .stack_reduction import ordinary_stack, single_stack
 
 
 @dataclass(frozen=True)
@@ -73,6 +73,12 @@ def wide_half_examples() -> list[Example]:
     settled = ordinary_stack(builder, whole, builder.rules.parse("CuCuCuCuCuCu:----CuCu--Cu:--CuCu--CuCu"))
     if settled is None:
         raise RuntimeError("V再次堆叠的代表目标未取得单次普通追加配方")
+    column = builder.column(("Cu", "Cu"), 3)
+    assert column is not None
+    lower = builder.apply("stack", half, column)
+    pin_tail = single_stack(builder, lower, builder.rules.parse("Cu----CuCu--:------Cu----:crCuCuP-----:cr--Cu------:crCuCu------"))
+    if pin_tail is None:
+        raise RuntimeError("六象限针尾代表未取得单次堆叠配方")
     milestones = (("独立柱拼成准备形S", prepared), ("切掉q1辅助晶体得到A", released),
                   ("无晶体阶梯B", scaffold), ("A与B拼接", merged), ("切出非K半形H", half))
     return [
@@ -81,6 +87,8 @@ def wide_half_examples() -> list[Example]:
                 (("每份H单独制造", half), ("第二份H旋转三个象限", whole.inputs[1]), ("最终交换输出V", whole))),
         Example("6q-V-stack", "不稳定成品再次加工后的变化", "以V作下料，追加q3单格普通料。下料本次重新分组，悬空晶体破碎，普通格落下；新增普通格落在q3第二层。", 6, settled,
                 (("加工前的V", whole), ("上料", settled.inputs[1]), ("一次堆叠后的成品", settled))),
+        Example("6q-pin-tail", "非K下料追加普通格和针尾", "H旁先准备q3两层普通柱；一次堆叠同时加入q4地面普通格与q3第三层针。上料的辅助晶体在本次下落中碎裂。", 6, pin_tail,
+                (("已有非K下料", lower), ("列前缀上料", pin_tail.inputs[1]), ("一次堆叠成品", pin_tail))),
     ]
 
 
