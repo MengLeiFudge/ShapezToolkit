@@ -58,6 +58,13 @@ class Rules:
         return {(z, q): cell for z, row in enumerate(shape.layers)
                 for q, cell in enumerate(row) if cell != EMPTY}
 
+    def column_tops(self, cells: dict[Position, str]) -> list[int]:
+        """单次扫描最高格，空列为−1；不截掉高度上限外的格。"""
+        tops = [-1] * self.quadrants
+        for z, q in cells:
+            tops[q] = max(tops[q], z)
+        return tops
+
     def fold(self, cells: dict[Position, str]) -> Shape | None:
         """按当前高度上限折叠，保留空底层和空中间层。"""
         cells = {pos: cell for pos, cell in cells.items() if pos[0] < self.height}
@@ -97,6 +104,8 @@ class Rules:
 
     def stationary(self, cells: dict[Position, str], *, grounded: bool = True) -> set[Position]:
         """反向支撑队列求最大静止格集合；抬高的上料使用空地面种子。"""
+        if not grounded and not any(cell[0] == "c" for cell in cells.values()):
+            return set()
         groups = self.groups(cells)
         owner = {pos: index for index, group in enumerate(groups) for pos in group}
         ground = {owner[pos] for pos in cells if grounded and pos[0] == 0}
@@ -125,7 +134,7 @@ class Rules:
         """用静止组及落点公式计算一次重力，最后截高，不合并下落中的新接触。"""
         vanished = set().union(*(group for group in fused if not group <= cells.keys()))
         live = {pos: cell for pos, cell in cells.items() if pos not in vanished}
-        fixed = self.stationary(live)
+        fixed = self.stationary(live) if any(cell[0] == "c" for cell in live.values()) else set()
         result = {pos: live[pos] for pos in fixed}
         moving = {pos: cell for pos, cell in live.items() if pos not in fixed and cell[0] != "c"}
         barriers = iter(sorted(fixed))

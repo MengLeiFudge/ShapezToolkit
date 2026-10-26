@@ -21,7 +21,7 @@ class StackPlan:
         if rules.quadrants != self.quadrants:
             raise ValueError("上料摘要与当前象限数不一致")
         cells = rules.cells(settled) if settled is not None else {}
-        tops = [max((z for z, column in cells if column == q), default=-1) for q in range(self.quadrants)]
+        tops = rules.column_tops(cells)
         for level, piece in self._landings(tops):
             if level < rules.height:
                 for q, cell in piece:
@@ -113,7 +113,7 @@ class StackCatalog:
                     or any(cell[0] == "c" and original.get(pos) != cell for pos, cell in desired.items())):
                 continue
             delta = {pos: cell for pos, cell in desired.items() if pos not in original}
-            tops = [max((z for z, column in original if column == q), default=-1) for q in range(rules.quadrants)]
+            tops = rules.column_tops(original)
             if any(z <= tops[q] for z, q in delta):
                 continue
             for plan, upper in self.uppers.items():

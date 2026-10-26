@@ -21,7 +21,7 @@ def stack_successors(rules: Rules, lower: Shape, known: Iterable[Shape]) -> Iter
         return
     cells = rules.cells(lower)
     n = rules.quadrants
-    tops = [max((z for z, q in cells if q == column), default=-1) for column in range(n)]
+    tops = rules.column_tops(cells)
 
     def place(columns: tuple[int, ...], cell: str) -> tuple[Shape, Shape] | None:
         """K原格不动，单个基础块停在所占列最高阻挡上方。"""
@@ -55,7 +55,7 @@ def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool)
     delta = {pos: cell for pos, cell in desired.items() if pos not in original}
     if any(cell[0] == "c" or (cell == PIN and not pins) for cell in delta.values()):
         return None
-    tops = [max((z for z, column in original if column == q), default=-1) for q in range(rules.quadrants)]
+    tops = rules.column_tops(original)
     if any(z <= tops[q] for z, q in delta):
         return None
     blocks = rules.groups(delta)
@@ -70,8 +70,7 @@ def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool)
         upper = builder.noncrystal(plain)
     else:
         filled = {}
-        for q in range(rules.quadrants):
-            top = max((z for z, column in shifted if column == q), default=-1)
+        for q, top in enumerate(rules.column_tops(shifted)):
             for z in range(top + 1):
                 filled[z, q] = shifted.get((z, q), "cr")
         if rules.stationary(filled, grounded=False):

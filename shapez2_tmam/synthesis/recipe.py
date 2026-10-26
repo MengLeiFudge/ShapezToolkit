@@ -223,8 +223,7 @@ class Builder:
         delta = {pos: cell for pos, cell in desired.items() if pos not in original}
         if any(cell[0] == "c" for cell in delta.values()):
             return None
-        tops = {q: max((z for z, column in original if column == q), default=-1)
-                for q in range(self.rules.quadrants)}
+        tops = self.rules.column_tops(original)
         if any(z <= tops[q] for z, q in delta):
             return None
         source = lower
