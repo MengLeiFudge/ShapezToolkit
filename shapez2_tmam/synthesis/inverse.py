@@ -84,7 +84,10 @@ def pin_column_at(target: tuple[str, ...], slot: int) -> tuple[str, ...] | None:
     forced = sum(1 << (z - 1) for z, cell in enumerate(target) if z and cell[0] == "c")
     if forced & ~crystals:
         return None
-    return pin_column(target, keep, crystals & ~forced)
+    extra = crystals & ~forced
+    if extra & ((forced << 1) | (forced >> 1)):
+        return None
+    return pin_column(target, keep, extra)
 
 
 def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> Iterator[PinFamily]:
@@ -111,7 +114,13 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
         if not candidates:
             return
         columns.append(candidates)
+    forced_masks = tuple(sum(1 << r for r, row in enumerate(target.layers[1:]) if row[q][0] == "c")
+                         for q in range(4))
     for selected in product(*columns):
+        crystal_masks = tuple(sum(1 << r for r, cell in enumerate(column) if cell[0] == "c") for column in selected)
+        if any(crystal_masks[q] & crystal_masks[(q + 1) % 4] & (forced_masks[q] ^ forced_masks[(q + 1) % 4])
+               for q in range(4)):
+            continue
         lower = tuple(tuple(selected[q][z] for q in range(rules.quadrants)) for z in range(height))
         fixed = {(z, q): cell for z, row in enumerate(lower) for q, cell in enumerate(row) if cell != EMPTY}
         capped = [CornerBuilder.admissible((*column, "cr")) for column in selected]

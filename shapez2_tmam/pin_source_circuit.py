@@ -21,6 +21,8 @@ class PinSource:
     valid: Ref
     column_valid: tuple[Ref, ...]
     image: PinImageFlags
+    # 横边冲突归入两端较快的列；该槽不变时，全部更快地址均无解。
+    slot_conflicts: tuple[Ref, ...]
 
 
 def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
@@ -40,15 +42,24 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
         program.not_(circuit.add("LogicGateCompare", value, Literal(0), config="AQ==")),
         circuit.add("LogicGateCompare", value, Literal(2), config="AQ=="),
         circuit.add("LogicGateCompare", value, Literal(3), config="AQ==")) for value in column) for column in materials)
+    conflicts: list[list[Ref]] = [[] for _ in range(4)]
+    for q in range(4):
+        neighbor = (q + 1) % 4
+        for r in range(4):
+            differs = circuit.add("LogicGateXOr", target[q][r + 1].crystal, target[neighbor][r + 1].crystal)
+            conflicts[min(q, neighbor)].append(program.and_(columns[q].flags[r].crystal,
+                                                           columns[neighbor].flags[r].crystal, differs))
+    slot_conflicts = tuple(program.or_(*values) for values in conflicts)
     image = image_constraints(program, target, columns, tuple(cell.crystal for cell in top_flags))
-    valid = program.and_(enable, image.passed, *(program.or_(*kinds) for kinds in tops),
+    valid = program.and_(enable, image.passed, program.not_(program.or_(*slot_conflicts)),
+                         *(program.or_(*kinds) for kinds in tops),
                          program.or_(*(cell.occupied for column in target for cell in column)),
                          *(column_admissible(circuit, (*column.flags, top)) for column, top in zip(columns, top_flags)))
     source_materials = tuple(tuple(circuit.add("LogicGateIf", value, valid) for value in (*column.materials, top))
                              for column, top in zip(columns, top_values))
     source_tags = tuple(tuple(circuit.add("LogicGateIf", value, valid) for value in (*column.tags, top))
                        for column, top in zip(columns, top_values))
-    return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image)
+    return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image, slot_conflicts)
 
 
 def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:
@@ -82,7 +93,7 @@ def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:
         "encoding": "材料0空1N2P3C；每列槽号0～19；顶格0空1Cu2P3红C。标签继承固定原目标表，辅助顶格标签同其整数。",
         "scope": "完整覆盖四列及顶盖结构候选，并筛融合/组位移必要条件；仍须真实制造、原生Pin及完整目标比较。没有内部迭代或完成脉冲。",
         "resource_bound": "四份共用二十槽选址和单列路由；每列最多20个槽而非256个控制字；不保存候选表或完整图形目录。",
-        "proof": "4q5l/pin-patterns.md；pin-image-constraints.md；pin-column-circuit.md。",
+        "proof": "4q5l/pin-patterns.md；pin-source-conflicts.md；pin-image-constraints.md；pin-column-circuit.md。",
         "verification": "仅静态DAG、端口和实际占地生产编译；未运行目标、候选遍历、制造、模拟或测试",
     }
 

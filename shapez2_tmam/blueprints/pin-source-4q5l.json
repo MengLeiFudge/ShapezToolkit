@@ -110,101 +110,101 @@
     "enable": 1194048
   },
   "outputs": {
-    "candidate_valid": 1200275,
+    "candidate_valid": 1200396,
     "source_bottom_to_top": [
       [
         {
-          "material": 1200276,
-          "tag": 1200296
+          "material": 1200397,
+          "tag": 1200417
         },
         {
-          "material": 1200281,
-          "tag": 1200301
+          "material": 1200402,
+          "tag": 1200422
         },
         {
-          "material": 1200286,
-          "tag": 1200306
+          "material": 1200407,
+          "tag": 1200427
         },
         {
-          "material": 1200291,
-          "tag": 1200311
+          "material": 1200412,
+          "tag": 1200432
         }
       ],
       [
         {
-          "material": 1200277,
-          "tag": 1200297
+          "material": 1200398,
+          "tag": 1200418
         },
         {
-          "material": 1200282,
-          "tag": 1200302
+          "material": 1200403,
+          "tag": 1200423
         },
         {
-          "material": 1200287,
-          "tag": 1200307
+          "material": 1200408,
+          "tag": 1200428
         },
         {
-          "material": 1200292,
-          "tag": 1200312
+          "material": 1200413,
+          "tag": 1200433
         }
       ],
       [
         {
-          "material": 1200278,
-          "tag": 1200298
+          "material": 1200399,
+          "tag": 1200419
         },
         {
-          "material": 1200283,
-          "tag": 1200303
+          "material": 1200404,
+          "tag": 1200424
         },
         {
-          "material": 1200288,
-          "tag": 1200308
+          "material": 1200409,
+          "tag": 1200429
         },
         {
-          "material": 1200293,
-          "tag": 1200313
+          "material": 1200414,
+          "tag": 1200434
         }
       ],
       [
         {
-          "material": 1200279,
-          "tag": 1200299
+          "material": 1200400,
+          "tag": 1200420
         },
         {
-          "material": 1200284,
-          "tag": 1200304
+          "material": 1200405,
+          "tag": 1200425
         },
         {
-          "material": 1200289,
-          "tag": 1200309
+          "material": 1200410,
+          "tag": 1200430
         },
         {
-          "material": 1200294,
-          "tag": 1200314
+          "material": 1200415,
+          "tag": 1200435
         }
       ],
       [
         {
-          "material": 1200280,
-          "tag": 1200300
+          "material": 1200401,
+          "tag": 1200421
         },
         {
-          "material": 1200285,
-          "tag": 1200305
+          "material": 1200406,
+          "tag": 1200426
         },
         {
-          "material": 1200290,
-          "tag": 1200310
+          "material": 1200411,
+          "tag": 1200431
         },
         {
-          "material": 1200295,
-          "tag": 1200315
+          "material": 1200416,
+          "tag": 1200436
         }
       ]
     ]
   },
-  "gate_platforms": 6252,
+  "gate_platforms": 6373,
   "reserved_channels": [
     1194000,
     1210383
@@ -219,6 +219,6 @@
   "encoding": "材料0空1N2P3C；每列槽号0～19；顶格0空1Cu2P3红C。标签继承固定原目标表，辅助顶格标签同其整数。",
   "scope": "完整覆盖四列及顶盖结构候选，并筛融合/组位移必要条件；仍须真实制造、原生Pin及完整目标比较。没有内部迭代或完成脉冲。",
   "resource_bound": "四份共用二十槽选址和单列路由；每列最多20个槽而非256个控制字；不保存候选表或完整图形目录。",
-  "proof": "4q5l/pin-patterns.md；pin-image-constraints.md；pin-column-circuit.md。",
+  "proof": "4q5l/pin-patterns.md；pin-source-conflicts.md；pin-image-constraints.md；pin-column-circuit.md。",
   "verification": "仅静态DAG、端口和实际占地生产编译；未运行目标、候选遍历、制造、模拟或测试"
 }

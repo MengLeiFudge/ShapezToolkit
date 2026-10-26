@@ -28,8 +28,10 @@ def pattern_column(program: CornerProgram, materials: tuple[Ref, ...], tags: tup
     crystal_bits = tuple(program.or_(*(chosen for chosen, _, crystals in selected if crystals & (1 << r)))
                          for r in range(4))
     forced = tuple(kinds[r + 1][3] for r in range(4))
-    valid = program.and_(enable, program.or_(*(chosen for chosen, _, _ in selected)),
-                         *(program.or_(program.not_(forced[r]), crystal_bits[r]) for r in range(4)))
     extra = tuple(program.and_(crystal_bits[r], program.not_(forced[r])) for r in range(4))
+    separated = tuple(program.not_(program.and_(extra[r], program.or_(*(
+        forced[neighbor] for neighbor in (r - 1, r + 1) if 0 <= neighbor < 4)))) for r in range(4))
+    valid = program.and_(enable, program.or_(*(chosen for chosen, _, _ in selected)), *separated,
+                         *(program.or_(program.not_(forced[r]), crystal_bits[r]) for r in range(4)))
     return column_candidate(circuit, materials, tags, (*keep_bits, *extra), valid,
                             with_landings=with_landings)
