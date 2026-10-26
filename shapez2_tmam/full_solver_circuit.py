@@ -479,9 +479,12 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     if args.report_only:
         report.pop("gate_platforms")
+        buildings = circuit.building_counts(packed=args.pack)
         report.update({"mode": "netlist_report", "logical_gates": len(circuit.gates),
                        "logical_gate_counts": dict(sorted(Counter(gate.kind for gate in circuit.gates).items())),
                        "local_gate_pairs": len(circuit.local_pairs()) if args.pack else 0,
+                       "building_counts_without_wires": buildings, "buildings_without_wires": sum(buildings.values()),
+                       "building_count_basis": "按当前门、输入常量、无线收发器与固定局部模板计数；不含线缆和平台。",
                        "layout_generated": False,
                        "timing_basis": "网表DAG与固定局部模板；实际布局尚未核对。" if args.pack else "全部Ref按无线边计算的网表DAG。",
                        "verification": "仅静态网表、频道依赖及理论时序；没有布线、装箱或占地检查，未运行目标、模拟或测试。"})

@@ -982,6 +982,29 @@
     "VirtualUnstacker": 41
   },
   "local_gate_pairs": 5491,
+  "building_counts_without_wires": {
+    "ConstantSignal": 61869,
+    "ControlledSignalReceiver": 38509,
+    "ControlledSignalTransmitter": 19599,
+    "LogicGateAnd": 7478,
+    "LogicGateCompare": 1492,
+    "LogicGateIf": 5998,
+    "LogicGateNot": 2033,
+    "LogicGateOr": 7672,
+    "LogicGateXOr": 18,
+    "VirtualAnalyzer": 48,
+    "VirtualCrystalGenerator": 11,
+    "VirtualHalfCutter": 2,
+    "VirtualHalvesSwapper": 1,
+    "VirtualPainter": 44,
+    "VirtualPinPusher": 1,
+    "VirtualRotator": 29,
+    "VirtualRotatorCCW": 46,
+    "VirtualStacker": 47,
+    "VirtualUnstacker": 41
+  },
+  "buildings_without_wires": 144938,
+  "building_count_basis": "按当前门、输入常量、无线收发器与固定局部模板计数；不含线缆和平台。",
   "layout_generated": false,
   "timing_basis": "网表DAG与固定局部模板；实际布局尚未核对。"
 }

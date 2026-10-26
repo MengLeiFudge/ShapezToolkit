@@ -346,6 +346,30 @@ class Circuit:
                     break
         return pairs
 
+    def building_counts(self, *, packed: bool = False) -> dict[str, int]:
+        """按网表及固定模板统计非线缆建筑；不分配坐标、平台或执行走线。"""
+        if self.fixed_local_pairs is not None and not packed:
+            raise ValueError("按局部连接计时的网表必须使用固定配对统计建筑")
+        pairs = self.local_pairs() if packed else {}
+        absorbed = set(pairs.values())
+        aliased = {reference for group in self.aliases for reference in group}
+        fixed = {Ref(node) for node, gate in enumerate(self.gates)
+                 if packed and gate.kind == "ConstantSignal" and gate.config is not None and Ref(node) not in aliased}
+        counts = Counter(gate.kind for gate in self.gates)
+        for node, gate in enumerate(self.gates):
+            for source in gate.inputs:
+                if isinstance(source, Ref) and node in pairs and source == Ref(pairs[node]):
+                    continue
+                # 每个外部输入有一份常量：字面量、就地常量或接收器频道。
+                counts["ConstantSignal"] += 1
+                if isinstance(source, Ref) and source not in fixed:
+                    counts["ControlledSignalReceiver"] += 1
+            if node not in absorbed:
+                outputs = len(PORTS[gate.kind][0])
+                counts["ControlledSignalTransmitter"] += outputs
+                counts["ConstantSignal"] += outputs
+        return dict(sorted(counts.items()))
+
     def document(self, *, packed: bool = False) -> dict:
         """生成原生 Island 蓝图文档，同时核对实际占地和信号网络。"""
         if self.fixed_local_pairs is not None and not packed:
