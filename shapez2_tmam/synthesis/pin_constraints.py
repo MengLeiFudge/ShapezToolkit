@@ -1,5 +1,6 @@
 """规范化顶针族的精确物理匹配；不以物理匹配替代前态可制作性。"""
 
+from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
 
 
@@ -49,9 +50,12 @@ def pin_image_matches(rules: Rules, lower: tuple[tuple[str, ...], ...],
         below = owner.get((z - 1, q))
         if below is not None and below != index:
             edges[index].add(below)
-    stationary = set(range(len(groups)))
+    # 列A使Pin活图的最大静止集合等于地面可达；任意网格仍用一般最大不动点。
+    admissible = all(CornerBuilder.admissible(tuple(original.get((z, q), EMPTY) for z in range(5)))
+                     for q in range(4))
+    stationary = set(ground) if admissible else set(range(len(groups)))
     while True:
-        following = {index for index in stationary if index in ground or edges[index] & stationary}
+        following = {index for index in range(len(groups)) if index in ground or edges[index] & stationary}
         if following == stationary:
             break
         stationary = following

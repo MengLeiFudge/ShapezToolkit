@@ -7,37 +7,37 @@
     "enable": 1277001
   },
   "outputs": {
-    "window": 1321436,
-    "sample": 1321437,
-    "done": 1321439,
-    "status": 1321448,
-    "result": 1321451,
+    "window": 1316037,
+    "sample": 1316038,
+    "done": 1316040,
+    "status": 1316049,
+    "result": 1316052,
     "instruction": {
-      "opcode": 1321440,
-      "a": 1321441,
-      "b": 1321442,
-      "destination": 1321443,
-      "base": 1321444,
-      "color": 1321445,
-      "request": 1321446
+      "opcode": 1316041,
+      "a": 1316042,
+      "b": 1316043,
+      "destination": 1316044,
+      "base": 1316045,
+      "color": 1316046,
+      "request": 1316047
     }
   },
-  "gate_platforms": 19780,
+  "gate_platforms": 17390,
   "reserved_channels": [
     1277000,
     1342535
   ],
-  "state_registers": 408,
-  "step_max_gate_depth": 49,
-  "initial_max_gate_depth": 184,
-  "slow_max_gate_depth": 167,
+  "state_registers": 358,
+  "step_max_gate_depth": 48,
+  "initial_max_gate_depth": 151,
+  "slow_max_gate_depth": 134,
   "slow_handoff_phases": 7,
   "slow_update_wait_cycles": 1,
-  "slow_state_registers": 334,
+  "slow_state_registers": 329,
   "timing": {
-    "phase_signal_ticks": 300,
-    "cycle_signal_ticks": 1200,
-    "reset_hold_signal_ticks": 2464,
+    "phase_signal_ticks": 240,
+    "cycle_signal_ticks": 960,
+    "reset_hold_signal_ticks": 2068,
     "reference_edge_signal_ticks": 12,
     "conditions": "整份蓝图批量导入或完整重载后固定接线；Hybrid/AlwaysHighUPS常速连续推进，每批最多4信号tick；频道独占。调试单步、模式切换、强制低UPS及快进不适用。",
     "reset": "enable=0持续不少于reset_hold_signal_ticks，再一次改为1并保持。复位时阶段3为真；启动先出现一小段阶段3，随后依次完整循环0、1、2、3。",
@@ -47,10 +47,11 @@
   "item_registers": 6,
   "program_rom_rows": 486,
   "physical_check": {
-    "label_rounds_max": 19,
-    "stationary_rounds_max": 20,
-    "motionless_fast_path": true,
-    "per_frame_family_cache": true,
+    "horizontal_path_max": 2,
+    "upper_upward_sweeps": 2,
+    "upper_downward_sweeps": 1,
+    "requires_column_admissibility": true,
+    "iterative_state_registers": 0,
     "manufacture_during_search": false
   },
   "prefix_closure": {
@@ -71,15 +72,15 @@
   },
   "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
   "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-  "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族物理证书位；共享20组编号、20静止位、5轮数位、一份制造ROM及六槽；另有K模式、首轮切向和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+  "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
   "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-  "proof": "4q5l/prefix-closure.md；full-tail-circuit.md；multicycle-control.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+  "proof": "4q5l/prefix-closure.md；full-tail-circuit.md；multicycle-control.md；pin-grounded.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
-  "logical_gates": 44334,
+  "logical_gates": 38935,
   "layout": "门组件刚性平移，矩形间留两格；平台方阵排列。频道、门和内部本地连线保持。",
   "platform_grid": [
-    141,
-    141
+    132,
+    132
   ]
 }

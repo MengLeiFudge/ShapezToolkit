@@ -9,6 +9,7 @@ from .circuit import Circuit, Literal, Ref
 from .corner_program import CornerProgram
 from .half_circuit import MaterialCell
 from .pin_column_circuit import PinColumn, column_candidate
+from .ring_circuit import top_connected
 
 
 @dataclass(frozen=True)
@@ -38,18 +39,7 @@ def image_constraints(program: CornerProgram, target: tuple[tuple[MaterialCell, 
         clauses.append(program.or_(zero, one))
         top.append(one)
     crystals = tuple(tuple(columns[q].flags[z].crystal if z < 4 else top[q] for q in range(4)) for z in range(5))
-    deleted = tuple(tuple(top[q] if z == 4 else program.zero for q in range(4)) for z in range(5))
-    # 20个晶体格，简单路径至多19条边；融合不经过普通块或针。
-    for _ in range(19):
-        following = []
-        for z in range(5):
-            row = []
-            for q in range(4):
-                neighbors = [deleted[z][(q - 1) % 4], deleted[z][(q + 1) % 4]]
-                neighbors.extend(deleted[r][q] for r in (z - 1, z + 1) if 0 <= r < 5)
-                row.append(program.or_(deleted[z][q], program.and_(crystals[z][q], program.or_(*neighbors))))
-            following.append(tuple(row))
-        deleted = tuple(following)
+    deleted = top_connected(program, crystals)
     live = [tuple(MaterialCell(column.flags[0].occupied, column.flags[0].occupied, program.zero)
                   for column in columns)]
     fixed = [tuple(column.flags[0].occupied for column in columns)]
@@ -141,7 +131,7 @@ def build_pin_image(channel_base: int = 1_144_000) -> tuple[Circuit, dict]:
         "encoding": "目标材料0空1N2P3C；每列控制前四位keep、后四位extraC；顶层只输入C掩码，顶层NPC不影响本次Pin物理。",
         "protocol": "组合筛选，无完成脉冲；全组输入保持settling规定时间再读。必要条件通过后仍须制造前态并原生Pin比较。",
         "scope": "拒绝融合删除保留C、同粘连组F/M矛盾、M被F直接阻挡或移动NPC块落点/支撑矛盾。未证明F最大性或前态可制作性。",
-        "proof": "4q5l/pin-image-constraints.md；pin-inverse.md静止组及落点定理。",
+        "proof": "4q5l/pin-image-constraints.md；crystal-boundary.md；pin-inverse.md静止组及落点定理。",
         "verification": "仅静态DAG、端口、别名及实际占地生产编译；未执行目标、控制字枚举、物理模拟或测试",
     }
 
