@@ -60,17 +60,17 @@ class Solver4:
             return Result("solved", recipe, "局部半形起点及完整有界顶针/逐层堆叠尾部")
         return Result("unsolvable", None, "已穷尽局部半形起点及最低晶体限制内的全部顶针/堆叠尾部")
 
-    def _tail(self, target: Shape) -> Recipe | None:
-        """先尝试零顶针尾部，再深度优先恢复最后一次顶针的真实输入。"""
-        # 首轮只求两个切向的强制最小起点；Pin后的S仍保留完整前缀遍历。
-        for start in range(2):
-            source = minimal_start(self.rules, target, start)
-            if source is None:
-                continue
-            found = self.constructor.construct(source)
-            if found.recipe is None:
-                raise RuntimeError("强制前缀闭包已证明A起点，但角构造未生成证书")
-            return self._finish(found.recipe, target)
+    def _tail(self, target: Shape, *, skip_start: bool = False) -> Recipe | None:
+        """恢复有界尾部；族闭包已否定全部A→S时只搜索Pin尾部。"""
+        if not skip_start:
+            for start in range(2):
+                source = minimal_start(self.rules, target, start)
+                if source is None:
+                    continue
+                found = self.constructor.construct(source)
+                if found.recipe is None:
+                    raise RuntimeError("强制前缀闭包已证明A起点，但角构造未生成证书")
+                return self._finish(found.recipe, target)
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
         if lowest == 0 or not in_support_class(self.rules, target, grounded=True):
             return None
@@ -89,32 +89,29 @@ class Solver4:
         return None
 
     def _family_recipe(self, family: PinFamily, lowest: int) -> Recipe | None:
-        """地面C族共用两次可选顶格闭包；其他族仍恢复每个真实成员。"""
+        """每族共用两次A→S闭包，失败后只恢复成员的Pin尾部。"""
+        template = Shape((*family.lower, tuple("cr" if family.top_crystals & (1 << q) else "Cu"
+                                              for q in range(4))))
+        desired = self.rules.cells(template)
+        for start in range(2):
+            initial = minimal_start(self.rules, template, start, optional_top=True)
+            if initial is None:
+                continue
+            direct = self.constructor.construct(initial)
+            if direct.recipe is None:
+                raise RuntimeError("可选顶格闭包已证明A起点，但角构造未生成证书")
+            selected = self.rules.cells(initial)
+            completed = self.rules.fold({pos: cell for pos, cell in desired.items()
+                                         if pos[0] < 4 or cell[0] == "c" or pos in selected})
+            assert completed is not None
+            return self._finish(direct.recipe, completed)
         if any(cell[0] == "c" for cell in family.lower[0]):
-            template = Shape((*family.lower, tuple("cr" if family.top_crystals & (1 << q) else "Cu"
-                                                  for q in range(4))))
-            desired = self.rules.cells(template)
-            for start in range(2):
-                initial = minimal_start(self.rules, template, start, optional_top=True)
-                if initial is None:
-                    continue
-                direct = self.constructor.construct(initial)
-                if direct.recipe is None:
-                    raise RuntimeError("可选顶格闭包已证明A起点，但角构造未生成证书")
-                selected = self.rules.cells(initial)
-                completed = self.rules.fold({pos: cell for pos, cell in desired.items()
-                                             if pos[0] < 4 or cell[0] == "c" or pos in selected})
-                assert completed is not None
-                return self._finish(direct.recipe, completed)
             return None
         for source in family.members(self.rules):
-            direct = self.constructor.construct(source)
-            if direct.status == "unsolvable":
-                continue
             source_lowest = min(z for z, row in enumerate(source.layers) if any(cell[0] == "c" for cell in row))
             if source_lowest >= lowest:
                 raise RuntimeError("顶针逆像没有使最低保留晶体严格降低")
-            previous = direct.recipe if direct.recipe is not None else self._tail(source)
+            previous = self._tail(source, skip_start=True)
             if previous is not None:
                 return previous
         return None

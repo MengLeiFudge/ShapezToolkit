@@ -54,6 +54,6 @@
 
 ## 实现对应
 
-Python入口为[`minimal_start`](../synthesis/prefix_closure.py)，[`prefix_closure`](../prefix_closure_circuit.py)输出单轮强制补格、无扩展标志与下一前缀位。两者保留原层号、全部C及普通材料标签。首轮按两个切向求A→S；[含地面C的来源族](optional-top.md)还可把最高层N作为可选助手，新增块只检查必需Δ。完整电路第二遍Pin搜索仍使用原有全部前缀游标。
+Python入口为[`minimal_start`](../synthesis/prefix_closure.py)，[`prefix_closure`](../prefix_closure_circuit.py)输出单轮强制补格、无扩展标志与下一前缀位。两者保留原层号、全部C及普通材料标签。首轮按两个切向求A→S；[同一Pin来源族](optional-top.md)还可把最高层N作为可选助手，新增块只检查必需Δ。完整电路第二遍Pin搜索仍使用原有全部前缀游标。
 
 本证明按源代码静态核对；未运行目标、目标枚举、测试、重力模拟或游戏。
