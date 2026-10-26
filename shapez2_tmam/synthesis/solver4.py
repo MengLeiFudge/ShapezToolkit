@@ -6,6 +6,7 @@ from typing import Iterator
 from .construct import Constructor, Result
 from .inverse import pin_families
 from .physics import Rules, Shape
+from .prefix_closure import minimal_start
 from .recipe import Recipe
 from .support import in_support_class
 
@@ -61,10 +62,15 @@ class Solver4:
 
     def _tail(self, target: Shape) -> Recipe | None:
         """先尝试零顶针尾部，再深度优先恢复最后一次顶针的真实输入。"""
-        for source in self.predecessors(target):
+        # 首轮只求两个切向的强制最小起点；Pin后的S仍保留完整前缀遍历。
+        for start in range(2):
+            source = minimal_start(self.rules, target, start)
+            if source is None:
+                continue
             found = self.constructor.construct(source)
-            if found.recipe is not None:
-                return self._finish(found.recipe, target)
+            if found.recipe is None:
+                raise RuntimeError("强制前缀闭包已证明A起点，但角构造未生成证书")
+            return self._finish(found.recipe, target)
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
         if lowest == 0:
             return None

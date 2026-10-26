@@ -6,7 +6,7 @@
 
 ## 状态分类
 
-333项慢状态为五帧全部330项状态，以及depth、second_pass、support_prefix。其余为快状态，包括组编号、静止位、轮数、CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计407项状态，六个物品槽、486行ROM保持。
+334项慢状态为五帧全部330项状态，以及depth、second_pass、support_prefix、leaf_direction。其余为快状态，包括组编号、静止位、轮数、CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计408项状态，六个物品槽、486行ROM保持。
 
 重K通路选择器改为独立慢状态support_prefix，初值0。下降到新帧时写0，ENTRY读完整帧目标；成功进入PREFIX时写1。回父或根开始重放时也写1，确保子帧在ENTRY直接失败后，父前缀扫描仍使用正确选择。Phase不再直接驱动K洪泛。
 
@@ -15,8 +15,9 @@
 | 慢写入 | 事件 |
 |---|---|
 | 新帧20格目标、下降depth | descend |
-| 初始化前缀及遍次 | enter、begin_pin_search |
-| 前缀推进 | move_prefix |
+| 初始化前缀及遍次 | enter、next_cut、begin_pin_search |
+| 前缀推进或强制补格 | move_prefix、grow_prefix |
+| 首轮切向 | enter清零、next_cut置一 |
 | 清来源游标 | start_source |
 | 来源推进及整段跳过 | counter_event |
 | 回父或跳成功叶端depth | search_pop、fail_pop、root_solved、replay_up |
@@ -51,8 +52,8 @@ record_valid列入pulses，next为 `ready AND 原accepted`，冻结时写0；它
 
 删掉冻结轮后，业务状态序列与原控制器逐步一致。每个慢事件最多插入一轮，故不改变可靠性、完备性或有限终止；也不把预算耗尽误作不可制作。
 
-当前41874逻辑门，未压缩版41874平台；[装箱版](packed-circuit.md)18636平台、137×137外框。新增掩码会增加占地，换取较短的制造周期。最坏来源数与递归分支界保持，必须继续压缩搜索。
+当前44334逻辑门，未压缩版44334平台；[装箱版](packed-circuit.md)19780平台、141×141外框。新增掩码会增加占地，换取较短的制造周期。最坏来源数与递归分支界保持，必须继续压缩搜索。
 
-相关七个Python文件LSP零诊断，两版生产蓝图通过组合DAG、逐端口和实际占地静态编译。未运行目标、搜索、指令、模拟、测试或游戏。
+本次四个Python文件LSP零诊断，两版生产蓝图通过组合DAG、逐端口和实际占地静态编译。未运行目标、搜索、指令、模拟、测试或游戏。
 
 [完整控制器](full-tail-circuit.md) · [蓝图接口](../blueprints/README.md) · [返回目录](README.md)
