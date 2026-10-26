@@ -277,6 +277,9 @@ class Builder:
         parallel = self.rectangular_columns(target)
         if parallel is not None:
             return parallel
+        columns = [tuple(row[q] for row in target.layers) for q in range(self.rules.quadrants)]
+        templates = [tuple(cell if cell in (EMPTY, PIN) or cell[0] == "c" else "N" for cell in column)
+                     for column in columns]
         half = self.rules.quadrants // 2
         halves = []
         for start in (0, half):
@@ -287,15 +290,29 @@ class Builder:
                 halves.append(parallel)
                 continue
             result = None
-            for q in range(start, start + half):
-                cells = tuple(row[q] for row in target.layers)
+            q = start
+            while q < start + half:
+                cells = columns[q]
                 if all(cell == EMPTY for cell in cells):
+                    q += 1
                     continue
-                column = self.column(cells, q)
+                end = q + 1
+                while end < start + half and templates[end] == templates[q]:
+                    end += 1
+                column = None
+                if end > q + 1:
+                    group = self.rules.fold({(z, i): row[i] for z, row in enumerate(target.layers)
+                                             for i in range(q, end) if row[i] != EMPTY})
+                    assert group is not None
+                    column = self.rectangular_columns(group)
+                if column is None:
+                    end = q + 1
+                    column = self.column(cells, q)
                 if column is None:
                     return None
-                # 长度至多 half 的已有连续区间完整落在保留侧，新列在另一侧。
+                # 已有前缀留在前半面；从q开始的连续新列段完整落在后半面。
                 result = column if result is None else self.join(result, column, q - half)
+                q = end
             halves.append(result)
         if halves[0] is None:
             result = halves[1]

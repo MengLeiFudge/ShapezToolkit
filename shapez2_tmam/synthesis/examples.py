@@ -211,6 +211,18 @@ def pin_framed_rectangle_example() -> Example:
                    6, result)
 
 
+def grouped_columns_example() -> Example:
+    """半面混色不能整体结晶时，仍合并相邻同模板的两列。"""
+    rules = Rules(6)
+    target = rules.parse("CuSrCuCuCuCu:crcrcbCuCuCu")
+    result = Constructor(rules).construct(target).recipe
+    if result is None or result.result != target:
+        raise RuntimeError("六象限相邻列分组未生成代表配方")
+    return Example("6q-grouped-columns", "半面混色时合并相邻兼容列",
+                   "q0/q1普通部件不同，但晶体层均为红色，两列一起制造；q2单独蓝色结晶。另一半面直接堆叠普通料，最后交换拼合。",
+                   6, result)
+
+
 def rectangular_example() -> Example:
     """同色的多行晶体共用结晶加工，六列三层直接制造。"""
     rules = Rules(6)
@@ -329,7 +341,7 @@ def main() -> int:
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
                      layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example(),
-                     pin_framed_rectangle_example()))
+                     pin_framed_rectangle_example(), grouped_columns_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)
