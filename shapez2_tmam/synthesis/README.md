@@ -54,7 +54,13 @@ if result.recipe is not None:
 
 四象限的 `Constructor.half` 使用[逐列角构造](../4q5l/corner-synthesis.md)，在合法颜色范围内精确判半形，成功时至多285个制造节点。`CornerBuilder.accepts_half` 只检查列条件和新分组的稳定性；`CornerBuilder.build` 准备单列及其 N/P 助手，处理八种顶针难列。`Solver4.solve` 使用这些局部起点及完整顶针/堆叠尾部；零Pin首轮由[`minimal_start`](prefix_closure.py)求两个切向的[强制最小前缀](../4q5l/prefix-closure.md)，每切向至多20次补格及一次最终检查。Pin后的S仍完整遍历，由[四次尾部Pin改写定理](../4q5l/three-pin-tail.md)按最高C的零基层号H限定max(0,H−1)条递归边、最多三条，实际搜索分支仍需压缩。理论上每个可制作四象限目标存在至多616节点的制造树。六象限目前只启用无晶体及独立柱构造，不能据此判断全部六象限含晶体目标。
 
-`pin_families`、`cut_families` 是独立的惰性物理逆像接口。候选能产生目标，不等于候选本身可制作；使用者须给实际族成员补制造证明。
+`pin_families`、`cut_families`是独立的惰性物理逆像接口。候选能产生目标，不等于候选本身可制作；使用者须给实际族成员补制造证明。
+
+`stack_reduction.stack_successors(rules, lower, known)`面向普通格统一为Cu的结构目录：K下料只生成连续普通块及单针，并用列顶公式计算结果；非K下料遍历known旧快照中的真实上料。六象限K分支至多37项，替换保持最终闭包，详见[证明](../general/conditional-stacking.md)。该接口尚未接成完整六象限求解器，也不返回不可制造结论。
+
+`HalfCatalog(builder).add(recipe)`登记已知配方各切向的半形结果及原输入凭据；`join(target)`直接投影目标并查表，四象限最多2对、六象限最多3对，找到时返回消费原输入的真实制造树。目标本身不被切割，不对切后结果多算一次重力；缺失只返回None，见[交换化简证明](../general/swap-witnesses.md)。六象限V的代表配方已由此接口生成。
+
+用户手工复现用的[八个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
 
 面向游戏材料寄存器可用 `Solver4(rules, certificate_first=True)`。`pin_families(..., check_output=False)`用[`pin_image_matches`](pin_constraints.py)按最大静止集合及块支撑精确匹配物理输出，无需先编码任意原生候选；[充要证明](../4q5l/pin-image-exact.md)补齐了原必要筛选。候选仍须递归取得制造证书，实际制造的Pin结果也须与目标相同；物理匹配不代替可制作性。两列判据使用[按层扫描](../4q5l/half-row-stability.md)。CLI保留默认正向Pin检查模式，两种物理检查接受同一规范化逆像族；均没有实用搜索复杂度承诺。
 
