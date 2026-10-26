@@ -123,7 +123,8 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
             continue
         lower = tuple(tuple(selected[q][z] for q in range(rules.quadrants)) for z in range(height))
         fixed = {(z, q): cell for z, row in enumerate(lower) for q, cell in enumerate(row) if cell != EMPTY}
-        capped = [CornerBuilder.admissible((*column, "cr")) for column in selected]
+        capped = [not (forced_masks[q] & 8) and CornerBuilder.admissible((*column, "cr"))
+                  for q, column in enumerate(selected)]
         for mask in range(1 << rules.quadrants):
             if any(mask & (1 << q) and not capped[q] for q in range(rules.quadrants)):
                 continue

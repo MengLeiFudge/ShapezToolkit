@@ -313,8 +313,12 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                               for value in values))
         carry = program.pick(crystal, carry, overflow)
     new_family = program.or_(carry, family_jump, skip_columns)
-    next_crystals, carry = _increment(program, crystals, program.or_(carry, family_jump), 16)
-    next_crystals = tuple(program.pick(skip_columns, program.zero, value) for value in next_crystals)
+    cap_advance = program.or_(carry, family_jump)
+    forbidden_caps = tuple(column[4].crystal for column in original)
+    cap_pass = tuple(program.or_(bit, forbidden) for bit, forbidden in zip(crystals, forbidden_caps))
+    next_crystals = tuple(program.pick(skip_columns, program.zero, circuit.add("LogicGateXOr", bit,
+        program.and_(cap_advance, program.not_(forbidden_caps[q]), *cap_pass[:q]))) for q, bit in enumerate(crystals))
+    carry = program.and_(cap_advance, *cap_pass)
     next_slots = []
     for q, bits in enumerate(slots):
         values, carry = _increment(program, bits, program.or_(carry, skip_at[q]), 20)
@@ -442,6 +446,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         **state_report, "timing": timing_contract(timing),
         "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
         "support_row_closures": 10, "pin_base_precheck": True, "crystal_conflict_slot_skip": True,
+        "top_crystal_forbidden_above_retained": True,
         "search_frames": 5, "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,
                            "requires_column_admissibility": True, "iterative_state_registers": 0,
