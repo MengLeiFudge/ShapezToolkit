@@ -7,22 +7,22 @@
     "enable": 1211001
   },
   "outputs": {
-    "window": 1240993,
-    "sample": 1240994,
-    "done": 1240996,
-    "status": 1241005,
-    "result": 1241008,
+    "window": 1241005,
+    "sample": 1241006,
+    "done": 1241008,
+    "status": 1241017,
+    "result": 1241020,
     "instruction": {
-      "opcode": 1240997,
-      "a": 1240998,
-      "b": 1240999,
-      "destination": 1241000,
-      "base": 1241001,
-      "color": 1241002,
-      "request": 1241003
+      "opcode": 1241009,
+      "a": 1241010,
+      "b": 1241011,
+      "destination": 1241012,
+      "base": 1241013,
+      "color": 1241014,
+      "request": 1241015
     }
   },
-  "gate_platforms": 29887,
+  "gate_platforms": 29899,
   "reserved_channels": [
     1211000,
     1276535

@@ -7,22 +7,22 @@
     "enable": 1277001
   },
   "outputs": {
-    "window": 1306993,
-    "sample": 1306994,
-    "done": 1306996,
-    "status": 1307005,
-    "result": 1307008,
+    "window": 1307005,
+    "sample": 1307006,
+    "done": 1307008,
+    "status": 1307017,
+    "result": 1307020,
     "instruction": {
-      "opcode": 1306997,
-      "a": 1306998,
-      "b": 1306999,
-      "destination": 1307000,
-      "base": 1307001,
-      "color": 1307002,
-      "request": 1307003
+      "opcode": 1307009,
+      "a": 1307010,
+      "b": 1307011,
+      "destination": 1307012,
+      "base": 1307013,
+      "color": 1307014,
+      "request": 1307015
     }
   },
-  "gate_platforms": 9945,
+  "gate_platforms": 9949,
   "reserved_channels": [
     1277000,
     1342535
@@ -91,7 +91,7 @@
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
   "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
-  "logical_gates": 29887,
+  "logical_gates": 29899,
   "local_constant_inputs": true,
   "layout": "未参与别名的固定常量输入就地复制；其余连接保持，复用旧平台的行内及上方空位，组件间隔一格、平台边缘两格，方阵排列。",
   "platform_grid": [

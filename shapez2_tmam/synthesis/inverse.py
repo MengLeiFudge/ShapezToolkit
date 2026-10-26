@@ -20,7 +20,8 @@ class PinFamily:
     def members(self, rules: Rules) -> Iterator[Shape]:
         """恢复顶层非晶体的空/N/P 选择；可制作性仍须分别由真实配方确认。"""
         free = [q for q in range(rules.quadrants) if not self.top_crystals & (1 << q)]
-        for choices in product((EMPTY, "Cu", PIN), repeat=len(free)):
+        domains = [(EMPTY, "Cu", PIN) if self.lower[-1][q] != EMPTY else (EMPTY, "Cu") for q in free]
+        for choices in product(*domains):
             top = ["cr" if self.top_crystals & (1 << q) else EMPTY for q in range(rules.quadrants)]
             for q, cell in zip(free, choices):
                 top[q] = cell

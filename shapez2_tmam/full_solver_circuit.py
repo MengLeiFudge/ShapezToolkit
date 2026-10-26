@@ -310,8 +310,9 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                                            program.not_(candidate.image.passed), program.not_(physics_matches)))
     carry = program.and_(counter_event, program.not_(bad_slot), program.not_(family_jump))
     next_top = []
-    for bits, crystal in zip(top, crystals):
-        values, overflow = _increment(program, bits, carry, 3)
+    for bits, crystal, allow_pin in zip(top, crystals, candidate.top_pin_allowed):
+        last = program.or_(_equals(program, bits, 2), program.and_(program.not_(allow_pin), _equals(program, bits, 1)))
+        values, overflow = _increment(program, bits, carry, 3, last=last)
         next_top.append(tuple(program.pick(program.or_(crystal, family_jump, skip_columns), program.zero, value)
                               for value in values))
         carry = program.pick(crystal, carry, overflow)
