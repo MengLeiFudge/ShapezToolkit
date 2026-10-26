@@ -71,6 +71,8 @@ target保持，enable=0至少1636tick后启用；window上升后48tick采一次�
 
 当前37278平台、356状态、486行ROM、六物品槽。target保持，enable=0至少2864tick；每完整window上升后96tick读一次，sample为真先收包再处理done。周期228模拟秒，最坏分支数仍过大，尚未通过实用性能验收。完整覆盖、帧回退、重放及互斥选择证明见[五帧控制](../4q5l/full-tail-circuit.md)。
 
+`full-tail-packed-4q5l.spz2bp`将同一网表装入16676平台，外框130×129，独占频道1277000～1342535。输入输出协议、周期和搜索界保持；逐端口核对及[装箱证明](../4q5l/packed-circuit.md)说明占地与时序为何保持。它同样尚未通过实用性能验收。
+
 ## 递归候选的固定标签网格
 
 `tagged-goal-4q5l.spz2bp`用5768平台将20份格ID还原为原层号的NPC片段、占用、针、晶体和颜色。0～3为空/Cu/P/红C，4～23固定引用最外层原目标格；原空格ID无效。C只在npc信号中用P占位，不生成免费晶体原料。
@@ -166,10 +168,11 @@ python -m shapez2_tmam.tagged_goal_circuit --channel-base 1127000 --output shape
 python -m shapez2_tmam.pin_image_circuit --channel-base 1144000 --output shapez2_tmam/blueprints/pin-image-4q5l.spz2bp
 python -m shapez2_tmam.pin_source_circuit --channel-base 1194000 --output shapez2_tmam/blueprints/pin-source-4q5l.spz2bp
 python -m shapez2_tmam.full_solver_circuit --channel-base 1211000 --output shapez2_tmam/blueprints/full-tail-4q5l.spz2bp
+python -m shapez2_tmam.full_solver_circuit --pack --output shapez2_tmam/blueprints/full-tail-packed-4q5l.spz2bp
 python -m shapez2_tmam.startpoint_circuit --tagged-goal --channel-base 1161000 --output shapez2_tmam/blueprints/tagged-leaf-4q5l.spz2bp
 ```
 
-[`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。每门单独使用一块 1×1 基础平台；无线收发器占用 3×3×3 格，交换门占两格，其余本次所用门占一格。
+[`Circuit.document`](../circuit.py) 在编译时检查每个门的输入数量、输出引用、频道范围、别名组，以及旋转后的建筑实际占地与每个本地输入端口的真实几何来源。默认每门单独使用一块1×1基础平台；`packed=True`按完整组件矩形装箱，刚性平移且组件间留两格。无线收发器占用3×3×3格，交换门占两格，其余本次所用门占一格。
 
 原生占地、端口来自 `resources.assets`，指纹及端口约定见 [`mari/ports.py`](../mari/ports.py)。格式对应 `BlueprintSerializer`、两种 `BlueprintEntryJsonConverter` 和 `SignalSerializer`；省略图标时 `BlueprintJsonConverter` 使用默认图标。无线时序依据 `SignalChannelRingBuffer.ReadSignal`、`SignalSimulation` 和 `SignalBuffer.TryPopSignal`。
 

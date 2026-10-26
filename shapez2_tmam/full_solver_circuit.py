@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
 
-from .circuit import Circuit, Gate, Literal, Ref
+from .circuit import Circuit, Gate, Literal, Ref, encode_document
 from .clocked_state import ClockedState
 from .corner_program import CornerProgram, half_body
 from .decoder_circuit import decode
@@ -398,12 +398,21 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
 def main() -> int:
     """仅编译生产蓝图及接口，不执行求解。"""
     parser = argparse.ArgumentParser(description="生成五帧递归及成功路径重放的完整四象限尾部电路")
-    parser.add_argument("--channel-base", type=int, default=1_211_000)
+    parser.add_argument("--channel-base", type=int)
+    parser.add_argument("--pack", action="store_true", help="将固定门组件装入共用平台；默认使用独立频道1277000")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    circuit, report = build_solver(args.channel_base)
+    default_base = 1_277_000 if args.pack else 1_211_000
+    circuit, report = build_solver(args.channel_base if args.channel_base is not None else default_base)
+    document = circuit.document(packed=args.pack)
+    if args.pack:
+        platforms = document["BP"]["Entries"]
+        report.update({"logical_gates": len(circuit.gates), "gate_platforms": len(platforms),
+                       "layout": "门组件刚性平移，矩形间留两格；平台方阵排列。频道、门和内部本地连线保持。",
+                       "platform_grid": [max(platform["X"] for platform in platforms) + 1,
+                                         max(platform["Y"] for platform in platforms) + 1]})
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(circuit.encode() + "\n", encoding="utf-8")
+    args.output.write_text(encode_document(document) + "\n", encoding="utf-8")
     args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"完整四象限尾部电路已编译：{args.output}；{report['gate_platforms']} 块平台。")
     return 0

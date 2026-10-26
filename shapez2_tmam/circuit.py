@@ -1,12 +1,13 @@
 """将信号门网表布置为带平台、无线连线的原生二代蓝图。
 
-每门一块 1x1 平台，端口布局固定且静态核对；显式兼容多驱动可共用频道。
+默认每门一块1x1平台；可选按刚性门组件压缩装箱，端口均静态核对。显式兼容多驱动可共用频道。
 这里编译生产电路，不运行游戏、门级模拟或目标求解。
 """
 
 import base64
 import gzip
 import json
+import math
 import struct
 from collections import deque
 from dataclasses import dataclass
@@ -80,6 +81,45 @@ _SUPPORTED = (set(_TYPES) - {"WireForward", "WireLeft"}) | {
     "ControlledSignalReceiver", "LogicGateIf", "LogicGateNot", "LogicGateAnd",
     "LogicGateOr", "LogicGateXOr", "LogicGateCompare",
 }
+
+
+def encode_document(document: dict) -> str:
+    """编码已经完成静态接线核对的生产蓝图，固定压缩时间戳。"""
+    raw = json.dumps(document, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return "SHAPEZ2-4-" + base64.b64encode(gzip.compress(raw, mtime=0)).decode("ascii") + "$"
+
+
+def _pack_platforms(platforms: list[dict], bounds: list[tuple[int, int, int, int]]) -> tuple[list[dict], dict[int, tuple[int, int]]]:
+    """刚性平移门组件，矩形间留两格；返回旧岛到新岛及建筑编号偏移。"""
+    packed: list[dict] = []
+    mapping = {}
+    x = y = 2
+    row_height = 0
+    order = sorted(range(len(platforms)), key=lambda i: (-(bounds[i][3] - bounds[i][1]),
+                                                        -(bounds[i][2] - bounds[i][0]), i))
+    for index in order:
+        left, bottom, right, top = bounds[index]
+        width, height = right - left + 1, top - bottom + 1
+        if width > 16 or height > 16:
+            raise ValueError("门组件矩形超出平台16×16格内部范围")
+        if x + width > 18:
+            x, y, row_height = 2, y + row_height + 2, 0
+        if not packed or y + height > 18:
+            packed.append({"T": "Foundation_1x1", "B": {
+                "$type": "Building", "BinaryVersion": 1137, "Entries": []}})
+            x = y = 2
+            row_height = 0
+        entries = packed[-1]["B"]["Entries"]
+        mapping[index] = len(packed) - 1, len(entries)
+        entries.extend({**entry, "X": entry["X"] + x - left, "Y": entry["Y"] + y - bottom}
+                       for entry in platforms[index]["B"]["Entries"])
+        x += width + 2
+        row_height = max(row_height, height)
+    # 方阵缩短蓝图边长；每岛内仍留两格边缘，不产生跨岛本地连接。
+    width = max(1, math.isqrt(max(0, len(packed) - 1)) + 1)
+    for index, platform in enumerate(packed):
+        platform.update(X=index % width, Y=index // width)
+    return packed, mapping
 
 
 class Circuit:
@@ -174,10 +214,11 @@ class Circuit:
                 "conditions": "本机Hybrid或AlwaysHighUPS模式的常速连续推进，每批最多4信号tick；频道独占、接线及配置固定。调试单步、模式切换、强制低UPS和快进不适用。",
                 "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"}
 
-    def document(self) -> dict:
+    def document(self, *, packed: bool = False) -> dict:
         """生成原生 Island 蓝图文档，同时核对实际占地和信号网络。"""
         channels = self.channel_map()
         platforms: list[dict] = []
+        bounds: list[tuple[int, int, int, int]] = []
         expected = []
         for i, gate in enumerate(self.gates):
             entries = []
@@ -261,6 +302,13 @@ class Circuit:
                 expected.append(((i, transmitter, 1), (i, gate_index, port)))
             platforms.append({"X": i % 12, "Y": i // 12, "T": "Foundation_1x1", "B": {
                 "$type": "Building", "BinaryVersion": 1137, "Entries": entries}})
+            bounds.append((min(x for x, _, _ in occupied), min(y for _, y, _ in occupied),
+                           max(x for x, _, _ in occupied), max(y for _, y, _ in occupied)))
+        if packed:
+            platforms, mapping = _pack_platforms(platforms, bounds)
+            expected = [((mapping[pi][0], mapping[pi][1] + local, port),
+                         (mapping[si][0], mapping[si][1] + slocal, sport))
+                        for (pi, local, port), (si, slocal, sport) in expected]
         blueprint = {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}
         wiring = Wiring(blueprint)
         indices = {}
@@ -275,7 +323,6 @@ class Circuit:
                 raise ValueError(f"平台 {pi} 的 {local}:{port} 接线不符合网表，实际来源 {sources}")
         return {"V": 1137, "BP": blueprint}
 
-    def encode(self) -> str:
+    def encode(self, *, packed: bool = False) -> str:
         """编译网表并编码为 SHAPEZ2-4，压缩时间戳固定以保持结果可复核。"""
-        raw = json.dumps(self.document(), ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-        return "SHAPEZ2-4-" + base64.b64encode(gzip.compress(raw, mtime=0)).decode("ascii") + "$"
+        return encode_document(self.document(packed=packed))
