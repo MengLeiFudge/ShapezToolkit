@@ -36,7 +36,9 @@ def _base_valid(circuit: Circuit, source: Ref, quadrants: int) -> Ref:
     no_crystals = []
     rotated = source
     for q in range(quadrants):
-        if q:
+        if quadrants == 6 and q >= 4:
+            rotated = circuit.add("VirtualRotator", source if q == 4 else rotated)
+        elif q:
             rotated = circuit.add("VirtualRotatorCCW", rotated)
         part = circuit.add("VirtualAnalyzer", rotated)
         no_crystals.append(circuit.add("LogicGateCompare", part, Literal(crystal), config="Bg=="))
@@ -122,7 +124,8 @@ def build_processor(channel_base: int | None = None, *, quadrants: int = 4) -> t
     next_state = recipe_step(circuit, reads[:6], reads[6], reads[7], packet, quadrants)
     # 此时所有状态入口仍为常量，只有组合DAG；下面仅闭合已计入的一级读入口。
     depth = circuit.settling_bound()["max_gate_depth"]
-    timing = clock(circuit, packet["enable"], phase_steps=max(8, (depth + 13) // 2))
+    # 提交截止到主组关写留2P−60tick，须严格超过12D+36tick。
+    timing = clock(circuit, packet["enable"], phase_steps=max(8, depth // 2 + 5))
     reset = circuit.add("LogicGateNot", packet["enable"])
     master_load = circuit.add("LogicGateOr", timing.phases[0], reset)
     slave_load = circuit.add("LogicGateOr", timing.phases[2], reset)
