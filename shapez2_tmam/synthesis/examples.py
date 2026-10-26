@@ -199,6 +199,18 @@ def two_quadrant_example() -> Example:
                    2, result, (("最高晶体以下前缀", prefix), ("跨列普通上层", bridged), ("补针后的目标", result)))
 
 
+def pin_framed_rectangle_example() -> Example:
+    """五层矩形用共同针前缀及交错N/P后缀包住同色段核心。"""
+    rules = Rules(6)
+    target = rules.parse("P-P-P-P-P-P-:crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu:CuP-CuP-CuP-")
+    result = Constructor(rules).construct(target).recipe
+    if result is None or result.result != target:
+        raise RuntimeError("六象限带针矩形未生成并行制造代表配方")
+    return Example("6q-pin-framed-rectangle", "共同针前缀与交错后缀的并行制造",
+                   "先制造三层红蓝晶体核心，再一次顶针补齐六列地面针，最后追加交错普通格和针的一层。永久针在全部结晶完成后加入。",
+                   6, result)
+
+
 def rectangular_example() -> Example:
     """同色的多行晶体共用结晶加工，六列三层直接制造。"""
     rules = Rules(6)
@@ -316,7 +328,8 @@ def main() -> int:
     args = parser.parse_args()
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
-                     layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example()))
+                     layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example(),
+                     pin_framed_rectangle_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)

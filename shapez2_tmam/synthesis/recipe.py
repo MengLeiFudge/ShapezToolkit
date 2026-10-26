@@ -190,7 +190,7 @@ class Builder:
         return self.apply("rotate", merged, parameter=start)
 
     def rectangular_columns(self, target: Shape) -> Recipe | None:
-        """共同制造等高N/C列；须占全圈或连续半面以内，且同层晶体同色。"""
+        """并行制造矩形列：共同针前缀、同层同色N/C核心及无C后缀。"""
         n = self.rules.quadrants
         occupied = {q for q, cell in enumerate(target.layers[0]) if cell != EMPTY}
         width = len(occupied)
@@ -201,7 +201,7 @@ class Builder:
             return None
         colors = []
         for row in target.layers:
-            if any((cell != EMPTY) != (q in occupied) or cell == PIN for q, cell in enumerate(row)):
+            if any((cell != EMPTY) != (q in occupied) for q, cell in enumerate(row)):
                 return None
             crystals = {cell[1] for cell in row if cell[0] == "c"}
             if len(crystals) > 1 or "u" in crystals:
@@ -209,9 +209,13 @@ class Builder:
             colors.append(next(iter(crystals), None))
         if not any(colors):
             return self.noncrystal(target)
+        prefix = next(z for z, row in enumerate(target.layers) if any(row[q] != PIN for q in occupied))
+        top = max(z for z, color in enumerate(colors) if color is not None)
+        if any(PIN in row for row in target.layers[prefix:top + 1]):
+            return None
         source = None
         pending_color = None
-        for row, color in zip(target.layers, colors):
+        for row, color in zip(target.layers[prefix:top + 1], colors[prefix:top + 1]):
             if color is not None and pending_color is not None and color != pending_color:
                 assert source is not None
                 source = self.apply("crystal", source, parameter=pending_color)
@@ -225,6 +229,10 @@ class Builder:
             source = self.window(source, start + width - n // 2)
             if width < n // 2:
                 source = self.window(source, start)
+        for _ in range(prefix):
+            source = self.apply("pin", source)
+        for segment in self._noncrystal_segments(target.layers[top + 1:]):
+            source = self.apply("stack", source, segment)
         if source.result != target:
             raise RuntimeError("同色层的并行列制造结果与目标不一致")
         return source

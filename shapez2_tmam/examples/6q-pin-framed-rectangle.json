@@ -1,0 +1,99 @@
+{
+  "name": "6q-pin-framed-rectangle",
+  "title": "共同针前缀与交错后缀的并行制造",
+  "mechanism": "先制造三层红蓝晶体核心，再一次顶针补齐六列地面针，最后追加交错普通格和针的一层。永久针在全部结晶完成后加入。",
+  "quadrants": 6,
+  "height": 5,
+  "target": "P-P-P-P-P-P-:crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu:CuP-CuP-CuP-",
+  "register_count": 2,
+  "evidence": "依据局部物理与已证配方变换生成中间产物；未在游戏或Mod中验证。",
+  "milestone_orientation": null,
+  "milestones": [],
+  "steps": [
+    {
+      "id": 0,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "P-CuP-CuP-Cu"
+    },
+    {
+      "id": 1,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "CuP-CuP-CuP-"
+    },
+    {
+      "id": 2,
+      "operation": "stack",
+      "inputs": [
+        0,
+        1
+      ],
+      "parameter": null,
+      "result": "P-CuP-CuP-Cu:CuP-CuP-CuP-"
+    },
+    {
+      "id": 3,
+      "operation": "crystal",
+      "inputs": [
+        2
+      ],
+      "parameter": "r",
+      "result": "crCucrCucrCu:CucrCucrCucr"
+    },
+    {
+      "id": 4,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "P-CuP-CuP-Cu"
+    },
+    {
+      "id": 5,
+      "operation": "stack",
+      "inputs": [
+        3,
+        4
+      ],
+      "parameter": null,
+      "result": "crCucrCucrCu:CucrCucrCucr:P-CuP-CuP-Cu"
+    },
+    {
+      "id": 6,
+      "operation": "crystal",
+      "inputs": [
+        5
+      ],
+      "parameter": "b",
+      "result": "crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu"
+    },
+    {
+      "id": 7,
+      "operation": "pin",
+      "inputs": [
+        6
+      ],
+      "parameter": null,
+      "result": "P-P-P-P-P-P-:crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu"
+    },
+    {
+      "id": 8,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "CuP-CuP-CuP-"
+    },
+    {
+      "id": 9,
+      "operation": "stack",
+      "inputs": [
+        7,
+        8
+      ],
+      "parameter": null,
+      "result": "P-P-P-P-P-P-:crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu:CuP-CuP-CuP-"
+    }
+  ]
+}
