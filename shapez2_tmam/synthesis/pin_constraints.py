@@ -4,6 +4,19 @@ from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
 
 
+def pin_base_possible(target: Shape) -> bool:
+    """列A来源的Pin/S尾部必要条件：低层保留C下方有新增针及不动格。"""
+    for z, row in enumerate(target.layers[:3]):
+        for q, cell in enumerate(row):
+            if cell[0] != "c":
+                continue
+            if z == 0 or target.layers[0][q] != PIN:
+                return False
+            if z == 2 and target.layers[1][q] == EMPTY:
+                return False
+    return True
+
+
 def pin_image_matches(rules: Rules, lower: tuple[tuple[str, ...], ...],
                        top_crystals: int, target: Shape) -> bool:
     """以最大静止集合及块支撑确认Pin结果；不运行前态制造或重力。"""

@@ -22,16 +22,16 @@
 
 `in_support_class(..., grounded=True, optional_top=True)`仍从地面沿全部模板格求H，只将最高层普通格从最终必达要求中排除。固定低层、最高层C及P的直接下方要求不放宽。来源模板的自由格必须是普通块；该选项不代表可忽略任意输入中的最高目标格。
 
-`Solver4._family_recipe`先对全族尝试两个A→S闭包。成功就返回真实制造证书；失败后，地面C族已无Pin历史，直接拒绝。其他族再用模板检查G成员存在性；没有G成员也整体拒绝。只有通过者才恢复空/N/P成员，并逐一搜索各自Pin尾部。
+`Solver4._family_recipe`先对全族尝试两个A→S闭包。成功就返回真实制造证书；失败后，[低层C底部条件](pin-base.md)不符的族已无Pin历史，直接拒绝。其他族再用模板检查G成员存在性；没有G成员也整体拒绝。只有通过者才恢复空/N/P成员，并逐一搜索各自Pin尾部。
 
 ## 共用电路及回退
 
 洪泛不增加一份副本。`support_circuit.in_support_class`增加可选顶格输入，只放宽最终最高普通格的可达要求。完整控制器仅在`optional_top AND pin_search AND NOT support_prefix`时启用：这是可选模板的完整G检查；当前前缀K以及精确目标G仍要求全部占用格可达。
 
-可选A→S失败后，若最低C允许Pin，则与普通根一样置pin_search并切换完整目标通路，进入PIN_PREFLIGHT。区别在于模板仅检查整个族的G可行性，不能直接作为精确目标进入Pin来源搜索：
+可选A→S失败后，若低层C底部条件允许Pin，则与普通根一样置pin_search并切换完整目标通路，进入PIN_PREFLIGHT。区别在于模板仅检查整个族的G可行性，不能直接作为精确目标进入Pin来源搜索：
 
 - 模板G检查结束后统一进入FAIL，保留当前G结果。可选模式、pin_search及G结果均为真时，回父SOURCE，保持空NPC地址，开始精确成员递归。
-- 无G成员，或地面C使Pin不可能时，回父新增的FAMILY_NEXT，整族推进C掩码。
+- 无G成员，或低层C底部条件使Pin不可能时，回父新增的FAMILY_NEXT，整族推进C掩码。
 - 精确成员失败仍回SOURCE_NEXT，正常推进NPC成员。
 
 fail_pop清全局叶端模式并修改深度，触发慢更新冻结；FAMILY_NEXT通过Phase保存整族跳过请求，避免模式清零后丢失该请求。SOURCE_NEXT和FAMILY_NEXT共用计数通路，后者强制family_jump；坏列跳过仍优先。族改变时清family_checked，下一族重新进行A→S检查。

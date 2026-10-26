@@ -6,7 +6,7 @@ from typing import Iterator
 
 from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
-from .pin_constraints import pin_image_matches
+from .pin_constraints import pin_base_possible, pin_image_matches
 from .pin_patterns import SOURCE_PATTERNS
 
 
@@ -99,7 +99,7 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
     """
     if rules.quadrants != 4:
         raise ValueError("此逆像生成器当前限定四象限五层")
-    if any(cell[0] == "c" for cell in target.layers[0]):
+    if not pin_base_possible(target):
         return
     height = rules.height - 1
     columns: list[list[tuple[str, ...]]] = []

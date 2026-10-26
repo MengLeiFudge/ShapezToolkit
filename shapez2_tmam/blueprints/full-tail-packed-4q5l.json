@@ -7,22 +7,22 @@
     "enable": 1277001
   },
   "outputs": {
-    "window": 1308780,
-    "sample": 1308781,
-    "done": 1308783,
-    "status": 1308792,
-    "result": 1308795,
+    "window": 1308803,
+    "sample": 1308804,
+    "done": 1308806,
+    "status": 1308815,
+    "result": 1308818,
     "instruction": {
-      "opcode": 1308784,
-      "a": 1308785,
-      "b": 1308786,
-      "destination": 1308787,
-      "base": 1308788,
-      "color": 1308789,
-      "request": 1308790
+      "opcode": 1308807,
+      "a": 1308808,
+      "b": 1308809,
+      "destination": 1308810,
+      "base": 1308811,
+      "color": 1308812,
+      "request": 1308813
     }
   },
-  "gate_platforms": 10623,
+  "gate_platforms": 10631,
   "reserved_channels": [
     1277000,
     1342535
@@ -47,6 +47,7 @@
   "grounded_pin_tail_required": true,
   "shared_family_grounding_check": true,
   "support_row_closures": 10,
+  "pin_base_precheck": true,
   "search_frames": 5,
   "item_registers": 6,
   "program_rom_rows": 265,
@@ -84,9 +85,9 @@
   "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
   "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-  "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+  "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
-  "logical_gates": 31674,
+  "logical_gates": 31697,
   "local_constant_inputs": true,
   "layout": "未参与别名的固定常量输入就地复制；其余连接保持，复用旧平台的行内及上方空位，组件间隔一格、平台边缘两格，方阵排列。",
   "platform_grid": [

@@ -130,8 +130,11 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "LogicGateCompare", cell.color, Literal("color:u"), config="AQ==")) for row in decoded.cells for cell in row))
     in_scope = program.and_(decoded.valid, program.not_(uncolored))
     has_crystal = program.or_(*(cell.crystal for column in original for cell in column))
-    ground_crystal = program.or_(*(column[0].crystal for column in original))
-    tail_candidate = program.and_(has_crystal, program.not_(ground_crystal), program.not_(levels[4]))
+    pin_base = program.and_(*(program.and_(
+        program.not_(column[0].crystal),
+        program.or_(program.not_(program.or_(column[1].crystal, column[2].crystal)), column[0].pin),
+        program.or_(program.not_(column[2].crystal), column[1].occupied)) for column in original))
+    tail_candidate = program.and_(has_crystal, pin_base, program.not_(levels[4]))
     pin_allowed = program.and_(tail_candidate, program.not_(optional_top))
 
     finder = PrefixSearch(program, original, optional_top=optional_top)
@@ -437,7 +440,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "gate_platforms": len(circuit.gates), "reserved_channels": [channel_base, channel_base + reserve - 1],
         **state_report, "timing": timing_contract(timing),
         "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
-        "support_row_closures": 10,
+        "support_row_closures": 10, "pin_base_precheck": True,
         "search_frames": 5, "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,
                            "requires_column_admissibility": True, "iterative_state_registers": 0,
@@ -457,7 +460,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+        "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 

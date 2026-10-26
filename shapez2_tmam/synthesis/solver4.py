@@ -6,6 +6,7 @@ from typing import Iterator
 from .construct import Constructor, Result
 from .inverse import PinFamily, pin_families
 from .physics import Rules, Shape
+from .pin_constraints import pin_base_possible
 from .prefix_closure import minimal_start
 from .recipe import Recipe
 from .support import in_support_class
@@ -72,7 +73,7 @@ class Solver4:
                     raise RuntimeError("强制前缀闭包已证明A起点，但角构造未生成证书")
                 return self._finish(found.recipe, target)
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
-        if lowest == 0 or not in_support_class(self.rules, target, grounded=True):
+        if not pin_base_possible(target) or not in_support_class(self.rules, target, grounded=True):
             return None
         for pushed in self.predecessors(target, grounded=True):
             # 不可制作的中间输出不能成为尾部节点；unknown 则继续完整逆推。
@@ -105,7 +106,7 @@ class Solver4:
                                          if pos[0] < 4 or cell[0] == "c" or pos in selected})
             assert completed is not None
             return self._finish(direct.recipe, completed)
-        if (any(cell[0] == "c" for cell in family.lower[0])
+        if (not pin_base_possible(template)
                 or not in_support_class(self.rules, template, grounded=True, optional_top=True)):
             return None
         for source in family.members(self.rules):
