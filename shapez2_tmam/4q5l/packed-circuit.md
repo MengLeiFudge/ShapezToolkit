@@ -2,7 +2,7 @@
 
 完整控制器可用 `python -m shapez2_tmam.full_solver_circuit --pack --output shapez2_tmam/blueprints/full-tail-packed-4q5l.spz2bp` 编译压缩布局。产物为 [蓝图](../blueprints/full-tail-packed-4q5l.spz2bp)及[接口](../blueprints/full-tail-packed-4q5l.json)。默认频道1277000～1342535，与未压缩版独立。
 
-实际平台数和方阵尺寸由[生产接口JSON](../blueprints/full-tail-packed-4q5l.json)记录。逻辑门、358项状态、486行ROM和六物品槽没有因装箱减少。本优化只减占地；两版均采用[慢更新冻结协议](multicycle-control.md)，控制周期960信号tick，即80模拟秒，慢更新后额外等待一轮。搜索复杂度保持原界，尚未通过游戏实用性能验收。
+实际平台数和方阵尺寸由[生产接口JSON](../blueprints/full-tail-packed-4q5l.json)记录。逻辑门、359项状态、265行ROM和六物品槽没有因装箱减少。本优化只减占地；两版均采用[慢更新冻结协议](multicycle-control.md)，控制周期1008信号tick，即84模拟秒，慢更新后额外等待一轮。搜索复杂度保持原界，尚未通过游戏实用性能验收。
 
 ## 装箱规则
 
@@ -28,6 +28,6 @@
 
 ## 静态证据
 
-压缩版生产编译通过逐输入接线核对及组件占地检查。本次两个Python文件LSP零诊断。最新两版完整控制器生产编译通过，通用标签部件重编译产物不变。没有运行目标、求解、制造指令、反馈模拟、测试或游戏导入。
+压缩版生产编译通过逐输入接线核对及组件占地检查。本次两个Python文件LSP零诊断。最新两版完整控制器生产编译通过，通用标签和独立半形部件沿用原产物。没有运行目标、求解、制造指令、反馈模拟、测试或游戏导入。
 
 [返回目录](README.md) · [蓝图使用](../blueprints/README.md)

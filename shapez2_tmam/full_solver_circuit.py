@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .circuit import Circuit, Gate, Literal, Ref, encode_document
 from .clocked_state import ClockedState
-from .corner_program import CornerProgram, half_body
+from .corner_program import CornerProgram
 from .decoder_circuit import decode
 from .half_circuit import MaterialCell, column_admissible, half_stable
 from .pin_source_circuit import pin_source
@@ -17,6 +17,7 @@ from .prefix_search import PrefixSearch
 from .program_controller import RECORD_FIELDS, _rom
 from .recipe_processor import _read, recipe_step
 from .sequential_circuit import timing_contract
+from .shared_angle import mirror_packet, shared_half_body
 from .stationary_circuit import stationary_matches
 from .support_circuit import in_support_class
 from .synthesis.physics import Rules
@@ -164,13 +165,14 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     items = tuple(bank.add(None) for _ in range(6))
     ack, item_status = bank.add(), bank.add()
     second_pass = bank.add()
+    second_corner = bank.add()
     shifted = program.not_(partitions[0])
     aligned = tuple(tuple(program.choose(shifted, finder.columns[(q + 1) % 4][z], finder.columns[q][z])
                           for z in range(5)) for q in range(4))
     flipped = program.not_(program.or_(*(cell.occupied for column in aligned[:2] for cell in column)))
     take_back = circuit.add("LogicGateXOr", flipped, second_pass)
     columns = tuple(tuple(program.choose(take_back, aligned[q + 2][z], aligned[q][z]) for z in range(5)) for q in (0, 1))
-    present = program.or_(*half_body(program, columns))
+    present, corner_last, mirror_limit = shared_half_body(program, columns, second_corner)
     program.emit(present, 4, 0)
     program.rotate(0, 2, program.not_(second_pass), destination=5)
     with_second = program.and_(second_pass, present)
@@ -197,6 +199,10 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     width = (len(instructions) - 1).bit_length()
     pc = tuple(bank.add() for _ in range(width))
     packet, selected, last, jumps = _rom(circuit, instructions, pc, program.one, program.const(None))
+    in_corner = program.or_(*(program.and_(program.not_(pc[k]), *(
+        pc[j] if mirror_limit & (1 << j) else program.not_(pc[j]) for j in range(k + 1, width)))
+        for k in range(width) if mirror_limit & (1 << k)))
+    mirror_packet(program, packet, program.and_(second_corner, in_corner))
     replay = program.or_(modes[Phase.REPLAY_LEAF], modes[Phase.REPLAY_PARENT])
     packet["enable"] = program.and_(enable, replay, selected)
     packet["request"] = program.not_(ack)
@@ -211,7 +217,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                    for k, value in enumerate(next_pc)]
     end_macro = program.and_(advance, _equals(program, pc, macro_last))
     repeat = program.and_(end_macro, program.not_(second_pass))
-    next_pc = [program.pick(repeat, program.zero, bit) for bit in next_pc]
+    repeat_corner = program.and_(advance, _equals(program, pc, corner_last), program.not_(second_corner))
+    next_pc = [program.pick(program.or_(repeat, repeat_corner), program.zero, bit) for bit in next_pc]
     macro_done = program.and_(end_macro, second_pass)
     parent_done = program.and_(advance, last)
     for read, source in zip((*items, ack, item_status), next_items):
@@ -219,6 +226,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     for read, source in zip(pc, next_pc):
         bank.put(read, source)
     bank.put(second_pass, program.or_(second_pass, repeat))
+    bank.put(second_corner, 1, repeat_corner)
+    bank.put(second_corner, 0, repeat)
 
     cpu_matches = same_grid(program, decode(circuit, items[0], program.one, Rules(4)), grid)
 
@@ -336,6 +345,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     bank.put(ack, 0, reset_cpu)
     bank.put(item_status, 0, reset_cpu)
     bank.put(second_pass, 0, reset_cpu)
+    bank.put(second_corner, 0, reset_cpu)
     for k, read in enumerate(pc):
         bank.put(read, 0, reset_cpu)
         bank.put(read, int(bool(parent_start & (1 << k))), replay_up)
@@ -362,11 +372,11 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     # K的重通路只由慢状态切换；业务冻结时脉冲清零，避免重复发包。
     bank.put(support_prefix, 0, descend)
     bank.put(support_prefix, 1, program.or_(enter, search_pop, fail_pop, root_solved, replay_up))
-    slow_reads = (depth, second_pass, support_prefix, leaf_direction, *(read for frame in frames for read in (
+    slow_reads = (depth, second_pass, second_corner, support_prefix, leaf_direction, *(read for frame in frames for read in (
         *(cell for column in frame.goal for cell in column), *frame.prefix,
         *(bit for bits in (*frame.slots, *frame.top) for bit in bits), *frame.crystals, frame.pin_search)))
     slow_event = program.or_(enter, next_cut, grow_prefix, begin_pin_search, move_prefix, start_source, counter_event,
-                             descend, search_pop, fail_pop, root_solved, replay_up, repeat)
+                             descend, search_pop, fail_pop, root_solved, replay_up, repeat, repeat_corner)
     timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,))
     window = program.and_(timing.phases[3], enable)
     sample = program.and_(window, record_valid)
@@ -393,16 +403,18 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                            "manufacture_during_search": False},
         "prefix_closure": {"directions": 2, "growth_rounds_max_per_direction": 20,
                            "final_checks_per_direction": 1, "pin_pass_keeps_full_enumeration": True},
+        "shared_angle_rows": corner_last + 1, "angle_calls": 4,
+        "instruction_bound": 2 * (macro_last + corner_last + 2) + 4 * (len(instructions) - parent_start),
         "leaf_program_rows": macro_last + 1, "parent_tail_rows": len(instructions) - parent_start,
         "statuses": {"0": "搜索或成功路径重放中", "1": "已输出完整制造流程，原生回放等于原目标",
                      "2": "穷尽全部有界尾部后不可制作", "3": "cu晶体供料未界定", "4": "内部状态或回放失配，不能判不可制作",
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-        "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+        "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/prefix-closure.md；full-tail-circuit.md；multicycle-control.md；pin-grounded.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+        "proof": "4q5l/prefix-closure.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 
