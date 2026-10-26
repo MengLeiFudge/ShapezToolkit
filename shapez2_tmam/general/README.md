@@ -8,7 +8,7 @@
 
 1. 先读[三列以上半形的无限构造族](wide-half-loops.md)，核对 n=2k≥6、H≥5 的非 K 半形及不稳定拼合输出，再读[六象限的具体矩阵](../6q5l/non-k-half.md)。
 2. 再读[通用列内不变量](column-invariants.md)，确认 Q、J 和顶针位置约束只使用局部事实，没有依赖整体稳定性。
-3. 查[一般尾部计数](stack-progress.md)与[扩大后的安全堆叠范围](addition-components.md)：不稳定输出仍保留；K_add为复杂上料可换成基础块的充分条件。现有Python分支仍仅实现K。
+3. 查[一般尾部计数](stack-progress.md)与[扩大后的安全堆叠范围](addition-components.md)：不稳定输出仍保留；K_add为复杂上料可换成基础块的充分条件。Python分支已接入K_add，用危险高度和反向可达传播完成静态判定。
 4. 读[原八象限八层构造](general-model.md)，其中复杂堆叠无法从同一下料改成逐块堆叠的反例仍有独立作用；再对照[六象限完整配方目录](../6q5l/synthesis.md)及其参数推广，区分完整搜索和结构约化。
 
 ## 研究结果索引
@@ -18,9 +18,9 @@
 | [参数化模型与反例](general-model.md) | 八象限八层中，可制作的无针悬空环、不稳定输出，以及复杂堆叠无法从同一下料改成逐块堆叠的构造 |
 | [通用列内不变量](column-invariants.md) | 不依赖整体稳定性的 Q、J 证明，以及顶针逆向的晶体位置、地面针占用约束 |
 | [三列以上半形的无限构造族](wide-half-loops.md) | 对所有偶数 n≥6、H≥5 显式构造非 K 半形和不稳定输出；固定偶数参数的有限合成保证及尚未解决的压缩问题 |
-| [K下料的通用堆叠化简](conditional-stacking.md) | 已实现的K分支基础块约化；更大理论范围见下两项 |
+| [K下料的通用堆叠化简](conditional-stacking.md) | K范围的基础块约化证明；当前实现采用下述更强K_add范围 |
 | [受列顶保护的普通块](protected-stack.md) | 普通内块也可保护支撑环；n≥8、H≥5的显式非K可制造族 |
-| [接地来源与潜在粘合](addition-components.md) | K_add支撑证书及堆叠闭包；等列顶稳定图形、六象限H也可逐层追加 |
+| [接地来源与潜在粘合](addition-components.md) | K_add支撑证书及堆叠闭包；危险高度两圈扫描与跨标签边传播已接入Python，六象限H也可逐层追加 |
 | [堆叠进展量与尾部界](stack-progress.md) | 有效Stack严格增加N/P数减C数；一般含C尾部至多n(3H−1)次主干Stack/Pin |
 | [两象限任意层数直接合成](two-quadrant-synthesis.md) | 稳定性、Q与最高C以下连续前缀的充要判据；O(H)构造、3槽；单层任意偶数象限构造及通用融合屏障 |
 | [交换的半形结果与原输入凭据](swap-witnesses.md) | 按切后结果合并候选；保留原输入避免重复重力；给定目标直接投影查表 |

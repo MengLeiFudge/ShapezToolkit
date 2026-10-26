@@ -60,7 +60,7 @@ if result.recipe is not None:
 
 `pin_families`、`cut_families`是独立的惰性物理逆像接口。候选能产生目标，不等于候选本身可制作；使用者须给实际族成员补制造证明。
 
-`stack_reduction.stack_successors(rules, lower, known)`面向普通格统一为Cu的结构目录：K下料只生成连续普通块及单针，并用列顶公式计算结果；非K下料遍历known旧快照中的真实上料。六象限K分支至多37项，替换保持最终闭包，详见[证明](../general/conditional-stacking.md)。该接口尚未接成完整六象限求解器，也不返回不可制造结论。
+`stack_reduction.stack_successors(rules, lower, known)`面向普通格统一为Cu的结构目录：[K_add](../general/addition-components.md)下料只生成连续普通块及单针，并用列顶公式计算结果；未通过充分判据的下料遍历known旧快照中的真实上料。六象限基础块分支至多37项，范围包含K及等列顶非K半形H，替换保持最终闭包。`support.in_addition_class`用每列危险高度和跨潜在组支撑边的反向传播实现判据，不计算强连通分量。该接口尚未接成完整六象限求解器，也不返回不可制造结论。
 
 `HalfCatalog(builder).add(recipe)`按前半、后半用途分别保存已知最低成本原输入；`join(target)`直接投影目标并比较n个有向起点，4q查4对、6q查6对，选表内总步骤最少、同长时物品槽最少的制造树。目标本身不被切割，不对切后结果多算一次重力；缺失只返回None，见[交换化简](../general/swap-witnesses.md)及[用途成本证明](../general/orientation-cost.md)。Builder.apply同时合并连续旋转、删去精确结果等于输入的一元加工；六象限V代表配方由此接口生成。
 
