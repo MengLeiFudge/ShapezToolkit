@@ -10,7 +10,7 @@ Rules现在接受偶数象限n≥2、制造层数上限H≥2。采用单象限�
 | Builder | 基础层、无晶体纯针行段、独立柱、晶体前缀、连续半面拼接；覆盖不到时返回None |
 | Constructor | 通用无晶体完整判据及独立柱/前缀局部构造；未覆盖的含晶体目标返回unknown |
 | stack_successors | K_add下料的n²+1种结构基础块；未通过充分判据时保留真实上料 |
-| ordinary_stack / single_stack | 给定真实下料的普通追加、针尾及部分交错N/P构造；依次尝试无C、原位补C及差分约束压紧载体，不额外结算下料 |
+| ordinary_stack / single_stack | 给定真实下料的普通追加、针尾及部分交错N/P构造；依次尝试无C、原位补C、列内压紧及针下间隙载体，不额外结算下料 |
 | HalfCatalog | 按前/后半用途保留最低成本原输入；按目标n个有向投影选目录内较短配方 |
 | StackPlan / StackCatalog | 任意堆叠的精确摘要及目标前缀匹配，保留每个键最短的已知凭据；缺失不是不可制作证明 |
 | Recipe.steps / step_count / register_count | 任意本模型配置的消费式步骤与完整中间产物；建立节点时计算总步骤数和物品槽需求，按子树槽需求降序调度 |

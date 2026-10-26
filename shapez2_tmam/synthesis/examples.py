@@ -149,6 +149,23 @@ def packed_stack_example() -> Example:
                    6, result, (("原下料", lower), ("压紧后的三层上料", result.inputs[1]), ("一次堆叠成品", result)))
 
 
+def layered_stack_example() -> Example:
+    """NPN与NN共享底顶普通块，保留针下C间隙解除全列压紧的冲突。"""
+    builder = Builder(Rules(6))
+    lower = builder.noncrystal(builder.rules.parse(
+        "--Cu------Cu:--Cu------Cu:--Cu------Cu:--Cu--------"))
+    assert lower is not None
+    materials = {"-": EMPTY, "N": "Cu", "P": PIN}
+    rows = ("NN-NNN", "-N-P-N", "-N---N", "-N-NNN", "-N----")
+    target = builder.rules.parse(":".join("".join(materials[cell] for cell in row) for row in rows))
+    result = single_stack(builder, lower, target)
+    if result is None:
+        raise RuntimeError("六象限针下间隙载体未生成代表配方")
+    return Example("6q-layer-constraints", "用针下晶体间隙解除上料对齐冲突",
+                   "q1四层柱与q5三层柱作下料。q3的NPN与q4的NN共享底顶普通块，不能同时全列压紧；改造NPN、NCN、CCN三列并对齐顶端，辅助C在一次堆叠中碎裂。",
+                   6, result, (("原下料", lower), ("保留针下晶体间隙的三层上料", result.inputs[1]), ("一次堆叠成品", result)))
+
+
 def two_quadrant_example() -> Example:
     """两象限六层：先拼连续晶体以下前缀，再让普通上层跨列支撑。"""
     builder = Builder(Rules(2, 6))
@@ -251,7 +268,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
     args = parser.parse_args()
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
-    examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example()))
+    examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(), layered_stack_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)

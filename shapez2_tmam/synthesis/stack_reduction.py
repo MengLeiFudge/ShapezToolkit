@@ -44,13 +44,31 @@ def stack_successors(rules: Rules, lower: Shape, known: Iterable[Shape]) -> Iter
             yield extension
 
 
+def _minimum_levels(limits: list[int], edges: list[tuple[int, int, int]]) -> list[int] | None:
+    """求非负差分下界的逐分量最小解；超出逐变量上限或有正环时返回None。"""
+    levels = [0] * len(limits)
+    for _ in limits:
+        changed = False
+        for before, after, distance in edges:
+            candidate = levels[before] + distance
+            if candidate > levels[after]:
+                if candidate > limits[after]:
+                    return None
+                levels[after] = candidate
+                changed = True
+        if not changed:
+            return levels
+    return None
+
+
 def _packed_upper(builder: Builder, delta: dict[Position, str]) -> Recipe | None:
     """列内N/P压紧，差分约束确定最短C前缀；仅接受能全体释放的最小解。"""
     rules = builder.rules
     n = rules.quadrants
+    height = max(z for z, _ in delta) + 1
     words: list[list[str]] = [[] for _ in range(n)]
     ranks = {}
-    for z in range(rules.height):
+    for z in range(height):
         for q in range(n):
             if (cell := delta.get((z, q))) is not None:
                 ranks[z, q] = len(words[q])
@@ -59,7 +77,7 @@ def _packed_upper(builder: Builder, delta: dict[Position, str]) -> Recipe | None
     for q in range(n):
         r = (q + 1) % n
         previous = None
-        for z in range(rules.height):
+        for z in range(height):
             row = [(column, ranks[z, column]) for column in (q, r)
                    if (z, column) in delta and delta[z, column] != PIN]
             if not row:
@@ -73,19 +91,8 @@ def _packed_upper(builder: Builder, delta: dict[Position, str]) -> Recipe | None
                 before, before_index = previous
                 edges.append((before, column, before_index - index + 1))
             previous = column, index
-    starts = [0] * n
-    for _ in range(n):
-        changed = False
-        for before, after, distance in edges:
-            candidate = starts[before] + distance
-            if candidate > starts[after]:
-                if candidate + len(words[after]) > rules.height:
-                    return None
-                starts[after] = candidate
-                changed = True
-        if not changed:
-            break
-    else:
+    starts = _minimum_levels([rules.height - len(word) for word in words], edges)
+    if starts is None:
         return None
     cells = {(z, q): cell for q, word in enumerate(words) if word
              for z, cell in enumerate(["cr"] * starts[q] + word)}
@@ -99,8 +106,54 @@ def _packed_upper(builder: Builder, delta: dict[Position, str]) -> Recipe | None
     return upper
 
 
+def _layered_upper(builder: Builder, delta: dict[Position, str], blocks: list[set[Position]]) -> Recipe | None:
+    """保留第一根针以下的晶体间隙，按物理块来源层求一个可释放载体。"""
+    rules = builder.rules
+    height = max(z for z, _ in delta) + 1
+    owner = {pos: index for index, block in enumerate(blocks) for pos in block}
+    edges = []
+    for q in range(rules.quadrants):
+        previous = None
+        pinned = False
+        for z in range(height):
+            pos = z, q
+            if pos not in delta:
+                continue
+            current = owner[pos]
+            if previous is not None:
+                edges.append((previous, current, 1))
+                if pinned:
+                    edges.append((current, previous, -1))
+            pinned |= delta[pos] == PIN
+            previous = current
+        previous = None
+        r = (q + 1) % rules.quadrants
+        for z in range(height):
+            pos = next(((z, column) for column in (q, r)
+                        if (z, column) in delta and delta[z, column] != PIN), None)
+            if pos is not None:
+                current = owner[pos]
+                if previous is not None:
+                    edges.append((previous, current, 1))
+                previous = current
+    levels = _minimum_levels([rules.height - 1] * len(blocks), edges)
+    if levels is None:
+        return None
+    placed = {(levels[owner[pos]], pos[1]): cell for pos, cell in delta.items()}
+    cells = {(z, q): placed.get((z, q), "cr")
+             for q, top in enumerate(rules.column_tops(placed)) for z in range(top + 1)}
+    if rules.stationary(cells, grounded=False):
+        return None
+    source = rules.fold(cells)
+    assert source is not None
+    upper = builder.independent_columns(source)
+    if upper is None:
+        raise RuntimeError("针下晶体与连续针后缀未生成独立柱制造证书")
+    return upper
+
+
 def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool) -> Recipe | None:
-    """共用下料一次结算判据；保留旧候选，失败后尝试列内压紧上料。"""
+    """共用下料一次结算判据；依次尝试无C、原位补C、列压紧和针下间隙。"""
     rules = builder.rules
     collapsed = rules.collapse(rules.cells(lower.result))
     original = rules.cells(collapsed) if collapsed is not None else {}
@@ -136,6 +189,8 @@ def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool)
         if upper is None:
             upper = _packed_upper(builder, delta)
         if upper is None:
+            upper = _layered_upper(builder, delta, blocks)
+        if upper is None:
             return None
     if upper is None:
         raise RuntimeError("无晶体下落结果未生成制造证书")
@@ -151,9 +206,9 @@ def ordinary_stack(builder: Builder, lower: Recipe, target: Shape) -> Recipe | N
 
 
 def single_stack(builder: Builder, lower: Recipe, target: Shape) -> Recipe | None:
-    """新增N/P的单次构造；依次检查无C、原位补C及列内压紧载体。
+    """新增N/P的单次构造；依次检查无C、原位补C、列压紧和针下间隙载体。
 
     下料允许非K或不稳定。每个补C候选均须全体释放并取得独立列制造凭据。
-    返回None仅表示必要条件或三种候选未通过，不能判目标全局不可制作。
+    返回None仅表示必要条件或四种候选未通过，不能判目标全局不可制作。
     """
     return _single_stack(builder, lower, target, pins=True)
