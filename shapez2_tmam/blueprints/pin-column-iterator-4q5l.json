@@ -28,38 +28,38 @@
     "enable": 1022010
   },
   "outputs": {
-    "sample": 1022887,
-    "exhausted": 1022889,
+    "sample": 1022924,
+    "exhausted": 1022926,
     "source_bottom_four": [
       {
-        "material": 1022890,
-        "tag": 1022894
+        "material": 1022927,
+        "tag": 1022931
       },
       {
-        "material": 1022891,
-        "tag": 1022895
+        "material": 1022928,
+        "tag": 1022932
       },
       {
-        "material": 1022892,
-        "tag": 1022896
+        "material": 1022929,
+        "tag": 1022933
       },
       {
-        "material": 1022893,
-        "tag": 1022897
+        "material": 1022930,
+        "tag": 1022934
       }
     ],
     "control_word_bits_low_to_high": [
-      1022898,
-      1022899,
-      1022900,
-      1022901,
-      1022902,
-      1022903,
-      1022904,
-      1022905
+      1022935,
+      1022936,
+      1022937,
+      1022938,
+      1022939,
+      1022940,
+      1022941,
+      1022942
     ]
   },
-  "gate_platforms": 874,
+  "gate_platforms": 911,
   "reserved_channels": [
     1022000,
     1024047

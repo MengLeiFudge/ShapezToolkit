@@ -110,109 +110,109 @@
     "enable": 1194048
   },
   "outputs": {
-    "candidate_valid": 1200204,
+    "candidate_valid": 1200072,
     "source_bottom_to_top": [
       [
         {
-          "material": 1200205,
-          "tag": 1200225
+          "material": 1200073,
+          "tag": 1200093
         },
         {
-          "material": 1200210,
-          "tag": 1200230
+          "material": 1200078,
+          "tag": 1200098
         },
         {
-          "material": 1200215,
-          "tag": 1200235
+          "material": 1200083,
+          "tag": 1200103
         },
         {
-          "material": 1200220,
-          "tag": 1200240
+          "material": 1200088,
+          "tag": 1200108
         }
       ],
       [
         {
-          "material": 1200206,
-          "tag": 1200226
+          "material": 1200074,
+          "tag": 1200094
         },
         {
-          "material": 1200211,
-          "tag": 1200231
+          "material": 1200079,
+          "tag": 1200099
         },
         {
-          "material": 1200216,
-          "tag": 1200236
+          "material": 1200084,
+          "tag": 1200104
         },
         {
-          "material": 1200221,
-          "tag": 1200241
+          "material": 1200089,
+          "tag": 1200109
         }
       ],
       [
         {
-          "material": 1200207,
-          "tag": 1200227
+          "material": 1200075,
+          "tag": 1200095
         },
         {
-          "material": 1200212,
-          "tag": 1200232
+          "material": 1200080,
+          "tag": 1200100
         },
         {
-          "material": 1200217,
-          "tag": 1200237
+          "material": 1200085,
+          "tag": 1200105
         },
         {
-          "material": 1200222,
-          "tag": 1200242
+          "material": 1200090,
+          "tag": 1200110
         }
       ],
       [
         {
-          "material": 1200208,
-          "tag": 1200228
+          "material": 1200076,
+          "tag": 1200096
         },
         {
-          "material": 1200213,
-          "tag": 1200233
+          "material": 1200081,
+          "tag": 1200101
         },
         {
-          "material": 1200218,
-          "tag": 1200238
+          "material": 1200086,
+          "tag": 1200106
         },
         {
-          "material": 1200223,
-          "tag": 1200243
+          "material": 1200091,
+          "tag": 1200111
         }
       ],
       [
         {
-          "material": 1200209,
-          "tag": 1200229
+          "material": 1200077,
+          "tag": 1200097
         },
         {
-          "material": 1200214,
-          "tag": 1200234
+          "material": 1200082,
+          "tag": 1200102
         },
         {
-          "material": 1200219,
-          "tag": 1200239
+          "material": 1200087,
+          "tag": 1200107
         },
         {
-          "material": 1200224,
-          "tag": 1200244
+          "material": 1200092,
+          "tag": 1200112
         }
       ]
     ]
   },
-  "gate_platforms": 6184,
+  "gate_platforms": 6052,
   "reserved_channels": [
     1194000,
     1210383
   ],
   "settling": {
-    "max_gate_depth": 89,
-    "hold_signal_ticks": 5824,
-    "hold_simulation_seconds": 485.3333333333333,
+    "max_gate_depth": 88,
+    "hold_signal_ticks": 5760,
+    "hold_simulation_seconds": 480.0,
     "conditions": "本机Hybrid或AlwaysHighUPS模式的常速连续推进，每批最多4信号tick；频道独占、接线及配置固定。调试单步、模式切换、强制低UPS和快进不适用。",
     "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"
   },

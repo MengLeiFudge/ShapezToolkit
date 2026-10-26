@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from .circuit import Literal, Ref
 from .corner_program import CornerProgram
-from .pin_column_circuit import PinColumn, _prefix_counts, column_candidate
+from .pin_column_circuit import PinColumn, column_candidate, decode_column
 from .synthesis.pin_patterns import SOURCE_PATTERNS
 
 
@@ -24,10 +24,8 @@ def pattern_column(program: CornerProgram, materials: tuple[Ref, ...], tags: tup
     if len(materials) != 5 or len(tags) != 5:
         raise ValueError("二十槽单列通路需要五格材料和标签")
     circuit = program.circuit
-    kinds = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==")
-                        for kind in range(4)) for value in materials)
-    retained = [kinds[0][1]] + [program.or_(row[1], row[2]) for row in kinds[1:]]
-    counts = _prefix_counts(circuit, retained)[-1]
+    target = decode_column(circuit, materials)
+    kinds, counts = target.kinds, target.counts[-1]
     addresses = tuple(circuit.add("LogicGateCompare", slot, Literal(index), config="AQ==") for index in range(20))
     floor = (program.not_(kinds[0][2]), kinds[0][2])
     selected: list[tuple[Ref, int, int]] = []
@@ -51,5 +49,5 @@ def pattern_column(program: CornerProgram, materials: tuple[Ref, ...], tags: tup
     valid = program.and_(enable, program.or_(*(chosen for chosen, _, _ in selected)), *separated,
                          *(program.or_(program.not_(forced[r]), crystal_bits[r]) for r in range(4)))
     column = column_candidate(circuit, materials, tags, (*keep_bits, *extra), valid,
-                              with_landings=with_landings)
+                              with_landings=with_landings, decoded_target=target)
     return PatternColumn(column, program.or_(*last), program.or_(*available), addresses)

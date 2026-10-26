@@ -21,19 +21,44 @@ class PinColumn:
 
 
 def _prefix_counts(circuit: Circuit, bits: list[Ref]) -> list[list[Ref]]:
-    """逐前缀的一热计数；只用布尔门，不依赖整数算术建筑。"""
-    counts = [[circuit.add("ConstantSignal", config=constant(1))]]
-    for bit in bits:
-        previous = counts[-1]
-        no = circuit.add("LogicGateNot", bit)
-        current = [circuit.add("LogicGateAnd", previous[0], no)]
-        for count in range(1, len(previous)):
-            unchanged = circuit.add("LogicGateAnd", previous[count], no)
-            increased = circuit.add("LogicGateAnd", previous[count - 1], bit)
-            current.append(circuit.add("LogicGateOr", unchanged, increased))
-        current.append(circuit.add("LogicGateAnd", previous[-1], bit))
-        counts.append(current)
-    return counts
+    """缓存平衡区间的一热卷积；返回每个原前缀的精确计数。"""
+    one = circuit.add("ConstantSignal", config=constant(1))
+    inverted = [circuit.add("LogicGateNot", bit) for bit in bits]
+    intervals: dict[tuple[int, int], list[Ref]] = {}
+
+    def count_interval(lo: int, hi: int) -> list[Ref]:
+        if lo == hi:
+            return [one]
+        if hi - lo == 1:
+            return [inverted[lo], bits[lo]]
+        key = (lo, hi)
+        if key not in intervals:
+            middle = (lo + hi) // 2
+            left, right = count_interval(lo, middle), count_interval(middle, hi)
+            intervals[key] = [_combine(circuit, "LogicGateOr", [
+                circuit.add("LogicGateAnd", left[i], right[k - i])
+                for i in range(max(0, k - len(right) + 1), min(k + 1, len(left)))])
+                for k in range(hi - lo + 1)]
+        return intervals[key]
+
+    return [count_interval(0, end) for end in range(len(bits) + 1)]
+
+
+@dataclass(frozen=True)
+class ColumnTarget:
+    """同一份目标材料的种类、保留NPC及前缀计数，供选址和路由共用。"""
+
+    kinds: tuple[tuple[Ref, ...], ...]
+    retained: tuple[Ref, ...]
+    counts: tuple[tuple[Ref, ...], ...]
+
+
+def decode_column(circuit: Circuit, materials: tuple[Ref, ...]) -> ColumnTarget:
+    """解码材料而不接受它；调用方仍须检查每格属于0～3。"""
+    kinds = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==")
+                        for kind in range(4)) for value in materials)
+    retained = [kinds[0][1]] + [circuit.add("LogicGateOr", row[1], row[2]) for row in kinds[1:]]
+    return ColumnTarget(kinds, tuple(retained), tuple(tuple(row) for row in _prefix_counts(circuit, retained)))
 
 
 def _bus(circuit: Circuit, sources: list[Ref]) -> Ref:
@@ -45,16 +70,14 @@ def _bus(circuit: Circuit, sources: list[Ref]) -> Ref:
 
 
 def column_candidate(circuit: Circuit, materials: tuple[Ref, ...], tags: tuple[Ref, ...],
-                     mask_bits: tuple[Ref, ...], enable: Ref, *, with_landings: bool = False) -> PinColumn:
-    """添加共用单列数据通路；不调用Pin或把本地通过当作全图可解性。"""
+                     mask_bits: tuple[Ref, ...], enable: Ref, *, with_landings: bool = False,
+                     decoded_target: ColumnTarget | None = None) -> PinColumn:
+    """共用单列路由；decoded_target须由同一materials建立，不替代有效性检查。"""
     if len(materials) != 5 or len(tags) != 5 or len(mask_bits) != 8:
         raise ValueError("单列候选需要五格材料、五个标签和八个控制位")
-    flags = []
-    clauses = []
-    for value in materials:
-        kinds = [circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==") for kind in range(4)]
-        flags.append(kinds)
-        clauses.append(_combine(circuit, "LogicGateOr", kinds))
+    target = decoded_target if decoded_target is not None else decode_column(circuit, materials)
+    flags = target.kinds
+    clauses = [_combine(circuit, "LogicGateOr", list(kinds)) for kinds in flags]
     masks = []
     for value in mask_bits:
         zero = circuit.add("LogicGateCompare", value, Literal(0), config="AQ==")
@@ -63,8 +86,8 @@ def column_candidate(circuit: Circuit, materials: tuple[Ref, ...], tags: tuple[R
         masks.append(one)
     keep, extra_crystals = masks[:4], masks[4:]
     clauses.extend((enable, circuit.add("LogicGateNot", flags[0][3])))
-    retained = [flags[0][1]] + [circuit.add("LogicGateOr", kinds[1], kinds[2]) for kinds in flags[1:]]
-    target_counts = _prefix_counts(circuit, retained)
+    retained = target.retained
+    target_counts = target.counts
     source_counts = _prefix_counts(circuit, keep)
     same_count = [circuit.add("LogicGateAnd", target_counts[-1][k], source_counts[-1][k]) for k in range(5)]
     clauses.append(_combine(circuit, "LogicGateOr", same_count))

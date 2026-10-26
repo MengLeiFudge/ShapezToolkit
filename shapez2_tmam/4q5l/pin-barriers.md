@@ -32,7 +32,7 @@ count(K[0:c]) = count(L中目标层号 < c+1 的项)。
 
 [`inverse._sources_fit`](../synthesis/inverse.py)由`pin_column`和`pin_families`共同使用。它在组合其他列之前筛选；`pin_families(check_output=False)`也保留该必要条件。默认物理检查和取证优先模式都不漏真实制造前态。
 
-[`column_candidate`](../pin_column_circuit.py)增加四道前缀等式。独立单列蓝图从490增加到518平台，最大频道依赖深度仍为34；自动单列迭代器从846增加到874平台，仍用P=156、每轮52模拟秒。输入与输出频道以重新生成的JSON为准。八位计数仍遍历256轮，当前优化减少的是有效分支，而非这256轮的等待时间。
+[`column_candidate`](../pin_column_circuit.py)增加四道前缀等式。采用[平衡计数](source-counts.md)的独立单列蓝图为555平台，最大频道依赖深度32；自动单列迭代器为911平台，沿用P=156、每轮52模拟秒。输入与输出频道以重新生成的JSON为准。八位计数仍遍历256轮，当前优化减少的是有效分支，而非这256轮的等待时间。
 
 ## 3. 地面掩码把每列上界降为20
 
