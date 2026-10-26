@@ -4,7 +4,7 @@ from dataclasses import replace
 
 from .circuit import Gate, Literal, Ref
 from .corner_program import CornerProgram
-from .sequential_circuit import Clock, clock, latch, select
+from .sequential_circuit import Clock, clock
 
 
 class ClockedState:
@@ -79,10 +79,10 @@ class ClockedState:
         master_load = self.program.or_(timing.phases[0], reset)
         slave_load = self.program.or_(timing.phases[2], reset)
         for read, initial in self.initial.items():
-            data = select(circuit, enable, self.next[read], initial)
-            master = latch(circuit, data, master_load)
-            slave_data = select(circuit, enable, master, initial)
-            slave = latch(circuit, slave_data, slave_load)
+            data = self.program.control(enable).select(self.next[read], initial)
+            master = self.program.control(master_load).latch(data)
+            slave_data = self.program.control(enable).select(master, initial)
+            slave = self.program.control(slave_load).latch(slave_data)
             circuit.gates[read.node] = Gate("LogicGateIf", (slave, Literal(1)))
         self.closed = True
         report = {"state_registers": len(self.initial), "step_max_gate_depth": depth,

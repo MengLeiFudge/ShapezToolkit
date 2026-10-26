@@ -5,7 +5,7 @@ from dataclasses import dataclass, replace
 from .circuit import Circuit, Literal, Ref, constant
 from .decoder_circuit import DecodedCell, DecodedShape
 from .half_circuit import _combine
-from .sequential_circuit import select
+from .sequential_circuit import SignalControl
 from .synthesis.physics import EMPTY, PIN, Rules, Shape
 
 
@@ -38,8 +38,9 @@ class Instruction:
 class CornerProgram:
     """共用目标表达式和基础层信号，把既有角证明展开为指令ROM。"""
 
-    def __init__(self, circuit: Circuit):
+    def __init__(self, circuit: Circuit, *, share_controls: bool = False):
         self.circuit = circuit
+        self.controls: dict[Ref, SignalControl] | None = {} if share_controls else None
         self.rules = Rules(4)
         self.instructions: list[Instruction] = []
         self.constants: dict[int | str | Shape | None, Ref] = {}
@@ -87,6 +88,14 @@ class CornerProgram:
             self.expressions[key] = self.circuit.add("LogicGateNot", value)
         return self.expressions[key]
 
+    def control(self, condition: Ref) -> SignalControl:
+        """仅共享相同原条件的一对等深控制，数据分支及反馈仍分别生成。"""
+        if self.controls is None:
+            return SignalControl(self.circuit, condition)
+        if condition not in self.controls:
+            self.controls[condition] = SignalControl(self.circuit, condition)
+        return self.controls[condition]
+
     def pick(self, condition: Ref, yes: Ref, no: Ref) -> Ref:
         if yes == no:
             return yes
@@ -94,7 +103,7 @@ class CornerProgram:
             return yes if self.booleans[condition] else no
         key = ("pick", condition, yes, no)
         if key not in self.expressions:
-            self.expressions[key] = select(self.circuit, condition, yes, no)
+            self.expressions[key] = self.control(condition).select(yes, no)
         return self.expressions[key]
 
     def cell(self, code: str) -> CellRef:

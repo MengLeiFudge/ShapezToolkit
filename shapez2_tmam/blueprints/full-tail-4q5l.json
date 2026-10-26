@@ -7,22 +7,22 @@
     "enable": 1211001
   },
   "outputs": {
-    "window": 1241005,
-    "sample": 1241006,
-    "done": 1241008,
-    "status": 1241017,
-    "result": 1241020,
+    "window": 1235675,
+    "sample": 1235676,
+    "done": 1235678,
+    "status": 1235687,
+    "result": 1235690,
     "instruction": {
-      "opcode": 1241009,
-      "a": 1241010,
-      "b": 1241011,
-      "destination": 1241012,
-      "base": 1241013,
-      "color": 1241014,
-      "request": 1241015
+      "opcode": 1235679,
+      "a": 1235680,
+      "b": 1235681,
+      "destination": 1235682,
+      "base": 1235683,
+      "color": 1235684,
+      "request": 1235685
     }
   },
-  "gate_platforms": 29899,
+  "gate_platforms": 24569,
   "reserved_channels": [
     1211000,
     1276535
@@ -43,6 +43,7 @@
     "reset": "enable=0持续不少于reset_hold_signal_ticks，再一次改为1并保持。复位时阶段3为真；启动先出现一小段阶段3，随后依次完整循环0、1、2、3。",
     "proof": "4q5l/clocked-control.md；精确延迟与锁存器证明不依赖组合DAG保持期。"
   },
+  "shared_condition_controls": true,
   "palette_entries_per_cell": 9,
   "grounded_pin_tail_required": true,
   "shared_family_grounding_check": true,

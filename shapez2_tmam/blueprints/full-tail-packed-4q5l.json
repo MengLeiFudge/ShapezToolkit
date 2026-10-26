@@ -7,22 +7,22 @@
     "enable": 1277001
   },
   "outputs": {
-    "window": 1307005,
-    "sample": 1307006,
-    "done": 1307008,
-    "status": 1307017,
-    "result": 1307020,
+    "window": 1301675,
+    "sample": 1301676,
+    "done": 1301678,
+    "status": 1301687,
+    "result": 1301690,
     "instruction": {
-      "opcode": 1307009,
-      "a": 1307010,
-      "b": 1307011,
-      "destination": 1307012,
-      "base": 1307013,
-      "color": 1307014,
-      "request": 1307015
+      "opcode": 1301679,
+      "a": 1301680,
+      "b": 1301681,
+      "destination": 1301682,
+      "base": 1301683,
+      "color": 1301684,
+      "request": 1301685
     }
   },
-  "gate_platforms": 9757,
+  "gate_platforms": 9280,
   "reserved_channels": [
     1277000,
     1342535
@@ -43,6 +43,7 @@
     "reset": "enable=0持续不少于reset_hold_signal_ticks，再一次改为1并保持。复位时阶段3为真；启动先出现一小段阶段3，随后依次完整循环0、1、2、3。",
     "proof": "4q5l/clocked-control.md；精确延迟与锁存器证明不依赖组合DAG保持期。"
   },
+  "shared_condition_controls": true,
   "palette_entries_per_cell": 9,
   "grounded_pin_tail_required": true,
   "shared_family_grounding_check": true,
@@ -91,12 +92,12 @@
   "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
   "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
-  "logical_gates": 29899,
+  "logical_gates": 24569,
   "local_constant_inputs": true,
-  "local_gate_pairs": 7975,
+  "local_gate_pairs": 4807,
   "layout": "固定常量就地复制；单消费者私有组合门两两本地连接，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
   "platform_grid": [
-    99,
-    99
+    97,
+    96
   ]
 }

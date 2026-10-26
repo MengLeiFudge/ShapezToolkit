@@ -87,7 +87,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     circuit = Circuit(channel_base + 32)
     target = circuit.add("ControlledSignalReceiver", Literal(channel_base))
     enable = circuit.add("ControlledSignalReceiver", Literal(channel_base + 1))
-    program = CornerProgram(circuit)
+    program = CornerProgram(circuit, share_controls=True)
     bank = ClockedState(program)
     decoded = decode(circuit, target, program.one, Rules(4))
     palette = TagPalette(program, decoded)
@@ -448,7 +448,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                     "instruction": {name: channels[value] for name, value in zip(RECORD_FIELDS, instruction_outputs)}},
         "gate_platforms": len(circuit.gates), "reserved_channels": [channel_base, channel_base + reserve - 1],
         **state_report, "timing": timing_contract(timing),
-        "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
+        "shared_condition_controls": True, "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
         "support_row_closures": 10, "pin_base_precheck": True, "crystal_conflict_slot_skip": True,
         "top_crystal_forbidden_above_retained": True, "source_slots_use_bucket_lengths": True,
         "search_frames": 4, "tail_pin_limit": "max(0, 最高原目标C层号-1)，层号从0开始",

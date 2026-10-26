@@ -46,24 +46,37 @@ def clock(circuit: Circuit, enable: Ref, phase_steps: int = 48) -> Clock:
     return Clock(phases, wave, ticks, 4 * ticks + 128)
 
 
+class SignalControl:
+    """同一条件的等深正反控制，可供多份选择器或锁存器共用。"""
+
+    def __init__(self, circuit: Circuit, condition: Ref):
+        self.circuit = circuit
+        self.enabled = circuit.add("LogicGateIf", condition, Literal(1))
+        self.disabled = circuit.add("LogicGateNot", condition)
+
+    def select(self, yes: Ref | Literal, no: Ref | Literal) -> Ref:
+        """两支各保留一级控制延迟，输出共用互补驱动频道。"""
+        first = self.circuit.add("LogicGateIf", yes, self.enabled)
+        second = self.circuit.add("LogicGateIf", no, self.disabled)
+        self.circuit.aliases.append((first, second))
+        return first
+
+    def latch(self, data: Ref | Literal) -> Ref:
+        """条件真时写入，否则由独立的本锁存器反馈保持。"""
+        incoming = self.circuit.add("LogicGateIf", data, self.enabled)
+        retained = self.circuit.add("LogicGateIf", incoming, self.disabled)
+        self.circuit.aliases.append((incoming, retained))
+        return incoming
+
+
 def select(circuit: Circuit, condition: Ref, yes: Ref | Literal, no: Ref | Literal) -> Ref:
     """等深控制的任意信号二选一；稳定运行时每tick恰有一个分支被选中。"""
-    enabled = circuit.add("LogicGateIf", condition, Literal(1))
-    disabled = circuit.add("LogicGateNot", condition)
-    first = circuit.add("LogicGateIf", yes, enabled)
-    second = circuit.add("LogicGateIf", no, disabled)
-    circuit.aliases.append((first, second))
-    return first
+    return SignalControl(circuit, condition).select(yes, no)
 
 
 def latch(circuit: Circuit, data: Ref | Literal, load: Ref) -> Ref:
     """透明写入、关闭后保持；load与其反相经过相同级数。"""
-    enabled = circuit.add("LogicGateIf", load, Literal(1))
-    disabled = circuit.add("LogicGateNot", load)
-    incoming = circuit.add("LogicGateIf", data, enabled)
-    retained = circuit.add("LogicGateIf", incoming, disabled)
-    circuit.aliases.append((incoming, retained))
-    return incoming
+    return SignalControl(circuit, load).latch(data)
 
 
 def timing_contract(timing: Clock) -> dict:

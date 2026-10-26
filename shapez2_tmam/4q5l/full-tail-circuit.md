@@ -10,7 +10,7 @@
 
 共享材料查询、S支撑检查、两个切向的半形判据、四列Pin候选与精确物理检查、一份265行ROM和六物品槽。前254行制造叶端，其中232行角主体及保存行每半形调用两次，两个半形再共用一次；后11行是一次Pin与五对基础层/Stack。物理检查没有迭代状态、组编号或族缓存。
 
-[`ClockedState`](../clocked_state.py)闭合全部299项状态。270项慢状态为四帧264项及depth、second_pass、second_corner、support_prefix、leaf_direction、leaf_mode；其余快状态包括CPU、PC、控制和包快照。慢更新后冻结一轮，指令valid在冻结轮清零。
+[`ClockedState`](../clocked_state.py)闭合全部299项状态。270项慢状态为四帧264项及depth、second_pass、second_corner、support_prefix、leaf_direction、leaf_mode；其余快状态包括CPU、PC、控制和包快照。慢更新后冻结一轮，指令valid在冻结轮清零。选择器及主副锁存器按原条件Ref[共用等深正反控制](shared-controls.md)，各数据分支、别名和反馈独立，逐tick延迟保持。
 
 ## 2. 搜索过程
 
@@ -75,7 +75,7 @@ leaf_direction只在首轮使用；挂起父帧总在Pin遍次，子帧改方向
 
 ## 7. 时序、规模与边界
 
-未压缩版29899平台，频道1211000～1276535；[装箱版](packed-circuit.md)9757平台、99×99外框，频道1277000～1342535。装箱版合并7975对内部组合门，两版沿用快路径58级、慢路径135级、初始150级的保守界，阶段252tick、周期1008tick即84模拟秒，复位至少2056tick。
+未压缩版24569平台，频道1211000～1276535；[装箱版](packed-circuit.md)9280平台、97×96外框，频道1277000～1342535。装箱版合并4807对内部组合门，两版沿用快路径58级、慢路径135级、初始150级的保守界，阶段252tick、周期1008tick即84模拟秒，复位至少2056tick。
 
 [慢更新冻结协议](multicycle-control.md)要求快路径`3P > 12D_fast+36`，慢路径`7P > 12D_slow+36`。普通制造一周期，慢状态变化后另冻结一轮。完整window上升后96tick读一次，sample真先收包再处理done/status；启动不完整阶段3忽略。导入、模式和独占频道前提沿用时序合同。
 
