@@ -106,15 +106,19 @@ def _packed_upper(builder: Builder, delta: dict[Position, str]) -> Recipe | None
     return upper
 
 
-def _layered_upper(builder: Builder, delta: dict[Position, str], blocks: list[set[Position]]) -> Recipe | None:
-    """保留第一根针以下的晶体间隙，按物理块来源层求一个可释放载体。"""
+def _layered_upper(builder: Builder, delta: dict[Position, str], blocks: list[set[Position]],
+                   *, ground_prefix: bool) -> Recipe | None:
+    """按块来源层保留晶体间隙；可将初始针固定为触地前缀以放宽后缀约束。"""
     rules = builder.rules
     height = max(z for z, _ in delta) + 1
     owner = {pos: index for index, block in enumerate(blocks) for pos in block}
     edges = []
+    limits = [rules.height - 1] * len(blocks)
     for q in range(rules.quadrants):
         previous = None
         pinned = False
+        normal_seen = False
+        prefix_length = 0
         for z in range(height):
             pos = z, q
             if pos not in delta:
@@ -124,7 +128,13 @@ def _layered_upper(builder: Builder, delta: dict[Position, str], blocks: list[se
                 edges.append((previous, current, 1))
                 if pinned:
                     edges.append((current, previous, -1))
-            pinned |= delta[pos] == PIN
+            if delta[pos] != PIN:
+                normal_seen = True
+            elif ground_prefix and not normal_seen:
+                limits[current] = prefix_length
+                prefix_length += 1
+            else:
+                pinned = True
             previous = current
         previous = None
         r = (q + 1) % rules.quadrants
@@ -136,7 +146,7 @@ def _layered_upper(builder: Builder, delta: dict[Position, str], blocks: list[se
                 if previous is not None:
                     edges.append((previous, current, 1))
                 previous = current
-    levels = _minimum_levels([rules.height - 1] * len(blocks), edges)
+    levels = _minimum_levels(limits, edges)
     if levels is None:
         return None
     placed = {(levels[owner[pos]], pos[1]): cell for pos, cell in delta.items()}
@@ -189,7 +199,10 @@ def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool)
         if upper is None:
             upper = _packed_upper(builder, delta)
         if upper is None:
-            upper = _layered_upper(builder, delta, blocks)
+            for ground_prefix in (False, True):
+                upper = _layered_upper(builder, delta, blocks, ground_prefix=ground_prefix)
+                if upper is not None:
+                    break
         if upper is None:
             return None
     if upper is None:

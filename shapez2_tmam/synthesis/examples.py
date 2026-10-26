@@ -167,6 +167,23 @@ def layered_stack_example() -> Example:
                    6, result, (("原下料", lower), ("保留针下晶体间隙的三层上料", result.inputs[1]), ("一次堆叠成品", result)))
 
 
+def pin_prefix_stack_example() -> Example:
+    """初始针固定触地，使PNN可以补成PNCN并与邻列NPN对齐。"""
+    builder = Builder(Rules(6))
+    lower = builder.noncrystal(builder.rules.parse(
+        "--Cu--CuCu--:--Cu----Cu--:--Cu--------:--Cu--------"))
+    assert lower is not None
+    materials = {"-": EMPTY, "N": "Cu", "P": PIN}
+    rows = ("NN-NN-", "-N-PN-", "-N-NN-", "-N--P-", "-N-NN-")
+    target = builder.rules.parse(":".join("".join(materials[cell] for cell in row) for row in rows))
+    result = single_stack(builder, lower, target)
+    if result is None:
+        raise RuntimeError("六象限触地针前缀上料未生成代表配方")
+    return Example("6q-ground-pin-prefix", "固定触地针前缀以保留中间晶体",
+                   "已有q1四层柱、q3地面N及q4两层柱；上料把q3做成P-N-C-N、q4做成C-N-P-N。q3初始针触地，使其中间晶体可制造，并让两列普通块对齐。",
+                   6, result, (("原下料", lower), ("触地针前缀的四层上料", result.inputs[1]), ("一次堆叠成品", result)))
+
+
 def two_quadrant_example() -> Example:
     """两象限六层：先拼连续晶体以下前缀，再让普通上层跨列支撑。"""
     rules = Rules(2, 6)
@@ -268,7 +285,8 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
     args = parser.parse_args()
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
-    examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(), layered_stack_example()))
+    examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
+                     layered_stack_example(), pin_prefix_stack_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)
