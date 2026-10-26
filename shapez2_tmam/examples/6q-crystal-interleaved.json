@@ -257,51 +257,43 @@
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "------P-----"
-    },
-    {
-      "id": 28,
-      "operation": "stack",
-      "inputs": [
-        26,
-        27
-      ],
-      "parameter": null,
-      "result": "------Cu----:------P-----"
-    },
-    {
-      "id": 29,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
       "result": "------Cu----"
     },
     {
-      "id": 30,
+      "id": 28,
+      "operation": "pin",
+      "inputs": [
+        27
+      ],
+      "parameter": null,
+      "result": "------P-----:------Cu----"
+    },
+    {
+      "id": 29,
       "operation": "stack",
       "inputs": [
-        28,
-        29
+        26,
+        28
       ],
       "parameter": null,
       "result": "------Cu----:------P-----:------Cu----"
     },
     {
-      "id": 31,
+      "id": 30,
       "operation": "swap",
       "inputs": [
         25,
-        30
+        29
       ],
       "parameter": 0,
       "result": "Cucr--Cu----:--cr--P-----:--cr--Cu----:--Cu--------"
     },
     {
-      "id": 32,
+      "id": 31,
       "operation": "stack",
       "inputs": [
         4,
-        31
+        30
       ],
       "parameter": null,
       "result": "CuCu--Cu----:--Cu--P-----:--Cu--Cu----:--Cu--------"
