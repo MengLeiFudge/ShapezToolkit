@@ -22,7 +22,7 @@
       "request": 1310797
     }
   },
-  "gate_platforms": 14899,
+  "gate_platforms": 11293,
   "reserved_channels": [
     1277000,
     1342535
@@ -84,9 +84,10 @@
   "proof": "4q5l/prefix-closure.md；optional-top.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
   "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
   "logical_gates": 33681,
-  "layout": "门组件刚性平移，矩形间留两格；平台方阵排列。频道、门和内部本地连线保持。",
+  "local_constant_inputs": true,
+  "layout": "未参与别名的固定常量输入就地复制；其余连接保持，复用旧平台的行内及上方空位，组件间隔一格、平台边缘两格，方阵排列。",
   "platform_grid": [
-    123,
-    122
+    107,
+    106
   ]
 }

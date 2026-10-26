@@ -1,6 +1,6 @@
 """将信号门网表布置为带平台、无线连线的原生二代蓝图。
 
-默认每门一块1x1平台；可选按刚性门组件压缩装箱，端口均静态核对。显式兼容多驱动可共用频道。
+默认每门一块1x1平台；装箱版就地复制固定常量，再平移门组件。端口均静态核对，显式兼容多驱动可共用频道。
 这里编译生产电路，不运行游戏、门级模拟或目标求解。
 """
 
@@ -90,11 +90,11 @@ def encode_document(document: dict) -> str:
 
 
 def _pack_platforms(platforms: list[dict], bounds: list[tuple[int, int, int, int]]) -> tuple[list[dict], dict[int, tuple[int, int]]]:
-    """刚性平移门组件，矩形间留两格；返回旧岛到新岛及建筑编号偏移。"""
+    """按行高和余宽复用旧平台空位，组件间留一格，边缘留两格。"""
     packed: list[dict] = []
     mapping = {}
-    x = y = 2
-    row_height = 0
+    rows: dict[tuple[int, int], list[tuple[int, int, int]]] = {}
+    vertical: dict[int, list[tuple[int, int]]] = {}
     order = sorted(range(len(platforms)), key=lambda i: (-(bounds[i][3] - bounds[i][1]),
                                                         -(bounds[i][2] - bounds[i][0]), i))
     for index in order:
@@ -102,19 +102,33 @@ def _pack_platforms(platforms: list[dict], bounds: list[tuple[int, int, int, int
         width, height = right - left + 1, top - bottom + 1
         if width > 16 or height > 16:
             raise ValueError("门组件矩形超出平台16×16格内部范围")
-        if x + width > 18:
-            x, y, row_height = 2, y + row_height + 2, 0
-        if not packed or y + height > 18:
-            packed.append({"T": "Foundation_1x1", "B": {
-                "$type": "Building", "BinaryVersion": 1137, "Entries": []}})
-            x = y = 2
-            row_height = 0
-        entries = packed[-1]["B"]["Entries"]
-        mapping[index] = len(packed) - 1, len(entries)
+        row_key = min((key for key in rows if key[0] >= height and key[1] >= width + 1), default=None)
+        if row_key is not None:
+            row_height, remaining = row_key
+            platform, x, y = rows[row_key].pop()
+            if not rows[row_key]:
+                del rows[row_key]
+        else:
+            space = min((space for space in vertical if space >= height + 1), default=None)
+            if space is None:
+                platform, y, space = len(packed), 2, 17
+                packed.append({"T": "Foundation_1x1", "B": {
+                    "$type": "Building", "BinaryVersion": 1137, "Entries": []}})
+            else:
+                platform, y = vertical[space].pop()
+                if not vertical[space]:
+                    del vertical[space]
+            free = space - height - 1
+            if free >= 2:
+                vertical.setdefault(free, []).append((platform, y + height + 1))
+            x, row_height, remaining = 2, height, 17
+        entries = packed[platform]["B"]["Entries"]
+        mapping[index] = platform, len(entries)
         entries.extend({**entry, "X": entry["X"] + x - left, "Y": entry["Y"] + y - bottom}
                        for entry in platforms[index]["B"]["Entries"])
-        x += width + 2
-        row_height = max(row_height, height)
+        remaining -= width + 1
+        if remaining >= 2:
+            rows.setdefault((row_height, remaining), []).append((platform, x + width + 1, y))
     # 方阵缩短蓝图边长；每岛内仍留两格边缘，不产生跨岛本地连接。
     width = max(1, math.isqrt(max(0, len(packed) - 1)) + 1)
     for index, platform in enumerate(packed):
@@ -220,6 +234,7 @@ class Circuit:
         platforms: list[dict] = []
         bounds: list[tuple[int, int, int, int]] = []
         expected = []
+        aliased = {reference for group in self.aliases for reference in group}
         for i, gate in enumerate(self.gates):
             entries = []
             occupied = set()
@@ -248,10 +263,16 @@ class Circuit:
             gate_index = place(gate.kind, 10, 10, config=gate.config)
             for port, source in enumerate(gate.inputs):
                 direction, dx, dy, _ = PORTS[gate.kind][1][port]
-                if isinstance(source, Literal):
+                fixed = None
+                if packed and isinstance(source, Ref) and source.port == 0 and source not in aliased:
+                    provider = self.gates[source.node]
+                    if provider.kind == "ConstantSignal":
+                        fixed = provider.config
+                if isinstance(source, Literal) or fixed is not None:
+                    config = constant(source.value) if isinstance(source, Literal) else fixed
                     vx, vy = _DIRECTIONS[direction]
                     sender = place("ConstantSignal", 10 + dx + vx, 10 + dy + vy,
-                                   (direction + 2) % 4, constant(source.value))
+                                   (direction + 2) % 4, config)
                     expected.append(((i, gate_index, port), (i, sender, 0)))
                     continue
                 channel = channels[source]

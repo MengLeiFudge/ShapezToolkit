@@ -71,7 +71,7 @@ target保持，enable=0至少1636tick后启用；window上升后48tick采一次�
 
 当前每格只查本列9项标签，使用360状态、265行ROM、六物品槽；具体规模见生产JSON。target保持，enable=0至少2044tick；每完整window上升后96tick读一次，sample为真先收包再处理done。采用[慢更新冻结协议](../4q5l/multicycle-control.md)，制造周期84模拟秒，慢状态更新后额外等待一轮。[两角共用](../4q5l/shared-angle.md)压缩制造ROM，[强制闭包](../4q5l/prefix-closure.md)把首轮改成每切向至多21次检查；[可选顶格](../4q5l/optional-top.md)对含地面C的来源族共用两次闭包，成功后提交精确目标。Pin分支仍过大，尚未通过实用性能验收。完整覆盖、帧回退、重放及互斥选择证明见[五帧控制](../4q5l/full-tail-circuit.md)。
 
-`full-tail-packed-4q5l.spz2bp`按固定门组件装箱，平台数量和外框尺寸见旁置JSON，独占频道1277000～1342535。输入输出协议、周期和搜索界保持；逐端口核对及[装箱证明](../4q5l/packed-circuit.md)说明占地与时序为何保持。它同样尚未通过实用性能验收。
+`full-tail-packed-4q5l.spz2bp`把未参与别名的固定常量就地放到门输入旁，并复用旧平台空位装箱，平台数量和外框尺寸见旁置JSON，独占频道1277000～1342535。动态连接、输入输出协议、周期和搜索界保持；逐端口核对及[装箱证明](../4q5l/packed-circuit.md)说明占地与时序为何保持。它同样尚未通过实用性能验收。
 
 ## 递归候选的固定标签网格
 
