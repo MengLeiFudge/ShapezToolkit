@@ -26,6 +26,7 @@ class PinSource:
     last_slots: tuple[Ref, ...]
     has_slots: Ref
     top_pin_allowed: tuple[Ref, ...]
+    top_crystal_allowed: tuple[Ref, ...]
     slot_addresses: tuple[tuple[Ref, ...], ...]
 
 
@@ -43,6 +44,9 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
     tops = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==")
                        for kind in range(4)) for value in top_values)
     top_flags = tuple(MaterialCell(program.not_(kinds[0]), kinds[2], kinds[3]) for kinds in tops)
+    top_pin_allowed = tuple(column.flags[3].occupied for column in columns)
+    cap = MaterialCell(program.one, program.zero, program.one)
+    top_crystal_allowed = tuple(column_admissible(circuit, (*column.flags, cap)) for column in columns)
     target = tuple(tuple(MaterialCell(
         program.not_(circuit.add("LogicGateCompare", value, Literal(0), config="AQ==")),
         circuit.add("LogicGateCompare", value, Literal(2), config="AQ=="),
@@ -59,14 +63,15 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
     valid = program.and_(enable, image.passed, program.not_(program.or_(*slot_conflicts)),
                          *(program.or_(*kinds) for kinds in tops),
                          program.or_(*(cell.occupied for column in target for cell in column)),
-                         *(column_admissible(circuit, (*column.flags, top)) for column, top in zip(columns, top_flags)))
+                         *(program.or_(program.not_(top.pin), allowed) for top, allowed in zip(top_flags, top_pin_allowed)),
+                         *(program.or_(program.not_(top.crystal), allowed) for top, allowed in zip(top_flags, top_crystal_allowed)))
     source_materials = tuple(tuple(circuit.add("LogicGateIf", value, valid) for value in (*column.materials, top))
                              for column, top in zip(columns, top_values))
     source_tags = tuple(tuple(circuit.add("LogicGateIf", value, valid) for value in (*column.tags, top))
                        for column, top in zip(columns, top_values))
     return PinSource(source_materials, source_tags, valid, tuple(column.valid for column in columns), image, slot_conflicts,
                      tuple(pattern.last_slot for pattern in patterns), program.and_(*(pattern.has_slots for pattern in patterns)),
-                     tuple(column.flags[3].occupied for column in columns), tuple(pattern.addresses for pattern in patterns))
+                     top_pin_allowed, top_crystal_allowed, tuple(pattern.addresses for pattern in patterns))
 
 
 def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:

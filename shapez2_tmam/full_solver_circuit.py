@@ -313,7 +313,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     carry = program.and_(member_advance, *top_pass)
     new_family = program.or_(carry, family_jump, skip_columns)
     cap_advance = program.or_(carry, family_jump)
-    forbidden_caps = tuple(column[4].crystal for column in original)
+    forbidden_caps = tuple(program.or_(column[4].crystal, program.not_(allowed))
+                           for column, allowed in zip(original, candidate.top_crystal_allowed))
     cap_pass = tuple(program.or_(bit, forbidden) for bit, forbidden in zip(crystals, forbidden_caps))
     next_crystals = tuple(program.pick(skip_columns, program.zero, circuit.add("LogicGateXOr", bit,
         program.and_(cap_advance, program.not_(forbidden_caps[q]), *cap_pass[:q]))) for q, bit in enumerate(crystals))
