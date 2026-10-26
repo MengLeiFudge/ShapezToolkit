@@ -46,14 +46,32 @@ class ClockedState:
         self.next[read] = branches[0]
 
 
-    def close(self, enable: Ref) -> tuple[Clock, dict]:
-        """将全组合DAG计入传播界；不模拟反馈或执行状态机。"""
+    def close(self, enable: Ref, *, slow_reads: tuple[Ref, ...] = (), slow_event: Ref | None = None,
+              pulses: tuple[Ref, ...] = ()) -> tuple[Clock, dict]:
+        """慢根更新后冻结一轮，脉冲在冻结期清零；分别核对3P/7P传播窗。"""
         if self.closed:
             raise ValueError("同一组主副寄存器只能闭合一次")
+        if bool(slow_reads) != (slow_event is not None) or (pulses and not slow_reads):
+            raise ValueError("慢状态与更新事件必须成对提供，脉冲需要慢状态协议")
+        if len(set(slow_reads)) != len(slow_reads) or len(set(pulses)) != len(pulses) or any(
+                read not in self.initial for read in (*slow_reads, *pulses)) or set(slow_reads) & set(pulses):
+            raise ValueError("慢状态及脉冲必须来自本组，互不重复且互不重叠")
         circuit = self.program.circuit
+        if slow_event is not None:
+            reads = tuple(self.initial)
+            cooling = self.add()
+            ready = self.program.not_(cooling)
+            self.put(cooling, self.program.and_(ready, slow_event))
+            for read in reads:
+                self.next[read] = (self.program.and_(ready, self.next[read]) if read in pulses else
+                                   self.program.pick(ready, self.next[read], read))
         full_depth = circuit.settling_bound()["max_gate_depth"]
-        depth = circuit.changing_depth(tuple(self.initial))
-        timing = clock(circuit, enable, phase_steps=max(8, (depth + 7) // 3))
+        all_reads = tuple(self.initial)
+        fast_reads = tuple(read for read in all_reads if read not in slow_reads)
+        depth = circuit.changing_depth(fast_reads)
+        slow_depth = circuit.changing_depth(slow_reads) if slow_reads else 0
+        phase_steps = max(8, (depth + 7) // 3, (slow_depth + 10) // 7)
+        timing = clock(circuit, enable, phase_steps=phase_steps)
         timing = replace(timing, reset_ticks=max(timing.reset_ticks, 12 * full_depth + 256))
         reset = self.program.not_(enable)
         master_load = self.program.or_(timing.phases[0], reset)
@@ -65,5 +83,9 @@ class ClockedState:
             slave = latch(circuit, slave_data, slave_load)
             circuit.gates[read.node] = Gate("LogicGateIf", (slave, Literal(1)))
         self.closed = True
-        return timing, {"state_registers": len(self.initial), "step_max_gate_depth": depth,
-                        "initial_max_gate_depth": full_depth}
+        report = {"state_registers": len(self.initial), "step_max_gate_depth": depth,
+                  "initial_max_gate_depth": full_depth}
+        if slow_reads:
+            report.update({"slow_max_gate_depth": slow_depth, "slow_handoff_phases": 7,
+                           "slow_update_wait_cycles": 1, "slow_state_registers": len(slow_reads)})
+        return timing, report

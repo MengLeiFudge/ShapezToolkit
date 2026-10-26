@@ -100,6 +100,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     leaf_depth = bank.add()
     result = bank.add(None)
     status = bank.add()
+    support_prefix = bank.add()
     modes = {value: circuit.add("LogicGateCompare", phase, Literal(int(value)), config="AQ==") for value in Phase}
     levels = [circuit.add("LogicGateCompare", depth, Literal(i), config="AQ==") for i in range(5)]
     root = levels[0]
@@ -133,7 +134,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     next_prefix = tuple(state.source for state in prefix_step[:12])
     last_prefix = prefix_step[-1].source
     pushed = TaggedGrid(finder.columns, grid.valid)
-    checking_prefix = modes[Phase.PREFIX]
+    checking_prefix = support_prefix
     support_grid = tuple(tuple(MaterialCell(
         program.pick(checking_prefix, finder.columns[q][z].occupied, original[q][z].occupied),
         program.pick(checking_prefix, finder.columns[q][z].pin, original[q][z].pin),
@@ -361,7 +362,15 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     bank.put(status, 1, replay_finished)
     bank.put(status, 3, outside)
     bank.put(status, 4, internal)
-    timing, state_report = bank.close(enable)
+    # K的重通路只由慢状态切换；业务冻结时脉冲清零，避免重复发包。
+    bank.put(support_prefix, 0, descend)
+    bank.put(support_prefix, 1, program.or_(enter, search_pop, fail_pop, root_solved, replay_up))
+    slow_reads = (depth, second_pass, support_prefix, *(read for frame in frames for read in (
+        *(cell for column in frame.goal for cell in column), *frame.prefix,
+        *(bit for bits in (*frame.slots, *frame.top) for bit in bits), *frame.crystals, frame.pin_search)))
+    slow_event = program.or_(enter, begin_pin_search, move_prefix, start_leaf, start_source, counter_event,
+                             descend, search_pop, fail_pop, root_solved, replay_up, repeat)
+    timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,))
     window = program.and_(timing.phases[3], enable)
     sample = program.and_(window, record_valid)
     done = program.and_(window, modes[Phase.DONE], decoded.valid)
@@ -387,10 +396,10 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-        "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位和1遍次位；共享一份制造ROM及六槽。成功参数留帧，重放一次，不保存数百条指令。",
+        "resource_bound": "五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位和1遍次位；共享一份制造ROM及六槽；另有K模式和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最低C每次下降至少一层，递归至多四边；每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/full-tail-circuit.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+        "proof": "4q5l/full-tail-circuit.md；multicycle-control.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 
