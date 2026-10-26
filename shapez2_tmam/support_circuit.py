@@ -5,8 +5,9 @@ from .corner_program import CornerProgram
 from .half_circuit import MaterialCell
 
 
-def in_support_class(program: CornerProgram, columns: tuple[tuple[MaterialCell, ...], ...], *, grounded: Ref | None = None) -> Ref:
-    """四列五层共用K/G洪泛；grounded为真时只以地面作种子。"""
+def in_support_class(program: CornerProgram, columns: tuple[tuple[MaterialCell, ...], ...], *,
+                     grounded: Ref | None = None, optional_top: Ref | None = None) -> Ref:
+    """共用K/G洪泛；可选顶格模式只放宽最高普通格的最终可达要求。"""
     if len(columns) != 4 or any(len(column) != 5 for column in columns):
         raise ValueError("K支撑筛选需要四列五个原层位")
     nonpins = tuple(tuple(program.and_(cell.occupied, program.not_(cell.pin)) for cell in column)
@@ -29,8 +30,12 @@ def in_support_class(program: CornerProgram, columns: tuple[tuple[MaterialCell, 
                 values.append(program.or_(reachable[q][z], pin_support, program.and_(nonpins[q][z], program.or_(*paths))))
             following.append(tuple(values))
         reachable = tuple(following)
-    clauses = [program.or_(program.not_(cell.occupied), reachable[q][z])
-               for q, column in enumerate(columns) for z, cell in enumerate(column)]
+    clauses = []
+    for q, column in enumerate(columns):
+        for z, cell in enumerate(column):
+            optional = (program.and_(optional_top, nonpins[q][z], program.not_(cell.crystal))
+                        if optional_top is not None and z == 4 else program.zero)
+            clauses.append(program.or_(program.not_(cell.occupied), reachable[q][z], optional))
     clauses.extend(program.or_(program.not_(column[z].pin), column[z - 1].occupied)
                    for column in columns for z in range(1, 5))
     return program.and_(*clauses)

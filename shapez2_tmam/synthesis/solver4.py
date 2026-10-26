@@ -105,7 +105,8 @@ class Solver4:
                                          if pos[0] < 4 or cell[0] == "c" or pos in selected})
             assert completed is not None
             return self._finish(direct.recipe, completed)
-        if any(cell[0] == "c" for cell in family.lower[0]):
+        if (any(cell[0] == "c" for cell in family.lower[0])
+                or not in_support_class(self.rules, template, grounded=True, optional_top=True)):
             return None
         for source in family.members(self.rules):
             source_lowest = min(z for z, row in enumerate(source.layers) if any(cell[0] == "c" for cell in row))

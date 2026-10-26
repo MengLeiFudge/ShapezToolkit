@@ -35,15 +35,15 @@
 
 ## 3. Python及电路对应
 
-`Solver4._family_recipe`对每个来源族建立模板，调用两次`minimal_start(..., optional_top=True)`。成功时先取得真实角制造证书，再向精确成员追加固定Δ。上层继续执行Pin并与指定输出逐格比较。失败后，含地面C族返回失败；其他族恢复空/N/P成员并调用`_tail(..., skip_start=True)`，直接检查G及Pin尾部，不重复已整体否定的A→S。
+`Solver4._family_recipe`对每个来源族建立模板，调用两次`minimal_start(..., optional_top=True)`。成功时先取得真实角制造证书，再向精确成员追加固定Δ。上层继续执行Pin并与指定输出逐格比较。失败后，含地面C族返回失败；其他族先通过[全族G可行性筛选](family-grounding.md)，再恢复空/N/P成员并调用`_tail(..., skip_start=True)`，搜索各自Pin尾部，不重复已整体否定的A→S。
 
 完整电路复用五帧、前缀闭包和制造ROM。每帧增加一位`family_checked`，全局`leaf_mode`保存三种模式：0为普通根目标，1为可选顶格族检查，2为已否定A→S的精确成员。
 
 - 每族第一次以空NPC顶盖检查列A及Pin像。空NPC顶盖若违反列A，其他NPC选择不能修复；融合、静止与落点不受NPC顶盖影响。
-- `family_checked=0`时下降，把子目标自由顶格填为标签1（Cu），置全局模式1，并把父帧`family_checked`置1。模板ENTRY仅检查列A，暂不以整体K失败否定该族；模式1禁止进入Pin轮。
+- `family_checked=0`时下降，把子目标自由顶格填为标签1（Cu），置全局模式1，并把父帧`family_checked`置1。模板ENTRY仅检查列A，暂不以整体K失败否定该族；模式1只允许A→S及整族G筛选，禁止模板本身继续下降。
 - `PrefixSearch.delta`保留全部未选格，供支撑闭包选入可选N；`required_delta`排除未选可选顶N，仅用于S追加及坏块检查。当前P仍须通过半形及K检查才能接受。
 - 成功时，把未选顶N写为空，保留已选顶N及固定C，清模式并进入RETURN。此次目标修改属于慢事件，冻结一业务周期。制造与逐帧比较读取已经确定的精确目标。
-- 可选检查失败时清模式并返回父帧。若子目标含地面C，回SOURCE_NEXT直接推进C掩码；否则回SOURCE，保持原NPC地址，先递归首个空顶盖成员，不能提前推进而漏掉它。
+- 可选A→S失败后，地面C族整体否定；其他族先以同一洪泛检查模板全部固定格能否通地面。无G成员时也整体否定，经FAMILY_NEXT跳族；有G成员时回父SOURCE，保持原NPC地址，先递归首个空顶盖成员，不能提前推进而漏掉它。失败回父时清全局模式，跳族请求由Phase携带。
 - 父帧`family_checked=1`时，下降写精确候选及模式2。ENTRY检查K和Pin允许条件，通过后初始化Pin轮并进入PIN_PREFLIGHT检查G，直接跳过A→S阶段。精确成员失败才按正常NPC游标推进。
 - 改变C掩码、来源槽或S前缀时清`family_checked`；同族NPC加一保持该位。新子帧也清自己的族检查位。
 

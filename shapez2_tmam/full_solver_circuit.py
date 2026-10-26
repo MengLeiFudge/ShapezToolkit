@@ -32,6 +32,7 @@ class Phase(IntEnum):
     PREFIX_NEXT = 2
     PIN_PREFLIGHT = 3
     SOURCE = 4
+    FAMILY_NEXT = 5
     SOURCE_NEXT = 6
     RETURN = 7
     FAIL = 8
@@ -130,8 +131,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     in_scope = program.and_(decoded.valid, program.not_(uncolored))
     has_crystal = program.or_(*(cell.crystal for column in original for cell in column))
     ground_crystal = program.or_(*(column[0].crystal for column in original))
-    pin_allowed = program.and_(has_crystal, program.not_(ground_crystal), program.not_(levels[4]),
-                               program.not_(optional_top))
+    tail_candidate = program.and_(has_crystal, program.not_(ground_crystal), program.not_(levels[4]))
+    pin_allowed = program.and_(tail_candidate, program.not_(optional_top))
 
     finder = PrefixSearch(program, original, optional_top=optional_top)
     for read, source in zip(finder.bits, prefix):
@@ -147,7 +148,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         program.pick(checking_prefix, finder.columns[q][z].pin, original[q][z].pin),
         program.pick(checking_prefix, finder.columns[q][z].crystal, original[q][z].crystal))
         for z in range(5)) for q in range(4))
-    anchored = in_support_class(program, support_grid, grounded=pin_search)
+    optional_grounding = program.and_(optional_top, pin_search, program.not_(support_prefix))
+    anchored = in_support_class(program, support_grid, grounded=pin_search, optional_top=optional_grounding)
     appendable = program.and_(finder.appendable, anchored)
     partitions = []
     for start in range(2):
@@ -261,11 +263,12 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                                program.or_(program.not_(appendable), program.not_(pin_allowed)))
     move_prefix = program.and_(modes[Phase.PREFIX_NEXT], program.not_(last_prefix))
     prefix_scan_finished = program.and_(modes[Phase.PREFIX_NEXT], last_prefix)
-    begin_pin_search = program.and_(leaf_finished, pin_allowed)
-    grounded_ready = program.and_(modes[Phase.PIN_PREFLIGHT], anchored)
+    begin_pin_search = program.and_(leaf_finished, tail_candidate)
+    grounded_ready = program.and_(modes[Phase.PIN_PREFLIGHT], anchored, program.not_(optional_top))
     grounded_fail = program.and_(modes[Phase.PIN_PREFLIGHT], program.not_(anchored))
-    prefixes_finished = program.or_(prefix_scan_finished, grounded_fail,
-                                    program.and_(leaf_finished, program.not_(pin_allowed)))
+    family_preflight_done = program.and_(modes[Phase.PIN_PREFLIGHT], optional_top)
+    prefixes_finished = program.or_(prefix_scan_finished, grounded_fail, family_preflight_done,
+                                    program.and_(leaf_finished, program.not_(tail_candidate)))
 
     valid_source = program.and_(candidate.valid, physics_matches)
     descend = program.and_(modes[Phase.SOURCE], valid_source)
@@ -274,7 +277,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     search_pop = program.and_(search_return, program.not_(root))
     root_solved = program.and_(search_return, root)
     fail_pop = program.and_(modes[Phase.FAIL], program.not_(root))
-    retry_family = program.and_(fail_pop, optional_top, program.not_(ground_crystal))
+    retry_family = program.and_(fail_pop, optional_top, pin_search, anchored)
+    skip_family = program.and_(fail_pop, optional_top, program.not_(retry_family))
     root_failed = program.and_(modes[Phase.FAIL], root)
     replay_check = program.or_(modes[Phase.REPLAY_LEAF_CHECK], modes[Phase.REPLAY_PARENT_CHECK])
     original_matches = circuit.add("LogicGateCompare", items[0], target, config="AQ==")
@@ -288,15 +292,15 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                      program.or_(program.not_(root), original_matches)))))
 
     # 同一C掩码的NPC顶盖共享Pin物理；坏列可跳过全部更快地址。
-    counter_event = modes[Phase.SOURCE_NEXT]
+    counter_event = program.or_(modes[Phase.SOURCE_NEXT], modes[Phase.FAMILY_NEXT])
     bad_columns = tuple(program.not_(valid) for valid in candidate.column_valid)
     bad_column = program.or_(*bad_columns)
     skip_at = tuple(program.and_(counter_event, bad_columns[q], program.not_(program.or_(*bad_columns[q + 1:])))
                     for q in range(4))
     skip_columns = program.or_(*skip_at)
     family_jump = program.and_(counter_event, program.not_(bad_column),
-                               program.or_(source_ground_crystal, program.not_(candidate.image.passed),
-                                           program.not_(physics_matches)))
+                               program.or_(modes[Phase.FAMILY_NEXT], source_ground_crystal,
+                                           program.not_(candidate.image.passed), program.not_(physics_matches)))
     carry = program.and_(counter_event, program.not_(bad_column), program.not_(family_jump))
     next_top = []
     for bits, crystal in zip(top, crystals):
@@ -391,7 +395,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         (program.and_(counter_event, program.not_(sources_finished)), Phase.SOURCE),
         (sources_finished, Phase.PREFIX_NEXT),
         (search_pop, Phase.RETURN), (root_solved, Phase.REPLAY_LEAF),
-        (retry_family, Phase.SOURCE), (program.and_(fail_pop, program.not_(retry_family)), Phase.SOURCE_NEXT),
+        (retry_family, Phase.SOURCE), (skip_family, Phase.FAMILY_NEXT),
+        (program.and_(fail_pop, program.not_(optional_top)), Phase.SOURCE_NEXT),
         (program.and_(modes[Phase.REPLAY_LEAF], macro_done), Phase.REPLAY_LEAF_CHECK),
         (program.and_(modes[Phase.REPLAY_PARENT], parent_done), Phase.REPLAY_PARENT_CHECK),
         (replay_up, Phase.REPLAY_PARENT),
@@ -431,7 +436,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                     "instruction": {name: channels[value] for name, value in zip(RECORD_FIELDS, instruction_outputs)}},
         "gate_platforms": len(circuit.gates), "reserved_channels": [channel_base, channel_base + reserve - 1],
         **state_report, "timing": timing_contract(timing),
-        "palette_entries_per_cell": 9, "grounded_pin_tail_required": True,
+        "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
         "search_frames": 5, "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,
                            "requires_column_admissibility": True, "iterative_state_registers": 0,
@@ -449,9 +454,9 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
         "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
-        "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
+        "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/prefix-closure.md；optional-top.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+        "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 
