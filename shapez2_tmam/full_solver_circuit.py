@@ -327,24 +327,20 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         initialize = program.and_(program.or_(enter_leaf, next_cut), selected_frame)
         initialize_pin = program.and_(program.or_(begin_pin_search, enter_pin), selected_frame)
         grow_s = program.and_(grow_prefix, selected_frame)
-        bank.put(frame.pin_search, 0, program.and_(enter_leaf, selected_frame))
-        bank.put(frame.pin_search, 1, initialize_pin)
+        bank.put_exclusive(frame.pin_search, ((program.and_(enter_leaf, selected_frame), 0), (initialize_pin, 1)))
         next_s = program.and_(move_prefix, selected_frame)
         reset_source = program.and_(start_source, selected_frame)
         next_d = program.and_(counter_event, selected_frame)
-        bank.put(frame.family_checked, 1, program.and_(descend, selected_frame))
-        bank.put(frame.family_checked, 0, program.or_(reset_source, program.and_(new_family, next_d)))
+        bank.put_exclusive(frame.family_checked, (
+            (program.and_(descend, selected_frame), 1),
+            (program.or_(reset_source, program.and_(new_family, next_d)), 0)))
         for read, value in zip(frame.crystals, next_crystals):
-            bank.put(read, value, next_d)
-            bank.put(read, 0, reset_source)
+            bank.put_exclusive(read, ((next_d, value), (reset_source, 0)))
         for k, read in enumerate(frame.prefix):
-            bank.put(read, closure.initial[k], initialize)
-            bank.put(read, closure.next_values[k], grow_s)
-            bank.put(read, finder.initial[k], initialize_pin)
-            bank.put(read, next_prefix[k], next_s)
+            bank.put_exclusive(read, ((initialize, closure.initial[k]), (grow_s, closure.next_values[k]),
+                                      (initialize_pin, finder.initial[k]), (next_s, next_prefix[k])))
         for read, value in zip((*frame.top, *frame.slots), (*next_top, *next_slots)):
-            bank.put(read, value, next_d)
-            bank.put(read, 0, reset_source)
+            bank.put_exclusive(read, ((next_d, value), (reset_source, 0)))
         for q in range(4):
             chosen_top = program.pick(finder.columns[q][4].occupied, tags[q][4], program.zero)
             bank.put(frame.goal[q][4], chosen_top, program.and_(commit_top, selected_frame))
@@ -366,10 +362,9 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     depth_choices.append((root_solved, leaf_depth))
     bank.put_exclusive(depth, tuple(depth_choices))
     bank.put(leaf_depth, depth, leaf_found)
-    bank.put(leaf_direction, 0, enter_leaf)
-    bank.put(leaf_direction, 1, next_cut)
-    bank.put(leaf_mode, program.pick(family_checked, program.const(2), program.one), descend)
-    bank.put(leaf_mode, 0, program.or_(commit_top, fail_pop))
+    bank.put_exclusive(leaf_direction, ((enter_leaf, 0), (next_cut, 1)))
+    bank.put_exclusive(leaf_mode, (
+        (descend, program.pick(family_checked, program.const(2), program.one)), (program.or_(commit_top, fail_pop), 0)))
 
     # 搜索仅保存材料参数与精确Pin关系；根成功后才执行并发布制造流。
     accepted = program.and_(packet["enable"], program.not_(error), replay)
@@ -386,8 +381,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     bank.put(second_pass, 0, reset_cpu)
     bank.put(second_corner, 0, reset_cpu)
     for k, read in enumerate(pc):
-        bank.put(read, 0, reset_cpu)
-        bank.put(read, int(bool(parent_start & (1 << k))), replay_up)
+        bank.put_exclusive(read, ((reset_cpu, 0), (replay_up, int(bool(parent_start & (1 << k))))))
 
     transitions = (
         (enter_leaf, Phase.PREFIX), (enter_pin, Phase.PIN_PREFLIGHT), (entry_fail, Phase.FAIL),
@@ -406,13 +400,11 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         (program.or_(root_failed, replay_finished, outside, invalid, internal), Phase.DONE),
     )
     bank.put_exclusive(phase, tuple((condition, int(destination)) for condition, destination in transitions))
-    bank.put(status, 2, root_failed)
-    bank.put(status, 1, replay_finished)
-    bank.put(status, 3, outside)
-    bank.put(status, 4, internal)
+    bank.put_exclusive(status, ((root_failed, 2), (replay_finished, 1), (outside, 3), (internal, 4)))
     # K的重通路只由慢状态切换；业务冻结时脉冲清零，避免重复发包。
-    bank.put(support_prefix, 0, program.or_(descend, begin_pin_search, enter_pin))
-    bank.put(support_prefix, 1, program.or_(enter_leaf, grounded_ready, search_pop, fail_pop, root_solved, replay_up))
+    bank.put_exclusive(support_prefix, (
+        (program.or_(descend, begin_pin_search, enter_pin), 0),
+        (program.or_(enter_leaf, grounded_ready, search_pop, fail_pop, root_solved, replay_up), 1)))
     slow_reads = (depth, second_pass, second_corner, support_prefix, leaf_direction, leaf_mode,
                   *(read for frame in frames for read in (
         *(cell for column in frame.goal for cell in column), *frame.prefix,
