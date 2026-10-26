@@ -37,7 +37,7 @@
 
 `Solver4._family_recipe`对每个来源族建立模板，调用两次`minimal_start(..., optional_top=True)`。成功时先取得真实角制造证书，再向精确成员追加固定Δ。上层继续执行Pin并与指定输出逐格比较。失败后，含地面C族返回失败；其他族先通过[全族G可行性筛选](family-grounding.md)，再恢复空/N/P成员并调用`_tail(..., skip_start=True)`，搜索各自Pin尾部，不重复已整体否定的A→S。
 
-完整电路复用五帧、前缀闭包和制造ROM。每帧增加一位`family_checked`，全局`leaf_mode`保存三种模式：0为普通根目标，1为可选顶格族检查，2为已否定A→S的精确成员。
+完整电路复用四帧、前缀闭包和制造ROM。每帧增加一位`family_checked`，全局`leaf_mode`保存三种模式：0为普通根目标，1为可选顶格族检查，2为已否定A→S的精确成员。
 
 - 每族第一次以空NPC顶盖检查列A及Pin像。空NPC顶盖若违反列A，其他NPC选择不能修复；融合、静止与落点不受NPC顶盖影响。
 - `family_checked=0`时下降，把子目标自由顶格填为标签1（Cu），置全局模式1，并把父帧`family_checked`置1。模板ENTRY仅检查列A，暂不以整体K失败否定该族；模式1只允许A→S及整族G筛选，禁止模板本身继续下降。

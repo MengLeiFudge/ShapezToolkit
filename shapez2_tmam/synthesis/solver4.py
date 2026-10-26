@@ -59,10 +59,10 @@ class Solver4:
         recipe = self._tail(target)
         if recipe is not None:
             return Result("solved", recipe, "局部半形起点及完整有界顶针/逐层堆叠尾部")
-        return Result("unsolvable", None, "已穷尽局部半形起点及最低晶体限制内的全部顶针/堆叠尾部")
+        return Result("unsolvable", None, "已穷尽局部半形起点及三次尾部顶针界内的全部顶针/堆叠尾部")
 
-    def _tail(self, target: Shape, *, skip_start: bool = False) -> Recipe | None:
-        """恢复有界尾部；族闭包已否定全部A→S时只搜索Pin尾部。"""
+    def _tail(self, target: Shape, *, skip_start: bool = False, remaining_pins: int = 3) -> Recipe | None:
+        """三次尾部Pin界保持覆盖；余量为零仍先完成尚未排除的A→S。"""
         if not skip_start:
             for start in range(2):
                 source = minimal_start(self.rules, target, start)
@@ -72,6 +72,8 @@ class Solver4:
                 if found.recipe is None:
                     raise RuntimeError("强制前缀闭包已证明A起点，但角构造未生成证书")
                 return self._finish(found.recipe, target)
+        if remaining_pins == 0:
+            return None
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
         if not pin_base_possible(target) or not in_support_class(self.rules, target, grounded=True):
             return None
@@ -80,7 +82,7 @@ class Solver4:
             if self.constructor.construct(pushed).status == "unsolvable":
                 continue
             for family in pin_families(self.rules, pushed, check_output=not self.certificate_first):
-                previous = self._family_recipe(family, lowest)
+                previous = self._family_recipe(family, lowest, remaining_pins - 1)
                 if previous is None:
                     continue
                 result = self.builder.apply("pin", previous)
@@ -89,7 +91,7 @@ class Solver4:
                 return self._finish(result, target)
         return None
 
-    def _family_recipe(self, family: PinFamily, lowest: int) -> Recipe | None:
+    def _family_recipe(self, family: PinFamily, lowest: int, remaining_pins: int) -> Recipe | None:
         """每族共用两次A→S闭包，失败后只恢复成员的Pin尾部。"""
         template = Shape((*family.lower, tuple("cr" if family.top_crystals & (1 << q) else "Cu"
                                               for q in range(4))))
@@ -106,14 +108,14 @@ class Solver4:
                                          if pos[0] < 4 or cell[0] == "c" or pos in selected})
             assert completed is not None
             return self._finish(direct.recipe, completed)
-        if (not pin_base_possible(template)
+        if (remaining_pins == 0 or not pin_base_possible(template)
                 or not in_support_class(self.rules, template, grounded=True, optional_top=True)):
             return None
         for source in family.members(self.rules):
             source_lowest = min(z for z, row in enumerate(source.layers) if any(cell[0] == "c" for cell in row))
             if source_lowest >= lowest:
                 raise RuntimeError("顶针逆像没有使最低保留晶体严格降低")
-            previous = self._tail(source, skip_start=True)
+            previous = self._tail(source, skip_start=True, remaining_pins=remaining_pins)
             if previous is not None:
                 return previous
         return None

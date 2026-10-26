@@ -1,4 +1,4 @@
-"""四象限五层完整尾部的五帧DFS：共用制造ROM，成功后才重放并发布指令。"""
+"""四象限五层完整尾部的四帧DFS：共用制造ROM，成功后才重放并发布指令。"""
 
 import argparse
 import json
@@ -97,7 +97,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         tuple(bank.add() for _ in range(12)),
         tuple(tuple(bank.add() for _ in range(5)) for _ in range(4)),
         tuple(tuple(bank.add() for _ in range(2)) for _ in range(4)),
-        tuple(bank.add() for _ in range(4)), bank.add(), bank.add()) for i in range(5))
+        tuple(bank.add() for _ in range(4)), bank.add(), bank.add()) for i in range(4))
     phase = bank.add(int(Phase.ENTRY))
     depth = bank.add()
     leaf_depth = bank.add()
@@ -108,7 +108,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     optional_top = circuit.add("LogicGateCompare", leaf_mode, Literal(1), config="AQ==")
     known_no_leaf = circuit.add("LogicGateCompare", leaf_mode, Literal(2), config="AQ==")
     modes = {value: circuit.add("LogicGateCompare", phase, Literal(int(value)), config="AQ==") for value in Phase}
-    levels = [circuit.add("LogicGateCompare", depth, Literal(i), config="AQ==") for i in range(5)]
+    levels = [circuit.add("LogicGateCompare", depth, Literal(i), config="AQ==") for i in range(4)]
     root = levels[0]
 
     def active(values: tuple[Ref, ...]) -> Ref:
@@ -134,7 +134,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         program.not_(column[0].crystal),
         program.or_(program.not_(program.or_(column[1].crystal, column[2].crystal)), column[0].pin),
         program.or_(program.not_(column[2].crystal), column[1].occupied)) for column in original))
-    tail_candidate = program.and_(has_crystal, pin_base, program.not_(levels[4]))
+    tail_candidate = program.and_(has_crystal, pin_base, program.not_(levels[3]))
     pin_allowed = program.and_(tail_candidate, program.not_(optional_top))
 
     finder = PrefixSearch(program, original, optional_top=optional_top)
@@ -353,7 +353,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         for q in range(4):
             chosen_top = program.pick(finder.columns[q][4].occupied, tags[q][4], program.zero)
             bank.put(frame.goal[q][4], chosen_top, program.and_(commit_top, selected_frame))
-        if i < 4:
+        if i < 3:
             pushing = program.and_(descend, selected_frame)
             bank.put(frames[i + 1].pin_search, 0, pushing)
             bank.put(frames[i + 1].family_checked, 0, pushing)
@@ -447,7 +447,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
         "support_row_closures": 10, "pin_base_precheck": True, "crystal_conflict_slot_skip": True,
         "top_crystal_forbidden_above_retained": True,
-        "search_frames": 5, "item_registers": 6, "program_rom_rows": len(instructions),
+        "search_frames": 4, "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,
                            "requires_column_admissibility": True, "iterative_state_registers": 0,
                            "manufacture_during_search": False},
@@ -456,24 +456,24 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                            "optional_top_for_ground_crystal_families": True,
                            "shared_leaf_check_for_all_families": True},
         "shared_angle_rows": corner_last + 1, "angle_calls": 4,
-        "instruction_bound": 2 * (macro_last + corner_last + 2) + 4 * (len(instructions) - parent_start),
+        "instruction_bound": 2 * (macro_last + corner_last + 2) + 3 * (len(instructions) - parent_start),
         "leaf_program_rows": macro_last + 1, "parent_tail_rows": len(instructions) - parent_start,
         "statuses": {"0": "搜索或成功路径重放中", "1": "已输出完整制造流程，原生回放等于原目标",
                      "2": "穷尽全部有界尾部后不可制作", "3": "cu晶体供料未界定", "4": "内部状态或回放失配，不能判不可制作",
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
         "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
-        "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
-        "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
+        "resource_bound": "每格只查本列5个原标签及4种辅助料；四帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
+        "termination": "四次尾部Pin可改写为A→S，故递归至多三边；最低C沿边仍严格下降；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+        "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 
 
 def main() -> int:
     """仅编译生产蓝图及接口，不执行求解。"""
-    parser = argparse.ArgumentParser(description="生成五帧递归及成功路径重放的完整四象限尾部电路")
+    parser = argparse.ArgumentParser(description="生成四帧递归及成功路径重放的完整四象限尾部电路")
     parser.add_argument("--channel-base", type=int)
     parser.add_argument("--pack", action="store_true", help="就地放置固定常量并装箱门组件；默认使用独立频道1277000")
     parser.add_argument("--output", type=Path, required=True)

@@ -1,6 +1,6 @@
 # 合成的 Python 接口
 
-这个包接受四象限或六象限五层目标，输出具有逐步加工结果的制造证书。默认使用快速局部构造；无晶体目标采用完整判据，未覆盖的含晶体目标返回 `unknown`。四象限另有 `--complete` 启用[完整有界尾部逆推](../4q5l/tail-solver.md)，不建立半形目录，但最坏搜索时间仍很大。四象限的[五帧完整电路控制](../4q5l/full-tail-circuit.md)已有首版，尚未通过实用性能验收；六象限完整求解仍未实现。
+这个包接受四象限或六象限五层目标，输出具有逐步加工结果的制造证书。默认使用快速局部构造；无晶体目标采用完整判据，未覆盖的含晶体目标返回 `unknown`。四象限另有 `--complete` 启用[完整有界尾部逆推](../4q5l/tail-solver.md)，不建立半形目录，但最坏搜索时间仍很大。四象限的[四帧完整电路控制](../4q5l/full-tail-circuit.md)已有首版，尚未通过实用性能验收；六象限完整求解仍未实现。
 
 ## 输入目标，取得制造步骤
 
@@ -52,12 +52,12 @@ if result.recipe is not None:
 
 `Builder` 提供基础层、无晶体逐层构造、独立单列、独立晶体前缀、逐层 N/P 追加和列拼接。多层晶体原料通过基础原料、结晶和切割展开，不能作为免费的实体输入。
 
-四象限的 `Constructor.half` 使用[逐列角构造](../4q5l/corner-synthesis.md)，在合法颜色范围内精确判半形，成功时至多285个制造节点。`CornerBuilder.accepts_half` 只检查列条件和新分组的稳定性；`CornerBuilder.build` 准备单列及其 N/P 助手，处理八种顶针难列。`Solver4.solve` 使用这些局部起点及完整顶针/堆叠尾部；零Pin首轮由[`minimal_start`](prefix_closure.py)求两个切向的[强制最小前缀](../4q5l/prefix-closure.md)，每切向至多20次补格及一次最终检查。Pin后的S仍完整遍历，最多四条递归边，实际搜索分支仍需压缩。理论上每个可制作四象限目标存在至多627节点的制造树。六象限目前只启用无晶体及独立柱构造，不能据此判断全部六象限含晶体目标。
+四象限的 `Constructor.half` 使用[逐列角构造](../4q5l/corner-synthesis.md)，在合法颜色范围内精确判半形，成功时至多285个制造节点。`CornerBuilder.accepts_half` 只检查列条件和新分组的稳定性；`CornerBuilder.build` 准备单列及其 N/P 助手，处理八种顶针难列。`Solver4.solve` 使用这些局部起点及完整顶针/堆叠尾部；零Pin首轮由[`minimal_start`](prefix_closure.py)求两个切向的[强制最小前缀](../4q5l/prefix-closure.md)，每切向至多20次补格及一次最终检查。Pin后的S仍完整遍历，由[四次尾部Pin改写定理](../4q5l/three-pin-tail.md)限定最多三条递归边，实际搜索分支仍需压缩。理论上每个可制作四象限目标存在至多616节点的制造树。六象限目前只启用无晶体及独立柱构造，不能据此判断全部六象限含晶体目标。
 
 `pin_families`、`cut_families` 是独立的惰性物理逆像接口。候选能产生目标，不等于候选本身可制作；使用者须给实际族成员补制造证明。
 
 面向游戏材料寄存器可用 `Solver4(rules, certificate_first=True)`。`pin_families(..., check_output=False)`用[`pin_image_matches`](pin_constraints.py)按最大静止集合及块支撑精确匹配物理输出，无需先编码任意原生候选；[充要证明](../4q5l/pin-image-exact.md)补齐了原必要筛选。候选仍须递归取得制造证书，实际制造的Pin结果也须与目标相同；物理匹配不代替可制作性。两列判据使用[按层扫描](../4q5l/half-row-stability.md)。CLI保留默认正向Pin检查模式，两种物理检查接受同一规范化逆像族；均没有实用搜索复杂度承诺。
 
-`pin_column(target_column, keep_mask, crystal_mask)`接收五格目标和两个0～15掩码，返回一份前四层结构候选或None。它不计算整图Pin，也不判可制作性；晶体掩码只标记强制保留C以外的辅助红C。相应[八位数据通路与自动迭代器](../4q5l/pin-column-circuit.md)已编译为原生蓝图，材料格与标签直接路由，另有`pin_column_at(target_column, slot)`以0～19直接选址，与[四列及完整顶盖电路](../4q5l/pin-patterns.md)共用固定模式表；完整搜索、回退和成功路径发令已接入[五帧控制器](../4q5l/full-tail-circuit.md)，规模和耗时仍须压缩。
+`pin_column(target_column, keep_mask, crystal_mask)`接收五格目标和两个0～15掩码，返回一份前四层结构候选或None。它不计算整图Pin，也不判可制作性；晶体掩码只标记强制保留C以外的辅助红C。相应[八位数据通路与自动迭代器](../4q5l/pin-column-circuit.md)已编译为原生蓝图，材料格与标签直接路由，另有`pin_column_at(target_column, slot)`以0～19直接选址，与[四列及完整顶盖电路](../4q5l/pin-patterns.md)共用固定模式表；完整搜索、回退和成功路径发令已接入[四帧控制器](../4q5l/full-tail-circuit.md)，规模和耗时仍须压缩。
 
 [原生电路部件及频道接法](../blueprints/README.md) · [返回总目录](../README.md)
