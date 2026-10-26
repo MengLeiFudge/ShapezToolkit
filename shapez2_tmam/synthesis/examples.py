@@ -71,6 +71,7 @@ def wide_half_examples() -> list[Example]:
     whole = catalog.join(builder.rules.parse("Cu----Cu----:------------:crCuCucrCuCu:cr--Cucr--Cu:crCuCucrCuCu"))
     if whole is None:
         raise RuntimeError("已登记H的半形凭据，仍未构造出V")
+    exchange = whole.inputs[0] if whole.operation == "rotate" else whole
     settled = ordinary_stack(builder, whole, builder.rules.parse("CuCuCuCuCuCu:----CuCu--Cu:--CuCu--CuCu"))
     if settled is None:
         raise RuntimeError("V再次堆叠的代表目标未取得单次普通追加配方")
@@ -98,8 +99,8 @@ def wide_half_examples() -> list[Example]:
                   ("无晶体阶梯B", scaffold), ("A与B拼接", merged), ("切出非K半形H", half))
     return [
         Example("6q-H", "可制造的非K稳定半形", "晶体框架与内部普通格互相阻挡；支撑环不通地面，也不含针。", 6, half, milestones),
-        Example("6q-V", "交换后不稳定的成品", "独立制造两份H，第二份转三个象限，再交换。交换后不追加重力；新连接会在下一次加工时改变分组。", 6, whole,
-                (("每份H单独制造", half), ("第二份H旋转三个象限", whole.inputs[1]), ("最终交换输出V", whole))),
+        Example("6q-V", "交换后不稳定的成品", "独立制造两份H，选择输入方向再交换。交换后不追加重力；新连接会在下一次加工时改变分组。", 6, whole,
+                (("每份H单独制造", half), ("交换的第二份输入", exchange.inputs[1]), ("最终交换输出V", whole))),
         Example("6q-V-stack", "不稳定成品再次加工后的变化", "以V作下料，追加q3单格普通料。下料本次重新分组，悬空晶体破碎，普通格落下；新增普通格落在q3第二层。", 6, settled,
                 (("加工前的V", whole), ("上料", settled.inputs[1]), ("一次堆叠后的成品", settled))),
         Example("6q-pin-tail", "非K下料追加普通格和针尾", "H旁先准备q3两层普通柱；一次堆叠同时加入q4地面普通格与q3第三层针。独立下落把上料缩成一层N/P基础料，无需辅助晶体。", 6, pin_tail,

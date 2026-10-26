@@ -104,9 +104,16 @@ class Builder:
         if operation == "rotate":
             if not isinstance(parameter, int):
                 raise ValueError("旋转参数需要整数象限数")
-            if parameter % self.rules.quadrants == 0:
-                return inputs[0]
-            result = self.rules.rotate(shapes[0], parameter)
+            source = inputs[0]
+            while source.operation == "rotate":
+                assert isinstance(source.parameter, int)
+                parameter += source.parameter
+                source = source.inputs[0]
+            parameter %= self.rules.quadrants
+            if not parameter:
+                return source
+            result = self.rules.rotate(source.result, parameter)
+            inputs = (source,)
         elif operation == "cut":
             if parameter not in (0, 1):
                 raise ValueError("切割出口需要 0（索引前半）或 1（索引后半）")
@@ -125,6 +132,8 @@ class Builder:
             result = self.rules.crystal(shapes[0], parameter)
         if result is None:
             raise ValueError(f"加工 {operation} 无产物，不能作为制造树输入")
+        if len(inputs) == 1 and result == inputs[0].result:
+            return inputs[0]
         return Recipe(operation, result, inputs, parameter, self.rules.height)
 
     def window(self, source: Recipe, start: int) -> Recipe:

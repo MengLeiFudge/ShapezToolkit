@@ -60,7 +60,7 @@ if result.recipe is not None:
 
 `stack_reduction.stack_successors(rules, lower, known)`面向普通格统一为Cu的结构目录：K下料只生成连续普通块及单针，并用列顶公式计算结果；非K下料遍历known旧快照中的真实上料。六象限K分支至多37项，替换保持最终闭包，详见[证明](../general/conditional-stacking.md)。该接口尚未接成完整六象限求解器，也不返回不可制造结论。
 
-`HalfCatalog(builder).add(recipe)`登记已知配方各切向的半形结果及原输入凭据；`join(target)`直接投影目标并查表，四象限最多2对、六象限最多3对，找到时返回消费原输入的真实制造树。目标本身不被切割，不对切后结果多算一次重力；缺失只返回None，见[交换化简证明](../general/swap-witnesses.md)。六象限V的代表配方已由此接口生成。
+`HalfCatalog(builder).add(recipe)`按前半、后半用途分别保存已知最低成本原输入；`join(target)`直接投影目标并比较n个有向起点，4q查4对、6q查6对，选表内总步骤最少的制造树。目标本身不被切割，不对切后结果多算一次重力；缺失只返回None，见[交换化简](../general/swap-witnesses.md)及[用途成本证明](../general/orientation-cost.md)。Builder.apply同时合并连续旋转、删去精确结果等于输入的一元加工；六象限V代表配方由此接口生成。
 
 `ordinary_stack(builder, lower, target)`允许非K及不稳定下料。当目标相对下料一次结算结果只增加普通格时，直接检查列顶与新增块支撑，构造一份紧密N/C上料并执行一次Stack；不搜索任意上料，也不把一次加工拆成多次。失败仅表示固定下料的这一子问题不满足条件，见[证明](../general/ordinary-stack.md)。
 

@@ -11,7 +11,7 @@ Rules现在接受偶数象限n≥2、制造层数上限H≥2。采用单象限�
 | Constructor | 通用无晶体完整判据及独立柱/前缀局部构造；未覆盖的含晶体目标返回unknown |
 | stack_successors | K下料的n²+1种结构基础块；非K分支仍保留真实上料 |
 | ordinary_stack / single_stack | 给定真实下料的普通追加、针尾及部分交错N/P构造；用块数守恒选择紧凑无C上料，不额外结算下料 |
-| HalfCatalog | 保存各切后半形的原输入凭据，按目标投影查询n/2条直径 |
+| HalfCatalog | 按前/后半用途保留最低成本原输入；按目标n个有向投影选目录内较短配方 |
 | StackPlan / StackCatalog | 任意堆叠的精确摘要及目标前缀匹配，保留每个键最短的已知凭据；缺失不是不可制作证明 |
 | Recipe.steps / step_count | 任意本模型配置的消费式步骤与完整中间产物；建立节点时直接计算总步骤数 |
 
@@ -40,6 +40,6 @@ python -m shapez2_tmam.synthesis 'cr--------------' --quadrants 8 --height 8
 
 Python可直接建立Builder(Rules(8, 8))并调用single_stack或HalfCatalog。所有输入图形须由同一Rules解析、所有输入Recipe须来自同一制造配置。
 
-[八象限八层代表](../examples/8q8l-single-stack.md)已展开为142步：八层辅助晶体塔顶破后形成非K下料，再将双层普通上料一次堆入。最终只有六层，但全过程要求八层上限。它是既有证明的具体配方导出，不表示默认Constructor已能从任意同类目标自动发现该准备过程。
+[八象限八层代表](../examples/8q8l-single-stack.md)已展开为125步：八层辅助晶体塔顶破后形成非K下料，再将双层普通上料一次堆入。最终只有六层，但全过程要求八层上限。它是既有证明的具体配方导出，不表示默认Constructor已能从任意同类目标自动发现该准备过程。
 
 修改文件LSP零诊断；固定代表配方已导出。未执行完整求解、目录枚举、测试或游戏/Mod验证。Python参数化模型不自动保证具体Mod提供相同旋转、半切及高度规则。
