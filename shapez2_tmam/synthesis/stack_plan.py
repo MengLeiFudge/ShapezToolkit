@@ -1,9 +1,12 @@
 """任意Stack的下料结算摘要、上料块序列及保留原输入的制造凭据。"""
 
 from dataclasses import dataclass
+from typing import Iterator
 
-from .physics import EMPTY, PIN, Rules, Shape
+from .physics import EMPTY, PIN, Position, Rules, Shape
 from .recipe import Builder, Recipe
+
+Piece = tuple[tuple[int, str], ...]
 
 
 @dataclass(frozen=True)
@@ -11,7 +14,7 @@ class StackPlan:
     """上料可能保留的有序N/P块；此序列不是一份可直接送入机器的物品。"""
 
     quadrants: int
-    pieces: tuple[tuple[tuple[int, str], ...], ...]
+    pieces: tuple[Piece, ...]
 
     def apply(self, rules: Rules, settled: Shape | None) -> Shape | None:
         """从下料的一次结算结果更新列顶；超高块仍阻挡后续块。"""
@@ -19,13 +22,31 @@ class StackPlan:
             raise ValueError("上料摘要与当前象限数不一致")
         cells = rules.cells(settled) if settled is not None else {}
         tops = [max((z for z, column in cells if column == q), default=-1) for q in range(self.quadrants)]
-        for piece in self.pieces:
-            level = 1 + max(tops[q] for q, _ in piece)
-            for q, cell in piece:
-                tops[q] = level
-                if level < rules.height:
+        for level, piece in self._landings(tops):
+            if level < rules.height:
+                for q, cell in piece:
                     cells[level, q] = cell
         return rules.fold(cells)
+
+    def _landings(self, tops: list[int]) -> Iterator[tuple[int, Piece]]:
+        """复制起始列顶，逐块更新；来源序列已经排除固定的高处障碍。"""
+        tops = tops.copy()
+        for piece in self.pieces:
+            level = 1 + max(tops[q] for q, _ in piece)
+            for q, _ in piece:
+                tops[q] = level
+            yield level, piece
+
+    def _matches(self, height: int, tops: list[int], delta: dict[Position, str]) -> bool:
+        """目录已确认下料格保留且不新增C；按不可撤销的新增格拒绝不符前缀。"""
+        added = 0
+        for level, piece in self._landings(tops):
+            if level >= height:
+                continue
+            if any(delta.get((level, q)) != cell for q, cell in piece):
+                return False
+            added += len(piece)
+        return added == len(delta)
 
 
 def stack_plan(rules: Rules, upper: Shape) -> StackPlan:
@@ -72,12 +93,14 @@ class StackCatalog:
         self.uppers: dict[StackPlan, Recipe] = {}
 
     def add(self, recipe: Recipe) -> None:
-        """保留原下料；空或单块上料摘要改用已证明等价的基础配方。"""
+        """每个摘要保留已知步数最少的原输入；空或单块上料改用基础配方。"""
         rules = self.builder.rules
         if recipe.height != rules.height or len(recipe.result.layers[0]) != rules.quadrants:
             raise ValueError("堆叠凭据必须与目录的物理配置一致")
         settled = rules.collapse(rules.cells(recipe.result))
-        self.lowers.setdefault(settled, recipe)
+        previous = self.lowers.get(settled)
+        if previous is None or recipe.step_count < previous.step_count:
+            self.lowers[settled] = recipe
         plan = stack_plan(rules, recipe.result)
         upper = recipe
         if not plan.pieces:
@@ -85,21 +108,34 @@ class StackCatalog:
         elif len(plan.pieces) == 1:
             values = dict(plan.pieces[0])
             upper = self.builder.base(tuple(values.get(q, EMPTY) for q in range(rules.quadrants)))
-        self.uppers.setdefault(plan, upper)
+        previous = self.uppers.get(plan)
+        if previous is None or upper.step_count < previous.step_count:
+            self.uppers[plan] = upper
 
     def construct(self, target: Shape) -> Recipe | None:
-        """求值已知摘要对；命中后用原输入凭据实际生成制造树，缺失仅返回None。"""
-        desired = self.builder.rules.cells(target)
+        """选已登记摘要对中总步数最少的精确命中，缺失仅返回None。"""
+        rules = self.builder.rules
+        desired = rules.cells(target)
+        best: tuple[Recipe, Recipe] | None = None
+        best_cost = None
         for settled, lower in self.lowers.items():
-            original = self.builder.rules.cells(settled) if settled is not None else {}
+            original = rules.cells(settled) if settled is not None else {}
             if (any(desired.get(pos) != cell for pos, cell in original.items())
                     or any(cell[0] == "c" and original.get(pos) != cell for pos, cell in desired.items())):
                 continue
+            delta = {pos: cell for pos, cell in desired.items() if pos not in original}
+            tops = [max((z for z, column in original if column == q), default=-1) for q in range(rules.quadrants)]
+            if any(z <= tops[q] for z, q in delta):
+                continue
             for plan, upper in self.uppers.items():
-                if plan.apply(self.builder.rules, settled) != target:
+                cost = lower.step_count + upper.step_count + 1
+                if best_cost is not None and cost >= best_cost:
                     continue
-                result = self.builder.apply("stack", lower, upper)
-                if result.result != target:
-                    raise RuntimeError("堆叠摘要与原输入的加工结果不一致")
-                return result
-        return None
+                if plan._matches(rules.height, tops, delta):
+                    best, best_cost = (lower, upper), cost
+        if best is None:
+            return None
+        result = self.builder.apply("stack", *best)
+        if result.result != target:
+            raise RuntimeError("堆叠摘要与原输入的加工结果不一致")
+        return result

@@ -1,6 +1,6 @@
 """制造树及无需搜索的种子构造；所有多层晶体原料均展开为真实加工。"""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Iterator
 
 from .physics import EMPTY, PIN, Rules, Shape
@@ -15,12 +15,14 @@ class Recipe:
     inputs: tuple["Recipe", ...] = ()
     parameter: int | str | None = None
     height: int = 5
+    step_count: int = field(init=False)
 
     def __post_init__(self):
         """保存制造上限，防止不同Pin截高语义的配方或指令相互混用。"""
         if self.height < 2 or len(self.result.layers) > self.height or any(
                 node.height != self.height or len(node.result.layers[0]) != len(self.result.layers[0]) for node in self.inputs):
             raise ValueError("制造树的层数上限、象限数或输入配方配置不一致")
+        object.__setattr__(self, "step_count", 1 + sum(node.step_count for node in self.inputs))
 
     def steps(self) -> Iterator[dict]:
         """按依赖顺序流式展开，每份实体物品有独立编号，不隐式复制实物。"""

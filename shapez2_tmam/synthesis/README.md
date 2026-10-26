@@ -64,7 +64,9 @@ if result.recipe is not None:
 
 `single_stack(builder, lower, target)`把普通追加扩展到新增针：先尝试平移后的无晶体上料；失败时，对每列普通格在下、连续针尾在上的目标构造N/C列前缀及针尾。空列不填C，列顶以上不补C。依据[无环支撑森林证明](../general/pin-tail-stack.md)，实际仍执行一次Stack。普通格和针交错且直接上料失败时返回None，不能视为不可制作。
 
-`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，空/单块上料摘要使用已证极小替换；`construct(target)`只搜索已登记摘要对，成功返回真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
+`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，每键保留已知步数最少者，空/单块上料摘要使用已证极小替换。`construct(target)`先筛下料，再逐块检查新增格；可见格不匹配时立即停止该候选，成功返回已登记摘要对中总步数最少的真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
+
+`Recipe.step_count`在建立节点时计算`1+sum(输入.step_count)`，等于消费式步骤展开的条数。共享子配方引用仍按每份实体分别计数。这个指标用于选配方，不代表建筑数量或游戏耗时，也不保证全局最短。
 
 用户手工复现用的[十二个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
 
