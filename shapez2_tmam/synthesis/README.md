@@ -62,13 +62,13 @@ if result.recipe is not None:
 
 `stack_reduction.stack_successors(rules, lower, known)`面向普通格统一为Cu的结构目录：K下料只生成连续普通块及单针，并用列顶公式计算结果；非K下料遍历known旧快照中的真实上料。六象限K分支至多37项，替换保持最终闭包，详见[证明](../general/conditional-stacking.md)。该接口尚未接成完整六象限求解器，也不返回不可制造结论。
 
-`HalfCatalog(builder).add(recipe)`按前半、后半用途分别保存已知最低成本原输入；`join(target)`直接投影目标并比较n个有向起点，4q查4对、6q查6对，选表内总步骤最少的制造树。目标本身不被切割，不对切后结果多算一次重力；缺失只返回None，见[交换化简](../general/swap-witnesses.md)及[用途成本证明](../general/orientation-cost.md)。Builder.apply同时合并连续旋转、删去精确结果等于输入的一元加工；六象限V代表配方由此接口生成。
+`HalfCatalog(builder).add(recipe)`按前半、后半用途分别保存已知最低成本原输入；`join(target)`直接投影目标并比较n个有向起点，4q查4对、6q查6对，选表内总步骤最少、同长时物品槽最少的制造树。目标本身不被切割，不对切后结果多算一次重力；缺失只返回None，见[交换化简](../general/swap-witnesses.md)及[用途成本证明](../general/orientation-cost.md)。Builder.apply同时合并连续旋转、删去精确结果等于输入的一元加工；六象限V代表配方由此接口生成。
 
 `ordinary_stack(builder, lower, target)`允许非K及不稳定下料。当目标相对下料一次结算结果只增加普通格时，直接检查列顶与新增块支撑，构造一份紧密N/C上料并执行一次Stack；不搜索任意上料，也不把一次加工拆成多次。失败仅表示固定下料的这一子问题不满足条件，见[证明](../general/ordinary-stack.md)。
 
 `single_stack(builder, lower, target)`把普通追加扩展到新增针：先令新增N/P独立下落，若前后块数相等，就用紧凑的无晶体上料；否则检查补C连续列在抬高后没有静止格，并取得独立列制造凭据。这个[块数守恒判据及交错上料构造](../general/interleaved-stack.md)保留旧[针尾域](../general/pin-tail-stack.md)，也覆盖部分N/P交错目标；实际始终只对原下料执行一次Stack。两种候选均失败时返回None，不能视为目标全局不可制作。
 
-`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，每键保留已知步数最少者，空/单块上料摘要使用已证极小替换。`construct(target)`先筛下料，再逐块检查新增格；可见格不匹配时立即停止该候选，成功返回已登记摘要对中总步数最少的真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
+`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，每键保留已知步数最少者，空/单块上料摘要使用已证极小替换。`construct(target)`先筛下料，再逐块检查新增格；可见格不匹配时立即停止该候选，成功返回已登记摘要对中总步数最少、同长时物品槽最少的真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
 
 `Recipe.step_count`在建立节点时计算`1+sum(输入.step_count)`，等于消费式步骤展开的条数。共享子配方引用仍按每份实体分别计数。这个指标用于选配方，不代表建筑数量或游戏耗时，也不保证全局最短。
 

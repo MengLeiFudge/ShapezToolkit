@@ -13,7 +13,7 @@ class HalfCatalog:
         self.backs: dict[Shape | None, Recipe] = {}
 
     def add(self, recipe: Recipe) -> None:
-        """双出口各保留最低成本原输入；后半只旋转索引键，不旋转使用凭据。"""
+        """双出口按步数、槽数依次取优；后半只旋转索引键，不旋转使用凭据。"""
         rules = self.builder.rules
         half = rules.quadrants // 2
         for start in range(rules.quadrants):
@@ -22,11 +22,11 @@ class HalfCatalog:
             back = rules.rotate(back, half) if back is not None else None
             for table, key in ((self.fronts, front), (self.backs, back)):
                 previous = table.get(key)
-                if previous is None or source.step_count < previous.step_count:
+                if previous is None or (source.step_count, source.register_count) < (previous.step_count, previous.register_count):
                     table[key] = source
 
     def join(self, target: Shape) -> Recipe | None:
-        """投影目标的n个有向半面，选两表中总成本最低的真实交换配方。"""
+        """投影目标的n个有向半面，选总步数最少、同长槽数最少的交换配方。"""
         rules = self.builder.rules
         half = rules.quadrants // 2
         best: tuple[Recipe, Recipe, int] | None = None
@@ -39,7 +39,8 @@ class HalfCatalog:
             first, second = self.fronts.get(front), self.backs.get(back)
             if first is None or second is None:
                 continue
-            cost = first.step_count + second.step_count + 1 + (aligned != target)
+            slots = max(first.register_count, second.register_count) + (first.register_count == second.register_count)
+            cost = (first.step_count + second.step_count + 1 + (aligned != target), slots)
             if best_cost is None or cost < best_cost:
                 best, best_cost = (first, second, start), cost
         if best is None:

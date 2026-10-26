@@ -82,13 +82,13 @@ class StackCatalog:
         self.uppers: dict[StackPlan, Recipe] = {}
 
     def add(self, recipe: Recipe) -> None:
-        """每个摘要保留已知步数最少的原输入；空或单块上料改用基础配方。"""
+        """每个摘要按步数、槽数依次取优；空或单块上料改用基础配方。"""
         rules = self.builder.rules
         if recipe.height != rules.height or len(recipe.result.layers[0]) != rules.quadrants:
             raise ValueError("堆叠凭据必须与目录的物理配置一致")
         settled = rules.collapse(rules.cells(recipe.result))
         previous = self.lowers.get(settled)
-        if previous is None or recipe.step_count < previous.step_count:
+        if previous is None or (recipe.step_count, recipe.register_count) < (previous.step_count, previous.register_count):
             self.lowers[settled] = recipe
         plan = stack_plan(rules, recipe.result)
         upper = recipe
@@ -98,11 +98,11 @@ class StackCatalog:
             values = dict(plan.pieces[0])
             upper = self.builder.base(tuple(values.get(q, EMPTY) for q in range(rules.quadrants)))
         previous = self.uppers.get(plan)
-        if previous is None or upper.step_count < previous.step_count:
+        if previous is None or (upper.step_count, upper.register_count) < (previous.step_count, previous.register_count):
             self.uppers[plan] = upper
 
     def construct(self, target: Shape) -> Recipe | None:
-        """选已登记摘要对中总步数最少的精确命中，缺失仅返回None。"""
+        """选总步数最少、同长槽数最少的精确命中，缺失仅返回None。"""
         rules = self.builder.rules
         desired = rules.cells(target)
         best: tuple[Recipe, Recipe] | None = None
@@ -117,7 +117,8 @@ class StackCatalog:
             if any(z <= tops[q] for z, q in delta):
                 continue
             for plan, upper in self.uppers.items():
-                cost = lower.step_count + upper.step_count + 1
+                slots = max(lower.register_count, upper.register_count) + (lower.register_count == upper.register_count)
+                cost = (lower.step_count + upper.step_count + 1, slots)
                 if best_cost is not None and cost >= best_cost:
                     continue
                 if plan._matches(rules.height, tops, delta):
