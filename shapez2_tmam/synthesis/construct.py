@@ -39,19 +39,35 @@ class Constructor:
         if any(cell == "cu" for row in target.layers for cell in row) or not corners.accepts_half(target):
             self.halves[target] = None
             return None
-        prepared = []
-        for q in (0, 1):
-            column = tuple(row[q] for row in target.layers)
-            if all(cell == EMPTY for cell in column):
-                continue
-            recipe = corners.build(column, q, -1 if q == 0 else 1)
-            if recipe is None:
-                raise RuntimeError("目标已满足半形判据，但角构造未生成证书")
-            prepared.append(recipe)
-        source = prepared[0] if len(prepared) == 1 else self.builder.join(prepared[0], prepared[1], 3)
-        result = self.builder.window(source, 0)
+        result = None
+        if not any(cell[0] == "c" for row in target.layers for cell in row):
+            result = self.builder.noncrystal(target)
+            if result is None:
+                raise RuntimeError("稳定的无晶体半形未生成逐层制造证书")
+        else:
+            columns = [tuple(row[q] for row in target.layers) + (EMPTY,) * (5 - len(target.layers))
+                       for q in (0, 1)]
+            for q in (0, 1):
+                if columns[1 - q] != corners.helper(columns[q]):
+                    continue
+                result = corners.build(columns[q], q, 1 if q == 0 else -1)
+                if result is None:
+                    raise RuntimeError("目标匹配角助手，但内向角构造未生成证书")
+                break
+        if result is None:
+            prepared = []
+            for q in (0, 1):
+                column = tuple(row[q] for row in target.layers)
+                if all(cell == EMPTY for cell in column):
+                    continue
+                recipe = corners.build(column, q, -1 if q == 0 else 1)
+                if recipe is None:
+                    raise RuntimeError("目标已满足半形判据，但角构造未生成证书")
+                prepared.append(recipe)
+            source = prepared[0] if len(prepared) == 1 else self.builder.join(prepared[0], prepared[1], 3)
+            result = self.builder.window(source, 0)
         if result.result != target:
-            raise RuntimeError("两角拼接结果与通过判据的目标半形不一致")
+            raise RuntimeError("半形制造证书与通过判据的目标不一致")
         self.halves[target] = result
         return result
 

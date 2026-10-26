@@ -67,6 +67,23 @@ class CornerBuilder:
                 return False
         return True
 
+    @staticmethod
+    def helper(cells: tuple[str, ...]) -> tuple[str, ...]:
+        """返回角构造最终保留的五格助手；普通格固定为Cu，供精确半形匹配。"""
+        word = "".join("-" if cell == EMPTY else "P" if cell == PIN else "C" if cell[0] == "c" else "N"
+                       for cell in cells).ljust(5, "-")
+        if word.startswith("-N-C"):
+            return (PIN, "Cu", PIN, "Cu", "Cu")
+        if word == "-N--C":
+            return (PIN, "Cu", PIN, PIN, "Cu")
+        if word in ("N-N-C", "P-N-C", "--N-C"):
+            return (PIN, "Cu", "Cu", PIN, "Cu")
+        helper = ["Cu"] * 5
+        for z in range(1, len(cells)):
+            if cells[z][0] == "c" and cells[z - 1] == EMPTY:
+                helper[z - 1] = PIN
+        return tuple(helper)
+
     def _shape(self, main: tuple[str, ...], helper: tuple[str, ...], near: int) -> Shape:
         """主列固定为 q0，辅助列为 q1 或 q3，保留空底层。"""
         cells = {(z, q): cell for q, column in ((0, main), (near, helper))
@@ -94,9 +111,9 @@ class CornerBuilder:
     def _simple_corner(self, cells: tuple[str, ...], near: int) -> Recipe | None:
         """在 N 隔断间填辅助晶体，必要时将一格 N 的来源提高到间隙顶端。"""
         top = max((z for z, cell in enumerate(cells) if cell[0] == "c"), default=-1)
-        helper = ["Cu"] * 5
+        helper = self.helper(cells)
         if top < 0:
-            return self.builder.noncrystal(self._shape(cells, tuple(helper), near))
+            return self.builder.noncrystal(self._shape(cells, helper, near))
         source = list(cells)
         for z in range(1, top + 1):
             if cells[z][0] != "c" or cells[z - 1] != EMPTY:
@@ -105,11 +122,10 @@ class CornerBuilder:
             if lower < 0 or (lower and cells[lower - 1] == EMPTY):
                 return None
             source[z - 1], source[lower] = cells[lower], EMPTY
-            helper[z - 1] = PIN
         deleted = {z for z in range(top + 1) if source[z] == EMPTY}
         for z in deleted:
             source[z] = "cr"
-        retained = self._shape(tuple(source), tuple(helper), near)
+        retained = self._shape(tuple(source), helper, near)
         groups = self.rules.groups(self.rules.cells(retained), fused=True)
         if any(any(q == 0 and z in deleted for z, q in group)
                and any(q == 0 and cells[z][0] == "c" for z, q in group) for group in groups):
@@ -124,7 +140,7 @@ class CornerBuilder:
             assert support is not None
             prepared = self.builder.join(prepared, support, start)
             prepared = self.builder.window(prepared, start)
-        expected = self._shape(cells, tuple(helper), near)
+        expected = self._shape(cells, helper, near)
         return prepared if prepared.result == expected else None
 
     def _pin_corner(self, cells: tuple[str, ...], word: str, near: int) -> Recipe | None:
@@ -142,7 +158,6 @@ class CornerBuilder:
                 extra = cells[4]
             anchor = ("cr", "Cu")
             tail = (PIN, "Cu", "Cu")
-            helper = (PIN, "Cu", PIN, "Cu", "Cu")
         else:
             crystal_level = 5
             if word == "N-N-C":
@@ -154,11 +169,9 @@ class CornerBuilder:
             if word == "-N--C":
                 anchor = ("cr", "cr", "Cu")
                 tail = (PIN, PIN, "Cu")
-                helper = (PIN, "Cu", PIN, PIN, "Cu")
             else:
                 anchor = ("Cu", "cr", "Cu")
                 tail = (PIN, "Cu")
-                helper = (PIN, "Cu", "Cu", PIN, "Cu")
         bottom = next(z for z, cell in enumerate(main) if cell != EMPTY)
         full = tuple("cr" if z < bottom else cell for z, cell in enumerate(main))
         initial = self.rules.cells(self._shape(full, ("Cu",) * 5, near))
@@ -189,4 +202,4 @@ class CornerBuilder:
         if extra is not None:
             source = self.builder.apply("stack", source, self.builder.base((extra, EMPTY, EMPTY, EMPTY)))
         source = self.builder.window(source, start)
-        return source if source.result == self._shape(cells, helper, near) else None
+        return source if source.result == self._shape(cells, self.helper(cells), near) else None

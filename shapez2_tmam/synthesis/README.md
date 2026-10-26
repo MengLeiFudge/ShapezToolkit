@@ -60,7 +60,7 @@ if result.recipe is not None:
 
 两象限的`Constructor.construct`检查稳定性、针前缀和全图最高C以下的连续列，随后先制造完整两列前缀，再追加上方N/P。它在已界定供料内直接返回solved或unsolvable，不查完整状态目录；`cu`仍返回unknown。配方长度O(H)、物品槽至多3，原生`--instructions`仍保持4q5l范围。
 
-四象限的 `Constructor.half` 使用[逐列角构造](../4q5l/corner-synthesis.md)，在合法颜色范围内精确判半形，成功时至多285个制造节点。`CornerBuilder.accepts_half` 只检查列条件和新分组的稳定性；`CornerBuilder.build` 准备单列及其 N/P 助手，处理八种顶针难列。`Solver4.solve` 使用这些局部起点及完整顶针/堆叠尾部；零Pin首轮由[`minimal_start`](prefix_closure.py)求两个切向的[强制最小前缀](../4q5l/prefix-closure.md)，每切向至多20次补格及一次最终检查。Pin后的S仍完整遍历，由[四次尾部Pin改写定理](../4q5l/three-pin-tail.md)按最高C的零基层号H限定max(0,H−1)条递归边、最多三条，实际搜索分支仍需压缩。理论上每个可制作四象限目标存在至多616节点的制造树。六象限目前只启用无晶体及独立柱构造，不能据此判断全部六象限含晶体目标。
+四象限的 `Constructor.half` 使用[逐列角构造](../4q5l/corner-synthesis.md)，在合法颜色范围内精确判半形，成功时至多285个制造节点；无晶体半形直接逐层制造，另一列恰为永久助手时直接制造一个内向角，其余使用两角拼接。`CornerBuilder.accepts_half` 只检查列条件和新分组的稳定性；`CornerBuilder.build` 准备单列及其 N/P 助手，处理八种顶针难列。`Solver4.solve` 使用这些局部起点及完整顶针/堆叠尾部；零Pin首轮由[`minimal_start`](prefix_closure.py)求两个切向的[强制最小前缀](../4q5l/prefix-closure.md)，每切向至多20次补格及一次最终检查。Pin后的S仍完整遍历，由[四次尾部Pin改写定理](../4q5l/three-pin-tail.md)按最高C的零基层号H限定max(0,H−1)条递归边、最多三条，实际搜索分支仍需压缩。理论上每个可制作四象限目标存在至多616节点的制造树。六象限目前只启用无晶体及独立柱构造，不能据此判断全部六象限含晶体目标。
 
 `pin_families`、`cut_families`是独立的惰性物理逆像接口。候选能产生目标，不等于候选本身可制作；使用者须给实际族成员补制造证明。
 

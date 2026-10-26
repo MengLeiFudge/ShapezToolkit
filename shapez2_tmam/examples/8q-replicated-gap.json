@@ -106,80 +106,79 @@
     },
     {
       "id": 11,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "------------CuCu"
+      "operation": "rotate",
+      "inputs": [
+        10
+      ],
+      "parameter": 2,
+      "result": "----crcr--------:----CuCu--------:----crcr--------"
     },
     {
       "id": 12,
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "------------CuCu"
+      "result": "----CuCu--------"
     },
     {
       "id": 13,
-      "operation": "pin",
-      "inputs": [
-        12
-      ],
+      "operation": "base",
+      "inputs": [],
       "parameter": null,
-      "result": "------------P-P-:------------CuCu"
+      "result": "----CuCu--------"
     },
     {
       "id": 14,
-      "operation": "stack",
+      "operation": "pin",
       "inputs": [
-        11,
         13
       ],
       "parameter": null,
-      "result": "------------CuCu:------------P-P-:------------CuCu"
+      "result": "----P-P---------:----CuCu--------"
     },
     {
       "id": 15,
-      "operation": "base",
-      "inputs": [],
+      "operation": "stack",
+      "inputs": [
+        12,
+        14
+      ],
       "parameter": null,
-      "result": "------------CuCu"
+      "result": "----CuCu--------:----P-P---------:----CuCu--------"
     },
     {
       "id": 16,
-      "operation": "stack",
-      "inputs": [
-        14,
-        15
-      ],
-      "parameter": null,
-      "result": "------------CuCu:------------P-P-:------------CuCu:------------CuCu"
-    },
-    {
-      "id": 17,
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "------------CuCu"
+      "result": "----CuCu--------"
+    },
+    {
+      "id": 17,
+      "operation": "stack",
+      "inputs": [
+        15,
+        16
+      ],
+      "parameter": null,
+      "result": "----CuCu--------:----P-P---------:----CuCu--------:----CuCu--------"
     },
     {
       "id": 18,
-      "operation": "stack",
-      "inputs": [
-        16,
-        17
-      ],
+      "operation": "base",
+      "inputs": [],
       "parameter": null,
-      "result": "------------CuCu:------------P-P-:------------CuCu:------------CuCu:------------CuCu"
+      "result": "----CuCu--------"
     },
     {
       "id": 19,
-      "operation": "swap",
+      "operation": "stack",
       "inputs": [
-        10,
+        17,
         18
       ],
-      "parameter": 0,
-      "result": "crcr--------CuCu:CuCu--------P-P-:crcr--------CuCu:------------CuCu:------------CuCu"
+      "parameter": null,
+      "result": "----CuCu--------:----P-P---------:----CuCu--------:----CuCu--------:----CuCu--------"
     },
     {
       "id": 20,
@@ -188,273 +187,180 @@
         19
       ],
       "parameter": 2,
-      "result": "CuCucrcr--------:P-P-CuCu--------:CuCucrcr--------:CuCu------------:CuCu------------"
+      "result": "--------CuCu----:--------P-P-----:--------CuCu----:--------CuCu----:--------CuCu----"
     },
     {
       "id": 21,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "CuCuP-P-CuCuCuCu"
+      "operation": "swap",
+      "inputs": [
+        11,
+        20
+      ],
+      "parameter": 0,
+      "result": "----crcrCuCu----:----CuCuP-P-----:----crcrCuCu----:--------CuCu----:--------CuCu----"
     },
     {
       "id": 22,
-      "operation": "crystal",
+      "operation": "rotate",
       "inputs": [
         21
       ],
-      "parameter": "r",
-      "result": "CuCucrcrCuCuCuCu"
+      "parameter": 6,
+      "result": "crcrCuCu--------:CuCuP-P---------:crcrCuCu--------:----CuCu--------:----CuCu--------"
     },
     {
       "id": 23,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "CuCuCuCuCuCuP-P-"
+    },
+    {
+      "id": 24,
+      "operation": "crystal",
+      "inputs": [
+        23
+      ],
+      "parameter": "r",
+      "result": "CuCuCuCuCuCucrcr"
+    },
+    {
+      "id": 25,
+      "operation": "rotate",
+      "inputs": [
+        24
+      ],
+      "parameter": 4,
+      "result": "CuCucrcrCuCuCuCu"
+    },
+    {
+      "id": 26,
       "operation": "cut",
       "inputs": [
-        22
+        25
       ],
       "parameter": 0,
       "result": "CuCucrcr--------"
     },
     {
-      "id": 24,
+      "id": 27,
       "operation": "rotate",
       "inputs": [
-        23
+        26
       ],
       "parameter": 6,
       "result": "crcr--------CuCu"
     },
     {
-      "id": 25,
+      "id": 28,
       "operation": "cut",
       "inputs": [
-        24
+        27
       ],
       "parameter": 0,
       "result": "crcr------------"
     },
     {
-      "id": 26,
+      "id": 29,
       "operation": "rotate",
       "inputs": [
-        25
+        28
       ],
-      "parameter": 2,
-      "result": "----crcr--------"
-    },
-    {
-      "id": 27,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "----CuCu--------"
-    },
-    {
-      "id": 28,
-      "operation": "stack",
-      "inputs": [
-        26,
-        27
-      ],
-      "parameter": null,
-      "result": "----crcr--------:----CuCu--------"
-    },
-    {
-      "id": 29,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "----CuCu--------"
+      "parameter": 6,
+      "result": "------------crcr"
     },
     {
       "id": 30,
-      "operation": "stack",
-      "inputs": [
-        28,
-        29
-      ],
+      "operation": "base",
+      "inputs": [],
       "parameter": null,
-      "result": "----crcr--------:----CuCu--------:----CuCu--------"
+      "result": "------------CuCu"
     },
     {
       "id": 31,
-      "operation": "base",
-      "inputs": [],
+      "operation": "stack",
+      "inputs": [
+        29,
+        30
+      ],
       "parameter": null,
-      "result": "----CuCu--------"
+      "result": "------------crcr:------------CuCu"
     },
     {
       "id": 32,
-      "operation": "stack",
-      "inputs": [
-        30,
-        31
-      ],
+      "operation": "base",
+      "inputs": [],
       "parameter": null,
-      "result": "----crcr--------:----CuCu--------:----CuCu--------:----CuCu--------"
+      "result": "------------CuCu"
     },
     {
       "id": 33,
-      "operation": "base",
-      "inputs": [],
+      "operation": "stack",
+      "inputs": [
+        31,
+        32
+      ],
       "parameter": null,
-      "result": "----CuCu--------"
+      "result": "------------crcr:------------CuCu:------------CuCu"
     },
     {
       "id": 34,
-      "operation": "stack",
-      "inputs": [
-        32,
-        33
-      ],
+      "operation": "base",
+      "inputs": [],
       "parameter": null,
-      "result": "----crcr--------:----CuCu--------:----CuCu--------:----CuCu--------:----CuCu--------"
+      "result": "------------CuCu"
     },
     {
       "id": 35,
-      "operation": "rotate",
+      "operation": "stack",
       "inputs": [
+        33,
         34
       ],
-      "parameter": 2,
-      "result": "--------crcr----:--------CuCu----:--------CuCu----:--------CuCu----:--------CuCu----"
+      "parameter": null,
+      "result": "------------crcr:------------CuCu:------------CuCu:------------CuCu"
     },
     {
       "id": 36,
-      "operation": "swap",
-      "inputs": [
-        20,
-        35
-      ],
-      "parameter": 0,
-      "result": "CuCucrcrcrcr----:P-P-CuCuCuCu----:CuCucrcrCuCu----:CuCu----CuCu----:CuCu----CuCu----"
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "------------CuCu"
     },
     {
       "id": 37,
-      "operation": "cut",
+      "operation": "stack",
       "inputs": [
+        35,
         36
       ],
-      "parameter": 0,
-      "result": "CuCuCuCu--------:P-P-------------:CuCucrcr--------:CuCu------------:CuCu------------"
+      "parameter": null,
+      "result": "------------crcr:------------CuCu:------------CuCu:------------CuCu:------------CuCu"
     },
     {
       "id": 38,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "CuCuCuCu--------"
+      "operation": "swap",
+      "inputs": [
+        22,
+        37
+      ],
+      "parameter": 0,
+      "result": "crcrCuCu----crcr:CuCuP-P-----CuCu:crcrCuCu----CuCu:----CuCu----CuCu:----CuCu----CuCu"
     },
     {
       "id": 39,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "P-P-CuCu--------"
-    },
-    {
-      "id": 40,
-      "operation": "stack",
-      "inputs": [
-        38,
-        39
-      ],
-      "parameter": null,
-      "result": "CuCuCuCu--------:P-P-CuCu--------"
-    },
-    {
-      "id": 41,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "CuCuCuCu--------"
-    },
-    {
-      "id": 42,
-      "operation": "stack",
-      "inputs": [
-        40,
-        41
-      ],
-      "parameter": null,
-      "result": "CuCuCuCu--------:P-P-CuCu--------:CuCuCuCu--------"
-    },
-    {
-      "id": 43,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "CuCuCuCu--------"
-    },
-    {
-      "id": 44,
-      "operation": "stack",
-      "inputs": [
-        42,
-        43
-      ],
-      "parameter": null,
-      "result": "CuCuCuCu--------:P-P-CuCu--------:CuCuCuCu--------:CuCuCuCu--------"
-    },
-    {
-      "id": 45,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "CuCuCuCu--------"
-    },
-    {
-      "id": 46,
-      "operation": "stack",
-      "inputs": [
-        44,
-        45
-      ],
-      "parameter": null,
-      "result": "CuCuCuCu--------:P-P-CuCu--------:CuCuCuCu--------:CuCuCuCu--------:CuCuCuCu--------"
-    },
-    {
-      "id": 47,
-      "operation": "rotate",
-      "inputs": [
-        46
-      ],
-      "parameter": 4,
-      "result": "--------CuCuCuCu:--------P-P-CuCu:--------CuCuCuCu:--------CuCuCuCu:--------CuCuCuCu"
-    },
-    {
-      "id": 48,
-      "operation": "swap",
-      "inputs": [
-        37,
-        47
-      ],
-      "parameter": 0,
-      "result": "CuCuCuCuCuCuCuCu:P-P-----P-P-CuCu:CuCucrcrCuCuCuCu:CuCu----CuCuCuCu:CuCu----CuCuCuCu"
-    },
-    {
-      "id": 49,
-      "operation": "rotate",
-      "inputs": [
-        48
-      ],
-      "parameter": 6,
-      "result": "CuCuCuCuCuCuCuCu:----P-P-CuCuP-P-:crcrCuCuCuCuCuCu:----CuCuCuCuCuCu:----CuCuCuCuCuCu"
-    },
-    {
-      "id": 50,
       "operation": "cut",
       "inputs": [
-        49
+        38
       ],
       "parameter": 0,
       "result": "CuCuCuCu--------:----P-P---------:crcrCuCu--------:----CuCu--------:----CuCu--------"
     },
     {
-      "id": 51,
+      "id": 40,
       "operation": "rotate",
       "inputs": [
-        50
+        39
       ],
       "parameter": 1,
       "result": "--CuCuCuCu------:------P-P-------:--crcrCuCu------:------CuCu------:------CuCu------"
