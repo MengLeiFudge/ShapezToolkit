@@ -9,6 +9,7 @@ from .corners import CornerBuilder
 from .half_catalog import HalfCatalog
 from .physics import EMPTY, PIN, Rules
 from .recipe import Builder, Recipe
+from .stack_reduction import ordinary_stack
 
 
 @dataclass(frozen=True)
@@ -69,12 +70,17 @@ def wide_half_examples() -> list[Example]:
     whole = catalog.join(builder.rules.parse("Cu----Cu----:------------:crCuCucrCuCu:cr--Cucr--Cu:crCuCucrCuCu"))
     if whole is None:
         raise RuntimeError("已登记H的半形凭据，仍未构造出V")
+    settled = ordinary_stack(builder, whole, builder.rules.parse("CuCuCuCuCuCu:----CuCu--Cu:--CuCu--CuCu"))
+    if settled is None:
+        raise RuntimeError("V再次堆叠的代表目标未取得单次普通追加配方")
     milestones = (("独立柱拼成准备形S", prepared), ("切掉q1辅助晶体得到A", released),
                   ("无晶体阶梯B", scaffold), ("A与B拼接", merged), ("切出非K半形H", half))
     return [
         Example("6q-H", "可制造的非K稳定半形", "晶体框架与内部普通格互相阻挡；支撑环不通地面，也不含针。", 6, half, milestones),
         Example("6q-V", "交换后不稳定的成品", "独立制造两份H，第二份转三个象限，再交换。交换后不追加重力；新连接会在下一次加工时改变分组。", 6, whole,
                 (("每份H单独制造", half), ("第二份H旋转三个象限", whole.inputs[1]), ("最终交换输出V", whole))),
+        Example("6q-V-stack", "不稳定成品再次加工后的变化", "以V作下料，追加q3单格普通料。下料本次重新分组，悬空晶体破碎，普通格落下；新增普通格落在q3第二层。", 6, settled,
+                (("加工前的V", whole), ("上料", settled.inputs[1]), ("一次堆叠后的成品", settled))),
     ]
 
 
@@ -107,7 +113,7 @@ def export(example: Example, output: Path) -> tuple[str, str, int]:
 
 
 def main() -> int:
-    """一次导出八个固定例子，供用户手工复现特殊制造机制。"""
+    """导出固定例子，供用户手工复现特殊制造机制。"""
     parser = argparse.ArgumentParser(description="导出四象限间隙及六象限非K/非稳定代表图形的制造步骤")
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
     args = parser.parse_args()
