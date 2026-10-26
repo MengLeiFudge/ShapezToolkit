@@ -1,12 +1,12 @@
 # 六个物品寄存器的配方流与电路回放
 
-四象限当前构造无需同时保存整棵制造树的全部产物。按既有后序展开顺序，六个物品寄存器足以保存所有仍会被消费的中间产物。Python的[`Recipe.instructions`](../synthesis/recipe.py)把制造树编成消费式指令流；[`recipe-processor-4q5l.spz2bp`](../blueprints/recipe-processor-4q5l.spz2bp)用445平台在原生虚拟操作上回放这份流。
+四象限当前构造无需同时保存整棵制造树的全部产物。按原输入顺序后序展开，六个物品寄存器足以保存所有仍会被消费的中间产物；新的槽数降序调度不会增加这个上界。Python的[`Recipe.instructions`](../synthesis/recipe.py)把制造树编成消费式指令流；[`recipe-processor-4q5l.spz2bp`](../blueprints/recipe-processor-4q5l.spz2bp)用445平台在原生虚拟操作上回放这份流。
 
 本部件执行制造证书。它没有搜索目标、生成角宏指令或判定完整可制作性；这些仍须接到完整控制器。
 
 ## 1. 同时活跃物品的递推
 
-对制造树R，记p(R)为按`Recipe.steps`顺序执行时，同时存在的最大物品数。每份引用都展开为独立制造，不复制实体。一个节点只在全部输入就绪后执行，并消费这些输入。
+对制造树R，记p(R)为按原输入顺序后序执行时，同时存在的最大物品数。每份引用都展开为独立制造，不复制实体。一个节点只在全部输入就绪后执行，并消费这些输入。
 
 ```text
 p(base) = 1。
@@ -32,13 +32,13 @@ p(binary(A,B)) = max(p(A), 1+p(B))。
 
 简单角的独立前缀虽然调用通用宏，但它只有主列与近助手，不能误套成四列开销。难角的互补部分只有晶体脊与远辅助柱，至多3槽。旋转、窗口切割不增加活跃数。
 
-`Constructor.construct`接受的其他独立柱及前缀分支也包含在表内。因此当前四象限构造器及`Solver4`生成的每份成功配方，都能按原后序顺序用六槽执行。这个结论与[616节点存在界](tail-solver.md)衡量不同资源：616约束完整制造量，六槽约束同时活跃量。
+`Constructor.construct`接受的其他独立柱及前缀分支也包含在表内。因此当前四象限构造器及`Solver4`生成的每份成功配方，都能按原后序顺序用六槽执行。当前`Recipe.steps`采用[子树槽需求降序调度](../general/recipe-slots.md)，不比这个顺序需要更多槽，因此仍保持六槽上界。这个结论与[616节点存在界](tail-solver.md)衡量不同资源：616约束完整制造量，六槽约束同时活跃量。
 
-六槽只覆盖上述四象限制造宏。任意手工构造的制造树可能需要更多槽；`instructions(registers=6)`在确实没有空槽时抛异常，不偷偷覆盖物品。六象限及一般参数尚未取得同一上界。
+六槽只覆盖上述四象限制造宏。任意手工构造的制造树可能需要更多槽；`instructions(registers=6)`在输出首条指令前检查制造树需求，预算不足时抛异常，不偷偷覆盖物品。六象限及一般参数尚未取得同一上界。
 
 ## 2. Python导出与指令格式
 
-四象限CLI在原参数后加`--instructions`，会额外输出`instructions`与`register_count=6`。也可以逐项读取`recipe.instructions()`，无需先存完整指令表。此接口不改变原`steps`输出。
+四象限CLI在原参数后加`--instructions`，会额外输出`instructions`与`register_count=6`。也可以逐项读取`recipe.instructions()`，无需先存完整指令表。指令与`steps`使用同一调度顺序。CLI的`register_count=6`表示回放器配置预算；`Recipe.register_count`及代表配方JSON的同名字段表示具体制造树的槽数需求。
 
 每条指令包含`id`、`opcode`、`destination`、`a`、`b`、`base`、`color`、`request`和预期`result`。物品地址是0～5；不用的地址填0，不用的base/color为空。`result`为证书记录，电路不把它作为免费原料或运算输入。
 

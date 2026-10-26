@@ -16,6 +16,7 @@ class Recipe:
     parameter: int | str | None = None
     height: int = 5
     step_count: int = field(init=False)
+    register_count: int = field(init=False)
 
     def __post_init__(self):
         """保存制造上限，防止不同Pin截高语义的配方或指令相互混用。"""
@@ -23,21 +24,26 @@ class Recipe:
                 node.height != self.height or len(node.result.layers[0]) != len(self.result.layers[0]) for node in self.inputs):
             raise ValueError("制造树的层数上限、象限数或输入配方配置不一致")
         object.__setattr__(self, "step_count", 1 + sum(node.step_count for node in self.inputs))
+        demands = sorted((node.register_count for node in self.inputs), reverse=True)
+        object.__setattr__(self, "register_count", max((demand + index for index, demand in enumerate(demands)), default=1))
 
     def steps(self) -> Iterator[dict]:
-        """按依赖顺序流式展开，每份实体物品有独立编号，不隐式复制实物。"""
-        pending: list[tuple[Recipe, bool]] = [(self, False)]
+        """先制造槽数需求较大的子树；操作数仍按原输入顺序，不复制实物。"""
+        pending: list[tuple[Recipe, bool, tuple[int, ...]]] = [(self, False, ())]
         outputs = []
         index = 0
         while pending:
-            node, ready = pending.pop()
+            node, ready, order = pending.pop()
             if not ready:
-                pending.append((node, True))
-                pending.extend((child, False) for child in reversed(node.inputs))
+                order = tuple(sorted(range(len(node.inputs)), key=lambda i: node.inputs[i].register_count, reverse=True))
+                pending.append((node, True, order))
+                pending.extend((node.inputs[i], False, ()) for i in reversed(order))
                 continue
-            count = len(node.inputs)
-            inputs = outputs[-count:] if count else []
+            count = len(order)
+            inputs = [0] * count
             if count:
+                for position, operand in enumerate(order):
+                    inputs[operand] = outputs[-count + position]
                 del outputs[-count:]
             yield {"id": index, "operation": node.operation, "inputs": inputs,
                    "parameter": node.parameter, "result": node.result.to_key()}
@@ -48,6 +54,8 @@ class Recipe:
         """把四象限制造树流式编为消费输入的寄存器指令，不复制实体。"""
         if len(self.result.layers[0]) != 4 or self.height != 5 or registers < 1:
             raise ValueError("寄存器指令当前需要四象限五层配置和至少一个寄存器")
+        if registers < self.register_count:
+            raise ValueError(f"制造树至少需要{self.register_count}个同时存活的物品寄存器")
         live: dict[int, int] = {}
         occupied: set[int] = set()
         for step in self.steps():

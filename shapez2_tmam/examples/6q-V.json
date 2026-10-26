@@ -5,6 +5,7 @@
   "quadrants": 6,
   "height": 5,
   "target": "Cu----Cu----:------------:crCuCucrCuCu:cr--Cucr--Cu:crCuCucrCuCu",
+  "register_count": 4,
   "evidence": "按既有证明构造并由Python加工模型计算中间产物；未在游戏或Mod中验证。",
   "milestones": [
     {

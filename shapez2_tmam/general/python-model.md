@@ -13,7 +13,7 @@ Rules现在接受偶数象限n≥2、制造层数上限H≥2。采用单象限�
 | ordinary_stack / single_stack | 给定真实下料的普通追加、针尾及部分交错N/P构造；用块数守恒选择紧凑无C上料，不额外结算下料 |
 | HalfCatalog | 按前/后半用途保留最低成本原输入；按目标n个有向投影选目录内较短配方 |
 | StackPlan / StackCatalog | 任意堆叠的精确摘要及目标前缀匹配，保留每个键最短的已知凭据；缺失不是不可制作证明 |
-| Recipe.steps / step_count | 任意本模型配置的消费式步骤与完整中间产物；建立节点时直接计算总步骤数 |
+| Recipe.steps / step_count / register_count | 任意本模型配置的消费式步骤与完整中间产物；建立节点时计算总步骤数和物品槽需求，按子树槽需求降序调度 |
 
 物理规则保持：groups的邻接取模n；collapse的静止组、移动N/P块的层序落点不依赖四象限或五层；cut用n/2；stack与pin使用实例H；rotate按整数列置换。实现采用[一次排序、反向支撑队列及列顶扫描](physics-scan.md)，stationary在collapse和上料摘要间共用。新接触不在本次加工中合组，交换后不追加重力。规则证明来源见[六象限局部计算](../6q5l/synthesis.md#2-不依赖-k-的精确操作计算)、[一般参数模型](general-model.md)和[通用堆叠证明](pin-tail-stack.md)。
 

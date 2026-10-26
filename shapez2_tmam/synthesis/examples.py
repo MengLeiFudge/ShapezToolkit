@@ -162,6 +162,7 @@ def export(example: Example, output: Path) -> tuple[str, str, int]:
     steps = list(example.recipe.steps())
     document = {"name": example.name, "title": example.title, "mechanism": example.mechanism,
                 "quadrants": example.quadrants, "height": example.recipe.height, "target": example.recipe.result.to_key(),
+                "register_count": example.recipe.register_count,
                 "evidence": "按既有证明构造并由Python加工模型计算中间产物；未在游戏或Mod中验证。",
                 "milestones": [{"name": name, "result": recipe.result.to_key()} for name, recipe in example.milestones],
                 "steps": steps}
@@ -170,6 +171,7 @@ def export(example: Example, output: Path) -> tuple[str, str, int]:
     lines = [f"# {example.title}", "", example.mechanism, "", f"配置：{example.quadrants}象限、{example.recipe.height}层上限。",
              "", "目标（从底到顶，q0为每层最左格）：", "", f"`{example.recipe.result.to_key()}`", "",
              f"共{len(steps)}步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。",
+             f"物品槽峰值为{example.recipe.register_count}，不含搜索状态及传输缓存；[槽数调度证明](../general/recipe-slots.md)。",
              "同一子配方出现两次时分别生产。Cut/Swap的另一个出口弃置；按表中出口继续。", "",
              "[操作与方向说明](README.md)；本配方未在游戏中验证。", ""]
     if example.milestones:
@@ -194,7 +196,7 @@ def main() -> int:
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)
-        print(f"{name}：{title}，{count}步 → {args.output / (name + '.md')}")
+        print(f"{name}：{title}，{count}步，{example.recipe.register_count}个物品槽 → {args.output / (name + '.md')}")
     return 0
 
 
