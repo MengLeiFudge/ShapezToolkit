@@ -53,12 +53,19 @@ class ColumnTarget:
     counts: tuple[tuple[Ref, ...], ...]
 
 
+def column_target(circuit: Circuit, kinds: tuple[tuple[Ref, ...], ...]) -> ColumnTarget:
+    """按五格四种类标志建立保留序号；标志须与对应整数材料完全一致。"""
+    if len(kinds) != 5 or any(len(row) != 4 for row in kinds):
+        raise ValueError("来源目标列需要五格各四种类标志")
+    retained = [kinds[0][1]] + [circuit.add("LogicGateOr", row[1], row[2]) for row in kinds[1:]]
+    return ColumnTarget(kinds, tuple(retained), tuple(tuple(row) for row in _prefix_counts(circuit, retained)))
+
+
 def decode_column(circuit: Circuit, materials: tuple[Ref, ...]) -> ColumnTarget:
     """解码材料而不接受它；调用方仍须检查每格属于0～3。"""
     kinds = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==")
                         for kind in range(4)) for value in materials)
-    retained = [kinds[0][1]] + [circuit.add("LogicGateOr", row[1], row[2]) for row in kinds[1:]]
-    return ColumnTarget(kinds, tuple(retained), tuple(tuple(row) for row in _prefix_counts(circuit, retained)))
+    return column_target(circuit, kinds)
 
 
 def _bus(circuit: Circuit, sources: list[Ref]) -> Ref:
@@ -71,8 +78,9 @@ def _bus(circuit: Circuit, sources: list[Ref]) -> Ref:
 
 def column_candidate(circuit: Circuit, materials: tuple[Ref, ...], tags: tuple[Ref, ...],
                      mask_bits: tuple[Ref, ...], enable: Ref, *, with_landings: bool = False,
-                     decoded_target: ColumnTarget | None = None) -> PinColumn:
-    """共用单列路由；decoded_target须由同一materials建立，不替代有效性检查。"""
+                     decoded_target: ColumnTarget | None = None,
+                     keep_counts: tuple[tuple[Ref, ...], ...] | None = None) -> PinColumn:
+    """可共用同目标解码及同keep掩码的表选计数；表无选中时调用方须关闭enable。"""
     if len(materials) != 5 or len(tags) != 5 or len(mask_bits) != 8:
         raise ValueError("单列候选需要五格材料、五个标签和八个控制位")
     target = decoded_target if decoded_target is not None else decode_column(circuit, materials)
@@ -88,7 +96,7 @@ def column_candidate(circuit: Circuit, materials: tuple[Ref, ...], tags: tuple[R
     clauses.extend((enable, circuit.add("LogicGateNot", flags[0][3])))
     retained = target.retained
     target_counts = target.counts
-    source_counts = _prefix_counts(circuit, keep)
+    source_counts = keep_counts if keep_counts is not None else _prefix_counts(circuit, keep)
     same_count = [circuit.add("LogicGateAnd", target_counts[-1][k], source_counts[-1][k]) for k in range(5)]
     clauses.append(_combine(circuit, "LogicGateOr", same_count))
     barriers = []

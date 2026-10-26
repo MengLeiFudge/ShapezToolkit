@@ -15,7 +15,8 @@ def row_reach(program: CornerProgram, occupied: tuple[Ref, ...], seeds: tuple[Re
             if other == q:
                 continue
             middle = program.or_(occupied[(q - 1) % 4], occupied[(q + 1) % 4]) if (q - other) % 4 == 2 else program.one
-            paths.append(program.and_(occupied[q], occupied[other], middle, seeds[other]))
+            connected = program.and_(occupied[q], occupied[other], middle)
+            paths.append(program.and_(connected, seeds[other]))
         reached.append(program.or_(*paths))
     return tuple(reached)
 

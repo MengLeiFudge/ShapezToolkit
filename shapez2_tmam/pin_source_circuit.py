@@ -8,6 +8,7 @@ from pathlib import Path
 from .circuit import Circuit, Literal, Ref
 from .corner_program import CornerProgram
 from .half_circuit import MaterialCell
+from .pin_column_circuit import ColumnTarget, decode_column
 from .pin_image_circuit import PinImageFlags, image_constraints
 from .pin_pattern_circuit import pattern_column
 
@@ -48,23 +49,25 @@ def _crystal_cap_allowed(program: CornerProgram, lower: tuple[MaterialCell, ...]
 
 def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
                tags: tuple[tuple[Ref, ...], ...], slots: tuple[Ref, ...],
-               top_values: tuple[Ref, ...], enable: Ref, *, excluded_caps: tuple[Ref, ...] | None = None) -> PinSource:
+               top_values: tuple[Ref, ...], enable: Ref, *, excluded_caps: tuple[Ref, ...] | None = None,
+               decoded_targets: tuple[ColumnTarget, ...] | None = None) -> PinSource:
     """默认顶格0空1Cu2P3红C；内部搜索可由排除位从最大允许C掩码开始。"""
     if (len(materials) != 4 or len(tags) != 4 or len(slots) != 4 or len(top_values) != 4
             or any(len(column) != 5 for column in (*materials, *tags))):
         raise ValueError("顶针前态需要四列五格材料/标签、四个来源槽号与四个顶格")
     if excluded_caps is not None and len(excluded_caps) != 4:
         raise ValueError("顶晶体排除位需要四列")
+    if decoded_targets is not None and len(decoded_targets) != 4:
+        raise ValueError("共用目标解码需要四列")
     circuit = program.circuit
-    patterns = tuple(pattern_column(program, material, tag, slot, enable, with_landings=True)
-                     for material, tag, slot in zip(materials, tags, slots))
+    decoded = decoded_targets if decoded_targets is not None else tuple(decode_column(circuit, column) for column in materials)
+    patterns = tuple(pattern_column(program, material, tag, slot, enable, with_landings=True, decoded_target=target)
+                     for material, tag, slot, target in zip(materials, tags, slots, decoded))
     columns = tuple(pattern.column for pattern in patterns)
     top_pin_allowed = tuple(column.flags[3].occupied for column in columns)
     top_crystal_allowed = tuple(_crystal_cap_allowed(program, column.flags) for column in columns)
-    target = tuple(tuple(MaterialCell(
-        program.not_(circuit.add("LogicGateCompare", value, Literal(0), config="AQ==")),
-        circuit.add("LogicGateCompare", value, Literal(2), config="AQ=="),
-        circuit.add("LogicGateCompare", value, Literal(3), config="AQ==")) for value in column) for column in materials)
+    target = tuple(tuple(MaterialCell(program.not_(kinds[0]), kinds[2], kinds[3])
+                         for kinds in column.kinds) for column in decoded)
     if excluded_caps is not None:
         top_values = tuple(program.pick(program.and_(allowed, program.not_(column[4].crystal), program.not_(excluded)),
                                         program.const(3), value)

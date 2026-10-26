@@ -11,6 +11,7 @@ from .clocked_state import ClockedState
 from .corner_program import CornerProgram
 from .decoder_circuit import decode
 from .half_circuit import MaterialCell, column_admissible, half_stable
+from .pin_column_circuit import column_target
 from .pin_source_circuit import pin_source
 from .prefix_closure_circuit import prefix_closure
 from .prefix_search import PrefixSearch
@@ -163,7 +164,14 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                             for cell in column) for column in finder.columns)
     pushed_tags = tuple(tuple(program.pick(finder.delta[q][z], program.zero, tags[q][z])
                               for z in range(5)) for q in range(4))
-    candidate = pin_source(program, materials, pushed_tags, slots, top, program.one, excluded_caps=cap_exclusions)
+    source_targets = tuple(column_target(circuit, tuple((
+        program.not_(cell.occupied),
+        program.and_(cell.occupied, program.not_(cell.pin), program.not_(cell.crystal)),
+        program.and_(cell.occupied, cell.pin),
+        program.and_(cell.occupied, program.not_(cell.pin), cell.crystal)) for cell in column))
+        for column in finder.columns)
+    candidate = pin_source(program, materials, pushed_tags, slots, top, program.one,
+                           excluded_caps=cap_exclusions, decoded_targets=source_targets)
     crystals = candidate.top_crystals
     source_ground_crystal = program.or_(*(program.or_(candidate.image.deleted[0][q],
                                                       candidate.image.live[1][q].crystal) for q in range(4)))
