@@ -1,9 +1,10 @@
-"""条件堆叠约化：K下料的基础块域，以及普通格/针尾的单次上料构造。"""
+"""条件堆叠约化：K下料的基础块域，以及摘要确认的单次N/P上料构造。"""
 
 from collections.abc import Iterable, Iterator
 
 from .physics import EMPTY, PIN, Rules, Shape
 from .recipe import Builder, Recipe
+from .stack_plan import stack_plan
 from .support import in_support_class
 
 
@@ -45,7 +46,7 @@ def stack_successors(rules: Rules, lower: Shape, known: Iterable[Shape]) -> Iter
 
 
 def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool) -> Recipe | None:
-    """共用下料一次结算判据；优先直接上料，再用无环列前缀补辅助C。"""
+    """共用下料一次结算判据；依次检查紧凑无C与连续列补C上料。"""
     rules = builder.rules
     collapsed = rules.collapse(rules.cells(lower.result))
     original = rules.cells(collapsed) if collapsed is not None else {}
@@ -58,34 +59,34 @@ def _single_stack(builder: Builder, lower: Recipe, target: Shape, *, pins: bool)
     tops = [max((z for z, column in original if column == q), default=-1) for q in range(rules.quadrants)]
     if any(z <= tops[q] for z, q in delta):
         return None
-    if any(not any(z == 0 or (z - 1, q) in desired for z, q in block) for block in rules.groups(delta)):
+    blocks = rules.groups(delta)
+    if any(not any(z == 0 or (z - 1, q) in desired for z, q in block) for block in blocks):
         return None
     bottom = min((z for z, _ in delta), default=0)
     shifted = {(z - bottom, q): cell for (z, q), cell in delta.items()}
-    plain = rules.fold(shifted)
+    plain = rules.collapse(shifted)
     if plain is None:
         upper = builder.apply("crystal", builder.base((PIN,) * rules.quadrants), parameter="r")
-    else:
+    elif len(rules.groups(rules.cells(plain))) == len(blocks):
         upper = builder.noncrystal(plain)
+    else:
+        filled = {}
+        for q in range(rules.quadrants):
+            top = max((z for z, column in shifted if column == q), default=-1)
+            for z in range(top + 1):
+                filled[z, q] = shifted.get((z, q), "cr")
+        source = rules.fold(filled)
+        assert source is not None
+        if sum(len(piece) for piece in stack_plan(rules, source).pieces) != len(delta):
+            return None
+        upper = builder.independent_columns(source)
         if upper is None:
-            filled = {}
-            for q in range(rules.quadrants):
-                top = max((z for z, column in shifted if column == q), default=-1)
-                pin_tail = False
-                for z in range(top + 1):
-                    cell = shifted.get((z, q), "cr")
-                    if pin_tail and cell != PIN:
-                        return None
-                    pin_tail |= cell == PIN
-                    filled[z, q] = cell
-            source = rules.fold(filled)
-            assert source is not None
-            upper = builder.independent_columns(source)
+            return None
     if upper is None:
-        raise RuntimeError("列前缀上料未生成制造证书")
+        raise RuntimeError("无晶体下落结果未生成制造证书")
     result = builder.apply("stack", lower, upper)
     if result.result != target:
-        raise RuntimeError("单次追加的列前缀上料与目标不一致")
+        raise RuntimeError("单次追加上料与已确认的目标不一致")
     return result
 
 
@@ -95,9 +96,9 @@ def ordinary_stack(builder: Builder, lower: Recipe, target: Shape) -> Recipe | N
 
 
 def single_stack(builder: Builder, lower: Recipe, target: Shape) -> Recipe | None:
-    """新增N/P的单次构造；覆盖直接无晶体上料及各列N在下/P尾在上的范围。
+    """新增N/P的单次构造；优先无C下落候选，再用可独立制造的补C连续列。
 
-    下料允许非K或不稳定。返回None还可能是针普通格交错时尚未覆盖，
-    不能作为固定下料之外、更不能作为目标全局不可制作的结论。
+    下料允许非K或不稳定。无C候选检查块数守恒，补C候选检查摘要，保留旧针尾域。
+    返回None仅表示必要条件或这两种候选未通过，不能判目标全局不可制作。
     """
     return _single_stack(builder, lower, target, pins=True)

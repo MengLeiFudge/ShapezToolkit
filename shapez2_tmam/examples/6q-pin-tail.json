@@ -1,7 +1,7 @@
 {
   "name": "6q-pin-tail",
   "title": "非K下料追加普通格和针尾",
-  "mechanism": "H旁先准备q3两层普通柱；一次堆叠同时加入q4地面普通格与q3第三层针。上料的辅助晶体在本次下落中碎裂。",
+  "mechanism": "H旁先准备q3两层普通柱；一次堆叠同时加入q4地面普通格与q3第三层针。独立下落把上料缩成一层N/P基础料，无需辅助晶体。",
   "quadrants": 6,
   "height": 5,
   "target": "Cu----CuCu--:------Cu----:crCuCuP-----:cr--Cu------:crCuCu------",
@@ -12,8 +12,8 @@
       "result": "Cu----Cu----:------Cu----:crCuCu------:cr--Cu------:crCuCu------"
     },
     {
-      "name": "列前缀上料",
-      "result": "------crCu--:------cr----:------P-----"
+      "name": "紧凑基础上料",
+      "result": "------P-Cu--"
     },
     {
       "name": "一次堆叠成品",
@@ -547,164 +547,14 @@
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "CuCuCuP-CuCu"
+      "result": "------P-Cu--"
     },
     {
       "id": 61,
-      "operation": "crystal",
-      "inputs": [
-        60
-      ],
-      "parameter": "r",
-      "result": "CuCuCucrCuCu"
-    },
-    {
-      "id": 62,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "CuCuCuP-CuCu"
-    },
-    {
-      "id": 63,
-      "operation": "stack",
-      "inputs": [
-        61,
-        62
-      ],
-      "parameter": null,
-      "result": "CuCuCucrCuCu:CuCuCuP-CuCu"
-    },
-    {
-      "id": 64,
-      "operation": "crystal",
-      "inputs": [
-        63
-      ],
-      "parameter": "r",
-      "result": "CuCuCucrCuCu:CuCuCucrCuCu"
-    },
-    {
-      "id": 65,
-      "operation": "rotate",
-      "inputs": [
-        64
-      ],
-      "parameter": -1,
-      "result": "CuCucrCuCuCu:CuCucrCuCuCu"
-    },
-    {
-      "id": 66,
-      "operation": "cut",
-      "inputs": [
-        65
-      ],
-      "parameter": 0,
-      "result": "CuCucr------:CuCucr------"
-    },
-    {
-      "id": 67,
-      "operation": "rotate",
-      "inputs": [
-        66
-      ],
-      "parameter": 1,
-      "result": "--CuCucr----:--CuCucr----"
-    },
-    {
-      "id": 68,
-      "operation": "rotate",
-      "inputs": [
-        67
-      ],
-      "parameter": -3,
-      "result": "cr------CuCu:cr------CuCu"
-    },
-    {
-      "id": 69,
-      "operation": "cut",
-      "inputs": [
-        68
-      ],
-      "parameter": 0,
-      "result": "cr----------:cr----------"
-    },
-    {
-      "id": 70,
-      "operation": "rotate",
-      "inputs": [
-        69
-      ],
-      "parameter": 3,
-      "result": "------cr----:------cr----"
-    },
-    {
-      "id": 71,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "------P-----"
-    },
-    {
-      "id": 72,
-      "operation": "stack",
-      "inputs": [
-        70,
-        71
-      ],
-      "parameter": null,
-      "result": "------cr----:------cr----:------P-----"
-    },
-    {
-      "id": 73,
-      "operation": "rotate",
-      "inputs": [
-        72
-      ],
-      "parameter": -1,
-      "result": "----cr------:----cr------:----P-------"
-    },
-    {
-      "id": 74,
-      "operation": "base",
-      "inputs": [],
-      "parameter": null,
-      "result": "--------Cu--"
-    },
-    {
-      "id": 75,
-      "operation": "rotate",
-      "inputs": [
-        74
-      ],
-      "parameter": -1,
-      "result": "------Cu----"
-    },
-    {
-      "id": 76,
-      "operation": "swap",
-      "inputs": [
-        73,
-        75
-      ],
-      "parameter": 0,
-      "result": "----crCu----:----cr------:----P-------"
-    },
-    {
-      "id": 77,
-      "operation": "rotate",
-      "inputs": [
-        76
-      ],
-      "parameter": 1,
-      "result": "------crCu--:------cr----:------P-----"
-    },
-    {
-      "id": 78,
       "operation": "stack",
       "inputs": [
         59,
-        77
+        60
       ],
       "parameter": null,
       "result": "Cu----CuCu--:------Cu----:crCuCuP-----:cr--Cu------:crCuCu------"

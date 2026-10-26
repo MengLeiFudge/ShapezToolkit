@@ -87,6 +87,13 @@ def wide_half_examples() -> list[Example]:
     compact = stack_catalog.construct(builder.rules.parse("Cu----Cu----:------------:------crCuCu:------cr--Cu:------crCuCu"))
     if compact is None:
         raise RuntimeError("六象限上料摘要未生成代表配方")
+    column = builder.column(("Cu", "Cu"), 5)
+    assert column is not None
+    interleaved_lower = builder.apply("stack", half, column)
+    interleaved = single_stack(builder, interleaved_lower, builder.rules.parse(
+        "Cu----Cu--Cu:----------Cu:crCuCu----Cu:cr--Cu----P-:crCuCu----Cu"))
+    if interleaved is None:
+        raise RuntimeError("六象限紧凑交错上料未生成代表配方")
     milestones = (("独立柱拼成准备形S", prepared), ("切掉q1辅助晶体得到A", released),
                   ("无晶体阶梯B", scaffold), ("A与B拼接", merged), ("切出非K半形H", half))
     return [
@@ -95,12 +102,32 @@ def wide_half_examples() -> list[Example]:
                 (("每份H单独制造", half), ("第二份H旋转三个象限", whole.inputs[1]), ("最终交换输出V", whole))),
         Example("6q-V-stack", "不稳定成品再次加工后的变化", "以V作下料，追加q3单格普通料。下料本次重新分组，悬空晶体破碎，普通格落下；新增普通格落在q3第二层。", 6, settled,
                 (("加工前的V", whole), ("上料", settled.inputs[1]), ("一次堆叠后的成品", settled))),
-        Example("6q-pin-tail", "非K下料追加普通格和针尾", "H旁先准备q3两层普通柱；一次堆叠同时加入q4地面普通格与q3第三层针。上料的辅助晶体在本次下落中碎裂。", 6, pin_tail,
-                (("已有非K下料", lower), ("列前缀上料", pin_tail.inputs[1]), ("一次堆叠成品", pin_tail))),
+        Example("6q-pin-tail", "非K下料追加普通格和针尾", "H旁先准备q3两层普通柱；一次堆叠同时加入q4地面普通格与q3第三层针。独立下落把上料缩成一层N/P基础料，无需辅助晶体。", 6, pin_tail,
+                (("已有非K下料", lower), ("紧凑基础上料", pin_tail.inputs[1]), ("一次堆叠成品", pin_tail))),
         Example("6q-upper-summary", "复杂上料等价替换为单格基础料", "H作上料时，悬空框架永远留在高度上限外；对任意下料仅留下q0普通格。用单格基础料替代56步的H准备，本配方从114步降为59步。", 6, compact,
                 (("原本考虑的复杂上料H", half), ("已有旋转半形下料", turned), ("等价基础上料", compact.inputs[1]),
                  ("堆叠成品", compact))),
+        Example("6q-compact-interleaved", "非K下料上的紧凑交错上料",
+                "H旁准备q5两层普通柱；目标新增q3地面普通格及q5的NPN高尾。先让新增格独立下落，得到五步准备的三层无晶体上料，再一次堆到原下料。",
+                6, interleaved, (("已有非K下料", interleaved_lower), ("紧凑无晶体上料", interleaved.inputs[1]),
+                                 ("一次堆叠成品", interleaved))),
     ]
+
+
+def interleaved_stack_example() -> Example:
+    """紧凑上料会横向粘合，改用带独立NPN列的补C载体。"""
+    builder = Builder(Rules(6))
+    lower = builder.column(("Cu",) * 3, 1)
+    assert lower is not None
+    materials = {"-": EMPTY, "N": "Cu", "P": PIN}
+    rows = ("NN-N--", "-N-P--", "-N-N--", "-N----")
+    target = builder.rules.parse(":".join("".join(materials[cell] for cell in row) for row in rows))
+    result = single_stack(builder, lower, target)
+    if result is None:
+        raise RuntimeError("六象限补C交错上料未生成代表配方")
+    return Example("6q-crystal-interleaved", "补晶体载体保留交错普通格与针",
+                   "q1三层普通柱作下料；追加q0地面N、q1第四层N及q3的NPN。紧凑候选会把q0/q1粘合，故用q0单N、q1的CCCN与q3的NPN组成上料，辅助C在一次堆叠中碎裂。",
+                   6, result, (("原下料", lower), ("补C交错上料", result.inputs[1]), ("一次堆叠成品", result)))
 
 
 def general_stack_example() -> Example:
@@ -161,7 +188,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="导出四/六象限五层及八象限八层代表图形的制造步骤")
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
     args = parser.parse_args()
-    examples = corner_examples() + wide_half_examples() + [general_stack_example()]
+    examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)
