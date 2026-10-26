@@ -79,9 +79,7 @@ class Solver4:
         if not pin_base_possible(target) or not in_support_class(self.rules, target, grounded=True):
             return None
         for pushed in self.predecessors(target, grounded=True):
-            # 不可制作的中间输出不能成为尾部节点；unknown 则继续完整逆推。
-            if self.constructor.construct(pushed).status == "unsolvable":
-                continue
+            # 逐列前缀保持A，grounded筛选已强于K；制造凭据仍由下面的逆推取得。
             for family in pin_families(self.rules, pushed, check_output=not self.certificate_first):
                 previous = self._family_recipe(family, lowest, remaining_pins - 1)
                 if previous is None:
@@ -112,10 +110,10 @@ class Solver4:
         if (remaining_pins == 0 or not pin_base_possible(template)
                 or not in_support_class(self.rules, template, grounded=True, optional_top=True)):
             return None
+        source_lowest = min(z for z, row in enumerate(template.layers) if any(cell[0] == "c" for cell in row))
+        if source_lowest >= lowest:
+            raise RuntimeError("顶针逆像没有使最低保留晶体严格降低")
         for source in family.members(self.rules):
-            source_lowest = min(z for z, row in enumerate(source.layers) if any(cell[0] == "c" for cell in row))
-            if source_lowest >= lowest:
-                raise RuntimeError("顶针逆像没有使最低保留晶体严格降低")
             previous = self._tail(source, skip_start=True, remaining_pins=remaining_pins)
             if previous is not None:
                 return previous

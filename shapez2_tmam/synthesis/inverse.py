@@ -18,9 +18,13 @@ class PinFamily:
     top_crystals: int
 
     def members(self, rules: Rules) -> Iterator[Shape]:
-        """恢复顶层非晶体的空/N/P 选择；可制作性仍须分别由真实配方确认。"""
+        """先检查每列固定条件，再恢复顶层空/N/P；可制作性仍须有真实配方。"""
         if rules.quadrants != 4 or rules.height != 5:
             raise ValueError("顶针逆像族需要四象限五层配置")
+        columns = [tuple(row[q] for row in self.lower) for q in range(rules.quadrants)]
+        if any(not CornerBuilder.admissible((*column, "cr") if self.top_crystals & (1 << q) else column)
+               for q, column in enumerate(columns)):
+            return
         free = [q for q in range(rules.quadrants) if not self.top_crystals & (1 << q)]
         domains = [(EMPTY, "Cu", PIN) if self.lower[-1][q] != EMPTY else (EMPTY, "Cu") for q in free]
         for choices in product(*domains):
@@ -28,8 +32,6 @@ class PinFamily:
             for q, cell in zip(free, choices):
                 top[q] = cell
             rows = (*self.lower, tuple(top))
-            if any(not CornerBuilder.admissible(tuple(row[q] for row in rows)) for q in range(rules.quadrants)):
-                continue
             cells = {(z, q): cell for z, row in enumerate(rows)
                      for q, cell in enumerate(row) if cell != EMPTY}
             result = rules.fold(cells)
