@@ -199,6 +199,18 @@ def two_quadrant_example() -> Example:
                    2, result, (("最高晶体以下前缀", prefix), ("跨列普通上层", bridged), ("补针后的目标", result)))
 
 
+def rectangular_example() -> Example:
+    """同色的多行晶体共用结晶加工，六列三层直接制造。"""
+    rules = Rules(6)
+    target = rules.parse("crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu")
+    result = Constructor(rules).construct(target).recipe
+    if result is None or result.result != target:
+        raise RuntimeError("六象限同色层未生成并行列代表配方")
+    return Example("6q-rectangular-columns", "同层同色晶体的六列并行制造",
+                   "前两层交错位置先用针占位，再统一红色结晶；第三层单独蓝色结晶，已有晶体颜色保持。完整六列逐层制造，无需切割、交换或旋转。",
+                   6, result)
+
+
 def replicated_stack_example() -> Example:
     """四象限间隙构造扩张到八象限，复制块边界相对q0偏移一列。"""
     rules = Rules(8)
@@ -304,7 +316,7 @@ def main() -> int:
     args = parser.parse_args()
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
-                     layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example()))
+                     layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)

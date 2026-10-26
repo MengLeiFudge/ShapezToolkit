@@ -189,21 +189,58 @@ class Builder:
         merged = self.apply("swap", first, second, parameter=0)
         return self.apply("rotate", merged, parameter=start)
 
-    def dense_column(self, cells: tuple[str, ...], quadrant: int) -> Recipe:
-        """制造一根连续触地 N/C 柱；其他列全用普通辅助格，最后用两刀切出。"""
-        if not cells or len(cells) > self.rules.height or any(cell == EMPTY or cell == PIN for cell in cells):
-            raise ValueError(f"紧柱需要连续1～{self.rules.height}个普通块或晶体")
+    def rectangular_columns(self, target: Shape) -> Recipe | None:
+        """共同制造等高N/C列；须占全圈或连续半面以内，且同层晶体同色。"""
+        n = self.rules.quadrants
+        occupied = {q for q, cell in enumerate(target.layers[0]) if cell != EMPTY}
+        width = len(occupied)
+        if not width or n // 2 < width < n:
+            return None
+        start = next((q for q in range(n) if q in occupied and (q - 1) % n not in occupied), 0)
+        if any((start + i) % n not in occupied for i in range(width)):
+            return None
+        colors = []
+        for row in target.layers:
+            if any((cell != EMPTY) != (q in occupied) or cell == PIN for q, cell in enumerate(row)):
+                return None
+            crystals = {cell[1] for cell in row if cell[0] == "c"}
+            if len(crystals) > 1 or "u" in crystals:
+                return None
+            colors.append(next(iter(crystals), None))
+        if not any(colors):
+            return self.noncrystal(target)
         source = None
-        for cell in cells:
-            row = ["Cu"] * self.rules.quadrants
-            row[quadrant] = PIN if cell[0] == "c" else cell
-            layer = self.base(tuple(row))
+        pending_color = None
+        for row, color in zip(target.layers, colors):
+            if color is not None and pending_color is not None and color != pending_color:
+                assert source is not None
+                source = self.apply("crystal", source, parameter=pending_color)
+            layer = self.base(tuple(PIN if cell[0] == "c" else "Cu" if cell == EMPTY else cell for cell in row))
             source = layer if source is None else self.apply("stack", source, layer)
-            if cell[0] == "c":
-                source = self.apply("crystal", source, parameter=cell[1])
-        assert source is not None
-        source = self.window(source, quadrant - self.rules.quadrants // 2 + 1)
-        return self.window(source, quadrant)
+            if color is not None:
+                pending_color = color
+        assert source is not None and pending_color is not None
+        source = self.apply("crystal", source, parameter=pending_color)
+        if width < n:
+            source = self.window(source, start + width - n // 2)
+            if width < n // 2:
+                source = self.window(source, start)
+        if source.result != target:
+            raise RuntimeError("同色层的并行列制造结果与目标不一致")
+        return source
+
+    def dense_column(self, cells: tuple[str, ...], quadrant: int) -> Recipe:
+        """制造连续触地N/C单列，作为同色层矩形并行构造的宽度1特例。"""
+        if not cells or len(cells) > self.rules.height or any(cell in (EMPTY, PIN, "cu") for cell in cells):
+            raise ValueError(f"紧柱需要连续1～{self.rules.height}个普通块或有色晶体")
+        rows = []
+        for cell in cells:
+            row = [EMPTY] * self.rules.quadrants
+            row[quadrant] = cell
+            rows.append(tuple(row))
+        result = self.rectangular_columns(Shape(tuple(rows)))
+        assert result is not None
+        return result
 
     def column(self, cells: tuple[str, ...], quadrant: int) -> Recipe | None:
         """制造独立列精确分类内的柱；不满足连续性或针前缀条件时返回 None。"""
@@ -228,10 +265,19 @@ class Builder:
         return result
 
     def independent_columns(self, target: Shape) -> Recipe | None:
-        """分别造出可独立保留的各列，再依次拼接；有间隙的列不作为成功原料。"""
+        """可兼容矩形列共同制造，其余独立制造；保持连续前缀与针前缀合同。"""
+        parallel = self.rectangular_columns(target)
+        if parallel is not None:
+            return parallel
         half = self.rules.quadrants // 2
         halves = []
         for start in (0, half):
+            part = self.rules.fold({(z, q): cell for z, row in enumerate(target.layers)
+                                    for q, cell in enumerate(row) if start <= q < start + half and cell != EMPTY})
+            parallel = self.rectangular_columns(part) if part is not None else None
+            if parallel is not None:
+                halves.append(parallel)
+                continue
             result = None
             for q in range(start, start + half):
                 cells = tuple(row[q] for row in target.layers)

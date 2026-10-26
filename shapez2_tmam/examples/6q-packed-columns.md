@@ -8,7 +8,7 @@ q1四层柱与q4三层柱作下料。自由下落会粘错q0/q1，原位补C会�
 
 `CuCu--CuCu--:--Cu--P-Cu--:--Cu----Cu--:--Cu--CuCu--:--Cu--------`
 
-共35步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。
+共34步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。
 物品槽峰值为3，不含搜索状态及传输缓存；[槽数调度证明](../general/recipe-slots.md)。
 同一子配方出现两次时分别生产。Cut/Swap的另一个出口弃置；按表中出口继续。
 
@@ -33,33 +33,32 @@ q1四层柱与q4三层柱作下料。自由下落会粘错q0/q1，原位补C会�
 | 2 | pin | 1 | — | `----P-------:----Cu------` |
 | 3 | stack | 0, 2 | — | `----Cu------:----P-------:----Cu------` |
 | 4 | base | — | — | `CuCuP-CuCuCu` |
-| 5 | crystal | 4 | r | `CuCucrCuCuCu` |
-| 6 | base | — | — | `CuCuP-CuCuCu` |
-| 7 | stack | 5, 6 | — | `CuCucrCuCuCu:CuCuP-CuCuCu` |
-| 8 | crystal | 7 | r | `CuCucrCuCuCu:CuCucrCuCuCu` |
-| 9 | cut | 8 | 0 | `CuCucr------:CuCucr------` |
-| 10 | rotate | 9 | 1 | `--CuCucr----:--CuCucr----` |
-| 11 | cut | 10 | 1 | `------cr----:------cr----` |
-| 12 | base | — | — | `------Cu----` |
-| 13 | stack | 11, 12 | — | `------cr----:------cr----:------Cu----` |
-| 14 | swap | 3, 13 | 0 | `----Cucr----:----P-cr----:----CuCu----` |
-| 15 | rotate | 14 | 1 | `------Cucr--:------P-cr--:------CuCu--` |
-| 16 | base | — | — | `CuCuP-CuCuCu` |
-| 17 | crystal | 16 | r | `CuCucrCuCuCu` |
-| 18 | cut | 17 | 0 | `CuCucr------` |
-| 19 | rotate | 18 | 1 | `--CuCucr----` |
-| 20 | cut | 19 | 1 | `------cr----` |
-| 21 | base | — | — | `------Cu----` |
-| 22 | stack | 20, 21 | — | `------cr----:------Cu----` |
-| 23 | base | — | — | `----Cu------` |
-| 24 | swap | 23, 22 | 0 | `----Cucr----:------Cu----` |
-| 25 | rotate | 24 | 4 | `Cucr--------:--Cu--------` |
-| 26 | swap | 25, 15 | 0 | `Cucr--Cucr--:--Cu--P-cr--:------CuCu--` |
+| 5 | base | — | — | `CuCuP-CuCuCu` |
+| 6 | stack | 4, 5 | — | `CuCuP-CuCuCu:CuCuP-CuCuCu` |
+| 7 | crystal | 6 | r | `CuCucrCuCuCu:CuCucrCuCuCu` |
+| 8 | cut | 7 | 0 | `CuCucr------:CuCucr------` |
+| 9 | rotate | 8 | 1 | `--CuCucr----:--CuCucr----` |
+| 10 | cut | 9 | 1 | `------cr----:------cr----` |
+| 11 | base | — | — | `------Cu----` |
+| 12 | stack | 10, 11 | — | `------cr----:------cr----:------Cu----` |
+| 13 | swap | 3, 12 | 0 | `----Cucr----:----P-cr----:----CuCu----` |
+| 14 | rotate | 13 | 1 | `------Cucr--:------P-cr--:------CuCu--` |
+| 15 | base | — | — | `CuCuP-CuCuCu` |
+| 16 | crystal | 15 | r | `CuCucrCuCuCu` |
+| 17 | cut | 16 | 0 | `CuCucr------` |
+| 18 | rotate | 17 | 1 | `--CuCucr----` |
+| 19 | cut | 18 | 1 | `------cr----` |
+| 20 | base | — | — | `------Cu----` |
+| 21 | stack | 19, 20 | — | `------cr----:------Cu----` |
+| 22 | base | — | — | `----Cu------` |
+| 23 | swap | 22, 21 | 0 | `----Cucr----:------Cu----` |
+| 24 | rotate | 23 | 4 | `Cucr--------:--Cu--------` |
+| 25 | swap | 24, 14 | 0 | `Cucr--Cucr--:--Cu--P-cr--:------CuCu--` |
+| 26 | base | — | — | `--Cu----Cu--` |
 | 27 | base | — | — | `--Cu----Cu--` |
-| 28 | base | — | — | `--Cu----Cu--` |
-| 29 | stack | 27, 28 | — | `--Cu----Cu--:--Cu----Cu--` |
-| 30 | base | — | — | `--Cu----Cu--` |
-| 31 | stack | 29, 30 | — | `--Cu----Cu--:--Cu----Cu--:--Cu----Cu--` |
-| 32 | base | — | — | `--Cu--------` |
-| 33 | stack | 31, 32 | — | `--Cu----Cu--:--Cu----Cu--:--Cu----Cu--:--Cu--------` |
-| 34 | stack | 33, 26 | — | `CuCu--CuCu--:--Cu--P-Cu--:--Cu----Cu--:--Cu--CuCu--:--Cu--------` |
+| 28 | stack | 26, 27 | — | `--Cu----Cu--:--Cu----Cu--` |
+| 29 | base | — | — | `--Cu----Cu--` |
+| 30 | stack | 28, 29 | — | `--Cu----Cu--:--Cu----Cu--:--Cu----Cu--` |
+| 31 | base | — | — | `--Cu--------` |
+| 32 | stack | 30, 31 | — | `--Cu----Cu--:--Cu----Cu--:--Cu----Cu--:--Cu--------` |
+| 33 | stack | 32, 25 | — | `CuCu--CuCu--:--Cu--P-Cu--:--Cu----Cu--:--Cu--CuCu--:--Cu--------` |
