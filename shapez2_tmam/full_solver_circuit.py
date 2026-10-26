@@ -72,7 +72,7 @@ def _increment_value(program: CornerProgram, value: Ref, advance: Ref,
     return program.pick(wrap, program.zero, program.pick(advance, branches[0], value)), wrap
 
 
-def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
+def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tuple[Circuit, dict]:
     """静态编译完整四象限控制；不运行搜索、目标、制造或反馈模拟。"""
     reserve = 65_536
     if not 1 <= channel_base < (1 << 24) - reserve:
@@ -431,7 +431,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                       *frame.slots, *frame.top, *frame.cap_exclusions, frame.pin_search, frame.family_checked)))
     slow_event = program.or_(enter, next_cut, grow_prefix, begin_pin_search, grounded_ready, move_prefix, start_source, counter_event,
                              descend, commit_top, search_pop, fail_pop, root_solved, replay_up, repeat, repeat_corner)
-    timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,), local_pairs=True)
+    timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,),
+                                      local_pairs=True, packed_timing=packed)
     window = program.and_(timing.phases[3], enable)
     sample = program.and_(window, record_valid)
     done = program.and_(window, modes[Phase.DONE], decoded.valid)
@@ -475,7 +476,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "resource_bound": "每格只查本列5个原标签及4种辅助料；根帧直接读固定目标；其余三帧各20目标ID，四帧各4整数前缀高度，仅前三帧各保存4整数来源槽、4整数NPC顶盖、4顶层C排除位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最高原目标C层号H给出max(0,H-1)条尾部Pin边，至多三边；达到H次的历史可改写为A→S；最低C沿边仍严格下降；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族、最高C层号不超过1的族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；valid-slot-cursor.md；inactive-rom-runs.md；clocked-control.md。",
+        "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；valid-slot-cursor.md；inactive-rom-runs.md；packed-timing.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 
@@ -488,13 +489,13 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     default_base = 1_277_000 if args.pack else 1_211_000
-    circuit, report = build_solver(args.channel_base if args.channel_base is not None else default_base)
+    circuit, report = build_solver(args.channel_base if args.channel_base is not None else default_base, packed=args.pack)
     document = circuit.document(packed=args.pack)
     if args.pack:
         platforms = document["BP"]["Entries"]
         report.update({"logical_gates": len(circuit.gates), "gate_platforms": len(platforms),
                        "local_constant_inputs": True, "local_gate_pairs": len(circuit.local_pairs()),
-                       "layout": "固定常量就地复制；单消费者私有组合门两两本地连接，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
+                       "layout": "固定常量就地复制；私有组合门固定两两本地连接并按实际无线级数计时，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
                        "platform_grid": [max(platform["X"] for platform in platforms) + 1,
                                          max(platform["Y"] for platform in platforms) + 1]})
     args.output.parent.mkdir(parents=True, exist_ok=True)

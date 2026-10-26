@@ -187,6 +187,7 @@ class Circuit:
         self.channel_base = channel_base
         self.aliases: list[tuple[Ref, ...]] = []
         self.local_nodes: set[int] = set()
+        self.fixed_local_pairs: dict[int, int] | None = None
 
     def add(self, kind: str, *inputs: Ref | Literal, config: str | None = None) -> Ref:
         """添加一个门，返回输出零；其他出口用 Ref(node, port) 指定。"""
@@ -220,29 +221,37 @@ class Circuit:
 
     def _max_depth(self, changing: tuple[Ref, ...] | None = None,
                    outputs: tuple[Ref, ...] | None = None, *, trace: list[Ref] | None = None) -> int:
-        """频道DAG最长路径；trace记录各频道中承接最长依赖的门输出，不执行信号。"""
+        """频道DAG加权路径；固定局部边权为0，其余为1；trace记录实际门路径。"""
         channels = self.channel_map()
         if changing is not None and any(source not in channels for source in changing):
             raise ValueError("变化源引用了不存在的输出")
         if outputs is not None and any(output not in channels for output in outputs):
             raise ValueError("传播终点引用了不存在的输出")
         origins = set(channels.values()) if changing is None else {channels[source] for source in changing}
-        dependencies: dict[int, set[int]] = {channel: set() for channel in channels.values()}
+        dependencies: dict[int, dict[int, int]] = {channel: {} for channel in channels.values()}
+        local = self.local_pairs() if self.fixed_local_pairs is not None else {}
         writers: dict[tuple[int, int], Ref] = {}
         for index, gate in enumerate(self.gates):
-            incoming = {channels[source] for source in gate.inputs if isinstance(source, Ref)}
+            incoming: dict[int, int] = {}
+            for source in gate.inputs:
+                if isinstance(source, Ref):
+                    weight = int(local.get(index) != source.node)
+                    channel = channels[source]
+                    incoming[channel] = max(incoming.get(channel, 0), weight)
             if gate.kind == "ControlledSignalReceiver":
                 control = gate.inputs[0]
                 if not isinstance(control, Literal) or not isinstance(control.value, int):
                     raise ValueError("动态选频接收器不适用此组合传播上界")
                 if control.value in dependencies:
-                    incoming.add(control.value)
+                    incoming[control.value] = 1
             for port in range(len(PORTS[gate.kind][0])):
                 output = Ref(index, port)
-                dependencies[channels[output]].update(incoming)
-                if trace is not None:
-                    for source in incoming:
-                        writers.setdefault((channels[output], source), output)
+                channel = channels[output]
+                for source, weight in incoming.items():
+                    if source not in dependencies[channel] or weight > dependencies[channel][source]:
+                        dependencies[channel][source] = weight
+                        if trace is not None:
+                            writers[channel, source] = output
         remaining = {channel: len(sources) for channel, sources in dependencies.items()}
         consumers: dict[int, list[int]] = {channel: [] for channel in dependencies}
         for channel, sources in dependencies.items():
@@ -254,7 +263,7 @@ class Circuit:
         while queue:
             source = queue.popleft()
             for channel in consumers[source]:
-                candidate = depths[source] + 1 if depths[source] else 0
+                candidate = depths[source] + dependencies[channel][source] if depths[source] else 0
                 current = depths.get(channel, int(channel in origins))
                 if candidate > current:
                     previous[channel] = source
@@ -293,33 +302,54 @@ class Circuit:
                 "conditions": "本机Hybrid或AlwaysHighUPS模式的常速连续推进，每批最多4信号tick；频道独占、接线及配置固定。调试单步、模式切换、强制低UPS和快进不适用。",
                 "proof": "4q5l/signal-timing.md；含外部收发与启动余量，非墙钟时间。"}
 
-    def local_pairs(self) -> dict[int, int]:
-        """仅合并显式允许的私有组合门；频道别名及显式选频读者保持无线。"""
+    def freeze_local_pairs(self, protected: tuple[Ref, ...]) -> None:
+        """保护后续锁存器复用的输出，并固定用于压缩布局计时的局部配对。"""
+        if self.fixed_local_pairs is not None:
+            raise ValueError("局部计时配对不能重复固定")
+        self.fixed_local_pairs = self.local_pairs(protected=protected)
+
+    def local_pairs(self, *, protected: tuple[Ref, ...] = ()) -> dict[int, int]:
+        """选择私有组合门，或逐项核对已经用于时序计算的固定配对。"""
         kinds = {"LogicGateAnd", "LogicGateOr", "LogicGateXOr", "LogicGateCompare", "LogicGateIf", "LogicGateNot"}
         uses = Counter(source for gate in self.gates for source in gate.inputs if isinstance(source, Ref))
         aliased = {reference for group in self.aliases for reference in group}
+        public = set(protected)
         channels = self.channel_map()
         received = {gate.inputs[0].value for gate in self.gates if gate.kind == "ControlledSignalReceiver"
                     and isinstance(gate.inputs[0], Literal)}
+
+        def eligible(node: int, port: int, source: Ref | Literal) -> bool:
+            gate = self.gates[node]
+            return (isinstance(source, Ref) and source.port == 0 and source.node in self.local_nodes
+                    and source.node < node and uses[source] == 1 and source not in aliased and source not in public
+                    and channels[source] not in received and self.gates[source.node].kind in kinds
+                    and PORTS[gate.kind][1][port] in ((2, 0, 0, 0), (3, 0, 0, 0)))
+
         pairs: dict[int, int] = {}
         used: set[int] = set()
+        if self.fixed_local_pairs is not None:
+            for node, child in self.fixed_local_pairs.items():
+                if (node not in self.local_nodes or node in used or child in used or self.gates[node].kind not in kinds
+                        or not any(source == Ref(child) and eligible(node, port, source)
+                                   for port, source in enumerate(self.gates[node].inputs))):
+                    raise ValueError("用于时序计算的固定局部配对不再满足私有接线条件")
+                used.update((node, child))
+            return dict(self.fixed_local_pairs)
         for node in sorted(self.local_nodes, reverse=True):
             gate = self.gates[node]
             if node in used or gate.kind not in kinds:
                 continue
             for port, source in enumerate(gate.inputs):
-                if (not isinstance(source, Ref) or source.port or source.node not in self.local_nodes
-                        or source.node in used or source.node >= node or uses[source] != 1
-                        or source in aliased or channels[source] in received or self.gates[source.node].kind not in kinds
-                        or PORTS[gate.kind][1][port] not in ((2, 0, 0, 0), (3, 0, 0, 0))):
-                    continue
-                pairs[node] = source.node
-                used.update((node, source.node))
-                break
+                if isinstance(source, Ref) and source.node not in used and eligible(node, port, source):
+                    pairs[node] = source.node
+                    used.update((node, source.node))
+                    break
         return pairs
 
     def document(self, *, packed: bool = False) -> dict:
         """生成原生 Island 蓝图文档，同时核对实际占地和信号网络。"""
+        if self.fixed_local_pairs is not None and not packed:
+            raise ValueError("按局部连接计时的电路必须导出为固定配对的压缩布局")
         channels = self.channel_map()
         platforms: list[dict] = []
         bounds: list[tuple[int, int, int, int]] = []

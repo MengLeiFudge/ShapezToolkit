@@ -47,7 +47,7 @@ class ClockedState:
 
 
     def close(self, enable: Ref, *, slow_reads: tuple[Ref, ...] = (), slow_event: Ref | None = None,
-              pulses: tuple[Ref, ...] = (), local_pairs: bool = False) -> tuple[Clock, dict]:
+              pulses: tuple[Ref, ...] = (), local_pairs: bool = False, packed_timing: bool = False) -> tuple[Clock, dict]:
         """慢根更新后冻结一轮，脉冲在冻结期清零；分别核对3P/7P传播窗。"""
         if self.closed:
             raise ValueError("同一组主副寄存器只能闭合一次")
@@ -56,6 +56,8 @@ class ClockedState:
         if len(set(slow_reads)) != len(slow_reads) or len(set(pulses)) != len(pulses) or any(
                 read not in self.initial for read in (*slow_reads, *pulses)) or set(slow_reads) & set(pulses):
             raise ValueError("慢状态及脉冲必须来自本组，互不重复且互不重叠")
+        if packed_timing and not local_pairs:
+            raise ValueError("局部接线计时必须同时启用局部门合并")
         circuit = self.program.circuit
         if slow_event is not None:
             reads = tuple(self.initial)
@@ -67,6 +69,11 @@ class ClockedState:
                                    self.program.pick(ready, self.next[read], read))
         if local_pairs:
             circuit.local_nodes.update(set(range(len(circuit.gates))) - {read.node for read in self.initial})
+        if packed_timing:
+            control = None if self.program.controls is None else self.program.controls.get(enable)
+            controls = () if control is None else (control.enabled, control.disabled)
+            circuit.freeze_local_pairs((*self.next.values(), *controls,
+                                        *(value for value in self.initial.values() if isinstance(value, Ref))))
         full_depth = circuit.settling_bound()["max_gate_depth"]
         all_reads = tuple(self.initial)
         fast_reads = tuple(read for read in all_reads if read not in slow_reads)
@@ -94,6 +101,8 @@ class ClockedState:
         report = {"state_registers": len(self.initial), "step_max_gate_depth": depth,
                   "initial_max_gate_depth": full_depth,
                   "step_critical_path": path_nodes}
+        if packed_timing:
+            report["fixed_local_timing"] = True
         if slow_reads:
             report.update({"slow_max_gate_depth": slow_depth, "slow_handoff_phases": 7,
                            "slow_update_wait_cycles": 1, "slow_state_registers": len(slow_reads),
