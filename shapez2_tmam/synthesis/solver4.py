@@ -73,7 +73,7 @@ class Solver4:
                 if found.recipe is None:
                     raise RuntimeError("强制前缀闭包已证明A起点，但角构造未生成证书")
                 return self._finish(found.recipe, target)
-        if remaining_pins == 0:
+        if remaining_pins == 0 or not any(cell[0] == "c" for row in target.layers[2:] for cell in row):
             return None
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
         if not pin_base_possible(target) or not in_support_class(self.rules, target, grounded=True):
@@ -109,7 +109,8 @@ class Solver4:
                                          if pos[0] < 4 or cell[0] == "c" or pos in selected})
             assert completed is not None
             return self._finish(direct.recipe, completed)
-        if (remaining_pins == 0 or not pin_base_possible(template)
+        if (remaining_pins == 0 or not any(cell[0] == "c" for row in template.layers[2:] for cell in row)
+                or not pin_base_possible(template)
                 or not in_support_class(self.rules, template, grounded=True, optional_top=True)):
             return None
         for source in family.members(self.rules):

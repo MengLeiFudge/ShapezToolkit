@@ -124,14 +124,14 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     uncolored = program.or_(*(program.and_(cell.crystal, circuit.add(
         "LogicGateCompare", cell.color, Literal("color:u"), config="AQ==")) for row in decoded.cells for cell in row))
     in_scope = program.and_(decoded.valid, program.not_(uncolored))
-    has_crystal = program.or_(*(cell.crystal for column in original for cell in column))
+    has_upper_crystal = program.or_(*(cell.crystal for column in original for cell in column[2:]))
     pin_base = program.and_(*(program.and_(
         program.not_(column[0].crystal),
         program.or_(program.not_(program.or_(column[1].crystal, column[2].crystal)), column[0].pin),
         program.or_(program.not_(column[2].crystal), column[1].occupied)) for column in original))
     depth_allowed = program.or_(*(program.and_(levels[i], program.or_(*(
         cell.crystal for row in decoded.cells[i + 2:] for cell in row))) for i in range(3)))
-    tail_candidate = program.and_(has_crystal, pin_base, depth_allowed)
+    tail_candidate = program.and_(has_upper_crystal, pin_base, depth_allowed)
     pin_allowed = program.and_(tail_candidate, program.not_(optional_top))
 
     finder = PrefixSearch(program, original, optional_top=optional_top)
