@@ -9,7 +9,7 @@ class CornerBuilder:
 
     def __init__(self, builder: Builder):
         """共用已有制造树与物理配置，角构造仅启用四象限五层。"""
-        if builder.rules.quadrants != 4:
+        if builder.rules.quadrants != 4 or builder.rules.height != 5:
             raise ValueError("此角构造限定四象限五层")
         self.builder = builder
         self.rules = builder.rules

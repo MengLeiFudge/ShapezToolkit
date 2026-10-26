@@ -62,7 +62,7 @@
 
 ## 4. Python与电路实现边界
 
-[`stack_reduction.stack_successors`](../synthesis/stack_reduction.py)实现这个结构目录接口。K分支生成连续区间/单针，用列顶最大值直接计算落点，跳过截高后完全不变的边；非K分支逐个调用真实Stack。它接受擦除标签的结构状态，基础上料统一用Cu作为N代表。当前Rules实例仍只开放4q5l、6q5l；一般n/H的结论是证明，尚未扩大Python物理配置。
+[`stack_reduction.stack_successors`](../synthesis/stack_reduction.py)实现这个结构目录接口。K分支生成连续区间/单针，用列顶最大值直接计算落点，跳过截高后完全不变的边；非K分支逐个调用真实Stack。它接受擦除标签的结构状态，基础上料统一用Cu作为N代表。Rules已开放偶数n≥2、H≥2，见[参数化模型与固定接口边界](python-model.md)。
 
 K分支无需对下料每次重建物理组，也无需保存任意多层上料。候选生成只需模式、起点、长度；列顶可共用，落点取对应区间最大值。六象限上料域最多37项，而非上料目录地址。实际门数尚未编译，不能由候选数直接换算为37个元件。
 

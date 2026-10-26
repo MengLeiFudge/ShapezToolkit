@@ -47,6 +47,8 @@ def height_flags(circuit: Circuit, source: Ref, valid: Ref, maximum: int = 5) ->
 
 def decode(circuit: Circuit, target: Ref, enable: Ref, rules: Rules) -> DecodedShape:
     """用结晶高度标记重新安放拆出的层；不对原目标执行重力或结晶。"""
+    if rules.quadrants not in (4, 6) or rules.height != 5:
+        raise ValueError("原生解码电路目前限定四/六象限五层配置")
     remaining = target
     raw_rows = []
     sources = []

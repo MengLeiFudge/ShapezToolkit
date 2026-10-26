@@ -14,6 +14,13 @@ class Recipe:
     result: Shape
     inputs: tuple["Recipe", ...] = ()
     parameter: int | str | None = None
+    height: int = 5
+
+    def __post_init__(self):
+        """保存制造上限，防止不同Pin截高语义的配方或指令相互混用。"""
+        if self.height < 2 or len(self.result.layers) > self.height or any(
+                node.height != self.height or len(node.result.layers[0]) != len(self.result.layers[0]) for node in self.inputs):
+            raise ValueError("制造树的层数上限、象限数或输入配方配置不一致")
 
     def steps(self) -> Iterator[dict]:
         """按依赖顺序流式展开，每份实体物品有独立编号，不隐式复制实物。"""
@@ -37,8 +44,8 @@ class Recipe:
 
     def instructions(self, registers: int = 6) -> Iterator[dict]:
         """把四象限制造树流式编为消费输入的寄存器指令，不复制实体。"""
-        if len(self.result.layers[0]) != 4 or registers < 1:
-            raise ValueError("寄存器指令当前需要四象限和至少一个寄存器")
+        if len(self.result.layers[0]) != 4 or self.height != 5 or registers < 1:
+            raise ValueError("寄存器指令当前需要四象限五层配置和至少一个寄存器")
         live: dict[int, int] = {}
         occupied: set[int] = set()
         for step in self.steps():
@@ -82,10 +89,12 @@ class Builder:
         shape = self.rules.parse("".join(cells))
         if any(cell[0] == "c" for cell in cells):
             raise ValueError("基础原料不能包含晶体")
-        return Recipe("base", shape)
+        return Recipe("base", shape, height=self.rules.height)
 
     def apply(self, operation: str, *inputs: Recipe, parameter: int | str | None = None) -> Recipe:
         """计算一个实体操作；空产物不接入后续制造树。"""
+        if any(node.height != self.rules.height or len(node.result.layers[0]) != self.rules.quadrants for node in inputs):
+            raise ValueError("输入制造树必须与当前物理配置一致")
         shapes = tuple(node.result for node in inputs)
         arity = {"rotate": 1, "cut": 1, "pin": 1, "crystal": 1, "stack": 2, "swap": 2}
         if operation not in arity or len(inputs) != arity[operation]:
@@ -114,7 +123,7 @@ class Builder:
             result = self.rules.crystal(shapes[0], parameter)
         if result is None:
             raise ValueError(f"加工 {operation} 无产物，不能作为制造树输入")
-        return Recipe(operation, result, inputs, parameter)
+        return Recipe(operation, result, inputs, parameter, self.rules.height)
 
     def window(self, source: Recipe, start: int) -> Recipe:
         """旋转到原生方向、保留连续半面，再恢复世界方向。"""
@@ -132,7 +141,7 @@ class Builder:
     def dense_column(self, cells: tuple[str, ...], quadrant: int) -> Recipe:
         """制造一根连续触地 N/C 柱；其他列全用普通辅助格，最后用两刀切出。"""
         if not cells or len(cells) > self.rules.height or any(cell == EMPTY or cell == PIN for cell in cells):
-            raise ValueError("紧柱需要连续 1～5 个普通块或晶体")
+            raise ValueError(f"紧柱需要连续1～{self.rules.height}个普通块或晶体")
         source = None
         for cell in cells:
             row = ["Cu"] * self.rules.quadrants

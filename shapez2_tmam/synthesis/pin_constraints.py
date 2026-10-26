@@ -20,8 +20,8 @@ def pin_base_possible(target: Shape) -> bool:
 def pin_image_matches(rules: Rules, lower: tuple[tuple[str, ...], ...],
                        top_crystals: int, target: Shape) -> bool:
     """以最大静止集合及块支撑确认Pin结果；不运行前态制造或重力。"""
-    if rules.quadrants != 4 or len(lower) != 4 or any(len(row) != 4 for row in lower):
-        raise ValueError("顶针像精确判据需要四象限、前四层来源")
+    if rules.quadrants != 4 or rules.height != 5 or len(lower) != 4 or any(len(row) != 4 for row in lower):
+        raise ValueError("顶针像精确判据需要四象限五层配置、前四层来源")
     if not 0 <= top_crystals < 16:
         raise ValueError("顶层晶体掩码需要在0～15之间")
     desired = rules.cells(target)

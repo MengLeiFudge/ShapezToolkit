@@ -7,8 +7,8 @@ from .support import in_support_class
 
 def minimal_start(rules: Rules, target: Shape, start: int, *, optional_top: bool = False) -> Shape | None:
     """求最小A→S前态；可将第4层普通格作为只在A中保留的可选助手。"""
-    if rules.quadrants != 4 or start not in (0, 1):
-        raise ValueError("前缀强制闭包需要四象限及切向0或1")
+    if rules.quadrants != 4 or rules.height != 5 or start not in (0, 1):
+        raise ValueError("前缀强制闭包需要四象限五层及切向0或1")
     desired = rules.cells(target)
     columns = tuple(tuple(row[q] for row in target.layers) for q in range(4))
     if any(not CornerBuilder.admissible(column) for column in columns):

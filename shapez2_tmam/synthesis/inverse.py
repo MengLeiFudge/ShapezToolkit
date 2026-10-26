@@ -19,6 +19,8 @@ class PinFamily:
 
     def members(self, rules: Rules) -> Iterator[Shape]:
         """恢复顶层非晶体的空/N/P 选择；可制作性仍须分别由真实配方确认。"""
+        if rules.quadrants != 4 or rules.height != 5:
+            raise ValueError("顶针逆像族需要四象限五层配置")
         free = [q for q in range(rules.quadrants) if not self.top_crystals & (1 << q)]
         domains = [(EMPTY, "Cu", PIN) if self.lower[-1][q] != EMPTY else (EMPTY, "Cu") for q in free]
         for choices in product(*domains):
@@ -104,7 +106,7 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
     check_output=False 用静止集合及块支撑精确匹配物理输出；调用者仍须取得前态制造证书。
     不保存整个候选集，不调用全图可制作判定，也不隐式接受递归环。
     """
-    if rules.quadrants != 4:
+    if rules.quadrants != 4 or rules.height != 5:
         raise ValueError("此逆像生成器当前限定四象限五层")
     if not pin_base_possible(target):
         return
@@ -154,6 +156,8 @@ class CutFamily:
 
     def members(self, rules: Rules) -> Iterator[Shape]:
         """生成满足各融合组删除/保护约束的另一半；不替代前态可制作判定。"""
+        if rules.quadrants != 4 or rules.height != 5:
+            raise ValueError("切割逆像族需要四象限五层配置")
         fixed = rules.cells(self.retained)
         groups = rules.groups(fixed, fused=True)
         dropped = [(z, q) for z in range(rules.height)
@@ -183,7 +187,7 @@ def cut_families(rules: Rules, target: Shape) -> Iterator[CutFamily]:
     输出，因此每个可触边晶体分量只需枚举删除/保留两种物理效果。
     返回的族覆盖全部真实可制作前态结构，但族成员本身未获制造证明。
     """
-    if rules.quadrants != 4:
+    if rules.quadrants != 4 or rules.height != 5:
         raise ValueError("此逆像生成器当前限定四象限五层")
     half = rules.quadrants // 2
     if any(cell != EMPTY for row in target.layers for cell in row[half:]):

@@ -10,6 +10,8 @@ from .synthesis.physics import Rules
 
 def build_noncrystal(quadrants: int, channel_base: int = 1_002_000) -> tuple[Circuit, dict]:
     """用五次拆层和四次虚拟堆叠重建目标，同时检查全部格位没有晶体。"""
+    if quadrants not in (4, 6):
+        raise ValueError("原生无晶体电路目前限定四或六象限")
     rules = Rules(quadrants)
     if not 1 <= channel_base < (1 << 24) - 1024:
         raise ValueError("频道基址需要为实例保留后续 1024 个频道，并保持低于 2^24")

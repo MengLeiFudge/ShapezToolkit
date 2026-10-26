@@ -92,17 +92,42 @@ def wide_half_examples() -> list[Example]:
     ]
 
 
+def general_stack_example() -> Example:
+    """八象限八层的非K下料；双层普通上料必须保持同一次堆叠。"""
+    builder = Builder(Rules(8, 8))
+    columns = (("cr", "Cu", "cr", "cr", "cr"), ("cr",), ("cr", "cr"), ("cr",),
+               ("cr", "Cu", "cr", "cr", "cr"), ("cr",), ("cr",) * 8, ("cr",))
+    shape = builder.rules.fold({(z, q): cell for q, column in enumerate(columns) for z, cell in enumerate(column)})
+    assert shape is not None
+    seed = builder.independent_columns(shape)
+    assert seed is not None
+    frame = seed
+    for mask in ((1, 2, 3), (2,), (2, 3)):
+        frame = builder.apply("stack", frame, builder.base(tuple("Cu" if q in mask else EMPTY for q in range(8))))
+    lower = builder.apply("pin", frame)
+    materials = {"-": EMPTY, "N": "Cu", "P": PIN, "C": "cr"}
+    rows = ("PPPPPPPP", "N---N---", "--------", "CNNNC---", "CNN-C---", "CNNNC---")
+    target = builder.rules.parse(":".join("".join(materials[cell] for cell in row) for row in rows))
+    result = single_stack(builder, lower, target)
+    if result is None:
+        raise RuntimeError("八象限八层代表未取得单次堆叠配方")
+    return Example("8q8l-single-stack", "八象限八层的单次复杂堆叠",
+                   "准备过程使用八层晶体塔，顶破后得到非K下料S。把q1两层普通柱一次堆上去；拆成两次堆叠会让框架重新分组并碎裂。",
+                   8, result, (("八层准备形", seed), ("添加框架后的D", frame), ("顶破后的S", lower),
+                               ("双层普通上料", result.inputs[1]), ("一次堆叠成品", result)))
+
+
 def export(example: Example, output: Path) -> tuple[str, str, int]:
     """输出消费式步骤及全部中间图形码；同一配方引用展开为独立物品。"""
     steps = list(example.recipe.steps())
     document = {"name": example.name, "title": example.title, "mechanism": example.mechanism,
-                "quadrants": example.quadrants, "height": 5, "target": example.recipe.result.to_key(),
+                "quadrants": example.quadrants, "height": example.recipe.height, "target": example.recipe.result.to_key(),
                 "evidence": "按既有证明构造并由Python加工模型计算中间产物；未在游戏或Mod中验证。",
                 "milestones": [{"name": name, "result": recipe.result.to_key()} for name, recipe in example.milestones],
                 "steps": steps}
     stem = output / example.name
     stem.with_suffix(".json").write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    lines = [f"# {example.title}", "", example.mechanism, "", f"配置：{example.quadrants}象限、五层上限。",
+    lines = [f"# {example.title}", "", example.mechanism, "", f"配置：{example.quadrants}象限、{example.recipe.height}层上限。",
              "", "目标（从底到顶，q0为每层最左格）：", "", f"`{example.recipe.result.to_key()}`", "",
              f"共{len(steps)}步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。",
              "同一子配方出现两次时分别生产。Cut/Swap的另一个出口弃置；按表中出口继续。", "",
@@ -122,10 +147,10 @@ def export(example: Example, output: Path) -> tuple[str, str, int]:
 
 def main() -> int:
     """导出固定例子，供用户手工复现特殊制造机制。"""
-    parser = argparse.ArgumentParser(description="导出四象限间隙及六象限非K/非稳定代表图形的制造步骤")
+    parser = argparse.ArgumentParser(description="导出四/六象限五层及八象限八层代表图形的制造步骤")
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
     args = parser.parse_args()
-    examples = corner_examples() + wide_half_examples()
+    examples = corner_examples() + wide_half_examples() + [general_stack_example()]
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output)

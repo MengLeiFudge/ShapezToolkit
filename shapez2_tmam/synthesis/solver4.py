@@ -18,7 +18,7 @@ class Solver4:
     def __init__(self, rules: Rules | None = None, *, certificate_first: bool = False):
         """共用四象限规则；可选以静止组及块支撑判据代替族的正向Pin检查。"""
         self.rules = rules or Rules(4)
-        if self.rules.quadrants != 4:
+        if self.rules.quadrants != 4 or self.rules.height != 5:
             raise ValueError("完整尾部求解目前限定四象限五层")
         self.constructor = Constructor(self.rules)
         self.builder = self.constructor.builder

@@ -1,6 +1,6 @@
 """合成器使用的精确局部物理；保留加工前分组，输出后不再稳定化。
 
-规则实例限定四/六象限五层，独立于 Mari 的固定四象限电路模型。
+规则实例支持偶数象限及至少两层的参数化模型，独立于 Mari 的固定四象限电路。
 """
 
 from dataclasses import dataclass
@@ -25,15 +25,16 @@ class Shape:
 
 @dataclass(frozen=True)
 class Rules:
-    """一个四/六象限、五层局部加工实例；实例之间不混用物品。"""
+    """一个偶数象限、固定高度上限的局部加工实例；实例之间不混用物品。"""
 
     quadrants: int = 4
     height: int = 5
 
     def __post_init__(self):
-        """只启用当前任务已界定的两种配置。"""
-        if self.quadrants not in (4, 6) or self.height != 5:
-            raise ValueError("合成器局部物理需要四或六象限、五层配置")
+        """等分半切要求偶数象限；一层顶针语义不在当前证明范围。"""
+        if (not isinstance(self.quadrants, int) or self.quadrants < 2 or self.quadrants % 2
+                or not isinstance(self.height, int) or self.height < 2):
+            raise ValueError("局部物理需要偶数象限n≥2、层数上限H≥2")
 
     def parse(self, key: str) -> Shape:
         """校验图形编码；语法合法不等于可制作或稳定。"""

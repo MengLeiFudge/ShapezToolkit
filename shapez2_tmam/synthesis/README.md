@@ -1,6 +1,6 @@
 # 合成的 Python 接口
 
-这个包接受四象限或六象限五层目标，输出具有逐步加工结果的制造证书。默认使用快速局部构造；无晶体目标采用完整判据，未覆盖的含晶体目标返回 `unknown`。四象限另有 `--complete` 启用[完整有界尾部逆推](../4q5l/tail-solver.md)，不建立半形目录，但最坏搜索时间仍很大。四象限的[四帧完整电路控制](../4q5l/full-tail-circuit.md)已有首版，尚未通过实用性能验收；六象限完整求解仍未实现。
+这个包接受偶数象限n≥2、层数上限H≥2的目标，输出具有逐步加工结果的制造证书。默认使用快速局部构造；无晶体目标采用完整判据，未覆盖的含晶体目标返回`unknown`。仅4q5l可用`--complete`启用[完整有界尾部逆推](../4q5l/tail-solver.md)，最坏搜索时间仍很大。六象限及通用参数尚无实用完整求解器，具体边界见[参数化Python模型](../general/python-model.md)。
 
 ## 输入目标，取得制造步骤
 
@@ -10,7 +10,7 @@
 python -m shapez2_tmam.synthesis 'CuCu----:Cu------' --quadrants 4
 ```
 
-四象限完整逆推在命令末尾加 `--complete`；此选项不支持六象限。另加 `--instructions` 可同时导出六寄存器消费式指令；只支持四象限。输出是 JSON。`status` 有三种值：
+`--quadrants`指定偶数象限数，`--height`指定整个制造过程的层数上限；默认4q5l。完整逆推`--complete`和六寄存器指令`--instructions`均只支持4q5l。输出是 JSON。`status` 有三种值：
 
 | 状态 | 含义 | 退出码 |
 |---|---|---|
@@ -48,7 +48,7 @@ if result.recipe is not None:
         print(step)
 ```
 
-`Rules` 提供旋转、切割、顶针、堆叠、结晶及交换的局部物理。它保留制造后不稳定的输出，不在交换后追加重力；结算过程中不合并新接触。四象限、六象限均使用五层上限，不能把规则实例的物品跨配置混用。
+`Rules(quadrants, height=5)`提供旋转、切割、顶针、堆叠、结晶及交换的局部物理，支持偶数n≥2、H≥2。它保留加工后不稳定的输出，不在交换后追加重力；结算中不合并新接触。Recipe记录制造上限，Builder拒绝不同上限或象限的配方输入混用；不能用成品层数代替整个制造过程的高度上限。
 
 `Builder` 提供基础层、无晶体逐层构造、独立单列、独立晶体前缀、逐层 N/P 追加和列拼接。多层晶体原料通过基础原料、结晶和切割展开，不能作为免费的实体输入。
 
@@ -64,7 +64,7 @@ if result.recipe is not None:
 
 `single_stack(builder, lower, target)`把普通追加扩展到新增针：先尝试平移后的无晶体上料；失败时，对每列普通格在下、连续针尾在上的目标构造N/C列前缀及针尾。空列不填C，列顶以上不补C。依据[无环支撑森林证明](../general/pin-tail-stack.md)，实际仍执行一次Stack。普通格和针交错且直接上料失败时返回None，不能视为不可制作。
 
-用户手工复现用的[十个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
+用户手工复现用的[十一个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
 
 面向游戏材料寄存器可用 `Solver4(rules, certificate_first=True)`。`pin_families(..., check_output=False)`用[`pin_image_matches`](pin_constraints.py)按最大静止集合及块支撑精确匹配物理输出，无需先编码任意原生候选；[充要证明](../4q5l/pin-image-exact.md)补齐了原必要筛选。候选仍须递归取得制造证书，实际制造的Pin结果也须与目标相同；物理匹配不代替可制作性。两列判据使用[按层扫描](../4q5l/half-row-stability.md)。CLI保留默认正向Pin检查模式，两种物理检查接受同一规范化逆像族；均没有实用搜索复杂度承诺。
 

@@ -54,4 +54,4 @@ U*没有针和空格，属于已有的紧密N/C种子，能逐列制造并拼接
 
 [八象限八层复杂堆叠反例](general-model.md#4-一般参数下复杂堆叠也不能总拆成基础块序列)不被推翻：它要求保留一次Stack，而本文恰好保留这一点，只替换上料的制造方式。
 
-[`ordinary_stack`](../synthesis/stack_reduction.py)提供Python构造：输入Builder、真实下料配方和目标；子问题条件不满足时返回None，不作全局不可制作判断。成功时返回真实的一次Stack制造树。当前已采用更省辅助料的[列前缀构造](pin-tail-stack.md)，并新增single_stack覆盖每列N在下、针尾在上的目标；上文完整矩形仍作为最初充分性证明。当前物理实例限4q5l/6q5l，通用参数覆盖由证明给出；没有运行完整目标搜索、测试或游戏验证。
+[`ordinary_stack`](../synthesis/stack_reduction.py)提供Python构造：输入Builder、真实下料配方和目标；子问题条件不满足时返回None，不作全局不可制作判断。成功时返回真实的一次Stack制造树。当前已采用更省辅助料的[列前缀构造](pin-tail-stack.md)，并新增single_stack覆盖每列N在下、针尾在上的目标；上文完整矩形仍作为最初充分性证明。物理与构造接口已支持偶数n≥2、H≥2，见[参数化模型](python-model.md)；没有运行完整目标搜索、测试或游戏验证。

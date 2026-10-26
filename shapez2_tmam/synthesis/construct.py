@@ -28,8 +28,8 @@ class Constructor:
 
     def half(self, target: Shape) -> Recipe | None:
         """合法颜色范围内精确判半形并生成配方；cu 供料未界定时返回 None。"""
-        if self.rules.quadrants != 4:
-            raise ValueError("逐列半形构造目前限定四象限")
+        if self.rules.quadrants != 4 or self.rules.height != 5:
+            raise ValueError("逐列半形构造目前限定四象限五层")
         if any(cell != EMPTY for row in target.layers for cell in row[2:]):
             raise ValueError("半形构造只接受索引前半；其他方向先旋转")
         if target in self.halves:
@@ -59,10 +59,12 @@ class Constructor:
         self.halves.clear()
         if any(cell == "cu" for row in target.layers for cell in row):
             return Result("unknown", None, "未确认未着色晶体对应的实体流体供料")
-        if any(not CornerBuilder.admissible(tuple(row[q] for row in target.layers))
-               for q in range(self.rules.quadrants)):
+        fixed_five = self.rules.height == 5 and self.rules.quadrants in (4, 6)
+        four_five = self.rules.height == 5 and self.rules.quadrants == 4
+        if fixed_five and any(not CornerBuilder.admissible(tuple(row[q] for row in target.layers))
+                              for q in range(self.rules.quadrants)):
             return Result("unsolvable", None, "目标违反列内针支撑、针前缀或晶体间隙必要条件")
-        if self.rules.quadrants == 4 and not in_support_class(self.rules, target):
+        if four_five and not in_support_class(self.rules, target):
             return Result("unsolvable", None, "四象限五层可制作状态必须通向地面或含针支撑环，目标不属于K")
         if not any(cell[0] == "c" for row in target.layers for cell in row):
             recipe = self.builder.noncrystal(target)
@@ -71,7 +73,7 @@ class Constructor:
         recipe = self.builder.crystal_prefixes(target)
         if recipe is not None:
             return Result("solved", recipe, "独立柱前缀制造后逐层追加")
-        if self.rules.quadrants == 4:
+        if four_five:
             for start in range(2):
                 aligned = self.rules.rotate(target, -start)
                 recipes = []
