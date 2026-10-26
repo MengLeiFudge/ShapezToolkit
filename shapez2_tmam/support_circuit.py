@@ -5,13 +5,14 @@ from .corner_program import CornerProgram
 from .half_circuit import MaterialCell
 
 
-def in_support_class(program: CornerProgram, columns: tuple[tuple[MaterialCell, ...], ...]) -> Ref:
-    """四列五层，地面和所有针作种子；针另须有直接支撑。"""
+def in_support_class(program: CornerProgram, columns: tuple[tuple[MaterialCell, ...], ...], *, grounded: Ref | None = None) -> Ref:
+    """四列五层共用K/G洪泛；grounded为真时只以地面作种子。"""
     if len(columns) != 4 or any(len(column) != 5 for column in columns):
         raise ValueError("K支撑筛选需要四列五个原层位")
     nonpins = tuple(tuple(program.and_(cell.occupied, program.not_(cell.pin)) for cell in column)
                     for column in columns)
-    reachable = tuple(tuple(cell.occupied if z == 0 else cell.pin for z, cell in enumerate(column))
+    pin_seed = program.one if grounded is None else program.not_(grounded)
+    reachable = tuple(tuple(cell.occupied if z == 0 else program.and_(cell.pin, pin_seed) for z, cell in enumerate(column))
                       for column in columns)
     # 二十格中每条简单路径最多十九边；只传播原粘连及向下支撑。
     for _ in range(19):
@@ -24,7 +25,8 @@ def in_support_class(program: CornerProgram, columns: tuple[tuple[MaterialCell, 
                              for neighbor in ((q - 1) % 4, (q + 1) % 4))
                 if z < 4:
                     paths.append(program.and_(column[z].crystal, column[z + 1].crystal, reachable[q][z + 1]))
-                values.append(program.or_(reachable[q][z], program.and_(nonpins[q][z], program.or_(*paths))))
+                pin_support = program.zero if grounded is None else program.and_(column[z].pin, reachable[q][z - 1])
+                values.append(program.or_(reachable[q][z], pin_support, program.and_(nonpins[q][z], program.or_(*paths))))
             following.append(tuple(values))
         reachable = tuple(following)
     clauses = [program.or_(program.not_(cell.occupied), reachable[q][z])

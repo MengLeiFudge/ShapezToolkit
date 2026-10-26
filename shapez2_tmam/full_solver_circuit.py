@@ -30,6 +30,7 @@ class Phase(IntEnum):
     ENTRY = 0
     PREFIX = 1
     PREFIX_NEXT = 2
+    PIN_PREFLIGHT = 3
     SOURCE = 4
     SOURCE_NEXT = 6
     RETURN = 7
@@ -140,7 +141,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         program.pick(checking_prefix, finder.columns[q][z].pin, original[q][z].pin),
         program.pick(checking_prefix, finder.columns[q][z].crystal, original[q][z].crystal))
         for z in range(5)) for q in range(4))
-    anchored = in_support_class(program, support_grid)
+    anchored = in_support_class(program, support_grid, grounded=pin_search)
     appendable = program.and_(finder.appendable, anchored)
     partitions = []
     for start in range(2):
@@ -249,7 +250,10 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     move_prefix = program.and_(modes[Phase.PREFIX_NEXT], program.not_(last_prefix))
     prefix_scan_finished = program.and_(modes[Phase.PREFIX_NEXT], last_prefix)
     begin_pin_search = program.and_(leaf_finished, pin_allowed)
-    prefixes_finished = program.or_(prefix_scan_finished, program.and_(leaf_finished, program.not_(pin_allowed)))
+    grounded_ready = program.and_(modes[Phase.PIN_PREFLIGHT], anchored)
+    grounded_fail = program.and_(modes[Phase.PIN_PREFLIGHT], program.not_(anchored))
+    prefixes_finished = program.or_(prefix_scan_finished, grounded_fail,
+                                    program.and_(leaf_finished, program.not_(pin_allowed)))
 
     valid_source = program.and_(candidate.valid, physics_matches)
     descend = program.and_(modes[Phase.SOURCE], valid_source)
@@ -319,6 +323,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                 bank.put(read, 0, reset_source)
         if i < 4:
             pushing = program.and_(descend, selected_frame)
+            bank.put(frames[i + 1].pin_search, 0, pushing)
             for q in range(4):
                 for z in range(5):
                     bank.put(frames[i + 1].goal[q][z], candidate.tags[q][z], pushing)
@@ -353,7 +358,8 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     transitions = (
         (enter, Phase.PREFIX), (entry_fail, Phase.FAIL),
         (leaf_found, Phase.RETURN), (start_source, Phase.SOURCE), (skip_prefix, Phase.PREFIX_NEXT),
-        (move_prefix, Phase.PREFIX), (begin_pin_search, Phase.PREFIX), (prefixes_finished, Phase.FAIL),
+        (move_prefix, Phase.PREFIX), (begin_pin_search, Phase.PIN_PREFLIGHT),
+        (grounded_ready, Phase.PREFIX), (prefixes_finished, Phase.FAIL),
         (descend, Phase.ENTRY), (skip_source, Phase.SOURCE_NEXT),
         (program.and_(counter_event, program.not_(sources_finished)), Phase.SOURCE),
         (sources_finished, Phase.PREFIX_NEXT),
@@ -370,12 +376,12 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
     bank.put(status, 3, outside)
     bank.put(status, 4, internal)
     # K的重通路只由慢状态切换；业务冻结时脉冲清零，避免重复发包。
-    bank.put(support_prefix, 0, descend)
-    bank.put(support_prefix, 1, program.or_(enter, search_pop, fail_pop, root_solved, replay_up))
+    bank.put(support_prefix, 0, program.or_(descend, begin_pin_search))
+    bank.put(support_prefix, 1, program.or_(enter, grounded_ready, search_pop, fail_pop, root_solved, replay_up))
     slow_reads = (depth, second_pass, second_corner, support_prefix, leaf_direction, *(read for frame in frames for read in (
         *(cell for column in frame.goal for cell in column), *frame.prefix,
         *(bit for bits in (*frame.slots, *frame.top) for bit in bits), *frame.crystals, frame.pin_search)))
-    slow_event = program.or_(enter, next_cut, grow_prefix, begin_pin_search, move_prefix, start_source, counter_event,
+    slow_event = program.or_(enter, next_cut, grow_prefix, begin_pin_search, grounded_ready, move_prefix, start_source, counter_event,
                              descend, search_pop, fail_pop, root_solved, replay_up, repeat, repeat_corner)
     timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,))
     window = program.and_(timing.phases[3], enable)
@@ -396,7 +402,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
                     "instruction": {name: channels[value] for name, value in zip(RECORD_FIELDS, instruction_outputs)}},
         "gate_platforms": len(circuit.gates), "reserved_channels": [channel_base, channel_base + reserve - 1],
         **state_report, "timing": timing_contract(timing),
-        "palette_entries_per_cell": 9,
+        "palette_entries_per_cell": 9, "grounded_pin_tail_required": True,
         "search_frames": 5, "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,
                            "requires_column_admissibility": True, "iterative_state_registers": 0,
@@ -414,7 +420,7 @@ def build_solver(channel_base: int = 1_211_000) -> tuple[Circuit, dict]:
         "resource_bound": "每格只查本列5个原标签及4种辅助料；五帧各20目标ID、12前缀位、20来源槽位、8NPC顶盖位、4顶层C位、1遍次位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最低C每次下降至少一层，递归至多四边；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
-        "proof": "4q5l/prefix-closure.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
+        "proof": "4q5l/prefix-closure.md；full-tail-circuit.md；shared-angle.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-image-exact.md；support-reachability.md；tail-solver.md；pin-patterns.md；clocked-control.md。",
         "verification": "仅静态源代码推导、DAG、端口和实际占地生产编译；未执行目标、搜索、指令、反馈模拟、测试或游戏",
     }
 

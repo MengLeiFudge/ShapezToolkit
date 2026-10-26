@@ -23,7 +23,7 @@ class Solver4:
         self.builder = self.constructor.builder
         self.certificate_first = certificate_first
 
-    def predecessors(self, target: Shape) -> Iterator[Shape]:
+    def predecessors(self, target: Shape, *, grounded: bool = False) -> Iterator[Shape]:
         """按非空格前缀生成K中的S前态，保留原层号与全部晶体。"""
         desired = self.rules.cells(target)
         columns = [sorted((z, cell) for (z, column), cell in desired.items() if column == q)
@@ -35,7 +35,7 @@ class Solver4:
         for counts in product(*ranges):
             original = {(z, q): cell for q, count in enumerate(counts) for z, cell in columns[q][:count]}
             source = self.rules.fold(original)
-            if source is None or not in_support_class(self.rules, source):
+            if source is None or not in_support_class(self.rules, source, grounded=grounded):
                 continue
             delta = {pos: cell for pos, cell in desired.items() if pos not in original}
             # 分组只读取新增格；与下料的新接触不能把独立上料块合并。
@@ -72,9 +72,9 @@ class Solver4:
                 raise RuntimeError("强制前缀闭包已证明A起点，但角构造未生成证书")
             return self._finish(found.recipe, target)
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
-        if lowest == 0:
+        if lowest == 0 or not in_support_class(self.rules, target, grounded=True):
             return None
-        for pushed in self.predecessors(target):
+        for pushed in self.predecessors(target, grounded=True):
             # 不可制作的中间输出不能成为尾部节点；unknown 则继续完整逆推。
             if self.constructor.construct(pushed).status == "unsolvable":
                 continue

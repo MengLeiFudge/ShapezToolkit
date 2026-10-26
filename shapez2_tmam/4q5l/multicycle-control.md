@@ -8,7 +8,7 @@
 
 330项慢状态为五帧全部325项状态，以及depth、second_pass、second_corner、support_prefix、leaf_direction。其余为快状态，包括CPU、PC、Phase、状态和包快照；另有冷却位cooling。总计359项状态，六个物品槽、265行ROM。
 
-重K通路选择器改为独立慢状态support_prefix，初值0。下降到新帧时写0，ENTRY读完整帧目标；成功进入PREFIX时写1。回父或根开始重放时也写1，确保子帧在ENTRY直接失败后，父前缀扫描仍使用正确选择。Phase不再直接驱动K洪泛。
+K/G共用通路由慢状态support_prefix选择目标或前缀，由当前帧pin_search选择种子。下降写新子帧时同步清该帧pin_search及support_prefix，ENTRY读完整目标K；成功进入PREFIX后support_prefix置1。begin_pin_search置pin_search=1并清support_prefix，PIN_PREFLIGHT读完整目标G；grounded_ready后再选前缀。回父或根重放也设为前缀；Phase不直接驱动洪泛。
 
 每次可能改慢状态的事件均触发slow_event：
 
@@ -23,7 +23,8 @@
 | 回父或跳成功叶端depth | search_pop、fail_pop、root_solved、replay_up |
 | 制造半形遍次 | root_solved、repeat |
 | 制造角遍次 | root_solved、repeat、repeat_corner |
-| K选择器 | descend、enter、search_pop、fail_pop、root_solved、replay_up |
+| K/G目标选择器 | descend、enter、begin_pin_search、grounded_ready、search_pop、fail_pop、root_solved、replay_up |
+| K/G种子模式 | enter、begin_pin_search、descend清新子帧遍次 |
 
 事件可包含不改变值的写入，只会多等一轮。不存在未列事件下的慢状态写入。复位另按全初始路径等待，不使用运行协议。
 
@@ -54,6 +55,6 @@ record_valid列入pulses，next为 `ready AND 原accepted`，冻结时写0；它
 
 当前规模由[完整控制器](full-tail-circuit.md)及生产JSON记录。新增掩码会增加占地，换取较短的制造周期。最坏来源数与递归分支界保持，必须继续压缩搜索。
 
-本次两个Python文件LSP零诊断，两版完整蓝图通过组合DAG、逐端口和实际占地静态编译。通用标签及独立半形部件沿用原产物。未运行目标、搜索、指令、模拟、测试或游戏。
+本次四个Python文件LSP零诊断，两版完整蓝图通过组合DAG、逐端口和实际占地静态编译。通用标签及独立半形部件沿用原产物。未运行目标、搜索、指令、模拟、测试或游戏。
 
 [完整控制器](full-tail-circuit.md) · [蓝图接口](../blueprints/README.md) · [返回目录](README.md)
