@@ -13,6 +13,30 @@ from .sequential_circuit import clock, latch, select, timing_contract
 RECORD_FIELDS = PACKET_FIELDS[:-1]
 
 
+def skip_inactive_runs(program: tuple[Instruction, ...], one: Ref, *, boundaries: tuple[int, ...] = ()) -> tuple[Instruction, ...]:
+    """仅段首附加跳转；同条件空行可跳过，原行号和调用边界保持。"""
+    if any(not 0 <= index < len(program) for index in boundaries):
+        raise ValueError("制造程序的受保护控制行必须位于ROM内")
+    protected = {*boundaries, len(program) - 1}
+    result = list(program)
+    start = 0
+    while start < len(program):
+        instruction = program[start]
+        if start in protected or instruction.branch is not None or instruction.skip_to is not None or instruction.condition == one:
+            start += 1
+            continue
+        end = start + 1
+        while end < len(program) and end not in protected:
+            following = program[end]
+            if following.branch is not None or following.skip_to is not None or following.condition != instruction.condition:
+                break
+            end += 1
+        if end > start + 1:
+            result[start] = replace(instruction, skip_to=end)
+        start = end
+    return tuple(result)
+
+
 def _rom(circuit: Circuit, program: tuple[Instruction, ...], bits: tuple[Ref, ...],
          one: Ref, null: Ref) -> tuple[dict[str, Ref], Ref, Ref, list[tuple[Ref, int]]]:
     """共用分段地址译码，并把同值字段的地址合为一组。"""
@@ -56,11 +80,12 @@ def _rom(circuit: Circuit, program: tuple[Instruction, ...], bits: tuple[Ref, ..
             fields[name] = null
     jumps = []
     for index, (address, instruction) in enumerate(zip(addresses, program)):
-        if instruction.branch is None:
+        if instruction.branch is None and instruction.skip_to is None:
             continue
         if instruction.skip_to is None or not index < instruction.skip_to < len(program):
             raise ValueError("宏跳转必须指向当前控制行之后的有效指令地址")
-        absent = circuit.add("LogicGateNot", instruction.branch)
+        condition = instruction.condition if instruction.branch is None else instruction.branch
+        absent = circuit.add("LogicGateNot", condition)
         jumps.append((circuit.add("LogicGateAnd", address, absent), instruction.skip_to))
     return fields, _combine(circuit, "LogicGateOr", chosen), addresses[-1], jumps
 
