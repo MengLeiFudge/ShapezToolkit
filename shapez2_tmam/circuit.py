@@ -188,9 +188,13 @@ class Circuit:
         self.aliases: list[tuple[Ref, ...]] = []
         self.local_nodes: set[int] = set()
         self.fixed_local_pairs: dict[int, int] | None = None
+        self.retained_nodes: frozenset[int] | None = None
+        self.retained_outputs: tuple[Ref, ...] = ()
 
     def add(self, kind: str, *inputs: Ref | Literal, config: str | None = None) -> Ref:
         """添加一个门，返回输出零；其他出口用 Ref(node, port) 指定。"""
+        if self.retained_nodes is not None:
+            raise ValueError("登记导出依赖后不能再添加门")
         if kind not in _SUPPORTED or len(inputs) != len(PORTS[kind][1]):
             raise ValueError(f"不支持的门或输入数量：{kind}")
         index = len(self.gates)
@@ -218,6 +222,45 @@ class Circuit:
                 if isinstance(source, Ref) and source not in channels:
                     raise ValueError(f"门输入引用了不存在的输出：{source}")
         return channels
+
+    def retain_outputs(self, outputs: tuple[Ref, ...]) -> None:
+        """完成网表后仅导出公开输出的依赖闭包；保留全部原Ref及频道编号。"""
+        if self.retained_nodes is not None:
+            raise ValueError("导出依赖不能重复登记")
+        channels = self.channel_map()
+        if any(output not in channels for output in outputs):
+            raise ValueError("导出终点引用了不存在的输出")
+        self.local_pairs(protected=outputs)
+        writers: dict[int, set[int]] = {}
+        for ref, channel in channels.items():
+            writers.setdefault(channel, set()).add(ref.node)
+        for gate in self.gates:
+            if gate.kind == "ControlledSignalReceiver":
+                source = gate.inputs[0]
+                if not isinstance(source, Literal) or not isinstance(source.value, int):
+                    raise ValueError("动态选频接收器不能静态裁剪导出依赖")
+        pending = [node for output in outputs for node in writers[channels[output]]]
+        retained: set[int] = set()
+        while pending:
+            node = pending.pop()
+            if node in retained:
+                continue
+            retained.add(node)
+            gate = self.gates[node]
+            for source in gate.inputs:
+                if isinstance(source, Ref):
+                    pending.extend(writers[channels[source]] - retained)
+            if gate.kind == "ControlledSignalReceiver":
+                source = gate.inputs[0]
+                assert isinstance(source, Literal) and isinstance(source.value, int)
+                pending.extend(writers.get(source.value, set()) - retained)
+        self.retained_nodes = frozenset(retained)
+        self.retained_outputs = outputs
+
+    def gate_counts(self) -> dict[str, int]:
+        """实际导出的逻辑门分类；原节点编号与频道分配不受裁剪影响。"""
+        return dict(sorted(Counter(gate.kind for node, gate in enumerate(self.gates)
+                                   if self.retained_nodes is None or node in self.retained_nodes).items()))
 
     def _max_depth(self, changing: tuple[Ref, ...] | None = None,
                    outputs: tuple[Ref, ...] | None = None, *, trace: list[Ref] | None = None) -> int:
@@ -313,7 +356,7 @@ class Circuit:
         kinds = {"LogicGateAnd", "LogicGateOr", "LogicGateXOr", "LogicGateCompare", "LogicGateIf", "LogicGateNot"}
         uses = Counter(source for gate in self.gates for source in gate.inputs if isinstance(source, Ref))
         aliased = {reference for group in self.aliases for reference in group}
-        public = set(protected)
+        public = set(protected) | set(self.retained_outputs)
         channels = self.channel_map()
         received = {gate.inputs[0].value for gate in self.gates if gate.kind == "ControlledSignalReceiver"
                     and isinstance(gate.inputs[0], Literal)}
@@ -334,7 +377,8 @@ class Circuit:
                                    for port, source in enumerate(self.gates[node].inputs))):
                     raise ValueError("用于时序计算的固定局部配对不再满足私有接线条件")
                 used.update((node, child))
-            return dict(self.fixed_local_pairs)
+            return {node: child for node, child in self.fixed_local_pairs.items()
+                    if self.retained_nodes is None or node in self.retained_nodes}
         for node in sorted(self.local_nodes, reverse=True):
             gate = self.gates[node]
             if node in used or gate.kind not in kinds:
@@ -344,7 +388,8 @@ class Circuit:
                     pairs[node] = source.node
                     used.update((node, source.node))
                     break
-        return pairs
+        return {node: child for node, child in pairs.items()
+                if self.retained_nodes is None or node in self.retained_nodes}
 
     def building_counts(self, *, packed: bool = False) -> dict[str, int]:
         """按网表及固定模板统计非线缆建筑；不分配坐标、平台或执行走线。"""
@@ -355,8 +400,10 @@ class Circuit:
         aliased = {reference for group in self.aliases for reference in group}
         fixed = {Ref(node) for node, gate in enumerate(self.gates)
                  if packed and gate.kind == "ConstantSignal" and gate.config is not None and Ref(node) not in aliased}
-        counts = Counter(gate.kind for gate in self.gates)
+        counts = Counter(self.gate_counts())
         for node, gate in enumerate(self.gates):
+            if self.retained_nodes is not None and node not in self.retained_nodes:
+                continue
             for source in gate.inputs:
                 if isinstance(source, Ref) and node in pairs and source == Ref(pairs[node]):
                     continue
@@ -384,7 +431,7 @@ class Circuit:
         fixed_values = {Ref(node): gate.config for node, gate in enumerate(self.gates)
                         if gate.kind == "ConstantSignal" and Ref(node) not in aliased and gate.config is not None}
         for i, gate in enumerate(self.gates):
-            if i in absorbed:
+            if i in absorbed or (self.retained_nodes is not None and i not in self.retained_nodes):
                 continue
             component = len(platforms)
             entries = []
@@ -481,7 +528,7 @@ class Circuit:
                     raise ValueError(f"没有布局的门输出：{gate.kind}:{port}")
                 expected.append(((component, transmitter, 0), (component, control, 0)))
                 expected.append(((component, transmitter, 1), (component, gate_index, port)))
-            platforms.append({"X": i % 12, "Y": i // 12, "T": "Foundation_1x1", "B": {
+            platforms.append({"X": component % 12, "Y": component // 12, "T": "Foundation_1x1", "B": {
                 "$type": "Building", "BinaryVersion": 1137, "Entries": entries}})
             bounds.append((min(x for x, _, _ in occupied), min(y for _, y, _ in occupied),
                            max(x for x, _, _ in occupied), max(y for _, y, _ in occupied)))

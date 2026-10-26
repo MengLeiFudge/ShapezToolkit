@@ -2,7 +2,6 @@
 
 import argparse
 import json
-from collections import Counter
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
@@ -426,6 +425,8 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
     status_output = circuit.add("LogicGateIf", status, program.and_(window, decoded.valid))
     output = circuit.add("LogicGateIf", items[0], program.and_(done,
         circuit.add("LogicGateCompare", status, Literal(1), config="AQ==")))
+    circuit.retain_outputs((window, sample, done, status_output, output, *instruction_outputs))
+    logical_gates = sum(circuit.gate_counts().values())
     channels = circuit.channel_map()
     if max(channels.values()) > channel_base + reserve - 1:
         raise ValueError("完整四象限控制超出其保留频道范围")
@@ -435,7 +436,9 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
         "outputs": {"window": channels[window], "sample": channels[sample], "done": channels[done],
                     "status": channels[status_output], "result": channels[output],
                     "instruction": {name: channels[value] for name, value in zip(RECORD_FIELDS, instruction_outputs)}},
-        "gate_platforms": len(circuit.gates), "reserved_channels": [channel_base, channel_base + reserve - 1],
+        "gate_platforms": logical_gates, "generated_gates": len(circuit.gates),
+        "omitted_gates": len(circuit.gates) - logical_gates,
+        "reserved_channels": [channel_base, channel_base + reserve - 1],
         **state_report, "timing": timing_contract(timing),
         "shared_condition_controls": True, "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
         "support_row_closures": 10, "pin_base_precheck": True, "crystal_conflict_slot_skip": True,
@@ -480,8 +483,8 @@ def main() -> int:
     if args.report_only:
         report.pop("gate_platforms")
         buildings = circuit.building_counts(packed=args.pack)
-        report.update({"mode": "netlist_report", "logical_gates": len(circuit.gates),
-                       "logical_gate_counts": dict(sorted(Counter(gate.kind for gate in circuit.gates).items())),
+        report.update({"mode": "netlist_report", "logical_gates": sum(circuit.gate_counts().values()),
+                       "logical_gate_counts": circuit.gate_counts(),
                        "local_gate_pairs": len(circuit.local_pairs()) if args.pack else 0,
                        "building_counts_without_wires": buildings, "buildings_without_wires": sum(buildings.values()),
                        "building_count_basis": "按当前门、输入常量、无线收发器与固定局部模板计数；不含线缆和平台。",
@@ -489,12 +492,12 @@ def main() -> int:
                        "timing_basis": "网表DAG与固定局部模板；实际布局尚未核对。" if args.pack else "全部Ref按无线边计算的网表DAG。",
                        "verification": "仅静态网表、频道依赖及理论时序；没有布线、装箱或占地检查，未运行目标、模拟或测试。"})
         args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        print(f"网表统计已生成：{args.output}；{len(circuit.gates)} 个逻辑门；未生成布局。")
+        print(f"网表统计已生成：{args.output}；{report['logical_gates']} 个逻辑门；未生成布局。")
         return 0
     document = circuit.document(packed=args.pack)
     if args.pack:
         platforms = document["BP"]["Entries"]
-        report.update({"logical_gates": len(circuit.gates), "gate_platforms": len(platforms),
+        report.update({"logical_gates": sum(circuit.gate_counts().values()), "gate_platforms": len(platforms),
                        "local_constant_inputs": True, "local_gate_pairs": len(circuit.local_pairs()),
                        "layout": "固定常量就地复制；私有组合门固定两两本地连接并按实际无线级数计时，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
                        "platform_grid": [max(platform["X"] for platform in platforms) + 1,
