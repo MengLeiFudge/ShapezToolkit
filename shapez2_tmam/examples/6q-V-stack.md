@@ -28,27 +28,27 @@
 
 | 编号 | 加工 | 输入编号 | 参数 | 产物 |
 |---:|---|---|---|---|
-| 0 | base | — | — | `CuCuP-CuCuCu` |
+| 0 | base | — | — | `CuCuCuCuCuP-` |
 | 1 | base | — | — | `CuCuCuCuCuCu` |
-| 2 | stack | 0, 1 | — | `CuCuP-CuCuCu:CuCuCuCuCuCu` |
-| 3 | base | — | — | `CuCuP-CuCuCu` |
-| 4 | stack | 2, 3 | — | `CuCuP-CuCuCu:CuCuCuCuCuCu:CuCuP-CuCuCu` |
-| 5 | base | — | — | `CuCuP-CuCuCu` |
-| 6 | stack | 4, 5 | — | `CuCuP-CuCuCu:CuCuCuCuCuCu:CuCuP-CuCuCu:CuCuP-CuCuCu` |
-| 7 | base | — | — | `CuCuP-CuCuCu` |
-| 8 | stack | 6, 7 | — | `CuCuP-CuCuCu:CuCuCuCuCuCu:CuCuP-CuCuCu:CuCuP-CuCuCu:CuCuP-CuCuCu` |
-| 9 | crystal | 8 | r | `CuCucrCuCuCu:CuCuCuCuCuCu:CuCucrCuCuCu:CuCucrCuCuCu:CuCucrCuCuCu` |
-| 10 | cut | 9 | 0 | `CuCucr------:CuCuCu------:CuCucr------:CuCucr------:CuCucr------` |
-| 11 | rotate | 10 | 4 | `cr------CuCu:Cu------CuCu:cr------CuCu:cr------CuCu:cr------CuCu` |
+| 2 | stack | 0, 1 | — | `CuCuCuCuCuP-:CuCuCuCuCuCu` |
+| 3 | base | — | — | `CuCuCuCuCuP-` |
+| 4 | stack | 2, 3 | — | `CuCuCuCuCuP-:CuCuCuCuCuCu:CuCuCuCuCuP-` |
+| 5 | base | — | — | `CuCuCuCuCuP-` |
+| 6 | stack | 4, 5 | — | `CuCuCuCuCuP-:CuCuCuCuCuCu:CuCuCuCuCuP-:CuCuCuCuCuP-` |
+| 7 | base | — | — | `CuCuCuCuCuP-` |
+| 8 | stack | 6, 7 | — | `CuCuCuCuCuP-:CuCuCuCuCuCu:CuCuCuCuCuP-:CuCuCuCuCuP-:CuCuCuCuCuP-` |
+| 9 | crystal | 8 | r | `CuCuCuCuCucr:CuCuCuCuCuCu:CuCuCuCuCucr:CuCuCuCuCucr:CuCuCuCuCucr` |
+| 10 | cut | 9 | 1 | `------CuCucr:------CuCuCu:------CuCucr:------CuCucr:------CuCucr` |
+| 11 | rotate | 10 | 1 | `cr------CuCu:Cu------CuCu:cr------CuCu:cr------CuCu:cr------CuCu` |
 | 12 | cut | 11 | 0 | `cr----------:Cu----------:cr----------:cr----------:cr----------` |
-| 13 | rotate | 12 | 2 | `----cr------:----Cu------:----cr------:----cr------:----cr------` |
-| 14 | base | — | — | `CuCuP-CuCuCu` |
-| 15 | crystal | 14 | r | `CuCucrCuCuCu` |
-| 16 | cut | 15 | 0 | `CuCucr------` |
-| 17 | rotate | 16 | 1 | `--CuCucr----` |
-| 18 | cut | 17 | 1 | `------cr----` |
-| 19 | swap | 13, 18 | 0 | `----crcr----:----Cu------:----cr------:----cr------:----cr------` |
-| 20 | rotate | 19 | 4 | `crcr--------:Cu----------:cr----------:cr----------:cr----------` |
+| 13 | rotate | 12 | 5 | `----------cr:----------Cu:----------cr:----------cr:----------cr` |
+| 14 | base | — | — | `CuCuCuCuCuP-` |
+| 15 | crystal | 14 | r | `CuCuCuCuCucr` |
+| 16 | cut | 15 | 1 | `------CuCucr` |
+| 17 | rotate | 16 | 1 | `cr------CuCu` |
+| 18 | cut | 17 | 0 | `cr----------` |
+| 19 | swap | 13, 18 | 1 | `cr--------cr:----------Cu:----------cr:----------cr:----------cr` |
+| 20 | rotate | 19 | 1 | `crcr--------:Cu----------:cr----------:cr----------:cr----------` |
 | 21 | base | — | — | `----------Cu` |
 | 22 | base | — | — | `----------Cu` |
 | 23 | pin | 22 | — | `----------P-:----------Cu` |
@@ -58,19 +58,19 @@
 | 27 | base | — | — | `----------Cu` |
 | 28 | stack | 26, 27 | — | `----------Cu:----------P-:----------Cu:----------Cu:----------Cu` |
 | 29 | swap | 20, 28 | 0 | `crcr------Cu:Cu--------P-:cr--------Cu:cr--------Cu:cr--------Cu` |
-| 30 | rotate | 29 | 2 | `--Cucrcr----:--P-Cu------:--Cucr------:--Cucr------:--Cucr------` |
-| 31 | cut | 30 | 0 | `--CuCu------:--P---------:--Cucr------:--Cucr------:--Cucr------` |
-| 32 | base | — | — | `----------Cu` |
-| 33 | base | — | — | `----------Cu` |
-| 34 | stack | 32, 33 | — | `----------Cu:----------Cu` |
-| 35 | base | — | — | `------CuCuCu` |
-| 36 | stack | 34, 35 | — | `----------Cu:----------Cu:------CuCuCu` |
-| 37 | base | — | — | `--------Cu--` |
-| 38 | stack | 36, 37 | — | `----------Cu:----------Cu:------CuCuCu:--------Cu--` |
-| 39 | base | — | — | `------CuCu--` |
-| 40 | stack | 38, 39 | — | `----------Cu:----------Cu:------CuCuCu:--------Cu--:------CuCu--` |
-| 41 | swap | 31, 40 | 0 | `--CuCu----Cu:--P-------Cu:--CucrCuCuCu:--Cucr--Cu--:--CucrCuCu--` |
-| 42 | rotate | 41 | 4 | `Cu----Cu--Cu:------Cu--P-:crCuCuCu--Cu:cr--Cu----Cu:crCuCu----Cu` |
+| 30 | rotate | 29 | 5 | `cr------Cucr:--------P-Cu:--------Cucr:--------Cucr:--------Cucr` |
+| 31 | cut | 30 | 1 | `--------CuCu:--------P---:--------Cucr:--------Cucr:--------Cucr` |
+| 32 | base | — | — | `----Cu------` |
+| 33 | base | — | — | `----Cu------` |
+| 34 | stack | 32, 33 | — | `----Cu------:----Cu------` |
+| 35 | base | — | — | `CuCuCu------` |
+| 36 | stack | 34, 35 | — | `----Cu------:----Cu------:CuCuCu------` |
+| 37 | base | — | — | `--Cu--------` |
+| 38 | stack | 36, 37 | — | `----Cu------:----Cu------:CuCuCu------:--Cu--------` |
+| 39 | base | — | — | `CuCu--------` |
+| 40 | stack | 38, 39 | — | `----Cu------:----Cu------:CuCuCu------:--Cu--------:CuCu--------` |
+| 41 | swap | 31, 40 | 1 | `----Cu--CuCu:----Cu--P---:CuCuCu--Cucr:--Cu----Cucr:CuCu----Cucr` |
+| 42 | rotate | 41 | 1 | `Cu----Cu--Cu:------Cu--P-:crCuCuCu--Cu:cr--Cu----Cu:crCuCu----Cu` |
 | 43 | cut | 42 | 0 | `Cu----------:------------:crCuCu------:cr--Cu------:crCuCu------` |
 | 44 | base | — | — | `CuCuP-CuCuCu` |
 | 45 | base | — | — | `CuCuCuCuCuCu` |
@@ -83,26 +83,26 @@
 | 52 | stack | 50, 51 | — | `CuCuP-CuCuCu:CuCuCuCuCuCu:CuCuP-CuCuCu:CuCuP-CuCuCu:CuCuP-CuCuCu` |
 | 53 | crystal | 52 | r | `CuCucrCuCuCu:CuCuCuCuCuCu:CuCucrCuCuCu:CuCucrCuCuCu:CuCucrCuCuCu` |
 | 54 | cut | 53 | 0 | `CuCucr------:CuCuCu------:CuCucr------:CuCucr------:CuCucr------` |
-| 55 | rotate | 54 | 4 | `cr------CuCu:Cu------CuCu:cr------CuCu:cr------CuCu:cr------CuCu` |
-| 56 | cut | 55 | 0 | `cr----------:Cu----------:cr----------:cr----------:cr----------` |
-| 57 | rotate | 56 | 2 | `----cr------:----Cu------:----cr------:----cr------:----cr------` |
+| 55 | rotate | 54 | 1 | `--CuCucr----:--CuCuCu----:--CuCucr----:--CuCucr----:--CuCucr----` |
+| 56 | cut | 55 | 1 | `------cr----:------Cu----:------cr----:------cr----:------cr----` |
+| 57 | rotate | 56 | 5 | `----cr------:----Cu------:----cr------:----cr------:----cr------` |
 | 58 | base | — | — | `CuCuP-CuCuCu` |
 | 59 | crystal | 58 | r | `CuCucrCuCuCu` |
 | 60 | cut | 59 | 0 | `CuCucr------` |
 | 61 | rotate | 60 | 1 | `--CuCucr----` |
 | 62 | cut | 61 | 1 | `------cr----` |
 | 63 | swap | 57, 62 | 0 | `----crcr----:----Cu------:----cr------:----cr------:----cr------` |
-| 64 | rotate | 63 | 4 | `crcr--------:Cu----------:cr----------:cr----------:cr----------` |
-| 65 | base | — | — | `----------Cu` |
-| 66 | base | — | — | `----------Cu` |
-| 67 | pin | 66 | — | `----------P-:----------Cu` |
-| 68 | stack | 65, 67 | — | `----------Cu:----------P-:----------Cu` |
-| 69 | base | — | — | `----------Cu` |
-| 70 | stack | 68, 69 | — | `----------Cu:----------P-:----------Cu:----------Cu` |
-| 71 | base | — | — | `----------Cu` |
-| 72 | stack | 70, 71 | — | `----------Cu:----------P-:----------Cu:----------Cu:----------Cu` |
-| 73 | swap | 64, 72 | 0 | `crcr------Cu:Cu--------P-:cr--------Cu:cr--------Cu:cr--------Cu` |
-| 74 | rotate | 73 | 2 | `--Cucrcr----:--P-Cu------:--Cucr------:--Cucr------:--Cucr------` |
+| 64 | rotate | 63 | 1 | `------crcr--:------Cu----:------cr----:------cr----:------cr----` |
+| 65 | base | — | — | `----Cu------` |
+| 66 | base | — | — | `----Cu------` |
+| 67 | pin | 66 | — | `----P-------:----Cu------` |
+| 68 | stack | 65, 67 | — | `----Cu------:----P-------:----Cu------` |
+| 69 | base | — | — | `----Cu------` |
+| 70 | stack | 68, 69 | — | `----Cu------:----P-------:----Cu------:----Cu------` |
+| 71 | base | — | — | `----Cu------` |
+| 72 | stack | 70, 71 | — | `----Cu------:----P-------:----Cu------:----Cu------:----Cu------` |
+| 73 | swap | 64, 72 | 1 | `----Cucrcr--:----P-Cu----:----Cucr----:----Cucr----:----Cucr----` |
+| 74 | rotate | 73 | 5 | `--Cucrcr----:--P-Cu------:--Cucr------:--Cucr------:--Cucr------` |
 | 75 | cut | 74 | 0 | `--CuCu------:--P---------:--Cucr------:--Cucr------:--Cucr------` |
 | 76 | base | — | — | `----------Cu` |
 | 77 | base | — | — | `----------Cu` |

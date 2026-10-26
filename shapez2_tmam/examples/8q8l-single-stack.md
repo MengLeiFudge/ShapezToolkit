@@ -41,9 +41,9 @@
 | 8 | stack | 6, 7 | — | `CuCuCuP-CuCuCuCu:CuCuCuCuCuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
 | 9 | crystal | 8 | r | `CuCuCucrCuCuCuCu:CuCuCuCuCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu` |
 | 10 | cut | 9 | 0 | `CuCuCucr--------:CuCuCuCu--------:CuCuCucr--------:CuCuCucr--------:CuCuCucr--------` |
-| 11 | rotate | 10 | 5 | `cr--------CuCuCu:Cu--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu` |
-| 12 | cut | 11 | 0 | `cr--------------:Cu--------------:cr--------------:cr--------------:cr--------------` |
-| 13 | rotate | 12 | 3 | `------cr--------:------Cu--------:------cr--------:------cr--------:------cr--------` |
+| 11 | rotate | 10 | 1 | `--CuCuCucr------:--CuCuCuCu------:--CuCuCucr------:--CuCuCucr------:--CuCuCucr------` |
+| 12 | cut | 11 | 1 | `--------cr------:--------Cu------:--------cr------:--------cr------:--------cr------` |
+| 13 | rotate | 12 | 7 | `------cr--------:------Cu--------:------cr--------:------cr--------:------cr--------` |
 | 14 | base | — | — | `CuCuCuP-CuCuCuCu` |
 | 15 | crystal | 14 | r | `CuCuCucrCuCuCuCu` |
 | 16 | cut | 15 | 0 | `CuCuCucr--------` |
@@ -67,55 +67,55 @@
 | 34 | cut | 33 | 1 | `--------cr------` |
 | 35 | swap | 29, 34 | 0 | `--crcrcrcr------:--Cu--cr--------:--cr------------:--cr------------:--cr------------` |
 | 36 | rotate | 35 | 7 | `crcrcrcr--------:Cu--cr----------:cr--------------:cr--------------:cr--------------` |
-| 37 | base | — | — | `CuCuCuP-CuCuCuCu` |
+| 37 | base | — | — | `CuCuCuCuCuCuCuP-` |
 | 38 | base | — | — | `CuCuCuCuCuCuCuCu` |
-| 39 | stack | 37, 38 | — | `CuCuCuP-CuCuCuCu:CuCuCuCuCuCuCuCu` |
-| 40 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 41 | stack | 39, 40 | — | `CuCuCuP-CuCuCuCu:CuCuCuCuCuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 42 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 43 | stack | 41, 42 | — | `CuCuCuP-CuCuCuCu:CuCuCuCuCuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 44 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 45 | stack | 43, 44 | — | `CuCuCuP-CuCuCuCu:CuCuCuCuCuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 46 | crystal | 45 | r | `CuCuCucrCuCuCuCu:CuCuCuCuCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu` |
-| 47 | cut | 46 | 0 | `CuCuCucr--------:CuCuCuCu--------:CuCuCucr--------:CuCuCucr--------:CuCuCucr--------` |
-| 48 | rotate | 47 | 5 | `cr--------CuCuCu:Cu--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu` |
+| 39 | stack | 37, 38 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuCu` |
+| 40 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 41 | stack | 39, 40 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuCu:CuCuCuCuCuCuCuP-` |
+| 42 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 43 | stack | 41, 42 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuCu:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 44 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 45 | stack | 43, 44 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuCu:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 46 | crystal | 45 | r | `CuCuCuCuCuCuCucr:CuCuCuCuCuCuCuCu:CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr` |
+| 47 | cut | 46 | 1 | `--------CuCuCucr:--------CuCuCuCu:--------CuCuCucr:--------CuCuCucr:--------CuCuCucr` |
+| 48 | rotate | 47 | 1 | `cr--------CuCuCu:Cu--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu` |
 | 49 | cut | 48 | 0 | `cr--------------:Cu--------------:cr--------------:cr--------------:cr--------------` |
-| 50 | rotate | 49 | 3 | `------cr--------:------Cu--------:------cr--------:------cr--------:------cr--------` |
-| 51 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 52 | crystal | 51 | r | `CuCuCucrCuCuCuCu` |
-| 53 | cut | 52 | 0 | `CuCuCucr--------` |
-| 54 | rotate | 53 | 1 | `--CuCuCucr------` |
-| 55 | cut | 54 | 1 | `--------cr------` |
-| 56 | swap | 50, 55 | 0 | `------crcr------:------Cu--------:------cr--------:------cr--------:------cr--------` |
-| 57 | rotate | 56 | 7 | `----crcr--------:----Cu----------:----cr----------:----cr----------:----cr----------` |
-| 58 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 59 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 60 | stack | 58, 59 | — | `CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 61 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 62 | stack | 60, 61 | — | `CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 63 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 64 | stack | 62, 63 | — | `CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 65 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 66 | stack | 64, 65 | — | `CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 67 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 68 | stack | 66, 67 | — | `CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 69 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 70 | stack | 68, 69 | — | `CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 71 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 72 | stack | 70, 71 | — | `CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu:CuCuCuP-CuCuCuCu` |
-| 73 | crystal | 72 | r | `CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu:CuCuCucrCuCuCuCu` |
-| 74 | cut | 73 | 0 | `CuCuCucr--------:CuCuCucr--------:CuCuCucr--------:CuCuCucr--------:CuCuCucr--------:CuCuCucr--------:CuCuCucr--------:CuCuCucr--------` |
-| 75 | rotate | 74 | 1 | `--CuCuCucr------:--CuCuCucr------:--CuCuCucr------:--CuCuCucr------:--CuCuCucr------:--CuCuCucr------:--CuCuCucr------:--CuCuCucr------` |
-| 76 | cut | 75 | 1 | `--------cr------:--------cr------:--------cr------:--------cr------:--------cr------:--------cr------:--------cr------:--------cr------` |
-| 77 | swap | 57, 76 | 0 | `----crcrcr------:----Cu--cr------:----cr--cr------:----cr--cr------:----cr--cr------:--------cr------:--------cr------:--------cr------` |
-| 78 | rotate | 77 | 7 | `--crcrcr--------:--Cu--cr--------:--cr--cr--------:--cr--cr--------:--cr--cr--------:------cr--------:------cr--------:------cr--------` |
-| 79 | base | — | — | `CuCuCuP-CuCuCuCu` |
-| 80 | crystal | 79 | r | `CuCuCucrCuCuCuCu` |
-| 81 | cut | 80 | 0 | `CuCuCucr--------` |
-| 82 | rotate | 81 | 1 | `--CuCuCucr------` |
-| 83 | cut | 82 | 1 | `--------cr------` |
-| 84 | swap | 78, 83 | 0 | `--crcrcrcr------:--Cu--cr--------:--cr--cr--------:--cr--cr--------:--cr--cr--------:------cr--------:------cr--------:------cr--------` |
-| 85 | rotate | 84 | 3 | `--------crcrcrcr:--------Cu--cr--:--------cr--cr--:--------cr--cr--:--------cr--cr--:------------cr--:------------cr--:------------cr--` |
+| 50 | rotate | 49 | 7 | `--------------cr:--------------Cu:--------------cr:--------------cr:--------------cr` |
+| 51 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 52 | crystal | 51 | r | `CuCuCuCuCuCuCucr` |
+| 53 | cut | 52 | 1 | `--------CuCuCucr` |
+| 54 | rotate | 53 | 1 | `cr--------CuCuCu` |
+| 55 | cut | 54 | 0 | `cr--------------` |
+| 56 | swap | 50, 55 | 1 | `cr------------cr:--------------Cu:--------------cr:--------------cr:--------------cr` |
+| 57 | rotate | 56 | 7 | `------------crcr:------------Cu--:------------cr--:------------cr--:------------cr--` |
+| 58 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 59 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 60 | stack | 58, 59 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 61 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 62 | stack | 60, 61 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 63 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 64 | stack | 62, 63 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 65 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 66 | stack | 64, 65 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 67 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 68 | stack | 66, 67 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 69 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 70 | stack | 68, 69 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 71 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 72 | stack | 70, 71 | — | `CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-:CuCuCuCuCuCuCuP-` |
+| 73 | crystal | 72 | r | `CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr:CuCuCuCuCuCuCucr` |
+| 74 | cut | 73 | 1 | `--------CuCuCucr:--------CuCuCucr:--------CuCuCucr:--------CuCuCucr:--------CuCuCucr:--------CuCuCucr:--------CuCuCucr:--------CuCuCucr` |
+| 75 | rotate | 74 | 1 | `cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu:cr--------CuCuCu` |
+| 76 | cut | 75 | 0 | `cr--------------:cr--------------:cr--------------:cr--------------:cr--------------:cr--------------:cr--------------:cr--------------` |
+| 77 | swap | 57, 76 | 1 | `cr----------crcr:cr----------Cu--:cr----------cr--:cr----------cr--:cr----------cr--:cr--------------:cr--------------:cr--------------` |
+| 78 | rotate | 77 | 7 | `----------crcrcr:----------Cu--cr:----------cr--cr:----------cr--cr:----------cr--cr:--------------cr:--------------cr:--------------cr` |
+| 79 | base | — | — | `CuCuCuCuCuCuCuP-` |
+| 80 | crystal | 79 | r | `CuCuCuCuCuCuCucr` |
+| 81 | cut | 80 | 1 | `--------CuCuCucr` |
+| 82 | rotate | 81 | 1 | `cr--------CuCuCu` |
+| 83 | cut | 82 | 0 | `cr--------------` |
+| 84 | swap | 78, 83 | 1 | `cr--------crcrcr:----------Cu--cr:----------cr--cr:----------cr--cr:----------cr--cr:--------------cr:--------------cr:--------------cr` |
+| 85 | rotate | 84 | 7 | `--------crcrcrcr:--------Cu--cr--:--------cr--cr--:--------cr--cr--:--------cr--cr--:------------cr--:------------cr--:------------cr--` |
 | 86 | swap | 36, 85 | 0 | `crcrcrcrcrcrcrcr:Cu--cr--Cu--cr--:cr------cr--cr--:cr------cr--cr--:cr------cr--cr--:------------cr--:------------cr--:------------cr--` |
 | 87 | base | — | — | `--CuCuCu--------` |
 | 88 | stack | 86, 87 | — | `crcrcrcrcrcrcrcr:Cu--cr--Cu--cr--:crCuCuCucr--cr--:cr------cr--cr--:cr------cr--cr--:------------cr--:------------cr--:------------cr--` |

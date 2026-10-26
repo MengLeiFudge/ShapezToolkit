@@ -28,20 +28,20 @@ q1三层普通柱作下料；追加q0地面N、q1第四层N及q3的NPN。紧凑�
 
 | 编号 | 加工 | 输入编号 | 参数 | 产物 |
 |---:|---|---|---|---|
-| 0 | base | — | — | `CuCuP-CuCuCu` |
-| 1 | base | — | — | `CuCuP-CuCuCu` |
-| 2 | stack | 0, 1 | — | `CuCuP-CuCuCu:CuCuP-CuCuCu` |
-| 3 | base | — | — | `CuCuP-CuCuCu` |
-| 4 | stack | 2, 3 | — | `CuCuP-CuCuCu:CuCuP-CuCuCu:CuCuP-CuCuCu` |
-| 5 | crystal | 4 | r | `CuCucrCuCuCu:CuCucrCuCuCu:CuCucrCuCuCu` |
-| 6 | cut | 5 | 0 | `CuCucr------:CuCucr------:CuCucr------` |
-| 7 | rotate | 6 | 1 | `--CuCucr----:--CuCucr----:--CuCucr----` |
-| 8 | cut | 7 | 1 | `------cr----:------cr----:------cr----` |
-| 9 | base | — | — | `------Cu----` |
-| 10 | stack | 8, 9 | — | `------cr----:------cr----:------cr----:------Cu----` |
-| 11 | base | — | — | `----Cu------` |
-| 12 | swap | 11, 10 | 0 | `----Cucr----:------cr----:------cr----:------Cu----` |
-| 13 | rotate | 12 | 4 | `Cucr--------:--cr--------:--cr--------:--Cu--------` |
+| 0 | base | — | — | `CuCuCuCuCuP-` |
+| 1 | base | — | — | `CuCuCuCuCuP-` |
+| 2 | stack | 0, 1 | — | `CuCuCuCuCuP-:CuCuCuCuCuP-` |
+| 3 | base | — | — | `CuCuCuCuCuP-` |
+| 4 | stack | 2, 3 | — | `CuCuCuCuCuP-:CuCuCuCuCuP-:CuCuCuCuCuP-` |
+| 5 | crystal | 4 | r | `CuCuCuCuCucr:CuCuCuCuCucr:CuCuCuCuCucr` |
+| 6 | cut | 5 | 1 | `------CuCucr:------CuCucr:------CuCucr` |
+| 7 | rotate | 6 | 1 | `cr------CuCu:cr------CuCu:cr------CuCu` |
+| 8 | cut | 7 | 0 | `cr----------:cr----------:cr----------` |
+| 9 | base | — | — | `Cu----------` |
+| 10 | stack | 8, 9 | — | `cr----------:cr----------:cr----------:Cu----------` |
+| 11 | base | — | — | `----------Cu` |
+| 12 | swap | 11, 10 | 1 | `cr--------Cu:cr----------:cr----------:Cu----------` |
+| 13 | rotate | 12 | 1 | `Cucr--------:--cr--------:--cr--------:--Cu--------` |
 | 14 | base | — | — | `------Cu----` |
 | 15 | base | — | — | `------Cu----` |
 | 16 | pin | 15 | — | `------P-----:------Cu----` |

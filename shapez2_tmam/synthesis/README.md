@@ -10,7 +10,7 @@
 python -m shapez2_tmam.synthesis 'CuCu----:Cu------' --quadrants 4
 ```
 
-`--quadrants`指定偶数象限数，`--height`指定整个制造过程的层数上限；默认4q5l。完整逆推`--complete`只支持4q5l；六寄存器指令`--instructions`支持4q5l和6q5l，六象限净转两格会拆成两条原位旋转指令。输出是 JSON。`status` 有三种值：
+`--quadrants`指定偶数象限数，`--height`指定整个制造过程的层数上限；默认4q5l。完整逆推`--complete`只支持4q5l；六寄存器指令`--instructions`支持4q5l和6q5l，最终证书经过半圈规范化，四/六象限每个制造表项只需一包；直接传入未经优化的六象限树时，两格旋转仍拆成两条原位指令。输出是 JSON。`status` 有三种值：
 
 | 状态 | 含义 | 退出码 |
 |---|---|---|

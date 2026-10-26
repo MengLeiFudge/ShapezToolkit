@@ -157,7 +157,7 @@
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "CuCuP-CuCuCu"
+      "result": "CuCuCuCuCuP-"
     },
     {
       "id": 16,
@@ -166,7 +166,7 @@
         15
       ],
       "parameter": "r",
-      "result": "CuCucrCuCuCu"
+      "result": "CuCuCuCuCucr"
     },
     {
       "id": 17,
@@ -174,8 +174,8 @@
       "inputs": [
         16
       ],
-      "parameter": 0,
-      "result": "CuCucr------"
+      "parameter": 1,
+      "result": "------CuCucr"
     },
     {
       "id": 18,
@@ -184,7 +184,7 @@
         17
       ],
       "parameter": 1,
-      "result": "--CuCucr----"
+      "result": "cr------CuCu"
     },
     {
       "id": 19,
@@ -192,15 +192,15 @@
       "inputs": [
         18
       ],
-      "parameter": 1,
-      "result": "------cr----"
+      "parameter": 0,
+      "result": "cr----------"
     },
     {
       "id": 20,
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "------Cu----"
+      "result": "Cu----------"
     },
     {
       "id": 21,
@@ -210,14 +210,14 @@
         20
       ],
       "parameter": null,
-      "result": "------cr----:------Cu----"
+      "result": "cr----------:Cu----------"
     },
     {
       "id": 22,
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "----Cu------"
+      "result": "----------Cu"
     },
     {
       "id": 23,
@@ -226,8 +226,8 @@
         22,
         21
       ],
-      "parameter": 0,
-      "result": "----Cucr----:------Cu----"
+      "parameter": 1,
+      "result": "cr--------Cu:Cu----------"
     },
     {
       "id": 24,
@@ -235,7 +235,7 @@
       "inputs": [
         23
       ],
-      "parameter": 4,
+      "parameter": 1,
       "result": "Cucr--------:--Cu--------"
     },
     {

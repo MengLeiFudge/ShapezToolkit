@@ -5,7 +5,7 @@ from .recipe import Recipe
 
 
 def optimize_rotations(source: Recipe) -> Recipe:
-    """在原非旋转消费树上最小化净旋转表项，保持目标及物品槽需求。"""
+    """最少净旋转表项，再以半圈等价选短角度；目标及物品槽保持。"""
     n = len(source.result.layers[0])
     if n < 2 or n % 2:
         raise ValueError("配方朝向优化需要至少两个偶数象限")
@@ -54,6 +54,12 @@ def optimize_rotations(source: Recipe) -> Recipe:
             if direct is not None and direct[0].step_count <= best.step_count + 1:
                 oriented.append(direct[0])
             else:
-                oriented.append(Recipe("rotate", shape, (best,), (r - direction) % n, node.height))
+                chosen = best
+                turns = (r - direction) % n
+                opposite = (turns + n // 2) % n
+                if min(opposite, n - opposite) < min(turns, n - turns):
+                    chosen = candidates[shapes[(direction + n // 2) % n]][0]
+                    turns = opposite
+                oriented.append(Recipe("rotate", shape, (chosen,), turns, node.height))
         states[node] = tuple(oriented)
     return states[source][0]

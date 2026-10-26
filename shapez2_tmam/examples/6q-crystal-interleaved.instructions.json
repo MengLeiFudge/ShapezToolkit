@@ -6,7 +6,7 @@
   "source_steps": 25,
   "register_budget": 6,
   "register_count": 3,
-  "packet_count": 26,
+  "packet_count": 25,
   "instructions": [
     {
       "id": 0,
@@ -14,10 +14,10 @@
       "destination": 0,
       "a": 0,
       "b": 0,
-      "base": "CuCuP-CuCuCu",
+      "base": "CuCuCuCuCuP-",
       "color": null,
       "request": 1,
-      "result": "CuCuP-CuCuCu"
+      "result": "CuCuCuCuCuP-"
     },
     {
       "id": 1,
@@ -25,10 +25,10 @@
       "destination": 1,
       "a": 0,
       "b": 0,
-      "base": "CuCuP-CuCuCu",
+      "base": "CuCuCuCuCuP-",
       "color": null,
       "request": 0,
-      "result": "CuCuP-CuCuCu"
+      "result": "CuCuCuCuCuP-"
     },
     {
       "id": 2,
@@ -39,7 +39,7 @@
       "base": null,
       "color": null,
       "request": 1,
-      "result": "CuCuP-CuCuCu:CuCuP-CuCuCu"
+      "result": "CuCuCuCuCuP-:CuCuCuCuCuP-"
     },
     {
       "id": 3,
@@ -47,10 +47,10 @@
       "destination": 1,
       "a": 0,
       "b": 0,
-      "base": "CuCuP-CuCuCu",
+      "base": "CuCuCuCuCuP-",
       "color": null,
       "request": 0,
-      "result": "CuCuP-CuCuCu"
+      "result": "CuCuCuCuCuP-"
     },
     {
       "id": 4,
@@ -61,7 +61,7 @@
       "base": null,
       "color": null,
       "request": 1,
-      "result": "CuCuP-CuCuCu:CuCuP-CuCuCu:CuCuP-CuCuCu"
+      "result": "CuCuCuCuCuP-:CuCuCuCuCuP-:CuCuCuCuCuP-"
     },
     {
       "id": 5,
@@ -72,18 +72,18 @@
       "base": null,
       "color": "color:r",
       "request": 0,
-      "result": "CuCucrCuCuCu:CuCucrCuCuCu:CuCucrCuCuCu"
+      "result": "CuCuCuCuCucr:CuCuCuCuCucr:CuCuCuCuCucr"
     },
     {
       "id": 6,
-      "opcode": 4,
+      "opcode": 5,
       "destination": 0,
       "a": 0,
       "b": 0,
       "base": null,
       "color": null,
       "request": 1,
-      "result": "CuCucr------:CuCucr------:CuCucr------"
+      "result": "------CuCucr:------CuCucr:------CuCucr"
     },
     {
       "id": 7,
@@ -94,18 +94,18 @@
       "base": null,
       "color": null,
       "request": 0,
-      "result": "--CuCucr----:--CuCucr----:--CuCucr----"
+      "result": "cr------CuCu:cr------CuCu:cr------CuCu"
     },
     {
       "id": 8,
-      "opcode": 5,
+      "opcode": 4,
       "destination": 0,
       "a": 0,
       "b": 0,
       "base": null,
       "color": null,
       "request": 1,
-      "result": "------cr----:------cr----:------cr----"
+      "result": "cr----------:cr----------:cr----------"
     },
     {
       "id": 9,
@@ -113,10 +113,10 @@
       "destination": 1,
       "a": 0,
       "b": 0,
-      "base": "------Cu----",
+      "base": "Cu----------",
       "color": null,
       "request": 0,
-      "result": "------Cu----"
+      "result": "Cu----------"
     },
     {
       "id": 10,
@@ -127,7 +127,7 @@
       "base": null,
       "color": null,
       "request": 1,
-      "result": "------cr----:------cr----:------cr----:------Cu----"
+      "result": "cr----------:cr----------:cr----------:Cu----------"
     },
     {
       "id": 11,
@@ -135,48 +135,48 @@
       "destination": 1,
       "a": 0,
       "b": 0,
-      "base": "----Cu------",
+      "base": "----------Cu",
       "color": null,
       "request": 0,
-      "result": "----Cu------"
+      "result": "----------Cu"
     },
     {
       "id": 12,
-      "opcode": 8,
+      "opcode": 9,
       "destination": 1,
       "a": 1,
       "b": 0,
       "base": null,
       "color": null,
       "request": 1,
-      "result": "----Cucr----:------cr----:------cr----:------Cu----"
+      "result": "cr--------Cu:cr----------:cr----------:Cu----------"
     },
     {
       "id": 13,
-      "opcode": 2,
+      "opcode": 1,
       "destination": 1,
       "a": 1,
       "b": 0,
       "base": null,
       "color": null,
       "request": 0,
-      "result": "--Cucr------:----cr------:----cr------:----Cu------"
+      "result": "Cucr--------:--cr--------:--cr--------:--Cu--------"
     },
     {
       "id": 14,
-      "opcode": 2,
-      "destination": 1,
-      "a": 1,
+      "opcode": 14,
+      "destination": 0,
+      "a": 0,
       "b": 0,
-      "base": null,
+      "base": "------Cu----",
       "color": null,
       "request": 1,
-      "result": "Cucr--------:--cr--------:--cr--------:--Cu--------"
+      "result": "------Cu----"
     },
     {
       "id": 15,
       "opcode": 14,
-      "destination": 0,
+      "destination": 2,
       "a": 0,
       "b": 0,
       "base": "------Cu----",
@@ -186,52 +186,52 @@
     },
     {
       "id": 16,
-      "opcode": 14,
-      "destination": 2,
-      "a": 0,
-      "b": 0,
-      "base": "------Cu----",
-      "color": null,
-      "request": 1,
-      "result": "------Cu----"
-    },
-    {
-      "id": 17,
       "opcode": 6,
       "destination": 2,
       "a": 2,
       "b": 0,
       "base": null,
       "color": null,
-      "request": 0,
+      "request": 1,
       "result": "------P-----:------Cu----"
     },
     {
-      "id": 18,
+      "id": 17,
       "opcode": 7,
       "destination": 0,
       "a": 0,
       "b": 2,
       "base": null,
       "color": null,
-      "request": 1,
+      "request": 0,
       "result": "------Cu----:------P-----:------Cu----"
     },
     {
-      "id": 19,
+      "id": 18,
       "opcode": 8,
       "destination": 1,
       "a": 1,
       "b": 0,
       "base": null,
       "color": null,
-      "request": 0,
+      "request": 1,
       "result": "Cucr--Cu----:--cr--P-----:--cr--Cu----:--Cu--------"
+    },
+    {
+      "id": 19,
+      "opcode": 14,
+      "destination": 0,
+      "a": 0,
+      "b": 0,
+      "base": "--Cu--------",
+      "color": null,
+      "request": 0,
+      "result": "--Cu--------"
     },
     {
       "id": 20,
       "opcode": 14,
-      "destination": 0,
+      "destination": 2,
       "a": 0,
       "b": 0,
       "base": "--Cu--------",
@@ -241,57 +241,46 @@
     },
     {
       "id": 21,
-      "opcode": 14,
-      "destination": 2,
-      "a": 0,
-      "b": 0,
-      "base": "--Cu--------",
-      "color": null,
-      "request": 0,
-      "result": "--Cu--------"
-    },
-    {
-      "id": 22,
       "opcode": 7,
       "destination": 0,
       "a": 0,
       "b": 2,
       "base": null,
       "color": null,
-      "request": 1,
+      "request": 0,
       "result": "--Cu--------:--Cu--------"
     },
     {
-      "id": 23,
+      "id": 22,
       "opcode": 14,
       "destination": 2,
       "a": 0,
       "b": 0,
       "base": "--Cu--------",
       "color": null,
-      "request": 0,
+      "request": 1,
       "result": "--Cu--------"
+    },
+    {
+      "id": 23,
+      "opcode": 7,
+      "destination": 0,
+      "a": 0,
+      "b": 2,
+      "base": null,
+      "color": null,
+      "request": 0,
+      "result": "--Cu--------:--Cu--------:--Cu--------"
     },
     {
       "id": 24,
       "opcode": 7,
       "destination": 0,
       "a": 0,
-      "b": 2,
-      "base": null,
-      "color": null,
-      "request": 1,
-      "result": "--Cu--------:--Cu--------:--Cu--------"
-    },
-    {
-      "id": 25,
-      "opcode": 7,
-      "destination": 0,
-      "a": 0,
       "b": 1,
       "base": null,
       "color": null,
-      "request": 0,
+      "request": 1,
       "result": "CuCu--Cu----:--Cu--P-----:--Cu--Cu----:--Cu--------"
     }
   ],

@@ -71,8 +71,8 @@
       "inputs": [
         4
       ],
-      "parameter": 4,
-      "result": "Cu------CuCu:cr------CuCu"
+      "parameter": 1,
+      "result": "--CuCuCu----:--CuCucr----"
     },
     {
       "id": 6,
@@ -80,8 +80,8 @@
       "inputs": [
         5
       ],
-      "parameter": 0,
-      "result": "Cu----------:cr----------"
+      "parameter": 1,
+      "result": "------Cu----:------cr----"
     },
     {
       "id": 7,
@@ -89,7 +89,7 @@
       "inputs": [
         6
       ],
-      "parameter": 2,
+      "parameter": 5,
       "result": "----Cu------:----cr------"
     },
     {
@@ -228,7 +228,7 @@
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "CuCuP-CuCuCu"
+      "result": "CuCuCuCuCuP-"
     },
     {
       "id": 24,
@@ -237,7 +237,7 @@
         23
       ],
       "parameter": "r",
-      "result": "CuCucrCuCuCu"
+      "result": "CuCuCuCuCucr"
     },
     {
       "id": 25,
@@ -245,8 +245,8 @@
       "inputs": [
         24
       ],
-      "parameter": 0,
-      "result": "CuCucr------"
+      "parameter": 1,
+      "result": "------CuCucr"
     },
     {
       "id": 26,
@@ -255,7 +255,7 @@
         25
       ],
       "parameter": 1,
-      "result": "--CuCucr----"
+      "result": "cr------CuCu"
     },
     {
       "id": 27,
@@ -263,15 +263,15 @@
       "inputs": [
         26
       ],
-      "parameter": 1,
-      "result": "------cr----"
+      "parameter": 0,
+      "result": "cr----------"
     },
     {
       "id": 28,
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "------Cu----"
+      "result": "Cu----------"
     },
     {
       "id": 29,
@@ -281,14 +281,14 @@
         28
       ],
       "parameter": null,
-      "result": "------cr----:------Cu----"
+      "result": "cr----------:Cu----------"
     },
     {
       "id": 30,
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "----Cu------"
+      "result": "----------Cu"
     },
     {
       "id": 31,
@@ -297,8 +297,8 @@
         30,
         29
       ],
-      "parameter": 0,
-      "result": "----Cucr----:------Cu----"
+      "parameter": 1,
+      "result": "cr--------Cu:Cu----------"
     },
     {
       "id": 32,
@@ -306,7 +306,7 @@
       "inputs": [
         31
       ],
-      "parameter": 4,
+      "parameter": 1,
       "result": "Cucr--------:--Cu--------"
     },
     {
