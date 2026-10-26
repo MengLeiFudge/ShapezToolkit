@@ -296,7 +296,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
         program.and_(replay_check, program.not_(program.and_(cpu_matches,
                      program.or_(program.not_(root), original_matches)))))
 
-    # 相邻晶体保留状态冲突时，推进涉及的最快槽；多个冲突取最高槽跳过。
+    # 坏列和固定目标禁位冲突都只依赖本列槽；推进最高坏槽并重置更快列。
     counter_event = program.or_(modes[Phase.SOURCE_NEXT], modes[Phase.FAMILY_NEXT])
     bad_slots = tuple(program.or_(program.not_(valid), conflict)
                       for valid, conflict in zip(candidate.column_valid, candidate.slot_conflicts))

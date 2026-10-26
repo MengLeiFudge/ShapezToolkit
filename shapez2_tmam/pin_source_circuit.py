@@ -22,7 +22,7 @@ class PinSource:
     valid: Ref
     column_valid: tuple[Ref, ...]
     image: PinImageFlags
-    # 横边冲突归入两端较快的列；该槽不变时，全部更快地址均无解。
+    # 禁位由目标固定；该列辅助C触及禁位时，任何其他槽及顶盖都无法修复。
     slot_conflicts: tuple[Ref, ...]
     last_slots: tuple[Ref, ...]
     has_slots: Ref
@@ -62,8 +62,14 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
         raise ValueError("共用目标解码需要四列")
     circuit = program.circuit
     decoded = decoded_targets if decoded_targets is not None else tuple(decode_column(circuit, column) for column in materials)
-    patterns = tuple(pattern_column(program, material, tag, slot, enable, with_landings=True, decoded_target=target)
-                     for material, tag, slot, target in zip(materials, tags, slots, decoded))
+    # 强制C由目标固定；与邻列强制C接触的辅助C不能出现在任何来源组合。
+    forbidden = tuple(tuple(program.and_(program.not_(decoded[q].kinds[r + 1][3]),
+                                             program.or_(decoded[(q - 1) % 4].kinds[r + 1][3],
+                                                         decoded[(q + 1) % 4].kinds[r + 1][3]))
+                            for r in range(4)) for q in range(4))
+    patterns = tuple(pattern_column(program, material, tag, slot, enable, with_landings=True, decoded_target=target,
+                                    forbidden_crystals=forbidden[q])
+                     for q, (material, tag, slot, target) in enumerate(zip(materials, tags, slots, decoded)))
     columns = tuple(pattern.column for pattern in patterns)
     top_pin_allowed = tuple(column.flags[3].occupied for column in columns)
     top_crystal_allowed = tuple(_crystal_cap_allowed(program, column.flags) for column in columns)
@@ -76,14 +82,8 @@ def pin_source(program: CornerProgram, materials: tuple[tuple[Ref, ...], ...],
     tops = tuple(tuple(circuit.add("LogicGateCompare", value, Literal(kind), config="AQ==")
                        for kind in range(4)) for value in top_values)
     top_flags = tuple(MaterialCell(program.not_(kinds[0]), kinds[2], kinds[3]) for kinds in tops)
-    conflicts: list[list[Ref]] = [[] for _ in range(4)]
-    for q in range(4):
-        neighbor = (q + 1) % 4
-        for r in range(4):
-            differs = circuit.add("LogicGateXOr", target[q][r + 1].crystal, target[neighbor][r + 1].crystal)
-            conflicts[min(q, neighbor)].append(program.and_(columns[q].flags[r].crystal,
-                                                           columns[neighbor].flags[r].crystal, differs))
-    slot_conflicts = tuple(program.or_(*values) for values in conflicts)
+    slot_conflicts = tuple(program.or_(*(program.and_(column.flags[r].crystal, forbidden[q][r]) for r in range(4)))
+                           for q, column in enumerate(columns))
     image = image_constraints(program, target, columns, tuple(cell.crystal for cell in top_flags))
     valid = program.and_(enable, image.passed, program.not_(program.or_(*slot_conflicts)),
                          *(program.or_(*kinds) for kinds in tops),
@@ -134,7 +134,7 @@ def build_pin_source(channel_base: int = 1_194_000) -> tuple[Circuit, dict]:
         "settling": circuit.settling_bound(),
         "encoding": "材料0空1N2P3C；每列槽号0～19；顶格0空1Cu2P3红C。标签继承固定原目标表，辅助顶格标签同其整数。",
         "scope": "完整覆盖四列及顶盖结构候选，并筛融合/组位移必要条件；仍须真实制造、原生Pin及完整目标比较。没有内部迭代或完成脉冲。",
-        "resource_bound": "四份共用二十槽选址和单列路由；按单列合法槽直接后继，跳过非法槽；不保存目标图形目录。",
+        "resource_bound": "四份共用二十槽选址和单列路由；后继域预先排除单列非法槽及与邻列强制晶体相连的辅助晶体槽；不保存目标图形目录。",
         "proof": "4q5l/pin-patterns.md；valid-slot-cursor.md；pin-source-conflicts.md；pin-image-constraints.md；pin-column-circuit.md。",
         "verification": "仅静态DAG、端口和实际占地生产编译；未运行目标、候选遍历、制造、模拟或测试",
     }

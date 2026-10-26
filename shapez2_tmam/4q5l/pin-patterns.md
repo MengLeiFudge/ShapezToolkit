@@ -38,7 +38,7 @@
 
 ## 4. 产物与边界
 
-[`pin-source-4q5l.spz2bp`](../blueprints/pin-source-4q5l.spz2bp)使用8652平台，保留频道1194000～1210383；输入、输出见旁置JSON。额外输出has_slots、四列first_slots、next_slots及last_slots，供外部游标直接跳槽。组合通路D=82，全输入保持5376信号tick后读取，无完成脉冲。
+[`pin-source-4q5l.spz2bp`](../blueprints/pin-source-4q5l.spz2bp)使用8788平台，保留频道1194000～1210383；输入、输出见旁置JSON。额外输出has_slots、四列first_slots、next_slots及last_slots，供外部游标直接跳槽。组合通路D=82，全输入保持5376信号tick后读取，无完成脉冲。
 
 单列扫描槽数从256降为20；四列固定槽空间从`256^4`降为`20^4=160000`，其中真正有效的含C四列组合仍不超过96000。完整顶盖另有`4^4=256`种，S前缀和递归也另计。因此当前进展减少搜索控制的无效地址，并未取得实用求解时间保证。
 

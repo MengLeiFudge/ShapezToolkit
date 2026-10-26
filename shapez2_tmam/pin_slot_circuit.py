@@ -19,8 +19,8 @@ class SlotCursor:
     has: Ref
 
 
-def valid_slots(program: CornerProgram, target: ColumnTarget) -> tuple[Ref, ...]:
-    """与单列结构接受等价；不包含横边、顶盖和整图Pin条件。"""
+def valid_slots(program: CornerProgram, target: ColumnTarget, forbidden_crystals: tuple[Ref, ...] = ()) -> tuple[Ref, ...]:
+    """单列结构接受，加上由相邻列强制C确定的禁用晶体位置。"""
     kinds, counts = target.kinds, target.counts
     destinations = tuple(tuple(program.and_(target.retained[z], counts[z][rank]) if rank <= z else program.zero
                                for z in range(5)) for rank in range(4))
@@ -46,6 +46,7 @@ def valid_slots(program: CornerProgram, target: ColumnTarget) -> tuple[Ref, ...]
     def crystal_positions(crystals: int) -> Ref:
         clauses = [program.not_(forced[r]) for r in range(4) if not crystals & (1 << r)]
         clauses.extend(same_crystal[r] for r in range(3) if crystals & (3 << r) == 3 << r)
+        clauses.extend(program.not_(forbidden) for r, forbidden in enumerate(forbidden_crystals) if crystals & (1 << r))
         return program.and_(*clauses)
 
     def allowed(keep: int, crystals: int) -> Ref:
@@ -93,9 +94,10 @@ def _prefix_or(program: CornerProgram, values: tuple[Ref, ...]) -> tuple[Ref, ..
     return (*left, *(program.or_(left[-1], value) for value in right[1:]))
 
 
-def slot_cursor(program: CornerProgram, target: ColumnTarget, addresses: tuple[Ref, ...]) -> SlotCursor:
-    """在原0～19地址上取下一个合法槽，跳过其间全部单列非法槽。"""
-    valid = valid_slots(program, target)
+def slot_cursor(program: CornerProgram, target: ColumnTarget, addresses: tuple[Ref, ...],
+                forbidden_crystals: tuple[Ref, ...] = ()) -> SlotCursor:
+    """按固定目标约束取下一个合法槽；禁位不依赖其他列当前地址。"""
+    valid = valid_slots(program, target, forbidden_crystals)
     if len(addresses) != len(valid):
         raise ValueError("合法槽后继需要二十个原地址标志")
     address_prefix = _prefix_or(program, addresses)

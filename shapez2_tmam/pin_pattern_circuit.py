@@ -22,7 +22,7 @@ class PatternColumn:
 
 def pattern_column(program: CornerProgram, materials: tuple[Ref, ...], tags: tuple[Ref, ...],
                    slot: Ref, enable: Ref, *, with_landings: bool = False,
-                   decoded_target: ColumnTarget | None = None) -> PatternColumn:
+                   decoded_target: ColumnTarget | None = None, forbidden_crystals: tuple[Ref, ...] = ()) -> PatternColumn:
     """slot为0～19整数；桶内补空槽或遗漏强制C的模式无效。"""
     if len(materials) != 5 or len(tags) != 5:
         raise ValueError("二十槽单列通路需要五格材料和标签")
@@ -52,5 +52,5 @@ def pattern_column(program: CornerProgram, materials: tuple[Ref, ...], tags: tup
                          *(program.or_(program.not_(forced[r]), crystal_bits[r]) for r in range(4)))
     column = column_candidate(circuit, materials, tags, (*keep_bits, *extra), valid,
                               with_landings=with_landings, decoded_target=target, keep_counts=keep_counts)
-    cursor = slot_cursor(program, target, addresses)
+    cursor = slot_cursor(program, target, addresses, forbidden_crystals)
     return PatternColumn(column, cursor.last, cursor.has, cursor.first, cursor.next)

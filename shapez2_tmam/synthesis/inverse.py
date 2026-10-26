@@ -109,22 +109,20 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
     if not pin_base_possible(target):
         return
     height = rules.height - 1
+    forced_masks = tuple(sum(1 << r for r, row in enumerate(target.layers[1:]) if row[q][0] == "c")
+                         for q in range(4))
     columns: list[list[tuple[str, ...]]] = []
     for q in range(rules.quadrants):
         # Shape省略空顶层；选址仍按五个原层位工作。
         target_column = tuple(target.layers[z][q] if z < len(target.layers) else EMPTY for z in range(5))
+        forbidden = (forced_masks[(q - 1) % 4] | forced_masks[(q + 1) % 4]) & ~forced_masks[q]
         candidates = [column for slot in range(len(_source_patterns(target_column)))
-                      if (column := pin_column_at(target_column, slot)) is not None]
+                      if (column := pin_column_at(target_column, slot)) is not None
+                      and not any(forbidden & (1 << r) and cell[0] == "c" for r, cell in enumerate(column))]
         if not candidates:
             return
         columns.append(candidates)
-    forced_masks = tuple(sum(1 << r for r, row in enumerate(target.layers[1:]) if row[q][0] == "c")
-                         for q in range(4))
     for selected in product(*columns):
-        crystal_masks = tuple(sum(1 << r for r, cell in enumerate(column) if cell[0] == "c") for column in selected)
-        if any(crystal_masks[q] & crystal_masks[(q + 1) % 4] & (forced_masks[q] ^ forced_masks[(q + 1) % 4])
-               for q in range(4)):
-            continue
         lower = tuple(tuple(selected[q][z] for q in range(rules.quadrants)) for z in range(height))
         fixed = {(z, q): cell for z, row in enumerate(lower) for q, cell in enumerate(row) if cell != EMPTY}
         capped = [not (forced_masks[q] & 8) and CornerBuilder.admissible((*column, "cr"))

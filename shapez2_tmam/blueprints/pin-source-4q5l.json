@@ -110,120 +110,120 @@
     "enable": 1194048
   },
   "outputs": {
-    "candidate_valid": 1202672,
-    "has_slots": 1202715,
+    "candidate_valid": 1202808,
+    "has_slots": 1202851,
     "first_slots": [
-      1196023,
-      1197658,
-      1199293,
-      1200928
+      1196095,
+      1197762,
+      1199429,
+      1201096
     ],
     "next_slots": [
-      1196141,
-      1197776,
-      1199411,
-      1201046
+      1196213,
+      1197880,
+      1199547,
+      1201214
     ],
     "last_slots": [
-      1196022,
-      1197657,
-      1199292,
-      1200927
+      1196094,
+      1197761,
+      1199428,
+      1201095
     ],
     "source_bottom_to_top": [
       [
         {
-          "material": 1202673,
-          "tag": 1202693
+          "material": 1202809,
+          "tag": 1202829
         },
         {
-          "material": 1202678,
-          "tag": 1202698
+          "material": 1202814,
+          "tag": 1202834
         },
         {
-          "material": 1202683,
-          "tag": 1202703
+          "material": 1202819,
+          "tag": 1202839
         },
         {
-          "material": 1202688,
-          "tag": 1202708
+          "material": 1202824,
+          "tag": 1202844
         }
       ],
       [
         {
-          "material": 1202674,
-          "tag": 1202694
+          "material": 1202810,
+          "tag": 1202830
         },
         {
-          "material": 1202679,
-          "tag": 1202699
+          "material": 1202815,
+          "tag": 1202835
         },
         {
-          "material": 1202684,
-          "tag": 1202704
+          "material": 1202820,
+          "tag": 1202840
         },
         {
-          "material": 1202689,
-          "tag": 1202709
+          "material": 1202825,
+          "tag": 1202845
         }
       ],
       [
         {
-          "material": 1202675,
-          "tag": 1202695
+          "material": 1202811,
+          "tag": 1202831
         },
         {
-          "material": 1202680,
-          "tag": 1202700
+          "material": 1202816,
+          "tag": 1202836
         },
         {
-          "material": 1202685,
-          "tag": 1202705
+          "material": 1202821,
+          "tag": 1202841
         },
         {
-          "material": 1202690,
-          "tag": 1202710
+          "material": 1202826,
+          "tag": 1202846
         }
       ],
       [
         {
-          "material": 1202676,
-          "tag": 1202696
+          "material": 1202812,
+          "tag": 1202832
         },
         {
-          "material": 1202681,
-          "tag": 1202701
+          "material": 1202817,
+          "tag": 1202837
         },
         {
-          "material": 1202686,
-          "tag": 1202706
+          "material": 1202822,
+          "tag": 1202842
         },
         {
-          "material": 1202691,
-          "tag": 1202711
+          "material": 1202827,
+          "tag": 1202847
         }
       ],
       [
         {
-          "material": 1202677,
-          "tag": 1202697
+          "material": 1202813,
+          "tag": 1202833
         },
         {
-          "material": 1202682,
-          "tag": 1202702
+          "material": 1202818,
+          "tag": 1202838
         },
         {
-          "material": 1202687,
-          "tag": 1202707
+          "material": 1202823,
+          "tag": 1202843
         },
         {
-          "material": 1202692,
-          "tag": 1202712
+          "material": 1202828,
+          "tag": 1202848
         }
       ]
     ]
   },
-  "gate_platforms": 8652,
+  "gate_platforms": 8788,
   "reserved_channels": [
     1194000,
     1210383
@@ -237,7 +237,7 @@
   },
   "encoding": "材料0空1N2P3C；每列槽号0～19；顶格0空1Cu2P3红C。标签继承固定原目标表，辅助顶格标签同其整数。",
   "scope": "完整覆盖四列及顶盖结构候选，并筛融合/组位移必要条件；仍须真实制造、原生Pin及完整目标比较。没有内部迭代或完成脉冲。",
-  "resource_bound": "四份共用二十槽选址和单列路由；按单列合法槽直接后继，跳过非法槽；不保存目标图形目录。",
+  "resource_bound": "四份共用二十槽选址和单列路由；后继域预先排除单列非法槽及与邻列强制晶体相连的辅助晶体槽；不保存目标图形目录。",
   "proof": "4q5l/pin-patterns.md；valid-slot-cursor.md；pin-source-conflicts.md；pin-image-constraints.md；pin-column-circuit.md。",
   "verification": "仅静态DAG、端口和实际占地生产编译；未运行目标、候选遍历、制造、模拟或测试"
 }
