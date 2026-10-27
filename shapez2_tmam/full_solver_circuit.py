@@ -473,7 +473,7 @@ def main() -> int:
     """编译网表统计，或生成生产蓝图及接口；不执行目标求解。"""
     parser = argparse.ArgumentParser(description="生成四帧递归及成功路径重放的完整四象限尾部电路")
     parser.add_argument("--channel-base", type=int)
-    parser.add_argument("--pack", action="store_true", help="合并内部组合门并装箱；默认使用独立频道1277000")
+    parser.add_argument("--pack", action="store_true", help="合并内部组合门并装入3×3大平台；默认使用独立频道1277000")
     parser.add_argument("--report-only", action="store_true", help="仅输出JSON网表统计和理论时序，不生成布局或蓝图")
     parser.add_argument("--output", type=Path, required=True, help="蓝图路径；使用--report-only时为JSON报告路径")
     args = parser.parse_args()
@@ -499,9 +499,13 @@ def main() -> int:
         platforms = document["BP"]["Entries"]
         report.update({"logical_gates": sum(circuit.gate_counts().values()), "gate_platforms": len(platforms),
                        "local_constant_inputs": True, "local_gate_pairs": len(circuit.local_pairs()),
-                       "layout": "固定常量就地复制；私有组合门固定两两本地连接并按实际无线级数计时，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
-                       "platform_grid": [max(platform["X"] for platform in platforms) + 1,
-                                         max(platform["Y"] for platform in platforms) + 1]})
+                       "layout": "固定常量就地复制；私有组合门固定两两本地连接并按实际无线级数计时，时钟与寄存器反馈保持原无线延迟；组件装入3×3大平台，组件间留一格、平台外缘退让三格。",
+                       "platform_type": "Foundation_3x3", "platform_size_chunks": [3, 3],
+                       "platform_buildable_rectangle": [-17, -17, 36, 36],
+                       "occupied_chunks": 9 * len(platforms),
+                       "platform_grid": [max(platform["X"] for platform in platforms) + 2,
+                                         max(platform["Y"] for platform in platforms) + 2],
+                       "platform_grid_unit": "20×20建筑格的区块；包含方阵末行空位"})
     args.output.write_text(encode_document(document) + "\n", encoding="utf-8")
     args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"完整四象限尾部电路已编译：{args.output}；{report['gate_platforms']} 块平台。")

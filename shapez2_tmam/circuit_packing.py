@@ -3,6 +3,10 @@
 import math
 from itertools import islice
 
+# Foundation_3x3 的九区块为 (-1..1, -1..1)；外缘退让三格。
+_SIZE = 54
+_ORIGIN = -17
+
 
 def _rotate(x: int, y: int, turns: int) -> tuple[int, int]:
     return ((x, y), (-y, x), (-x, -y), (y, -x))[turns]
@@ -30,9 +34,9 @@ def _orientations(entries: list[dict]) -> list[tuple[list[dict], int, int, int]]
         tiles = {tile for entry in rotated for tile in _tiles(entry)}
         left, bottom = min(x for x, _ in tiles), min(y for _, y in tiles)
         width, height = max(x for x, _ in tiles) - left + 1, max(y for _, y in tiles) - bottom + 1
-        if width > 16 or height > 16:
-            raise ValueError("组件旋转后的占地超出16×16内部范围")
-        mask = sum(1 << ((y - bottom) * 16 + x - left) for x, y in tiles)
+        if width > _SIZE or height > _SIZE:
+            raise ValueError("组件旋转后的占地超出3×3平台的54×54内部范围")
+        mask = sum(1 << ((y - bottom) * _SIZE + x - left) for x, y in tiles)
         if mask in seen:
             continue
         seen.add(mask)
@@ -42,17 +46,18 @@ def _orientations(entries: list[dict]) -> list[tuple[list[dict], int, int, int]]
 
 
 def pack_components(platforms: list[dict]) -> tuple[list[dict], dict[int, tuple[int, int]]]:
-    """有界候选箱选择与256位占地交集；不运行信号或目标图形。"""
+    """在3×3大平台装箱；位集并行筛除碰撞的原点，不枚举全部平移掩码。"""
     components = [_orientations(platform["B"]["Entries"]) for platform in platforms]
     order = sorted(range(len(components)), key=lambda i: (-components[i][0][1].bit_count(), i))
     packed: list[dict] = []
     blocked: list[int] = []
     spaces: dict[int, dict[int, None]] = {}
     mapping = {}
-    placements: dict[tuple[int, int, int], list[tuple[int, int, int]]] = {}
-    full = (1 << 256) - 1
-    left_edge = sum(1 << (16 * y) for y in range(16))
-    right_edge = left_edge << 15
+    placements: dict[tuple[int, int, int], tuple[int, tuple[int, ...]]] = {}
+    area = _SIZE * _SIZE
+    full = (1 << area) - 1
+    left_edge = sum(1 << (_SIZE * y) for y in range(_SIZE))
+    right_edge = left_edge << (_SIZE - 1)
     for index in order:
         variants = components[index]
         size = variants[0][1].bit_count()
@@ -69,12 +74,25 @@ def pack_components(platforms: list[dict]) -> tuple[list[dict], dict[int, tuple[
             for entries, mask, width, height in variants:
                 key = mask, width, height
                 if key not in placements:
-                    placements[key] = [(mask << (16 * y + x), x, y)
-                                       for y in range(17 - height) for x in range(17 - width)]
-                for shifted, x, y in placements[key]:
-                    if not shifted & occupied:
-                        chosen = platform, entries, shifted, x, y
+                    origins = sum(((1 << (_SIZE - width + 1)) - 1) << (_SIZE * y)
+                                  for y in range(_SIZE - height + 1))
+                    offsets = []
+                    remaining = mask
+                    while remaining:
+                        bit = remaining & -remaining
+                        offsets.append(bit.bit_length() - 1)
+                        remaining ^= bit
+                    placements[key] = origins, tuple(offsets)
+                available, offsets = placements[key]
+                # 原点p可用，当且仅当每个占地偏移d处的p+d均未被禁止。
+                for offset in offsets:
+                    available &= ~(occupied >> offset)
+                    if not available:
                         break
+                if available:
+                    shift = (available & -available).bit_length() - 1
+                    y, x = divmod(shift, _SIZE)
+                    chosen = platform, entries, mask << shift, x, y
                 if chosen is not None:
                     break
             if chosen is not None:
@@ -83,23 +101,24 @@ def pack_components(platforms: list[dict]) -> tuple[list[dict], dict[int, tuple[
             raise ValueError("组件不能放入空平台")
         platform, entries, mask, x, y = chosen
         if platform == len(packed):
-            packed.append({"T": "Foundation_1x1", "B": {
+            packed.append({"T": "Foundation_3x3", "B": {
                 "$type": "Building", "BinaryVersion": 1137, "Entries": []}})
             blocked.append(0)
         else:
-            old_space = 256 - blocked[platform].bit_count()
+            old_space = area - blocked[platform].bit_count()
             del spaces[old_space][platform]
             if not spaces[old_space]:
                 del spaces[old_space]
         target = packed[platform]["B"]["Entries"]
         mapping[index] = platform, len(target)
-        target.extend({**entry, "X": entry["X"] + x + 2, "Y": entry["Y"] + y + 2} for entry in entries)
+        target.extend({**entry, "X": entry["X"] + x + _ORIGIN, "Y": entry["Y"] + y + _ORIGIN}
+                      for entry in entries)
         # 相邻格不能再放另一组件，阻断所有相对端口可能形成的额外连接。
         blocked[platform] |= (mask | ((mask & ~left_edge) >> 1) | ((mask & ~right_edge) << 1)
-                              | (mask >> 16) | ((mask << 16) & full))
-        free = 256 - blocked[platform].bit_count()
+                              | (mask >> _SIZE) | ((mask << _SIZE) & full))
+        free = area - blocked[platform].bit_count()
         spaces.setdefault(free, {})[platform] = None
     width = max(1, math.isqrt(max(0, len(packed) - 1)) + 1)
     for index, platform in enumerate(packed):
-        platform.update(X=index % width, Y=index // width)
+        platform.update(X=3 * (index % width) + 1, Y=3 * (index // width) + 1)
     return packed, mapping

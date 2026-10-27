@@ -22,7 +22,7 @@
       "request": 1302137
     }
   },
-  "gate_platforms": 8920,
+  "gate_platforms": 543,
   "generated_gates": 25021,
   "omitted_gates": 456,
   "reserved_channels": [
@@ -966,9 +966,22 @@
   "logical_gates": 24565,
   "local_constant_inputs": true,
   "local_gate_pairs": 5442,
-  "layout": "固定常量就地复制；私有组合门固定两两本地连接并按实际无线级数计时，时钟与寄存器反馈保持原无线延迟；组件装箱并留一格间隔、平台边缘两格。",
+  "layout": "固定常量就地复制；私有组合门固定两两本地连接并按实际无线级数计时，时钟与寄存器反馈保持原无线延迟；组件装入3×3大平台，组件间留一格、平台外缘退让三格。",
+  "platform_type": "Foundation_3x3",
+  "platform_size_chunks": [
+    3,
+    3
+  ],
+  "platform_buildable_rectangle": [
+    -17,
+    -17,
+    36,
+    36
+  ],
+  "occupied_chunks": 4887,
   "platform_grid": [
-    95,
-    94
-  ]
+    72,
+    69
+  ],
+  "platform_grid_unit": "20×20建筑格的区块；包含方阵末行空位"
 }

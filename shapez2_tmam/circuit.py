@@ -7,7 +7,6 @@
 import base64
 import gzip
 import json
-import math
 import struct
 from collections import Counter, deque
 from collections.abc import Callable
@@ -89,53 +88,6 @@ def encode_document(document: dict) -> str:
     """编码已经完成静态接线核对的生产蓝图，固定压缩时间戳。"""
     raw = json.dumps(document, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     return "SHAPEZ2-4-" + base64.b64encode(gzip.compress(raw, mtime=0)).decode("ascii") + "$"
-
-
-def _pack_platforms(platforms: list[dict], bounds: list[tuple[int, int, int, int]]) -> tuple[list[dict], dict[int, tuple[int, int]]]:
-    """按行高和余宽复用旧平台空位，组件间留一格，边缘留两格。"""
-    packed: list[dict] = []
-    mapping = {}
-    rows: dict[tuple[int, int], list[tuple[int, int, int]]] = {}
-    vertical: dict[int, list[tuple[int, int]]] = {}
-    order = sorted(range(len(platforms)), key=lambda i: (-(bounds[i][3] - bounds[i][1]),
-                                                        -(bounds[i][2] - bounds[i][0]), i))
-    for index in order:
-        left, bottom, right, top = bounds[index]
-        width, height = right - left + 1, top - bottom + 1
-        if width > 16 or height > 16:
-            raise ValueError("门组件矩形超出平台16×16格内部范围")
-        row_key = min((key for key in rows if key[0] >= height and key[1] >= width + 1), default=None)
-        if row_key is not None:
-            row_height, remaining = row_key
-            platform, x, y = rows[row_key].pop()
-            if not rows[row_key]:
-                del rows[row_key]
-        else:
-            space = min((space for space in vertical if space >= height + 1), default=None)
-            if space is None:
-                platform, y, space = len(packed), 2, 17
-                packed.append({"T": "Foundation_1x1", "B": {
-                    "$type": "Building", "BinaryVersion": 1137, "Entries": []}})
-            else:
-                platform, y = vertical[space].pop()
-                if not vertical[space]:
-                    del vertical[space]
-            free = space - height - 1
-            if free >= 2:
-                vertical.setdefault(free, []).append((platform, y + height + 1))
-            x, row_height, remaining = 2, height, 17
-        entries = packed[platform]["B"]["Entries"]
-        mapping[index] = platform, len(entries)
-        entries.extend({**entry, "X": entry["X"] + x - left, "Y": entry["Y"] + y - bottom}
-                       for entry in platforms[index]["B"]["Entries"])
-        remaining -= width + 1
-        if remaining >= 2:
-            rows.setdefault((row_height, remaining), []).append((platform, x + width + 1, y))
-    # 方阵缩短蓝图边长；每岛内仍留两格边缘，不产生跨岛本地连接。
-    width = max(1, math.isqrt(max(0, len(packed) - 1)) + 1)
-    for index, platform in enumerate(packed):
-        platform.update(X=index % width, Y=index // width)
-    return packed, mapping
 
 
 def _place_pair(gate: Gate, provider: Gate, source: Ref, output_channel: int, channels: dict[Ref, int],
@@ -423,7 +375,6 @@ class Circuit:
             raise ValueError("按局部连接计时的电路必须导出为固定配对的压缩布局")
         channels = self.channel_map()
         platforms: list[dict] = []
-        bounds: list[tuple[int, int, int, int]] = []
         expected = []
         aliased = {reference for group in self.aliases for reference in group}
         pairs = self.local_pairs() if packed else {}
@@ -449,7 +400,9 @@ class Circuit:
                 for a, b, z in tiles:
                     a, b = ((a, b), (-b, a), (-a, -b), (b, -a))[turns]
                     footprint.add((x + a, y + b, z))
-                if occupied & footprint or any(not 2 <= a <= 17 or not 2 <= b <= 17 for a, b, _ in footprint):
+                lower, upper = (2, 17) if packed else (3, 16)
+                if occupied & footprint or any(not lower <= a <= upper or not lower <= b <= upper
+                                               for a, b, _ in footprint):
                     raise ValueError(f"平台 {i} 建筑占地冲突或越界：{kind}@({x},{y})")
                 occupied.update(footprint)
                 entry = {"X": x, "Y": y, "R": turns, "T": _TYPES.get(kind, kind + "InternalVariant")}
@@ -464,8 +417,6 @@ class Circuit:
                                 for (local, port), (sender, sport) in links)
                 platforms.append({"T": "Foundation_1x1", "B": {
                     "$type": "Building", "BinaryVersion": 1137, "Entries": entries}})
-                bounds.append((min(x for x, _, _ in occupied), min(y for _, y, _ in occupied),
-                               max(x for x, _, _ in occupied), max(y for _, y, _ in occupied)))
                 continue
             gate_index = place(gate.kind, 10, 10, config=gate.config)
             for port, source in enumerate(gate.inputs):
@@ -530,10 +481,8 @@ class Circuit:
                 expected.append(((component, transmitter, 1), (component, gate_index, port)))
             platforms.append({"X": component % 12, "Y": component // 12, "T": "Foundation_1x1", "B": {
                 "$type": "Building", "BinaryVersion": 1137, "Entries": entries}})
-            bounds.append((min(x for x, _, _ in occupied), min(y for _, y, _ in occupied),
-                           max(x for x, _, _ in occupied), max(y for _, y, _ in occupied)))
         if packed:
-            platforms, mapping = pack_components(platforms) if self.local_nodes else _pack_platforms(platforms, bounds)
+            platforms, mapping = pack_components(platforms)
             expected = [((mapping[pi][0], mapping[pi][1] + local, port),
                          (mapping[si][0], mapping[si][1] + slocal, sport))
                         for (pi, local, port), (si, slocal, sport) in expected]
