@@ -196,13 +196,10 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
     delta_present = tuple(program.or_(*(finder.delta[q][z] for q in range(4))) for z in range(5))
     layers = tuple(program.layer(tuple(program.choose(finder.delta[q][z], original[q][z], empty)
                                       for q in range(4))) for z in range(5))
-    for exists, layer in zip(delta_present, layers):
-        selected = program.and_(second_pass, exists)
-        program.emit(selected, 14, destination=1, base=layer)
-        program.emit(selected, 7, 0, 1)
     macro_last = len(program.instructions) - 1
     parent_start = len(program.instructions)
-    program.emit(program.one, 6, 0)
+    # 叶端第二遍直接进入同一追加段；只有父帧重放先执行Pin。
+    program.emit(modes[Phase.REPLAY_PARENT], 6, 0)
     for exists, layer in zip(delta_present, layers):
         program.emit(exists, 14, destination=1, base=layer)
         program.emit(exists, 7, 0, 1)
@@ -221,8 +218,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
     repeat = program.and_(end_macro, program.not_(second_pass))
     repeat_corner = program.and_(advance, circuit.add("LogicGateCompare", pc, Literal(corner_last), config="AQ=="),
                                  program.not_(second_corner))
-    macro_done = program.and_(end_macro, second_pass)
-    parent_done = program.and_(advance, last)
+    tail_done = program.and_(advance, last)
     for read, source in zip((*items, ack, item_status), next_items):
         bank.put(read, source)
     bank.put(pc, next_pc, advance)
@@ -398,8 +394,8 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
         (search_pop, Phase.RETURN), (root_solved, Phase.REPLAY_LEAF),
         (retry_family, Phase.SOURCE), (skip_family, Phase.FAMILY_NEXT),
         (program.and_(fail_pop, program.not_(optional_top)), Phase.SOURCE_NEXT),
-        (program.and_(modes[Phase.REPLAY_LEAF], macro_done), Phase.REPLAY_LEAF_CHECK),
-        (program.and_(modes[Phase.REPLAY_PARENT], parent_done), Phase.REPLAY_PARENT_CHECK),
+        (program.and_(modes[Phase.REPLAY_LEAF], tail_done), Phase.REPLAY_LEAF_CHECK),
+        (program.and_(modes[Phase.REPLAY_PARENT], tail_done), Phase.REPLAY_PARENT_CHECK),
         (replay_up, Phase.REPLAY_PARENT),
         (program.or_(root_failed, replay_finished, outside, invalid, internal), Phase.DONE),
     )
@@ -443,6 +439,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
         "shared_condition_controls": True, "palette_entries_per_cell": 9, "grounded_pin_tail_required": True, "shared_family_grounding_check": True,
         "support_row_closures": 10, "pin_base_precheck": True, "crystal_conflict_slot_skip": True,
         "top_crystal_forbidden_above_retained": True, "source_slots_use_valid_successors": True, "integer_source_cursors": True,
+        "retained_crystal_neighbor_motion_filter": True, "shared_leaf_parent_append": True,
         "direct_active_instruction_successor": True, "column_crystal_color_runs": True,
         "search_frames": 4, "tail_pin_limit": "max(0, 最高原目标C层号-1)，层号从0开始",
         "item_registers": 6, "program_rom_rows": len(instructions),
@@ -454,8 +451,10 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
                            "optional_top_for_ground_crystal_families": True,
                            "shared_leaf_check_for_all_families": True},
         "shared_angle_rows": corner_last + 1, "angle_calls": 4, "noncrystal_half_max_instructions": 9,
-        "instruction_bound": 2 * (macro_last + corner_last + 2) + 3 * (len(instructions) - parent_start),
-        "leaf_program_rows": macro_last + 1, "parent_tail_rows": len(instructions) - parent_start,
+        "instruction_bound": (2 * (macro_last + corner_last + 2) + len(instructions) - parent_start - 1
+                              + 3 * (len(instructions) - parent_start)),
+        "leaf_program_rows": len(instructions) - 1, "parent_tail_rows": len(instructions) - parent_start,
+        "shared_append_rows": len(instructions) - parent_start - 1,
         "statuses": {"0": "搜索或成功路径重放中", "1": "已输出完整制造流程，原生回放等于原目标",
                      "2": "穷尽全部有界尾部后不可制作", "3": "cu晶体供料未界定", "4": "内部状态或回放失配，不能判不可制作",
                      "null": "输入无效、关闭或窗口之外"},
