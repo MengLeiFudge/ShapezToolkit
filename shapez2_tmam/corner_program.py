@@ -25,8 +25,8 @@ class Instruction:
     """条件成立才执行的消费式指令；条件依赖目标及上层固定的调用状态。"""
 
     condition: Ref
-    opcode: int
-    a: int = 0
+    opcode: int | Ref
+    a: int | Ref = 0
     b: int = 0
     destination: int | Ref = 0
     base: Ref | Literal = Literal(None)
@@ -163,7 +163,7 @@ class CornerProgram:
         self.layers[key] = result
         return result
 
-    def emit(self, condition: Ref, opcode: int, a: int = 0, b: int = 0,
+    def emit(self, condition: Ref, opcode: int | Ref, a: int | Ref = 0, b: int = 0,
              destination: int | Ref | None = None, base: Ref | Literal = Literal(None),
              color: Ref | Literal = Literal(None)) -> None:
         if self.booleans.get(condition) != 0:
@@ -197,6 +197,36 @@ class CornerProgram:
         self.emit(condition, 8, first, second)
         self.rotate(first, start, condition)
 
+    def noncrystal_rows(self, rows: tuple[tuple[CellRef, ...], ...], work: int,
+                        condition: Ref, lower: Ref) -> None:
+        """按纯针前缀段准备N/P上料；lower表示槽work已有下料，调用者保证追加安全。"""
+        if not rows or len(rows) > 5 or any(len(row) != 4 for row in rows):
+            raise ValueError("无晶体行程序需要一至五层，每层四格")
+        present = tuple(self.or_(*(cell.occupied for cell in row)) for row in rows)
+        merges = []
+        for below, above, exists in zip(rows, rows[1:], present):
+            same = [self.one if a.occupied == b.occupied else
+                    self.or_(self.and_(a.occupied, b.occupied), self.and_(self.not_(a.occupied), self.not_(b.occupied)))
+                    for a, b in zip(below, above)]
+            merges.append(self.and_(exists, *same, *(self.or_(self.not_(cell.occupied), cell.pin) for cell in below)))
+        layers = [self.layer(row) for row in rows]
+        for z in range(len(rows) - 2, -1, -1):
+            above, current = layers[z + 1], layers[z]
+            layers[z] = self.pick(merges[z], self.const(above.value) if isinstance(above, Literal) else above,
+                                  self.const(current.value) if isinstance(current, Literal) else current)
+        completed = []
+        for z, (exists, layer) in enumerate(zip(present, layers)):
+            start = self.and_(condition, exists, self.not_(merges[z - 1]) if z else self.one)
+            occupied = self.or_(lower, *completed)
+            destination = self.pick(occupied, self.const(work + 1), self.const(work))
+            self.emit(start, 14, destination=destination, base=layer)
+            merge = merges[z] if z < len(merges) else self.zero
+            opcode = self.pick(merge, self.const(6), self.const(7))
+            source = self.pick(merge, destination, self.const(work))
+            self.emit(self.and_(condition, exists, self.or_(merge, occupied)),
+                      opcode, source, work + 1, destination=source)
+            completed.append(self.and_(exists, self.not_(merge)))
+
     def column(self, cells: tuple[CellRef, ...], q: int, work: int, condition: Ref,
                known_crystal: bool = False) -> None:
         """使用范围仅为连续独立列；空尾保留为条件，C下方不允许任意间隙。"""
@@ -206,12 +236,7 @@ class CornerProgram:
         copper = self.cell("Cu")
         has_crystal = self.one if known_crystal else self.or_(*(cell.crystal for cell in cells))
         ordinary_mode = self.and_(condition, self.not_(has_crystal))
-        for z, cell in enumerate(cells):
-            active = self.and_(ordinary_mode, cell.occupied)
-            row = self.layer((cell, empty, empty, empty))
-            self.emit(active, 14, destination=work if z == 0 else work + 1, base=row)
-            if z:
-                self.emit(active, 7, work, work + 1)
+        self.noncrystal_rows(tuple((cell, empty, empty, empty) for cell in cells), work, ordinary_mode, self.zero)
         crystal_mode = self.and_(condition, has_crystal)
         prefix = self.one
         prefixes = []
@@ -247,10 +272,9 @@ class CornerProgram:
         self.window(work, 0, crystal_mode)
         for prefix in prefixes:
             self.emit(self.and_(crystal_mode, prefix), 6, work)
-        for z, cell in enumerate(cells):
-            active = self.and_(crystal_mode, self.not_(higher[z]), cell.occupied)
-            self.emit(active, 14, destination=work + 1, base=self.layer((cell, empty, empty, empty)))
-            self.emit(active, 7, work, work + 1)
+        suffix = tuple((self.choose(self.not_(higher[z]), cell, empty), empty, empty, empty)
+                       for z, cell in enumerate(cells))
+        self.noncrystal_rows(suffix, work, crystal_mode, self.one)
         self.rotate(work, q, condition)
 
     def independent(self, columns: dict[int, tuple[CellRef, ...]], work: int, condition: Ref) -> None:

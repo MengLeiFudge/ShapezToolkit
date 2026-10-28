@@ -6,7 +6,7 @@ from .decoder_circuit import DecodedCell
 
 
 def shared_half_body(program: CornerProgram, columns: tuple[tuple[CellRef, ...], ...], second: Ref) -> tuple[Ref, int, int]:
-    """制造标准半形：无C直接逐层堆叠；含C两角共用槽0～3，第一角暂存槽4。"""
+    """制造标准半形：无C按纯针行段制造；含C两角共用槽0～3，第一角暂存槽4。"""
     if len(columns) != 2 or any(len(column) != 5 for column in columns):
         raise ValueError("共用两角程序需要两列各五个原层位")
     present = tuple(program.or_(*(cell.occupied for cell in column)) for column in columns)
@@ -32,12 +32,8 @@ def shared_half_body(program: CornerProgram, columns: tuple[tuple[CellRef, ...],
     direct = program.and_(present_any, program.not_(has_crystal))
     direct_block = program.begin(direct)
     empty = program.cell("--")
-    for z in range(5):
-        active = program.and_(direct, program.or_(*(column[z].occupied for column in columns)))
-        layer = program.layer((columns[0][z], columns[1][z], empty, empty))
-        program.emit(active, 14, destination=0 if z == 0 else 1, base=layer)
-        if z:
-            program.emit(active, 7, 0, 1)
+    program.noncrystal_rows(tuple((columns[0][z], columns[1][z], empty, empty) for z in range(5)),
+                            0, direct, program.zero)
     program.end(direct_block)
     return present_any, repeat_at, mirror_limit
 
