@@ -28,6 +28,13 @@ class StackPlan:
                     cells[level, q] = cell
         return rules.fold(cells)
 
+    def noncrystal_carrier(self, rules: Rules) -> Shape | None:
+        """同摘要无C实体的唯一候选；空摘要或落地后块合并时返回None。"""
+        source = self.apply(rules, None)
+        if source is None or len(rules.groups(rules.cells(source))) != len(self.pieces):
+            return None
+        return source
+
     def _landings(self, tops: list[int]) -> Iterator[tuple[int, Piece]]:
         """复制起始列顶，逐块更新；来源序列已经排除固定的高处障碍。"""
         tops = tops.copy()
@@ -82,7 +89,7 @@ class StackCatalog:
         self.uppers: dict[StackPlan, Recipe] = {}
 
     def add(self, recipe: Recipe) -> None:
-        """每个摘要按步数、槽数依次取优；空或单块上料改用基础配方。"""
+        """每个摘要按步数、槽数取优；首次登记尝试同摘要的简化上料。"""
         rules = self.builder.rules
         if recipe.height != rules.height or len(recipe.result.layers[0]) != rules.quadrants:
             raise ValueError("堆叠凭据必须与目录的物理配置一致")
@@ -91,13 +98,20 @@ class StackCatalog:
         if previous is None or (recipe.step_count, recipe.register_count) < (previous.step_count, previous.register_count):
             self.lowers[settled] = recipe
         plan = stack_plan(rules, recipe.result)
-        upper = recipe
-        if not plan.pieces:
-            upper = self.builder.apply("crystal", self.builder.base((PIN,) * rules.quadrants), parameter="r")
-        elif len(plan.pieces) == 1:
-            values = dict(plan.pieces[0])
-            upper = self.builder.base(tuple(values.get(q, EMPTY) for q in range(rules.quadrants)))
         previous = self.uppers.get(plan)
+        upper = recipe
+        if previous is None:
+            if not plan.pieces:
+                upper = self.builder.apply("crystal", self.builder.base((PIN,) * rules.quadrants), parameter="r")
+            elif len(plan.pieces) == 1:
+                values = dict(plan.pieces[0])
+                upper = self.builder.base(tuple(values.get(q, EMPTY) for q in range(rules.quadrants)))
+            elif (source := plan.noncrystal_carrier(rules)) is not None:
+                compact = self.builder.noncrystal(source)
+                if compact is None:
+                    raise RuntimeError("上料摘要的无合并落点未生成无晶体制造证书")
+                if (compact.step_count, compact.register_count) < (upper.step_count, upper.register_count):
+                    upper = compact
         if previous is None or (upper.step_count, upper.register_count) < (previous.step_count, previous.register_count):
             self.uppers[plan] = upper
 

@@ -1,0 +1,77 @@
+{
+  "name": "6q-multiblock-summary",
+  "title": "多块复杂上料替换为无晶体载体",
+  "mechanism": "原上料q0为CCCN、q3为NPN；辅助C抬高后全碎。摘要落地时四块不合并，改用q0地面N和q3的NPN，四步准备后堆到q0单N下料。",
+  "quadrants": 6,
+  "height": 5,
+  "target": "Cu----Cu----:Cu----P-----:------Cu----",
+  "register_count": 2,
+  "evidence": "依据局部物理与已证配方变换生成中间产物；未在游戏或Mod中验证。",
+  "milestone_orientation": "关键阶段按原构造的标准朝向示意，实际方向与物品编号见steps。",
+  "milestones": [
+    {
+      "name": "原复杂上料",
+      "result": "cr----Cu----:cr----P-----:cr----Cu----:Cu----------"
+    },
+    {
+      "name": "同摘要无晶体上料",
+      "result": "Cu----Cu----:------P-----:------Cu----"
+    },
+    {
+      "name": "一次堆叠成品",
+      "result": "Cu----Cu----:Cu----P-----:------Cu----"
+    }
+  ],
+  "steps": [
+    {
+      "id": 0,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "Cu----Cu----"
+    },
+    {
+      "id": 1,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "------Cu----"
+    },
+    {
+      "id": 2,
+      "operation": "pin",
+      "inputs": [
+        1
+      ],
+      "parameter": null,
+      "result": "------P-----:------Cu----"
+    },
+    {
+      "id": 3,
+      "operation": "stack",
+      "inputs": [
+        0,
+        2
+      ],
+      "parameter": null,
+      "result": "Cu----Cu----:------P-----:------Cu----"
+    },
+    {
+      "id": 4,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "Cu----------"
+    },
+    {
+      "id": 5,
+      "operation": "stack",
+      "inputs": [
+        4,
+        3
+      ],
+      "parameter": null,
+      "result": "Cu----Cu----:Cu----P-----:------Cu----"
+    }
+  ]
+}

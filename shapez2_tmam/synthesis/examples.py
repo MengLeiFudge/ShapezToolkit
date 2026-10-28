@@ -118,6 +118,25 @@ def wide_half_examples() -> list[Example]:
     ]
 
 
+def multiblock_summary_example() -> Example:
+    """含辅助C的四块上料，按摘要改用唯一无C载体。"""
+    builder = Builder(Rules(6))
+    source = builder.independent_columns(builder.rules.parse(
+        "cr----Cu----:cr----P-----:cr----Cu----:Cu----------"))
+    assert source is not None
+    lower = builder.base(("Cu", EMPTY, EMPTY, EMPTY, EMPTY, EMPTY))
+    catalog = StackCatalog(builder)
+    catalog.add(source)
+    catalog.add(lower)
+    result = catalog.construct(builder.rules.parse("Cu----Cu----:Cu----P-----:------Cu----"))
+    if result is None:
+        raise RuntimeError("六象限多块摘要未生成无晶体替换配方")
+    return Example("6q-multiblock-summary", "多块复杂上料替换为无晶体载体",
+                   "原上料q0为CCCN、q3为NPN；辅助C抬高后全碎。摘要落地时四块不合并，改用q0地面N和q3的NPN，四步准备后堆到q0单N下料。",
+                   6, result, (("原复杂上料", source), ("同摘要无晶体上料", result.inputs[1]),
+                               ("一次堆叠成品", result)))
+
+
 def interleaved_stack_example() -> Example:
     """紧凑上料会横向粘合，改用带独立NPN列的补C载体。"""
     builder = Builder(Rules(6))
@@ -351,7 +370,7 @@ def main() -> int:
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
                      layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example(),
-                     pin_framed_rectangle_example(), grouped_columns_example()))
+                     pin_framed_rectangle_example(), grouped_columns_example(), multiblock_summary_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output, instructions=args.instructions)

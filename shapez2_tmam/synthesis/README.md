@@ -77,7 +77,7 @@ if result.recipe is not None:
 
 `single_stack(builder, lower, target)`把普通追加扩展到新增针：依次尝试[无C块数守恒与原位补C](../general/interleaved-stack.md)、[列内压紧](../general/packed-column-stack.md)、[保留针下间隙](../general/layer-constraint-stack.md)。后两种载体共用差分下界求解器，分别调整列起点或物理块来源层。按块求解还会尝试把初始针固定为触地前缀，放宽允许补C的区间；全部补C候选须确认抬高后没有静止格，并取得独立列制造凭据。原针尾域及旧候选成功路径保持，实际始终只对原下料执行一次Stack。四种候选均失败时返回None，不能视为目标全局不可制作。
 
-`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，每键保留已知步数最少者，空/单块上料摘要使用已证极小替换。`construct(target)`先筛下料，再逐块检查新增格；可见格不匹配时立即停止该候选，成功返回已登记摘要对中总步数最少、同长时物品槽最少的真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
+`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，每键保留已知步数最少者，空/单块上料摘要使用已证极小替换；首次出现的多块摘要调用`StackPlan.noncrystal_carrier`，空地面落点块数保持时取得[同摘要的唯一无C载体](../general/noncrystal-carrier.md)，仅在配方成本更低时替换。`construct(target)`先筛下料，再逐块检查新增格；可见格不匹配时立即停止该候选，成功返回已登记摘要对中总步数最少、同长时物品槽最少的真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
 
 `Recipe.step_count`在建立节点时计算`1+sum(输入.step_count)`，等于消费式步骤展开的条数。共享子配方引用仍按每份实体分别计数。这个指标用于选配方，不代表建筑数量或游戏耗时，也不保证全局最短。
 
