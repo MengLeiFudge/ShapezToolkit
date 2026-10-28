@@ -1,4 +1,4 @@
-"""条件堆叠约化：K_add下料的基础块域，以及直接判据确认的单次N/P上料。"""
+"""条件堆叠约化：安全类下料的基础块域，以及直接判据确认的单次N/P上料。"""
 
 from collections.abc import Iterable, Iterator
 
@@ -10,7 +10,7 @@ from .support import in_addition_class
 def stack_successors(rules: Rules, lower: Shape, known: Iterable[Shape]) -> Iterator[tuple[Shape, Shape]]:
     """给出(上料,结果)；调用方提供同一规则下、普通格统一为Cu的结构目录快照。
 
-    K_add下料使用基础块；一次结算后进入K_add的下料先给出纯C触发料。
+    安全类下料使用基础块；一次结算后进入安全类的下料先给出纯C触发料。
     两种替换均保持最终闭包，不要求在原轮数取得同一结果。其余保留真实上料。
     """
     if not in_addition_class(rules, lower):
@@ -29,7 +29,7 @@ def stack_successors(rules: Rules, lower: Shape, known: Iterable[Shape]) -> Iter
     tops = rules.column_tops(cells)
 
     def place(columns: tuple[int, ...], cell: str) -> tuple[Shape, Shape] | None:
-        """K_add原格不动，单个基础块停在所占列最高阻挡上方。"""
+        """安全类原格不动，单个基础块停在所占列最高阻挡上方。"""
         level = 1 + max(tops[q] for q in columns)
         if level >= rules.height:
             return None

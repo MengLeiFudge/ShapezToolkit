@@ -27,7 +27,7 @@
 
 ## 后续研究
 
-按用户要求先研究一般偶数参数以反哺固定范围，再接Python流程、建筑与时序统计及走线。[K_add](../general/addition-components.md)及[一次结算后约化](../general/settled-stacking.md)已扩大可安全替换任意上料的下料范围，后者包括不稳定V；[交换半形凭据](../general/swap-witnesses.md)不依赖K。仍未覆盖的复杂下料保持真实Stack，不以K或稳定性过滤整个可制作集合。
+按用户要求先研究一般偶数参数以反哺固定范围，再接Python流程、建筑与时序统计及走线。包含K_add的[接地屏障判据K_X](../general/grounded-barriers.md)及[一次结算后约化](../general/settled-stacking.md)已扩大可安全替换任意上料的下料范围，后者包括不稳定V；[多块摘要的无C替换](../general/noncrystal-carrier.md)及[交换半形凭据](../general/swap-witnesses.md)不依赖K。仍未覆盖的复杂下料保持真实Stack，不以K或稳定性过滤整个可制作集合。
 
 四象限的 1296 个单段前态界及基础堆叠全局约化不作为六象限答案。若要提出更强的六象限约化，需要独立证明它处理全部合法输入，包括双输入操作的双方。
 

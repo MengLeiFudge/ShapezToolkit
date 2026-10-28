@@ -1,4 +1,4 @@
-"""支撑可达判K/G类，并用潜在粘合证书识别可安全逐块追加的K_add。"""
+"""支撑可达判K/G类，并用接地屏障与潜在粘合证书识别安全追加范围。"""
 
 from collections import deque
 
@@ -31,7 +31,7 @@ def in_support_class(rules: Rules, target: Shape, *, grounded: bool = False, opt
 
 
 def in_addition_class(rules: Rules, target: Shape) -> bool:
-    """判K_add充分条件；失败不代表不可制造，也不代表复杂Stack不能约化。"""
+    """判含接地屏障的K_X充分条件；失败不表示不可制造或不能约化。"""
     if in_support_class(rules, target):
         return True
     cells = rules.cells(target)
@@ -65,21 +65,23 @@ def in_addition_class(rules: Rules, target: Shape) -> bool:
     grounded = reach(ground)
     n = rules.quadrants
     height = len(target.layers)
-    starts = [top + 1 if top >= 0 and owner[top, q] not in grounded else height
-              for q, top in enumerate(tops)]
-    # 从最低种子出发，两方向各一圈；越过起点的路径不可能降低起点高度。
-    root = min(range(n), key=lambda q: starts[q])
-    for direction in (1, -1):
-        for step in range(n):
-            q = (root + direction * step) % n
-            r = (q + direction) % n
-            starts[r] = min(starts[r], max(starts[q], tops[r] + 1))
     analysis = {pos: cell for pos, cell in cells.items() if owner[pos] not in grounded}
-    for q, start in enumerate(starts):
-        for z in range(start, height):
-            neighbors = ((z, (q - 1) % n), (z, (q + 1) % n))
-            if not any(pos in cells and cells[pos] != PIN and owner[pos] in grounded for pos in neighbors):
-                analysis[z, q] = "Cu"
+    reachable: set[int] = set()
+    for z in range(height):
+        reachable.update(q for q, top in enumerate(tops)
+                         if top >= 0 and top + 1 == z and owner[top, q] not in grounded)
+        barriers = {q for q, top in enumerate(tops) if top < z and any(
+            pos in cells and cells[pos] != PIN and owner[pos] in grounded
+            for pos in ((z, (q - 1) % n), (z, (q + 1) % n)))}
+        # 屏障位置可以由针向上承接，但在本层不能作为无接地N横向传播。
+        queue = deque(reachable - barriers)
+        while queue:
+            q = queue.popleft()
+            for r in ((q - 1) % n, (q + 1) % n):
+                if tops[r] < z and r not in barriers and r not in reachable:
+                    reachable.add(r)
+                    queue.append(r)
+        analysis.update({(z, q): "Cu" for q in reachable - barriers})
     potential = {pos: index for index, group in enumerate(rules.groups(analysis)) for pos in group}
     labels = {index: potential[next(iter(group))]
               for index, group in enumerate(groups) if index not in grounded}

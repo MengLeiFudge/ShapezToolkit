@@ -9,7 +9,7 @@ Rules现在接受偶数象限n≥2、制造层数上限H≥2。采用单象限�
 | Rules | 按n环邻接，按H截高；Stack上料提高H+1；Pin排除原第H层并处理融合删除 |
 | Builder | 基础层、无晶体纯针行段、独立柱、晶体前缀、连续半面拼接；replicate可提升同H的小象限真实配方 |
 | Constructor | 两象限任意H及通用无晶体目标完整判定；其余独立柱/前缀及复制商图局部构造未覆盖时返回unknown |
-| stack_successors | K_add下料的n²+1种结构基础块；未通过充分判据时保留真实上料 |
+| stack_successors | K_X安全下料的n²+1种结构基础块；一次结算后安全者用纯C触发料，其余保留真实上料 |
 | ordinary_stack / single_stack | 给定真实下料的普通追加、针尾及部分交错N/P构造；依次尝试无C、原位补C、列内压紧及针下间隙载体，不额外结算下料 |
 | HalfCatalog | 按前/后半用途保留最低成本原输入；按目标n个有向投影选目录内较短配方 |
 | StackPlan / StackCatalog | 任意堆叠的精确摘要及目标前缀匹配，保留每个键最短的已知凭据；缺失不是不可制作证明 |
