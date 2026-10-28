@@ -8,7 +8,7 @@
 
 1. 先读[三列以上半形的无限构造族](wide-half-loops.md)，核对 n=2k≥6、H≥5 的非 K 半形及不稳定拼合输出，再读[六象限的具体矩阵](../6q5l/non-k-half.md)。
 2. 再读[通用列内不变量](column-invariants.md)，确认 Q、J 和顶针位置约束只使用局部事实，没有依赖整体稳定性。
-3. 查[一般尾部计数](stack-progress.md)、[扩大后的安全堆叠范围](addition-components.md)及[接地屏障修正](grounded-barriers.md)：不稳定输出仍保留；Python采用包含K_add的K_X，用逐行危险传播和反向支撑可达完成静态判定。
+3. 查[一般尾部计数](stack-progress.md)、[扩大后的安全堆叠范围](addition-components.md)及[接地屏障等价性](grounded-barriers.md)：不稳定输出仍保留；Python采用K_add，用两圈危险高度扫描和反向支撑可达完成判定。额外按行阻断X不会改变接受范围。
 4. 读[原八象限八层构造](general-model.md)，其中复杂堆叠无法从同一下料改成逐块堆叠的反例仍有独立作用；再对照[六象限完整配方目录](../6q5l/synthesis.md)及其参数推广，区分完整搜索和结构约化。
 
 ## 研究结果索引
@@ -18,11 +18,11 @@
 | [参数化模型与反例](general-model.md) | 八象限八层中，可制作的无针悬空环、不稳定输出，以及复杂堆叠无法从同一下料改成逐块堆叠的构造 |
 | [通用列内不变量](column-invariants.md) | 不依赖整体稳定性的 Q、J 证明，以及顶针逆向的晶体位置、地面针占用约束 |
 | [三列以上半形的无限构造族](wide-half-loops.md) | 对所有偶数 n≥6、H≥5 显式构造非 K 半形和不稳定输出；固定偶数参数的有限合成保证及尚未解决的压缩问题 |
-| [K下料的通用堆叠化简](conditional-stacking.md) | K范围的基础块约化证明；当前实现采用包含K_add的接地屏障判据K_X |
+| [K下料的通用堆叠化简](conditional-stacking.md) | K范围的基础块约化证明；当前实现采用更强的K_add范围 |
 | [受列顶保护的普通块](protected-stack.md) | 普通内块也可保护支撑环；n≥8、H≥5的显式非K可制造族 |
-| [接地来源与潜在粘合](addition-components.md) | K_add支撑证书及堆叠闭包；六象限H也可逐层追加，Python使用下述更细的接地屏障判据 |
-| [接地屏障与危险传播](grounded-barriers.md) | X中的N必接地，P仍可向上支撑；逐行传播定义K_X，包含K_add且保持Stack闭包，已接入Python |
-| [一次结算后进入安全范围](settled-stacking.md) | 原下料可不稳定；以纯C上料真实触发一次F，再进入K_X基础追加，涵盖六象限V；候选接口已实现 |
+| [接地来源与潜在粘合](addition-components.md) | K_add支撑证书及堆叠闭包；危险高度两圈扫描与跨标签边传播已接入Python，六象限H也可逐层追加 |
+| [接地屏障等价性](grounded-barriers.md) | 环形空列区间的屏障只在端点；提前阻断水平传播不改变旧组分区，无需增加逐行屏障状态机 |
+| [一次结算后进入安全范围](settled-stacking.md) | 原下料可不稳定；以纯C上料真实触发一次F，再进入K_add基础追加，涵盖六象限V；候选接口已实现 |
 | [堆叠进展量与尾部界](stack-progress.md) | 有效Stack严格增加N/P数减C数；一般含C尾部至多n(3H−1)次主干Stack/Pin |
 | [两象限任意层数直接合成](two-quadrant-synthesis.md) | 稳定性、Q与最高C以下连续前缀的充要判据已接入默认Constructor；O(H)制造步骤、3槽；另给单层构造与融合屏障 |
 | [相邻象限复制与配方提升](sector-replication.md) | 证明全部制造操作与等宽复制对应；默认构造可提升较小商图证书，间隙代表已扩到八象限 |
