@@ -120,9 +120,20 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
         # Shape省略空顶层；选址仍按五个原层位工作。
         target_column = tuple(target.layers[z][q] if z < len(target.layers) else EMPTY for z in range(5))
         forbidden = (forced_masks[(q - 1) % 4] | forced_masks[(q + 1) % 4]) & ~forced_masks[q]
-        candidates = [column for slot in range(len(_source_patterns(target_column)))
-                      if (column := pin_column_at(target_column, slot)) is not None
-                      and not any(forbidden & (1 << r) and cell[0] == "c" for r, cell in enumerate(column))]
+        retained = [(z, cell) for z, cell in enumerate(target_column)
+                    if cell != EMPTY and cell[0] != "c" and not (z == 0 and cell == PIN)]
+        candidates = []
+        for slot in range(len(_source_patterns(target_column))):
+            column = pin_column_at(target_column, slot)
+            if column is None or any(forbidden & (1 << r) and cell[0] == "c"
+                                     for r, cell in enumerate(column)):
+                continue
+            sources = [(r, cell) for r, cell in enumerate(column) if cell != EMPTY and cell[0] != "c"]
+            # 邻列强制C必静止；与它横向粘连的N不能降低目标落点，P不粘连。
+            if any(forbidden & (1 << r) and cell != PIN and z < r + 1
+                   for (r, cell), (z, _) in zip(sources, retained)):
+                continue
+            candidates.append(column)
         if not candidates:
             return
         columns.append(candidates)

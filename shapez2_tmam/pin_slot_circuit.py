@@ -20,7 +20,7 @@ class SlotCursor:
 
 
 def valid_slots(program: CornerProgram, target: ColumnTarget, forbidden_crystals: tuple[Ref, ...] = ()) -> tuple[Ref, ...]:
-    """单列结构接受，加上由相邻列强制C确定的禁用晶体位置。"""
+    """单列结构接受；邻列强制C既禁止辅助C，也禁止相邻N下落。"""
     kinds, counts = target.kinds, target.counts
     destinations = tuple(tuple(program.and_(target.retained[z], counts[z][rank]) if rank <= z else program.zero
                                for z in range(5)) for rank in range(4))
@@ -37,6 +37,9 @@ def valid_slots(program: CornerProgram, target: ColumnTarget, forbidden_crystals
     def positions(keep: int) -> Ref:
         sources = [r for r in range(4) if keep & (1 << r)]
         clauses = [program.or_(*destinations[rank][:r + 2]) for rank, r in enumerate(sources)]
+        if forbidden_crystals:
+            clauses.extend(program.or_(program.not_(forbidden_crystals[r]), pins[rank], destinations[rank][r + 1])
+                           for rank, r in enumerate(sources))
         for r in range(4):
             before = (keep & ((1 << r) - 1)).bit_count()
             clauses.append(program.or_(program.not_(forced[r]), counts[r + 1][before]))
