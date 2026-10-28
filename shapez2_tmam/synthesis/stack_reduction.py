@@ -10,10 +10,15 @@ from .support import in_addition_class
 def stack_successors(rules: Rules, lower: Shape, known: Iterable[Shape]) -> Iterator[tuple[Shape, Shape]]:
     """给出(上料,结果)；调用方提供同一规则下、普通格统一为Cu的结构目录快照。
 
-    K_add分支使用初始种子中的连续普通块或单针；完整性针对最终闭包，
-    不要求与原双输入规则在同一轮产生相同结果。未通过判据时原样保留真实堆叠。
+    K_add下料使用基础块；一次结算后进入K_add的下料先给出纯C触发料。
+    两种替换均保持最终闭包，不要求在原轮数取得同一结果。其余保留真实上料。
     """
     if not in_addition_class(rules, lower):
+        settled = rules.collapse(rules.cells(lower))
+        if settled is not None and settled != lower and in_addition_class(rules, settled):
+            # 纯C单层属于显式可制造种子；在高处全部碎裂，只触发下料的一次结算。
+            yield Shape((("cr",) * rules.quadrants,)), settled
+            return
         for upper in known:
             result = rules.stack(lower, upper)
             if result is not None and result != lower:

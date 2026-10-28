@@ -21,6 +21,7 @@
 | [K下料的通用堆叠化简](conditional-stacking.md) | K范围的基础块约化证明；当前实现采用下述更强K_add范围 |
 | [受列顶保护的普通块](protected-stack.md) | 普通内块也可保护支撑环；n≥8、H≥5的显式非K可制造族 |
 | [接地来源与潜在粘合](addition-components.md) | K_add支撑证书及堆叠闭包；危险高度两圈扫描与跨标签边传播已接入Python，六象限H也可逐层追加 |
+| [一次结算后进入安全范围](settled-stacking.md) | 原下料可不稳定；以纯C上料真实触发一次F，再进入K_add基础追加，涵盖六象限V；候选接口已实现 |
 | [堆叠进展量与尾部界](stack-progress.md) | 有效Stack严格增加N/P数减C数；一般含C尾部至多n(3H−1)次主干Stack/Pin |
 | [两象限任意层数直接合成](two-quadrant-synthesis.md) | 稳定性、Q与最高C以下连续前缀的充要判据已接入默认Constructor；O(H)制造步骤、3槽；另给单层构造与融合屏障 |
 | [相邻象限复制与配方提升](sector-replication.md) | 证明全部制造操作与等宽复制对应；默认构造可提升较小商图证书，间隙代表已扩到八象限 |
