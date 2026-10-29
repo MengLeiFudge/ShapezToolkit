@@ -319,25 +319,26 @@ class CornerProgram:
         self.window(work, start, with_far)
         self.end(far_block)
 
-    def hard(self, cells: tuple[CellRef, ...], cases: dict[str, Ref], near: int, work: int, condition: Ref) -> None:
-        """五组难列共用支撑转交流程，只选择初始列、锚列和最后补料。"""
+    def hard(self, cells: tuple[CellRef, ...], gaps: tuple[tuple[int, int, Ref], ...],
+             near: int, work: int, condition: Ref) -> None:
+        """按间隙上端r和落点m选择原料，所有悬空落点共用支撑转交程序。"""
         empty, copper, pin, crystal = (self.cell(code) for code in (EMPTY, "Cu", PIN, "cr"))
         far = 4 - near
         start = 0 if near == 1 else 3
         opposite = 3 if near == 1 else 0
-        low = cases["-N-C"]
-        two_gaps = cases["-N--C"]
-        empty_bottom = self.or_(cases["--N-C"], two_gaps)
-        first_normal = self.choose(cases["N-N-C"], self.typed(cells[0], "N"), crystal)
+        low = self.or_(*(flag for r, _, flag in gaps if r == 3))
+        lower_landing = self.or_(*(flag for _, m, flag in gaps if m == 1))
+        empty_bottom = self.and_(self.not_(low), self.not_(cells[0].occupied))
+        ground_normal = self.and_(cells[0].occupied, self.not_(cells[0].pin))
+        first_normal = self.choose(ground_normal, self.typed(cells[0], "N"), crystal)
         second = self.choose(low, self.typed(cells[1], "N"), first_normal)
-        third_normal = self.choose(two_gaps, self.typed(cells[1], "N"), self.typed(cells[2], "N"))
+        third_normal = self.choose(lower_landing, self.typed(cells[1], "N"), self.typed(cells[2], "N"))
         third = self.choose(low, self.typed(cells[3], "C"), third_normal)
-        fourth = self.choose(low, self.choose(cells[4].crystal, self.typed(cells[4], "C"), empty),
-                             self.typed(cells[4], "C"))
+        fourth = self.choose(cells[4].crystal, self.typed(cells[4], "C"), empty)
         full = (crystal, second, third, fourth, empty)
-        far_initial = (self.choose(cases["P-N-C"], copper, crystal),
+        far_initial = (self.choose(cells[0].pin, copper, crystal),
                        self.choose(empty_bottom, crystal, copper), copper, copper, copper)
-        anchor = (self.choose(self.or_(low, two_gaps), crystal, copper),
+        anchor = (self.choose(lower_landing, crystal, copper),
                   self.choose(low, copper, crystal), self.choose(low, empty, copper), empty, empty)
         self.independent({0: full, near: (copper,) * 5, far: far_initial}, work, condition)
         self.window(work, start, condition)
@@ -351,29 +352,29 @@ class CornerProgram:
         self.independent({2: (crystal,) * 5, far: far_tail}, work + 1, condition)
         self.join(work, work + 1, start, condition)
         self.emit(condition, 6, work)
-        for cell, needed in ((pin, self.one), (self.choose(two_gaps, pin, copper), self.one),
-                             (copper, self.or_(low, two_gaps))):
+        for z in range(2, 5):
+            needed = self.or_(*(flag for _, m, flag in gaps if z > m))
+            helper_pin = self.or_(*(flag for r, _, flag in gaps if z < r))
             active = self.and_(condition, needed)
-            row = tuple(cell if q == near else empty for q in range(4))
-            self.emit(active, 14, destination=work + 1, base=self.layer(row))
+            row = [empty] * 4
+            row[near] = self.choose(helper_pin, pin, copper)
+            if z == 4:
+                ordinary = self.and_(cells[4].occupied, self.not_(cells[4].crystal))
+                row[0] = self.choose(self.and_(low, ordinary), cells[4], empty)
+            self.emit(active, 14, destination=work + 1, base=self.layer(tuple(row)))
             self.emit(active, 7, work, work + 1)
-        ordinary = self.and_(cells[4].occupied, self.not_(cells[4].crystal))
-        extra = self.and_(condition, low, ordinary)
-        self.emit(extra, 14, destination=work + 1, base=self.layer((cells[4], empty, empty, empty)))
-        self.emit(extra, 7, work, work + 1)
         self.window(work, start, condition)
 
     def angle(self, cells: tuple[CellRef, ...], near: int, work: int, condition: Ref) -> None:
-        flags = []
-        for cell in cells:
-            flags.append({"-": self.not_(cell.occupied), "P": cell.pin, "C": cell.crystal,
-                          "N": self.and_(cell.occupied, self.not_(self.or_(cell.pin, cell.crystal)))})
-        cases = {pattern: self.and_(*(flags[z][kind] for z, kind in enumerate(pattern)))
-                 for pattern in ("-N-C", "N-N-C", "P-N-C", "--N-C", "-N--C")}
-        hard = self.or_(*cases.values())
+        # 调用方已验证列A；只识别C下方最近N的落点是否悬空，不匹配整列字串。
+        gaps = tuple((r, m, self.and_(cells[r].crystal, cells[m].occupied,
+                                      self.not_(cells[m - 1].occupied),
+                                      self.not_(self.or_(*(cell.occupied for cell in cells[m + 1:r])))))
+                     for r in range(3, 5) for m in range(1, r - 1))
+        hard = self.or_(*(flag for _, _, flag in gaps))
         hard_condition = self.and_(condition, hard)
         block = self.begin(hard_condition)
-        self.hard(cells, cases, near, work, hard_condition)
+        self.hard(cells, gaps, near, work, hard_condition)
         self.end(block)
         simple_condition = self.and_(condition, self.not_(hard))
         block = self.begin(simple_condition)

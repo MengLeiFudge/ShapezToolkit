@@ -27,6 +27,34 @@ class Example:
     milestones: tuple[tuple[str, Recipe], ...] = ()
 
 
+def whole_shape_examples() -> list[Example]:
+    """固定完整目标共用双半形入口；四象限是完整主流程代表，六象限仅示范已覆盖域。"""
+    examples = []
+    for n, name, title, key in (
+        (4, "4q-whole", "四象限完整目标：共用双半形制造",
+         "--P-CuCu:CuCu--P-:--CucrCu:--P---Cu:crCu--Cu"),
+        (6, "6q-whole", "六象限完整目标：通用脚手架拼出双环",
+         "Cu----Cu----:------------:crCuCucrCuCu:cr--Cucr--Cu:crCuCucrCuCu"),
+    ):
+        constructor = Constructor(Rules(n))
+        target = constructor.rules.parse(key)
+        recipe = constructor.paired_halves(target, 0)
+        if recipe is None:
+            raise RuntimeError("固定完整代表未取得双半形制造证书")
+        half = constructor.rules.fold({pos: cell for pos, cell in constructor.rules.cells(target).items()
+                                      if pos[1] < n // 2})
+        assert half is not None
+        first = constructor.half(half)
+        assert first is not None
+        mechanism = ("两种角加工在同一完整目标内调用；按同一半形程序制造两侧后拼合。"
+                     "这是统一整图流程的一个输入，角的差异不再计为整图类别。" if n == 4 else
+                     "两侧均由通用角和普通脚手架制造H，再共用双半形入口拼接。"
+                     "最终双环重新分组后不稳定，拼接后直接输出，不追加重力；本例不代表全部六象限已覆盖。")
+        examples.append(Example(name, title, mechanism, n, recipe,
+                                (("第一半形", first), ("两半形拼接成品", recipe))))
+    return examples
+
+
 def corner_examples() -> list[Example]:
     """每种间隙或顶破构造分支取一个固定主列，并保留必要辅助列。"""
     builder = Builder(Rules(4))
@@ -402,7 +430,8 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True, help="代表配方的输出目录")
     parser.add_argument("--instructions", action="store_true", help="另为四/六象限五层代表生成六槽指令包；其他配置仅导出步骤")
     args = parser.parse_args()
-    examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
+    examples = whole_shape_examples() + corner_examples() + wide_half_examples()
+    examples.extend((interleaved_stack_example(), general_stack_example()))
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
                      layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example(),
                      pin_framed_rectangle_example(), grouped_columns_example(), multiblock_summary_example(),

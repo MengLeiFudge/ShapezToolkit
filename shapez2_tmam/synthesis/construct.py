@@ -19,7 +19,7 @@ class Result:
 
 
 class Constructor:
-    """两象限完整判定；六象限以上两列角共用三列释放，四象限五层另可拼半形。"""
+    """两象限完整判定；其他参数由角、脚手架及同一个双半形入口构造。"""
 
     def __init__(self, rules: Rules):
         """固定物理规则；缓存只存当前目标分解用到的半形结果。"""
@@ -28,16 +28,53 @@ class Constructor:
         self.halves: dict[Shape, Recipe | None] = {}
 
     def half(self, target: Shape) -> Recipe | None:
-        """精确判半形，统一制造外向两角再去助手；cu供料未界定时返回None。"""
-        if self.rules.quadrants != 4 or self.rules.height != 5:
-            raise ValueError("逐列半形构造目前限定四象限五层")
-        if any(cell != EMPTY for row in target.layers for cell in row[2:]):
+        """四象限五层完整半形；其他参数仅覆盖直接释放或脚手架，失败不判不可解。"""
+        n = self.rules.quadrants
+        if n < 4:
+            raise ValueError("半形构造需要至少四象限")
+        if any(cell != EMPTY for row in target.layers for cell in row[n // 2:]):
             raise ValueError("半形构造只接受索引前半；其他方向先旋转")
         if target in self.halves:
             return self.halves[target]
-        result = CornerBuilder(self.builder).pair(target)
+        if n == 4:
+            result = CornerBuilder(self.builder).pair(target)
+        else:
+            result = self._adjacent_pair(target)
+            if result is None:
+                result = CornerBuilder(self.builder).supported_half(target)
         self.halves[target] = result
         return result
+
+    def paired_halves(self, target: Shape, start: int) -> Recipe | None:
+        """按指定切向统一制造两个半形；空侧跳过，不另选独立柱或无C配方。"""
+        half = self.rules.quadrants // 2
+        if not 0 <= start < half:
+            raise ValueError("双半形切向必须位于标准前半面")
+        aligned = self.rules.rotate(target, -start)
+        recipes = []
+        for side in (0, 1):
+            cells = {pos: cell for pos, cell in self.rules.cells(aligned).items() if pos[1] // half == side}
+            part = self.rules.fold(cells)
+            if part is None:
+                recipes.append(None)
+                continue
+            found = self.half(self.rules.rotate(part, half * side))
+            if found is None:
+                return None
+            recipes.append(self.builder.apply("rotate", found, parameter=half * side))
+        first, second = recipes
+        if first is None:
+            recipe = second
+        elif second is None:
+            recipe = first
+        else:
+            recipe = self.builder.join(first, second, 0)
+        if recipe is None:
+            return None
+        recipe = self.builder.apply("rotate", recipe, parameter=start)
+        if recipe.result != target:
+            raise RuntimeError("两半构造证书与目标不一致")
+        return recipe
 
     def _adjacent_pair(self, target: Shape) -> Recipe | None:
         """把至多两根相邻目标列转到标准方向，按同一通用角程序制造。"""
@@ -107,9 +144,8 @@ class Constructor:
             raise RuntimeError("两象限目标通过稳定性判据，却未生成上层追加证书")
         return Result("solved", recipe, "两象限连续前缀制造后逐层追加")
 
-    def construct(self, target: Shape) -> Result:
-        """返回真实制造树、必要条件的否定，或未覆盖的含晶体目标。"""
-        self.halves.clear()
+    def check_target(self, target: Shape) -> Result | None:
+        """共用供料范围与已证必要条件；通过不代表可制作，也不准备配方。"""
         if any(cell == "cu" for row in target.layers for cell in row):
             return Result("unknown", None, "未确认未着色晶体对应的实体流体供料")
         four_five = self.rules.height == 5 and self.rules.quadrants == 4
@@ -118,6 +154,14 @@ class Constructor:
             return Result("unsolvable", None, "目标违反列内针支撑、针前缀或晶体间隙必要条件")
         if four_five and not in_support_class(self.rules, target):
             return Result("unsolvable", None, "四象限五层可制作状态必须通向地面或含针支撑环，目标不属于K")
+        return None
+
+    def construct(self, target: Shape) -> Result:
+        """返回真实制造树、必要条件的否定，或未覆盖的含晶体目标。"""
+        self.halves.clear()
+        rejected = self.check_target(target)
+        if rejected is not None:
+            return rejected
         if not any(cell[0] == "c" for row in target.layers for cell in row):
             recipe = self.builder.noncrystal(target)
             return Result("solved" if recipe else "unsolvable", recipe,
@@ -125,42 +169,18 @@ class Constructor:
         if self.rules.quadrants == 2:
             return self._two_quadrant(target)
         if self.rules.quadrants >= 6:
-            recipe = self._adjacent_pair(target)
-            if recipe is not None:
-                return Result("solved", recipe, "三列释放的通用角构造，保留目标循环支撑")
+            for start in range(self.rules.quadrants // 2):
+                recipe = self.paired_halves(target, start)
+                if recipe is not None:
+                    return Result("solved", recipe, "通用角及外侧脚手架制造半形，统一拼接完整目标")
         recipe = self.builder.crystal_prefixes(target)
         if recipe is not None:
             return Result("solved", recipe, "独立柱前缀制造后逐层追加")
-        if four_five:
+        if self.rules.quadrants == 4:
             for start in range(2):
-                aligned = self.rules.rotate(target, -start)
-                recipes = []
-                for side in (0, 1):
-                    cells = {pos: cell for pos, cell in self.rules.cells(aligned).items()
-                             if pos[1] // 2 == side}
-                    part = self.rules.fold(cells)
-                    if part is None:
-                        recipes.append(None)
-                        continue
-                    normalized = self.rules.rotate(part, 2 * side)
-                    found = self.half(normalized)
-                    if found is None:
-                        break
-                    recipes.append(self.builder.apply("rotate", found, parameter=2 * side))
-                if len(recipes) != 2:
-                    continue
-                first, second = recipes
-                if first is None:
-                    recipe = second
-                elif second is None:
-                    recipe = first
-                else:
-                    recipe = self.builder.join(first, second, 0)
-                assert recipe is not None
-                recipe = self.builder.apply("rotate", recipe, parameter=start)
-                if recipe.result != target:
-                    raise RuntimeError("两半构造证书与目标不一致")
-                return Result("solved", recipe, "逐列角构造的半形拼接")
+                recipe = self.paired_halves(target, start)
+                if recipe is not None:
+                    return Result("solved", recipe, "逐列角构造的半形拼接")
         recipe = self._replicated(target)
         if recipe is not None:
             return Result("solved", recipe, "相邻象限等宽复制的制造证书")

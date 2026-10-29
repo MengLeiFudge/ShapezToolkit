@@ -1,4 +1,4 @@
-"""逐列角构造：六象限以上任意层共用三列释放，四象限五层保留已证顶破构造。"""
+"""角与脚手架半形：任意层释放及四象限五层顶破，共用稳定半形拼装。"""
 
 from .physics import EMPTY, PIN, Shape
 from .recipe import Builder, Recipe
@@ -8,10 +8,10 @@ class CornerBuilder:
     """制造主列及相邻N/P助手，再以外向两角制造指定的稳定两列目标。"""
 
     def __init__(self, builder: Builder):
-        """共用制造树；三列释放要求半面至少三列，四象限仅启用五层证明。"""
+        """共用制造树；四象限任意层仅接受直接释放，悬空落点顶破仍限定五层。"""
         rules = builder.rules
-        if rules.quadrants < 6 and (rules.quadrants != 4 or rules.height != 5):
-            raise ValueError("角构造需要四象限五层，或至少六象限")
+        if rules.quadrants < 4:
+            raise ValueError("角构造需要至少四象限")
         self.builder = builder
         self.rules = builder.rules
 
@@ -89,10 +89,12 @@ class CornerBuilder:
 
     @staticmethod
     def helper(cells: tuple[str, ...]) -> tuple[str, ...]:
-        """按落点参数生成四象限五层助手，不匹配完整列字串。"""
-        helper = ["Cu"] * 5
+        """直接释放助手与目标列等高；悬空落点的助手只采用五层已证公式。"""
+        helper = ["Cu"] * len(cells)
         for r, m in CornerBuilder._gaps(cells):
             if m and cells[m - 1] == EMPTY:
+                if len(cells) != 5:
+                    raise ValueError("四象限悬空落点的助手公式仅在五层证明")
                 return (PIN,) + ("Cu",) * m + (PIN,) * (r - m - 1) + ("Cu",) * (5 - r)
             helper[r - 1] = PIN
         return tuple(helper)
@@ -106,7 +108,7 @@ class CornerBuilder:
         return shape
 
     def build(self, cells: tuple[str, ...], quadrant: int, direction: int) -> Recipe | None:
-        """制造指定列及其相邻N/P助手；条件A在支持的参数范围内必要且充分。"""
+        """制造指定列及N/P助手；4q5l和n≥6的A完整，其他四象限仅覆盖直接释放。"""
         n, height = self.rules.quadrants, self.rules.height
         if not 0 <= quadrant < n or direction not in (-1, 1) or len(cells) > height:
             raise ValueError("角构造需要合法象限、相邻方向±1和不超过高度上限的列")
@@ -118,6 +120,8 @@ class CornerBuilder:
             return self.builder.apply("rotate", result, parameter=quadrant)
         near = direction % 4
         if any(m and cells[m - 1] == EMPTY for _, m in self._gaps(cells)):
+            if height != 5:
+                return None
             result = self._pin_corner(cells, near)
         else:
             result = self._simple_corner(cells, near)
@@ -127,6 +131,11 @@ class CornerBuilder:
         """制造只占q0/q1的稳定目标，允许目标助手含C及含针支撑环。"""
         if not self.accepts_half(target) or any(cell == "cu" for row in target.layers for cell in row):
             return None
+        if self.rules.quadrants == 4 and self.rules.height != 5:
+            for q in (0, 1):
+                column = tuple(row[q] for row in target.layers)
+                if any(m and column[m - 1] == EMPTY for _, m in self._gaps(column)):
+                    return None
         prepared = []
         for q in (0, 1):
             column = tuple(row[q] for row in target.layers)
@@ -144,6 +153,36 @@ class CornerBuilder:
         if result.result != target:
             raise RuntimeError("两列角制造证书与通过判据的目标不一致")
         return result
+
+    def supported_half(self, target: Shape) -> Recipe | None:
+        """以外侧N/P助手和普通脚手架制造半形；完整目标允许无针支撑环。"""
+        n, height = self.rules.quadrants, self.rules.height
+        half = n // 2
+        if n < 6 or any(cell != EMPTY for row in target.layers for cell in row[half:]):
+            raise ValueError("脚手架半形需要至少六象限，且仅占标准前半面")
+        cells = self.rules.cells(target)
+        if self.rules.stationary(cells) != cells.keys():
+            return None
+        for edge, direction, outside, start in ((0, -1, half, 1 - half), (half - 1, 1, n - 1, half - 1)):
+            if any(cell[0] == "c" and q != edge for (_, q), cell in cells.items()):
+                continue
+            scaffold = self.rules.fold({**{pos: cell for pos, cell in cells.items() if pos[1] != edge},
+                                        **{(z, outside): "Cu" for z in range(height)}})
+            assert scaffold is not None
+            support = self.builder.noncrystal(scaffold)
+            if support is None:
+                continue
+            column = tuple(row[edge] for row in target.layers)
+            if any(cell != EMPTY for cell in column):
+                main = self.build(column, edge, direction)
+                if main is None:
+                    continue
+                support = self.builder.join(main, support, start)
+            result = self.builder.window(support, 0)
+            if result.result != target:
+                raise RuntimeError("半形及脚手架通过支撑条件，但去助手后没有得到目标")
+            return result
+        return None
 
     def _release_corner(self, cells: tuple[str, ...], helper: int) -> Recipe:
         """三列保留、外列触发删除；近支撑的高度同时决定所有N的落点。"""
@@ -214,7 +253,7 @@ class CornerBuilder:
         start = 0 if near == 1 else 3
         if deleted:
             far = (4 - near) % 4
-            support = self.builder.column(tuple("cr" if z in deleted else "Cu" for z in range(5)), far)
+            support = self.builder.column(tuple("cr" if z in deleted else "Cu" for z in range(self.rules.height)), far)
             assert support is not None
             prepared = self.builder.join(prepared, support, start)
             prepared = self.builder.window(prepared, start)

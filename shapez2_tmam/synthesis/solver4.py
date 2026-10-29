@@ -53,13 +53,14 @@ class Solver4:
 
     def solve(self, target: Shape) -> Result:
         """返回合法制造树或穷尽后的不可制作；未界定供料颜色仍为 unknown。"""
-        direct = self.constructor.construct(target)
-        if direct.status != "unknown" or any(cell == "cu" for row in target.layers for cell in row):
-            return direct
-        highest = max(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
+        self.constructor.halves.clear()
+        rejected = self.constructor.check_target(target)
+        if rejected is not None:
+            return rejected
+        highest = max((z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row)), default=-1)
         recipe = self._tail(target, remaining_pins=max(0, highest - 1))
         if recipe is not None:
-            return Result("solved", recipe, "局部半形起点及完整有界顶针/逐层堆叠尾部")
+            return Result("solved", recipe, "统一双半形起点及有界顶针/逐层追加循环")
         return Result("unsolvable", None, "已穷尽局部半形起点及最高晶体推导界内的全部顶针/堆叠尾部")
 
     def _tail(self, target: Shape, *, skip_start: bool = False, remaining_pins: int = 3) -> Recipe | None:
@@ -69,10 +70,10 @@ class Solver4:
                 source = minimal_start(self.rules, target, start)
                 if source is None:
                     continue
-                found = self.constructor.construct(source)
-                if found.recipe is None:
+                found = self.constructor.paired_halves(source, start)
+                if found is None:
                     raise RuntimeError("强制前缀闭包已证明A起点，但角构造未生成证书")
-                return self._finish(found.recipe, target)
+                return self._finish(found, target)
         if remaining_pins == 0:
             return None
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
@@ -99,14 +100,14 @@ class Solver4:
             initial = minimal_start(self.rules, template, start, optional_top=True)
             if initial is None:
                 continue
-            direct = self.constructor.construct(initial)
-            if direct.recipe is None:
+            direct = self.constructor.paired_halves(initial, start)
+            if direct is None:
                 raise RuntimeError("可选顶格闭包已证明A起点，但角构造未生成证书")
             selected = self.rules.cells(initial)
             completed = self.rules.fold({pos: cell for pos, cell in desired.items()
                                          if pos[0] < 4 or cell[0] == "c" or pos in selected})
             assert completed is not None
-            return self._finish(direct.recipe, completed)
+            return self._finish(direct, completed)
         if (remaining_pins == 0 or not pin_base_possible(template)
                 or not in_support_class(self.rules, template, grounded=True, optional_top=True)):
             return None
