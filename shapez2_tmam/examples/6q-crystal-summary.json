@@ -1,0 +1,211 @@
+{
+  "name": "6q-crystal-summary",
+  "title": "含晶体上料按摘要缩短辅助前缀",
+  "mechanism": "原上料q0为单N、q1为CCCN、q3为NPN；无C落地会粘合q0/q1。保留块及列内次序，把q1缩成CN，其余不变，再堆到q1三层普通柱。替换对任意下料都等效。",
+  "quadrants": 6,
+  "height": 5,
+  "target": "CuCu--Cu----:--Cu--P-----:--Cu--Cu----:--Cu--------",
+  "register_count": 3,
+  "evidence": "依据局部物理与已证配方变换生成中间产物；未在游戏或Mod中验证。",
+  "milestone_orientation": "关键阶段按原构造的标准朝向示意，实际方向与物品编号见steps。",
+  "milestones": [
+    {
+      "name": "原复杂上料",
+      "result": "Cucr--Cu----:--cr--P-----:--cr--Cu----:--Cu--------"
+    },
+    {
+      "name": "原下料",
+      "result": "--Cu--------:--Cu--------:--Cu--------"
+    },
+    {
+      "name": "同摘要紧凑上料",
+      "result": "Cucr--Cu----:--Cu--P-----:------Cu----"
+    },
+    {
+      "name": "一次堆叠成品",
+      "result": "CuCu--Cu----:--Cu--P-----:--Cu--Cu----:--Cu--------"
+    }
+  ],
+  "steps": [
+    {
+      "id": 0,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "CuCuCuCuCuP-"
+    },
+    {
+      "id": 1,
+      "operation": "crystal",
+      "inputs": [
+        0
+      ],
+      "parameter": "r",
+      "result": "CuCuCuCuCucr"
+    },
+    {
+      "id": 2,
+      "operation": "cut",
+      "inputs": [
+        1
+      ],
+      "parameter": 1,
+      "result": "------CuCucr"
+    },
+    {
+      "id": 3,
+      "operation": "rotate",
+      "inputs": [
+        2
+      ],
+      "parameter": 1,
+      "result": "cr------CuCu"
+    },
+    {
+      "id": 4,
+      "operation": "cut",
+      "inputs": [
+        3
+      ],
+      "parameter": 0,
+      "result": "cr----------"
+    },
+    {
+      "id": 5,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "Cu----------"
+    },
+    {
+      "id": 6,
+      "operation": "stack",
+      "inputs": [
+        4,
+        5
+      ],
+      "parameter": null,
+      "result": "cr----------:Cu----------"
+    },
+    {
+      "id": 7,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "----------Cu"
+    },
+    {
+      "id": 8,
+      "operation": "swap",
+      "inputs": [
+        7,
+        6
+      ],
+      "parameter": 1,
+      "result": "cr--------Cu:Cu----------"
+    },
+    {
+      "id": 9,
+      "operation": "rotate",
+      "inputs": [
+        8
+      ],
+      "parameter": 1,
+      "result": "Cucr--------:--Cu--------"
+    },
+    {
+      "id": 10,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "------Cu----"
+    },
+    {
+      "id": 11,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "------Cu----"
+    },
+    {
+      "id": 12,
+      "operation": "pin",
+      "inputs": [
+        11
+      ],
+      "parameter": null,
+      "result": "------P-----:------Cu----"
+    },
+    {
+      "id": 13,
+      "operation": "stack",
+      "inputs": [
+        10,
+        12
+      ],
+      "parameter": null,
+      "result": "------Cu----:------P-----:------Cu----"
+    },
+    {
+      "id": 14,
+      "operation": "swap",
+      "inputs": [
+        9,
+        13
+      ],
+      "parameter": 0,
+      "result": "Cucr--Cu----:--Cu--P-----:------Cu----"
+    },
+    {
+      "id": 15,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "--Cu--------"
+    },
+    {
+      "id": 16,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "--Cu--------"
+    },
+    {
+      "id": 17,
+      "operation": "stack",
+      "inputs": [
+        15,
+        16
+      ],
+      "parameter": null,
+      "result": "--Cu--------:--Cu--------"
+    },
+    {
+      "id": 18,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "--Cu--------"
+    },
+    {
+      "id": 19,
+      "operation": "stack",
+      "inputs": [
+        17,
+        18
+      ],
+      "parameter": null,
+      "result": "--Cu--------:--Cu--------:--Cu--------"
+    },
+    {
+      "id": 20,
+      "operation": "stack",
+      "inputs": [
+        19,
+        14
+      ],
+      "parameter": null,
+      "result": "CuCu--Cu----:--Cu--P-----:--Cu--Cu----:--Cu--------"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ from typing import Iterator
 
 from .physics import EMPTY, PIN, Position, Rules, Shape
 from .recipe import Builder, Recipe
+from .stack_reduction import ordered_carriers
 
 Piece = tuple[tuple[int, str], ...]
 
@@ -112,6 +113,10 @@ class StackCatalog:
                     raise RuntimeError("上料摘要的无合并落点未生成无晶体制造证书")
                 if (compact.step_count, compact.register_count) < (upper.step_count, upper.register_count):
                     upper = compact
+            else:
+                for compact in ordered_carriers(self.builder, plan.pieces):
+                    if (compact.step_count, compact.register_count) < (upper.step_count, upper.register_count):
+                        upper = compact
         if previous is None or (upper.step_count, upper.register_count) < (previous.step_count, previous.register_count):
             self.uppers[plan] = upper
 

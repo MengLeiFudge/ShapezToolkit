@@ -137,6 +137,25 @@ def multiblock_summary_example() -> Example:
                                ("一次堆叠成品", result)))
 
 
+def crystal_summary_example() -> Example:
+    """无同摘要无C载体时，缩短辅助C前缀，保持任意下料上的效果。"""
+    builder = Builder(Rules(6))
+    source = builder.independent_columns(builder.rules.parse(
+        "Cucr--Cu----:--cr--P-----:--cr--Cu----:--Cu--------"))
+    lower = builder.column(("Cu",) * 3, 1)
+    assert source is not None and lower is not None
+    catalog = StackCatalog(builder)
+    catalog.add(source)
+    catalog.add(lower)
+    result = catalog.construct(builder.rules.parse("CuCu--Cu----:--Cu--P-----:--Cu--Cu----:--Cu--------"))
+    if result is None:
+        raise RuntimeError("六象限含晶体摘要未生成紧凑替换配方")
+    return Example("6q-crystal-summary", "含晶体上料按摘要缩短辅助前缀",
+                   "原上料q0为单N、q1为CCCN、q3为NPN；无C落地会粘合q0/q1。保留块及列内次序，把q1缩成CN，其余不变，再堆到q1三层普通柱。替换对任意下料都等效。",
+                   6, result, (("原复杂上料", source), ("原下料", lower),
+                               ("同摘要紧凑上料", result.inputs[1]), ("一次堆叠成品", result)))
+
+
 def interleaved_stack_example() -> Example:
     """紧凑上料会横向粘合，改用带独立NPN列的补C载体。"""
     builder = Builder(Rules(6))
@@ -370,7 +389,8 @@ def main() -> int:
     examples = corner_examples() + wide_half_examples() + [interleaved_stack_example(), general_stack_example()]
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
                      layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example(),
-                     pin_framed_rectangle_example(), grouped_columns_example(), multiblock_summary_example()))
+                     pin_framed_rectangle_example(), grouped_columns_example(), multiblock_summary_example(),
+                     crystal_summary_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output, instructions=args.instructions)

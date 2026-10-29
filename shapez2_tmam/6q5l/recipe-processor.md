@@ -12,7 +12,7 @@
 
 四象限每个净旋转仍只需一包，指令编号、请求序列及字段与原格式一致。八象限或其他层数尚无此原生回放器，指令导出继续拒绝，不把Python模型的参数范围等同于游戏设备支持范围。
 
-[H代表的完整指令](../examples/6q-H.instructions.json)包含44个制造表项、44包，使用3个活动物品槽。[半圈可推入配方的规范形](../general/recipe-orientation.md#6-半圈可推入配方净旋转只需四分之一圈)使六象限最终证书只需单格顺/逆旋转，不再拆包。`python -m shapez2_tmam.synthesis.examples --instructions --output shapez2_tmam/examples`可重新导出全部固定代表，其中四/六象限五层的20份另带`.instructions.json`；其余配置仅保留制造步骤。
+[H代表的完整指令](../examples/6q-H.instructions.json)包含44个制造表项、44包，使用3个活动物品槽。[半圈可推入配方的规范形](../general/recipe-orientation.md#6-半圈可推入配方净旋转只需四分之一圈)使六象限最终证书只需单格顺/逆旋转，不再拆包。`python -m shapez2_tmam.synthesis.examples --instructions --output shapez2_tmam/examples`可重新导出全部固定代表，其中四/六象限五层的21份另带`.instructions.json`；其余配置仅保留制造步骤。
 
 ## 原生加工与事务
 

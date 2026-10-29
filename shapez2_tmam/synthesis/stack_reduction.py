@@ -66,6 +66,61 @@ def _minimum_levels(limits: list[int], edges: list[tuple[int, int, int]]) -> lis
     return None
 
 
+def ordered_carriers(builder: Builder, pieces: tuple[tuple[tuple[int, str], ...], ...]) -> Iterator[Recipe]:
+    """从非空规范摘要生成至多两份同摘要载体；失败不代表不存在其他载体。"""
+    rules = builder.rules
+    columns: list[list[tuple[int, str]]] = [[] for _ in range(rules.quadrants)]
+    last_normal: list[int | None] = [None] * rules.quadrants
+    normal_edges = []
+    for index, piece in enumerate(pieces):
+        for q, cell in piece:
+            columns[q].append((index, cell))
+            if cell == PIN:
+                continue
+            for pair in (q, (q - 1) % rules.quadrants):
+                previous = last_normal[pair]
+                if previous is not None and previous != index:
+                    normal_edges.append((previous, index, 1))
+                last_normal[pair] = index
+    previous_levels = None
+    for ground_prefix in (False, True):
+        limits = [rules.height - 1] * len(pieces)
+        edges = normal_edges.copy()
+        for column in columns:
+            previous = None
+            pinned = False
+            normal_seen = False
+            prefix_length = 0
+            for current, cell in column:
+                if previous is not None:
+                    edges.append((previous, current, 1))
+                    if pinned:
+                        edges.append((current, previous, -1))
+                if cell != PIN:
+                    normal_seen = True
+                elif ground_prefix and not normal_seen:
+                    limits[current] = prefix_length
+                    prefix_length += 1
+                else:
+                    pinned = True
+                previous = current
+        levels = _minimum_levels(limits, edges)
+        if levels is None or levels == previous_levels:
+            continue
+        previous_levels = levels
+        placed = {(levels[index], q): cell for index, piece in enumerate(pieces) for q, cell in piece}
+        cells = {(z, q): placed.get((z, q), "cr")
+                 for q, top in enumerate(rules.column_tops(placed)) for z in range(top + 1)}
+        if rules.stationary(cells, grounded=False):
+            continue
+        source = rules.fold(cells)
+        assert source is not None
+        upper = builder.independent_columns(source)
+        if upper is None:
+            raise RuntimeError("摘要的连续独立柱载体未生成制造证书")
+        yield upper
+
+
 def _packed_upper(builder: Builder, delta: dict[Position, str]) -> Recipe | None:
     """列内N/P压紧，差分约束确定最短C前缀；仅接受能全体释放的最小解。"""
     rules = builder.rules
