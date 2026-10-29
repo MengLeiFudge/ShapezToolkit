@@ -1,0 +1,57 @@
+{
+  "name": "6q-colored-summary",
+  "quadrants": 6,
+  "height": 5,
+  "target": "CucrCucrCucr:--Cu--Cu--Cu",
+  "source_steps": 4,
+  "register_budget": 6,
+  "register_count": 2,
+  "packet_count": 4,
+  "instructions": [
+    {
+      "id": 0,
+      "opcode": 14,
+      "destination": 0,
+      "a": 0,
+      "b": 0,
+      "base": "CuP-CuP-CuP-",
+      "color": null,
+      "request": 1,
+      "result": "CuP-CuP-CuP-"
+    },
+    {
+      "id": 1,
+      "opcode": 10,
+      "destination": 0,
+      "a": 0,
+      "b": 0,
+      "base": null,
+      "color": "color:r",
+      "request": 0,
+      "result": "CucrCucrCucr"
+    },
+    {
+      "id": 2,
+      "opcode": 14,
+      "destination": 1,
+      "a": 0,
+      "b": 0,
+      "base": "--Cu--Cu--Cu",
+      "color": null,
+      "request": 1,
+      "result": "--Cu--Cu--Cu"
+    },
+    {
+      "id": 3,
+      "opcode": 7,
+      "destination": 0,
+      "a": 0,
+      "b": 1,
+      "base": null,
+      "color": null,
+      "request": 0,
+      "result": "CucrCucrCucr:--Cu--Cu--Cu"
+    }
+  ],
+  "verification": "从已交付制造树编译消费式指令；未执行回放、反馈模拟或游戏。"
+}

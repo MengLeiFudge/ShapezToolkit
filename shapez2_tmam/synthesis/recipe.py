@@ -204,7 +204,7 @@ class Builder:
         return self.apply("rotate", merged, parameter=start)
 
     def rectangular_columns(self, target: Shape) -> Recipe | None:
-        """并行制造矩形列：共同针前缀、同层同色N/C核心及无C后缀。"""
+        """并行制造矩形核心；最高C以上允许各列连续收尾、高度不同。"""
         n = self.rules.quadrants
         occupied = {q for q, cell in enumerate(target.layers[0]) if cell != EMPTY}
         width = len(occupied)
@@ -215,16 +215,20 @@ class Builder:
             return None
         colors = []
         for row in target.layers:
-            if any((cell != EMPTY) != (q in occupied) for q, cell in enumerate(row)):
-                return None
             crystals = {cell[1] for cell in row if cell[0] == "c"}
             if len(crystals) > 1 or "u" in crystals:
                 return None
             colors.append(next(iter(crystals), None))
+        top = max((z for z, color in enumerate(colors) if color is not None), default=len(target.layers) - 1)
+        previous = occupied
+        for z, row in enumerate(target.layers):
+            current = {q for q, cell in enumerate(row) if cell != EMPTY}
+            if (z <= top and current != occupied) or not current <= previous:
+                return None
+            previous = current
         if not any(colors):
             return self.noncrystal(target)
         prefix = next(z for z, row in enumerate(target.layers) if any(row[q] != PIN for q in occupied))
-        top = max(z for z, color in enumerate(colors) if color is not None)
         if any(PIN in row for row in target.layers[prefix:top + 1]):
             return None
         source = None

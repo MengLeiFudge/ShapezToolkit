@@ -36,6 +36,31 @@ class StackPlan:
             return None
         return source
 
+    def carrier_orders(self) -> Iterator[tuple[Piece, ...]]:
+        """原规范序及同秩三着色序；只重排互不占同列的块。"""
+        yield self.pieces
+        ranks = [0] * self.quadrants
+        colors: dict[tuple[int, int], int] = {}
+        buckets: list[list[list[Piece]]] = []
+        for piece in self.pieces:
+            rank = 1 + max(ranks[q] for q, _ in piece)
+            for q, _ in piece:
+                ranks[q] = rank
+            color = 0
+            if piece[0][1] != PIN:
+                adjacent = {colors.get((rank, (q + direction) % self.quadrants))
+                            for q, _ in piece for direction in (-1, 1)}
+                # 普通块是环上区间，同秩时至多接触两个其他普通块。
+                color = next(value for value in range(3) if value not in adjacent)
+                for q, _ in piece:
+                    colors[rank, q] = color
+            while len(buckets) < rank:
+                buckets.append([[], [], []])
+            buckets[rank - 1][color].append(piece)
+        colored = tuple(piece for rank in buckets for color in rank for piece in color)
+        if colored != self.pieces:
+            yield colored
+
     def _landings(self, tops: list[int]) -> Iterator[tuple[int, Piece]]:
         """复制起始列顶，逐块更新；来源序列已经排除固定的高处障碍。"""
         tops = tops.copy()
@@ -114,9 +139,10 @@ class StackCatalog:
                 if (compact.step_count, compact.register_count) < (upper.step_count, upper.register_count):
                     upper = compact
             else:
-                for compact in ordered_carriers(self.builder, plan.pieces):
-                    if (compact.step_count, compact.register_count) < (upper.step_count, upper.register_count):
-                        upper = compact
+                for pieces in plan.carrier_orders():
+                    for compact in ordered_carriers(self.builder, pieces):
+                        if (compact.step_count, compact.register_count) < (upper.step_count, upper.register_count):
+                            upper = compact
         if previous is None or (upper.step_count, upper.register_count) < (previous.step_count, previous.register_count):
             self.uppers[plan] = upper
 

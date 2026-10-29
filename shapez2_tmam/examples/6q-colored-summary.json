@@ -1,0 +1,56 @@
+{
+  "name": "6q-colored-summary",
+  "title": "同秩块交错排列，五层上料缩成两层",
+  "mechanism": "原五层上料在每列各释放一个独立普通格。按象限编号保序需六层，超过上限；同秩块两色交错后只需两层。底层用普通格与针交错供料并结晶，再追加奇数列普通格，共四步；作为上料对任意下料均与原物品等效。",
+  "quadrants": 6,
+  "height": 5,
+  "target": "CucrCucrCucr:--Cu--Cu--Cu",
+  "register_count": 2,
+  "evidence": "依据局部物理与已证配方变换生成中间产物；未在游戏或Mod中验证。",
+  "milestone_orientation": "关键阶段按原构造的标准朝向示意，实际方向与物品编号见steps。",
+  "milestones": [
+    {
+      "name": "原五层上料",
+      "result": "Cucrcrcrcrcr:--CucrcrcrCu:----Cucrcr--:------Cucr--:--------Cu--"
+    },
+    {
+      "name": "两层交错上料",
+      "result": "CucrCucrCucr:--Cu--Cu--Cu"
+    }
+  ],
+  "steps": [
+    {
+      "id": 0,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "CuP-CuP-CuP-"
+    },
+    {
+      "id": 1,
+      "operation": "crystal",
+      "inputs": [
+        0
+      ],
+      "parameter": "r",
+      "result": "CucrCucrCucr"
+    },
+    {
+      "id": 2,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "--Cu--Cu--Cu"
+    },
+    {
+      "id": 3,
+      "operation": "stack",
+      "inputs": [
+        1,
+        2
+      ],
+      "parameter": null,
+      "result": "CucrCucrCucr:--Cu--Cu--Cu"
+    }
+  ]
+}

@@ -59,7 +59,7 @@ if result.recipe is not None:
 
 `Builder` 提供基础层、无晶体逐层构造、独立单列、独立晶体前缀、逐层 N/P 追加和列拼接。多层晶体原料通过基础原料、结晶和切割展开，不能作为免费的实体输入。
 
-`Builder.rectangular_columns(target)`对同高度、连续角区间或全圈的列，使用[同色段并行结晶](../general/rectangular-columns.md)。共同纯针前缀及最高C之上的N/P后缀分开处理，中间N/C核心须同层晶体同色。核心多层先以针占位，换色前统一结晶，裁好角区间后再补地面针和无C后缀。纯N/C全圈L层只需`2L−1+k`步，k为忽略普通层后的连续晶体颜色段数。`independent_columns`先尝试整图及两个半面的这条直接路径，失败的半面仍合并相邻同NPC/晶体颜色模板的列段，其余保留逐列构造；失败仍不表示目标全局不可制作。
+`Builder.rectangular_columns(target)`对具有矩形核心、占据连续角区间或全圈的列，使用[同色段并行结晶](../general/rectangular-columns.md)。共同纯针前缀及最高C之上的N/P后缀分开处理，后缀允许各列高度不同，但每列连续、占用集合逐层递减；中间N/C核心须同层晶体同色。核心多层先以针占位，换色前统一结晶，裁好角区间后再补地面针和无C后缀。纯N/C全圈L层只需`2L−1+k`步，k为忽略普通层后的连续晶体颜色段数。`independent_columns`先尝试整图及两个半面的这条直接路径，失败的半面仍合并相邻同NPC/晶体颜色模板的列段，其余保留逐列构造；失败仍不表示目标全局不可制作。
 
 `Builder.replicate(source)`把相同H、较少偶数象限的真实配方提升到整数倍象限：每格扩张成相邻副本，旋转参数按倍数换算，其余操作保持。它根据[操作对应证明](../general/sector-replication.md)直接变换全部中间产物，不重新运行每个大图节点的物理。`Constructor`在旧构造失败后自动识别这种连续列结构，尝试较小商图并提升成功证书；小图不可制作不会被传为大图不可制作。
 
@@ -77,11 +77,11 @@ if result.recipe is not None:
 
 `single_stack(builder, lower, target)`把普通追加扩展到新增针：依次尝试[无C块数守恒与原位补C](../general/interleaved-stack.md)、[列内压紧](../general/packed-column-stack.md)、[保留针下间隙](../general/layer-constraint-stack.md)。后两种载体共用差分下界求解器，分别调整列起点或物理块来源层。按块求解还会尝试把初始针固定为触地前缀，放宽允许补C的区间；全部补C候选须确认抬高后没有静止格，并取得独立列制造凭据。原针尾域及旧候选成功路径保持，实际始终只对原下料执行一次Stack。四种候选均失败时返回None，不能视为目标全局不可制作。
 
-`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，每键保留已知步数最少者，空/单块上料摘要使用已证极小替换；首次出现的多块摘要调用`StackPlan.noncrystal_carrier`，空地面落点块数保持时取得[同摘要的唯一无C载体](../general/noncrystal-carrier.md)，仅在配方成本更低时替换。没有同摘要无C实体时，`ordered_carriers`直接从块序列建立差分约束，尝试普通后缀和触地针前缀两种[含C紧凑载体](../general/crystal-carrier.md)；两者均须全体释放、取得独立柱制造凭据，按成本择优。`construct(target)`先筛下料，再逐块检查新增格；可见格不匹配时立即停止该候选，成功返回已登记摘要对中总步数最少、同长时物品槽最少的真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
+`stack_plan(rules, upper)`编译任意上料的有效N/P块序列；`StackPlan.apply(rules, settled)`读取下料的一次结算结果，保留超高块对后续列顶的阻挡。`StackCatalog(builder).add(recipe)`按两类摘要登记原配方，每键保留已知步数最少者，空/单块上料摘要使用已证极小替换；首次出现的多块摘要调用`StackPlan.noncrystal_carrier`，空地面落点块数保持时取得[同摘要的唯一无C载体](../general/noncrystal-carrier.md)，仅在配方成本更低时替换。没有同摘要无C实体时，`StackPlan.carrier_orders`给出规范序及[同秩三着色序](../general/carrier-ordering.md)，后者避免把独立块排成过高阶梯；`ordered_carriers`分别从两种保序块序列建立差分约束，尝试普通后缀和触地针前缀两种[含C紧凑载体](../general/crystal-carrier.md)；两者均须全体释放、取得独立柱制造凭据，按成本择优。`construct(target)`先筛下料，再逐块检查新增格；可见格不匹配时立即停止该候选，成功返回已登记摘要对中总步数最少、同长时物品槽最少的真实加工树，缺失返回None。此接口可处理N/P交错及非K上料，见[通用证明](../general/stack-summaries.md)。
 
 `Recipe.step_count`在建立节点时计算`1+sum(输入.step_count)`，等于消费式步骤展开的条数。共享子配方引用仍按每份实体分别计数。这个指标用于选配方，不代表建筑数量或游戏耗时，也不保证全局最短。
 
-用户手工复现用的[二十五个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
+用户手工复现用的[二十六个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
 
 面向游戏材料寄存器可用 `Solver4(rules, certificate_first=True)`。`pin_families(..., check_output=False)`用[`pin_image_matches`](pin_constraints.py)按最大静止集合及块支撑精确匹配物理输出，无需先编码任意原生候选；[充要证明](../4q5l/pin-image-exact.md)补齐了原必要筛选。候选仍须递归取得制造证书，实际制造的Pin结果也须与目标相同；物理匹配不代替可制作性。两列判据使用[按层扫描](../4q5l/half-row-stability.md)。CLI保留默认正向Pin检查模式，两种物理检查接受同一规范化逆像族；均没有实用搜索复杂度承诺。
 

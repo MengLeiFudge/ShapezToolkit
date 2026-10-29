@@ -8,7 +8,7 @@ q1四层柱与q5三层柱作下料。q3的NPN与q4的NN共享底顶普通块，�
 
 `CuCu--CuCuCu:--Cu--P---Cu:--Cu------Cu:--Cu--CuCuCu:--Cu--------`
 
-共45步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。
+共42步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。
 物品槽峰值为3，不含搜索状态及传输缓存；[槽数调度证明](../general/recipe-slots.md)。
 同一子配方出现两次时分别生产。Cut/Swap的另一个出口弃置；按表中出口继续。
 
@@ -54,22 +54,19 @@ q1四层柱与q5三层柱作下料。q3的NPN与q4的NN共享底顶普通块，�
 | 23 | stack | 21, 22 | — | `cr----------:cr----------:Cu----------` |
 | 24 | swap | 14, 23 | 1 | `cr------CuCu:cr------P-cr:Cu------CuCu` |
 | 25 | rotate | 24 | 5 | `------CuCucr:------P-crcr:------CuCuCu` |
-| 26 | base | — | — | `CuCuCuCuCuP-` |
-| 27 | crystal | 26 | r | `CuCuCuCuCucr` |
-| 28 | cut | 27 | 1 | `------CuCucr` |
-| 29 | rotate | 28 | 1 | `cr------CuCu` |
-| 30 | cut | 29 | 0 | `cr----------` |
-| 31 | base | — | — | `Cu----------` |
-| 32 | stack | 30, 31 | — | `cr----------:Cu----------` |
-| 33 | base | — | — | `----------Cu` |
-| 34 | swap | 33, 32 | 1 | `cr--------Cu:Cu----------` |
-| 35 | rotate | 34 | 1 | `Cucr--------:--Cu--------` |
-| 36 | swap | 35, 25 | 0 | `Cucr--CuCucr:--Cu--P-crcr:------CuCuCu` |
+| 26 | base | — | — | `CuCuP-CuCuCu` |
+| 27 | crystal | 26 | r | `CuCucrCuCuCu` |
+| 28 | cut | 27 | 0 | `CuCucr------` |
+| 29 | rotate | 28 | 5 | `Cucr------Cu` |
+| 30 | cut | 29 | 0 | `Cucr--------` |
+| 31 | base | — | — | `--Cu--------` |
+| 32 | stack | 30, 31 | — | `Cucr--------:--Cu--------` |
+| 33 | swap | 32, 25 | 0 | `Cucr--CuCucr:--Cu--P-crcr:------CuCuCu` |
+| 34 | base | — | — | `--Cu------Cu` |
+| 35 | base | — | — | `--Cu------Cu` |
+| 36 | stack | 34, 35 | — | `--Cu------Cu:--Cu------Cu` |
 | 37 | base | — | — | `--Cu------Cu` |
-| 38 | base | — | — | `--Cu------Cu` |
-| 39 | stack | 37, 38 | — | `--Cu------Cu:--Cu------Cu` |
-| 40 | base | — | — | `--Cu------Cu` |
-| 41 | stack | 39, 40 | — | `--Cu------Cu:--Cu------Cu:--Cu------Cu` |
-| 42 | base | — | — | `--Cu--------` |
-| 43 | stack | 41, 42 | — | `--Cu------Cu:--Cu------Cu:--Cu------Cu:--Cu--------` |
-| 44 | stack | 43, 36 | — | `CuCu--CuCuCu:--Cu--P---Cu:--Cu------Cu:--Cu--CuCuCu:--Cu--------` |
+| 38 | stack | 36, 37 | — | `--Cu------Cu:--Cu------Cu:--Cu------Cu` |
+| 39 | base | — | — | `--Cu--------` |
+| 40 | stack | 38, 39 | — | `--Cu------Cu:--Cu------Cu:--Cu------Cu:--Cu--------` |
+| 41 | stack | 40, 33 | — | `CuCu--CuCuCu:--Cu--P---Cu:--Cu------Cu:--Cu--CuCuCu:--Cu--------` |

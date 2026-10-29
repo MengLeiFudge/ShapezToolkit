@@ -12,7 +12,7 @@ from .orientation import optimize_rotations
 from .physics import EMPTY, PIN, Rules
 from .recipe import Builder, Recipe
 from .stack_reduction import ordinary_stack, single_stack
-from .stack_plan import StackCatalog
+from .stack_plan import StackCatalog, stack_plan
 
 
 @dataclass(frozen=True)
@@ -154,6 +154,22 @@ def crystal_summary_example() -> Example:
                    "原上料q0为单N、q1为CCCN、q3为NPN；无C落地会粘合q0/q1。保留块及列内次序，把q1缩成CN，其余不变，再堆到q1三层普通柱。替换对任意下料都等效。",
                    6, result, (("原复杂上料", source), ("原下料", lower),
                                ("同摘要紧凑上料", result.inputs[1]), ("一次堆叠成品", result)))
+
+
+def colored_summary_example() -> Example:
+    """六个独立普通块改用两层交错载体，避免规范序引入六层阶梯。"""
+    builder = Builder(Rules(6))
+    source = builder.independent_columns(builder.rules.parse(
+        "Cucrcrcrcrcr:--CucrcrcrCu:----Cucrcr--:------Cucr--:--------Cu--"))
+    assert source is not None
+    catalog = StackCatalog(builder)
+    catalog.add(source)
+    result = catalog.uppers[stack_plan(builder.rules, source.result)]
+    if result.result != builder.rules.parse("CucrCucrCucr:--Cu--Cu--Cu"):
+        raise RuntimeError("六象限同秩着色未产生两层交错上料")
+    return Example("6q-colored-summary", "同秩块交错排列，五层上料缩成两层",
+                   "原五层上料在每列各释放一个独立普通格。按象限编号保序需六层，超过上限；同秩块两色交错后只需两层。底层用普通格与针交错供料并结晶，再追加奇数列普通格，共四步；作为上料对任意下料均与原物品等效。",
+                   6, result, (("原五层上料", source), ("两层交错上料", result)))
 
 
 def interleaved_stack_example() -> Example:
@@ -390,7 +406,7 @@ def main() -> int:
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
                      layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example(),
                      pin_framed_rectangle_example(), grouped_columns_example(), multiblock_summary_example(),
-                     crystal_summary_example()))
+                     crystal_summary_example(), colored_summary_example()))
     args.output.mkdir(parents=True, exist_ok=True)
     for example in examples:
         name, title, count = export(example, args.output, instructions=args.instructions)

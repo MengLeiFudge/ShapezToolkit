@@ -67,7 +67,7 @@ def _minimum_levels(limits: list[int], edges: list[tuple[int, int, int]]) -> lis
 
 
 def ordered_carriers(builder: Builder, pieces: tuple[tuple[tuple[int, str], ...], ...]) -> Iterator[Recipe]:
-    """从非空规范摘要生成至多两份同摘要载体；失败不代表不存在其他载体。"""
+    """从非空保序块序列生成至多两份同摘要载体；失败不代表不存在其他载体。"""
     rules = builder.rules
     columns: list[list[tuple[int, str]]] = [[] for _ in range(rules.quadrants)]
     last_normal: list[int | None] = [None] * rules.quadrants
