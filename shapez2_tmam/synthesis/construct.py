@@ -19,7 +19,7 @@ class Result:
 
 
 class Constructor:
-    """两象限用完整前缀判据，其余先走独立前缀，再准备四象限半形。"""
+    """两象限完整判定；六象限以上两列角共用三列释放，四象限五层另可拼半形。"""
 
     def __init__(self, rules: Rules):
         """固定物理规则；缓存只存当前目标分解用到的半形结果。"""
@@ -35,25 +35,22 @@ class Constructor:
             raise ValueError("半形构造只接受索引前半；其他方向先旋转")
         if target in self.halves:
             return self.halves[target]
-        corners = CornerBuilder(self.builder)
-        if any(cell == "cu" for row in target.layers for cell in row) or not corners.accepts_half(target):
-            self.halves[target] = None
-            return None
-        prepared = []
-        for q in (0, 1):
-            column = tuple(row[q] for row in target.layers)
-            if all(cell == EMPTY for cell in column):
-                continue
-            recipe = corners.build(column, q, -1 if q == 0 else 1)
-            if recipe is None:
-                raise RuntimeError("目标已满足半形判据，但角构造未生成证书")
-            prepared.append(recipe)
-        source = prepared[0] if len(prepared) == 1 else self.builder.join(prepared[0], prepared[1], 3)
-        result = self.builder.window(source, 0)
-        if result.result != target:
-            raise RuntimeError("半形制造证书与通过判据的目标不一致")
+        result = CornerBuilder(self.builder).pair(target)
         self.halves[target] = result
         return result
+
+    def _adjacent_pair(self, target: Shape) -> Recipe | None:
+        """把至多两根相邻目标列转到标准方向，按同一通用角程序制造。"""
+        n = self.rules.quadrants
+        columns = {q for row in target.layers for q, cell in enumerate(row) if cell != EMPTY}
+        if len(columns) > 2:
+            return None
+        start = next(q for q in columns if (q - 1) % n not in columns)
+        if any(q not in (start, (start + 1) % n) for q in columns):
+            return None
+        normalized = self.rules.rotate(target, -start)
+        recipe = CornerBuilder(self.builder).pair(normalized)
+        return self.builder.apply("rotate", recipe, parameter=start) if recipe is not None else None
 
     def _replicated(self, target: Shape) -> Recipe | None:
         """按完全相同的相邻列压缩商图；只提升成功证书，不传播商图的否定。"""
@@ -115,10 +112,9 @@ class Constructor:
         self.halves.clear()
         if any(cell == "cu" for row in target.layers for cell in row):
             return Result("unknown", None, "未确认未着色晶体对应的实体流体供料")
-        fixed_five = self.rules.height == 5 and self.rules.quadrants in (4, 6)
         four_five = self.rules.height == 5 and self.rules.quadrants == 4
-        if fixed_five and any(not CornerBuilder.admissible(tuple(row[q] for row in target.layers))
-                              for q in range(self.rules.quadrants)):
+        if any(not CornerBuilder.admissible(tuple(row[q] for row in target.layers))
+               for q in range(self.rules.quadrants)):
             return Result("unsolvable", None, "目标违反列内针支撑、针前缀或晶体间隙必要条件")
         if four_five and not in_support_class(self.rules, target):
             return Result("unsolvable", None, "四象限五层可制作状态必须通向地面或含针支撑环，目标不属于K")
@@ -128,6 +124,10 @@ class Constructor:
                           "无晶体按层构造" if recipe else "无晶体目标不满足逐层支撑条件")
         if self.rules.quadrants == 2:
             return self._two_quadrant(target)
+        if self.rules.quadrants >= 6:
+            recipe = self._adjacent_pair(target)
+            if recipe is not None:
+                return Result("solved", recipe, "三列释放的通用角构造，保留目标循环支撑")
         recipe = self.builder.crystal_prefixes(target)
         if recipe is not None:
             return Result("solved", recipe, "独立柱前缀制造后逐层追加")

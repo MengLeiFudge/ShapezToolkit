@@ -1,48 +1,56 @@
-"""四象限五层的逐列角构造：目标列旁保留一根不含晶体的辅助柱。"""
+"""逐列角构造：六象限以上任意层共用三列释放，四象限五层保留已证顶破构造。"""
 
 from .physics import EMPTY, PIN, Shape
 from .recipe import Builder, Recipe
 
 
 class CornerBuilder:
-    """以普通辅助材料、融合删除和一次顶破处理列内间隙。"""
+    """制造主列及相邻N/P助手，再以外向两角制造指定的稳定两列目标。"""
 
     def __init__(self, builder: Builder):
-        """共用已有制造树与物理配置，角构造仅启用四象限五层。"""
-        if builder.rules.quadrants != 4 or builder.rules.height != 5:
-            raise ValueError("此角构造限定四象限五层")
+        """共用制造树；三列释放要求半面至少三列，四象限仅启用五层证明。"""
+        rules = builder.rules
+        if rules.quadrants < 6 and (rules.quadrants != 4 or rules.height != 5):
+            raise ValueError("角构造需要四象限五层，或至少六象限")
         self.builder = builder
         self.rules = builder.rules
 
     @staticmethod
     def admissible(cells: tuple[str, ...]) -> bool:
         """检查针前缀、晶体间隙及独立针的直接支撑这些列内必要条件。"""
-        prefix = 0
-        while prefix < len(cells) and cells[prefix] == PIN:
-            prefix += 1
-        crystals = [z for z, cell in enumerate(cells) if cell[0] == "c"]
+        prefix = True
+        outside_pin = False
+        below = EMPTY
+        lower = -1
+        ordinary = 0
+        gap = False
         for z, cell in enumerate(cells):
-            if cell == PIN and z and cells[z - 1] == EMPTY:
-                return False
-        for z in crystals:
-            if any(cells[r] == PIN for r in range(prefix, z)):
-                return False
-            if z and cells[z - 1] == EMPTY:
-                below = next((cells[r] for r in range(z - 1, -1, -1) if cells[r] != EMPTY), EMPTY)
-                if below == EMPTY or below == PIN or below[0] == "c":
+            if cell == PIN:
+                if z and cells[z - 1] == EMPTY:
                     return False
-        for lower, upper in zip(crystals, crystals[1:]):
-            between = cells[lower + 1:upper]
-            if EMPTY in between:
-                ordinary = sum(cell != EMPTY and cell != PIN and cell[0] != "c" for cell in between)
-                if ordinary < 2 or cells[lower + 1] == EMPTY:
+                outside_pin |= not prefix
+            else:
+                prefix = False
+            if cell[0] == "c":
+                if outside_pin:
                     return False
+                if z and cells[z - 1] == EMPTY and (below in (EMPTY, PIN) or below[0] == "c"):
+                    return False
+                if lower >= 0 and gap and (ordinary < 2 or cells[lower + 1] == EMPTY):
+                    return False
+                lower, ordinary, gap = z, 0, False
+            elif cell == EMPTY:
+                gap = True
+            elif cell != PIN:
+                ordinary += 1
+            if cell != EMPTY:
+                below = cell
         return True
 
     def accepts_half(self, target: Shape) -> bool:
-        """局部半形判据：逐列条件成立，每个新分组均触地或有外部直接阻挡。"""
+        """检查q0/q1两列的A条件与稳定性；循环支撑也算直接阻挡。"""
         if any(cell != EMPTY for row in target.layers for cell in row[2:]):
-            raise ValueError("半形判据只接受索引前半")
+            raise ValueError("两列判据只接受q0/q1；其他方向先旋转")
         if any(not self.admissible(tuple(row[q] for row in target.layers)) for q in (0, 1)):
             return False
         return self.stable_half(tuple(row[:2] for row in target.layers))
@@ -68,24 +76,29 @@ class CornerBuilder:
         return True
 
     @staticmethod
+    def _gaps(cells: tuple[str, ...]) -> list[tuple[int, int]]:
+        """对已通过A的列返回(C层号, 最近下方N层号)，从低到高扫描。"""
+        gaps = []
+        below = -1
+        for r, cell in enumerate(cells):
+            if cell[0] == "c" and r and cells[r - 1] == EMPTY:
+                gaps.append((r, below))
+            if cell != EMPTY:
+                below = r
+        return gaps
+
+    @staticmethod
     def helper(cells: tuple[str, ...]) -> tuple[str, ...]:
-        """返回角构造最终保留的五格助手；普通格固定为Cu，供角构造及最终产物核对。"""
-        word = "".join("-" if cell == EMPTY else "P" if cell == PIN else "C" if cell[0] == "c" else "N"
-                       for cell in cells).ljust(5, "-")
-        if word.startswith("-N-C"):
-            return (PIN, "Cu", PIN, "Cu", "Cu")
-        if word == "-N--C":
-            return (PIN, "Cu", PIN, PIN, "Cu")
-        if word in ("N-N-C", "P-N-C", "--N-C"):
-            return (PIN, "Cu", "Cu", PIN, "Cu")
+        """按落点参数生成四象限五层助手，不匹配完整列字串。"""
         helper = ["Cu"] * 5
-        for z in range(1, len(cells)):
-            if cells[z][0] == "c" and cells[z - 1] == EMPTY:
-                helper[z - 1] = PIN
+        for r, m in CornerBuilder._gaps(cells):
+            if m and cells[m - 1] == EMPTY:
+                return (PIN,) + ("Cu",) * m + (PIN,) * (r - m - 1) + ("Cu",) * (5 - r)
+            helper[r - 1] = PIN
         return tuple(helper)
 
     def _shape(self, main: tuple[str, ...], helper: tuple[str, ...], near: int) -> Shape:
-        """主列固定为 q0，辅助列为 q1 或 q3，保留空底层。"""
+        """主列固定为q0，助手放在指定相邻列，保留空底层。"""
         cells = {(z, q): cell for q, column in ((0, main), (near, helper))
                  for z, cell in enumerate(column) if cell != EMPTY}
         shape = self.rules.fold(cells)
@@ -93,20 +106,88 @@ class CornerBuilder:
         return shape
 
     def build(self, cells: tuple[str, ...], quadrant: int, direction: int) -> Recipe | None:
-        """制造指定列及其顺/逆时针相邻 N/P 助手；不消耗外部晶体原料。"""
-        if not 0 <= quadrant < 4 or direction not in (-1, 1) or len(cells) > 5:
-            raise ValueError("角构造需要 q0～q3、相邻方向 ±1 和至多五格")
-        cells = cells + (EMPTY,) * (5 - len(cells))
+        """制造指定列及其相邻N/P助手；条件A在支持的参数范围内必要且充分。"""
+        n, height = self.rules.quadrants, self.rules.height
+        if not 0 <= quadrant < n or direction not in (-1, 1) or len(cells) > height:
+            raise ValueError("角构造需要合法象限、相邻方向±1和不超过高度上限的列")
+        cells = cells + (EMPTY,) * (height - len(cells))
         if all(cell == EMPTY for cell in cells) or "cu" in cells or not self.admissible(cells):
             return None
+        if n >= 6:
+            result = self._release_corner(cells, direction % n)
+            return self.builder.apply("rotate", result, parameter=quadrant)
         near = direction % 4
-        word = "".join("-" if cell == EMPTY else "P" if cell == PIN else "C" if cell[0] == "c" else "N"
-                       for cell in cells)
-        if word.startswith("-N-C") or word in ("N-N-C", "P-N-C", "--N-C", "-N--C"):
-            result = self._pin_corner(cells, word, near)
+        if any(m and cells[m - 1] == EMPTY for _, m in self._gaps(cells)):
+            result = self._pin_corner(cells, near)
         else:
             result = self._simple_corner(cells, near)
         return self.builder.apply("rotate", result, parameter=quadrant) if result is not None else None
+
+    def pair(self, target: Shape) -> Recipe | None:
+        """制造只占q0/q1的稳定目标，允许目标助手含C及含针支撑环。"""
+        if not self.accepts_half(target) or any(cell == "cu" for row in target.layers for cell in row):
+            return None
+        prepared = []
+        for q in (0, 1):
+            column = tuple(row[q] for row in target.layers)
+            if all(cell == EMPTY for cell in column):
+                continue
+            recipe = self.build(column, q, -1 if q == 0 else 1)
+            if recipe is None:
+                raise RuntimeError("两列目标满足判据，但未生成角制造证书")
+            prepared.append(recipe)
+        half = self.rules.quadrants // 2
+        source = prepared[0] if len(prepared) == 1 else self.builder.join(prepared[0], prepared[1], 1 - half)
+        result = self.builder.window(source, 0)
+        if half > 2:
+            result = self.builder.window(result, 2 - half)
+        if result.result != target:
+            raise RuntimeError("两列角制造证书与通过判据的目标不一致")
+        return result
+
+    def _release_corner(self, cells: tuple[str, ...], helper: int) -> Recipe:
+        """三列保留、外列触发删除；近支撑的高度同时决定所有N的落点。"""
+        n, height = self.rules.quadrants, self.rules.height
+        top = max((z for z, cell in enumerate(cells) if cell[0] == "c"), default=-1)
+        source = list(cells)
+        fixed = ["Cu"] * height
+        moves = {}
+        for r, m in self._gaps(cells):
+            source[r - 1], source[m] = cells[m], EMPTY
+            moves[r - 1] = m
+            fixed[r - 1] = PIN
+
+        # 每个牺牲C区间只生成删除掩码；移动N的近柱保留到目标落点下方。
+        anchor = ["Cu"] * height
+        z = 0
+        while z <= top:
+            if source[z] != EMPTY:
+                z += 1
+                continue
+            start = z
+            while z <= top and source[z] == EMPTY:
+                source[z] = "cr"
+                z += 1
+            bottom = moves.get(z, z - 1)
+            assert start <= bottom < z
+            anchor[bottom:z] = ["cr"] * (z - bottom)
+
+        prepared = self.builder.crystal_prefixes(self._shape(tuple(source), tuple(fixed), helper))
+        temporary, trigger = (-helper) % n, (-2 * helper) % n
+        shape = self.rules.fold({(z, q): cell for q in (temporary, trigger) for z, cell in enumerate(anchor)})
+        assert shape is not None
+        support = self.builder.independent_columns(shape)
+        if prepared is None or support is None:
+            raise RuntimeError("通过列条件A的角未生成连续前缀及支撑柱")
+        half = n // 2
+        start = 0 if helper == 1 else 1 - half
+        release_start = -1 if helper == 1 else 2 - half
+        result = self.builder.join(prepared, support, start)
+        result = self.builder.window(result, release_start)
+        result = self.builder.window(result, start)
+        if result.result != self._shape(cells, tuple(fixed), helper):
+            raise RuntimeError("三列释放的角产物与目标列及N/P助手不一致")
+        return result
 
     def _simple_corner(self, cells: tuple[str, ...], near: int) -> Recipe | None:
         """在 N 隔断间填辅助晶体，必要时将一格 N 的来源提高到间隙顶端。"""
@@ -115,10 +196,7 @@ class CornerBuilder:
         if top < 0:
             return self.builder.noncrystal(self._shape(cells, helper, near))
         source = list(cells)
-        for z in range(1, top + 1):
-            if cells[z][0] != "c" or cells[z - 1] != EMPTY:
-                continue
-            lower = next((r for r in range(z - 1, -1, -1) if cells[r] != EMPTY), -1)
+        for z, lower in self._gaps(cells):
             if lower < 0 or (lower and cells[lower - 1] == EMPTY):
                 return None
             source[z - 1], source[lower] = cells[lower], EMPTY
@@ -143,35 +221,24 @@ class CornerBuilder:
         expected = self._shape(cells, helper, near)
         return prepared if prepared.result == expected else None
 
-    def _pin_corner(self, cells: tuple[str, ...], word: str, near: int) -> Recipe | None:
-        """两次转交支撑后顶破远侧晶体脊，再为目标列补齐永久 N/P 助手。"""
+    def _pin_corner(self, cells: tuple[str, ...], near: int) -> Recipe | None:
+        """四象限五层以间隙上端r和落点m生成同一顶破程序的全部原料。"""
         far = (4 - near) % 4
         start = 0 if near == 1 else 3
         opposite_start = 3 if near == 1 else 0
-        extra = None
-        if word.startswith("-N-C"):
-            crystal_level = 4
-            main = (EMPTY, cells[1], cells[3])
-            if word[4] == "C":
-                main += (cells[4],)
-            elif word[4] in "NP":
-                extra = cells[4]
-            anchor = ("cr", "Cu")
-            tail = (PIN, "Cu", "Cu")
-        else:
-            crystal_level = 5
-            if word == "N-N-C":
-                main = (EMPTY, cells[0], cells[2], cells[4])
-            elif word == "P-N-C":
-                main = ("cr", "cr", cells[2], cells[4])
-            else:
-                main = (EMPTY, EMPTY, cells[1] if word == "-N--C" else cells[2], cells[4])
-            if word == "-N--C":
-                anchor = ("cr", "cr", "Cu")
-                tail = (PIN, PIN, "Cu")
-            else:
-                anchor = ("Cu", "cr", "Cu")
-                tail = (PIN, "Cu")
+        r, m = next((r, m) for r, m in self._gaps(cells) if m and cells[m - 1] == EMPTY)
+        top = max(z for z, cell in enumerate(cells) if cell[0] == "c")
+        main = [EMPTY] * top
+        for z, cell in enumerate(cells):
+            if cell[0] == "c":
+                main[z - 1] = cell
+        main[r - 2] = cells[m]
+        # 五层A条件下，更低的目标格至多是地面N/P；只决定原料，不改变工序。
+        if cells[0] == PIN:
+            main[:r - 2] = ["cr"] * (r - 2)
+        elif cells[0] != EMPTY:
+            main[r - 3] = cells[0]
+        anchor = ("Cu",) * (m - 1) + ("cr",) * (r - m - 1) + ("Cu",)
         bottom = next(z for z, cell in enumerate(main) if cell != EMPTY)
         full = tuple("cr" if z < bottom else cell for z, cell in enumerate(main))
         initial = self.rules.cells(self._shape(full, ("Cu",) * 5, near))
@@ -189,17 +256,18 @@ class CornerBuilder:
         source = self.builder.join(source, fixed, opposite_start)
         source = self.builder.window(source, start)
         complement = {(z, 2): "cr" for z in range(5)}
-        complement.update({(z, far): cell for z, cell in enumerate((PIN,) * (crystal_level - 2) + ("Cu",))})
+        complement.update({(z, far): cell for z, cell in enumerate((PIN,) * (r - 1) + ("Cu",))})
         shape = self.rules.fold(complement)
         assert shape is not None
         support = self.builder.independent_columns(shape)
         assert support is not None
         source = self.builder.join(source, support, start)
         source = self.builder.apply("pin", source)
-        for cell in tail:
-            row = tuple(cell if q == near else EMPTY for q in range(4))
-            source = self.builder.apply("stack", source, self.builder.base(row))
-        if extra is not None:
-            source = self.builder.apply("stack", source, self.builder.base((extra, EMPTY, EMPTY, EMPTY)))
+        for z in range(m + 1, 5):
+            row = [EMPTY] * 4
+            row[near] = PIN if z < r else "Cu"
+            if z > top:
+                row[0] = cells[z]
+            source = self.builder.apply("stack", source, self.builder.base(tuple(row)))
         source = self.builder.window(source, start)
         return source if source.result == self._shape(cells, self.helper(cells), near) else None

@@ -65,7 +65,9 @@ if result.recipe is not None:
 
 两象限的`Constructor.construct`检查稳定性、针前缀和全图最高C以下的连续列，随后先制造完整两列前缀，再追加上方N/P。它在已界定供料内直接返回solved或unsolvable，不查完整状态目录；`cu`仍返回unknown。配方长度O(H)、物品槽至多3，原生`--instructions`仅支持4q5l和6q5l，不包含这个两象限六层构造。
 
-四象限的 `Constructor.half` 使用[逐列角构造](../4q5l/corner-synthesis.md)，在合法颜色范围内精确判半形，成功时至多285个制造节点；所有半形统一制造外向两角、拼合并切去助手，无C直接制造和自带助手快捷分支均已删除。`CornerBuilder.accepts_half` 只检查列条件和新分组的稳定性；`CornerBuilder.build` 准备单列及其 N/P 助手，处理八种顶针难列。`Solver4.solve` 使用这些局部起点及完整顶针/堆叠尾部；零Pin首轮由[`minimal_start`](prefix_closure.py)求两个切向的[强制最小前缀](../4q5l/prefix-closure.md)，每切向至多20次补格及一次最终检查。Pin后的S仍完整遍历，由[四次尾部Pin改写定理](../4q5l/three-pin-tail.md)按最高C的零基层号H限定max(0,H−1)条递归边、最多三条，实际搜索分支仍需压缩。理论上每个可制作四象限目标存在至多616节点的制造树。六象限目前只启用无晶体及独立柱构造，不能据此判断全部六象限含晶体目标。
+四象限的 `Constructor.half` 使用[逐列角构造](../4q5l/corner-synthesis.md)，在合法颜色范围内精确判半形，成功时至多285个制造节点；所有半形统一制造外向两角、拼合并切去助手，无C直接制造和自带助手快捷分支均已删除。`CornerBuilder.accepts_half` 只检查列条件和新分组的稳定性；`CornerBuilder.build`准备单列及其N/P助手，四象限五层按直接释放或参数化顶破处理；顶破料由间隙上端r和落点m生成，不再匹配八种完整字串。`Solver4.solve` 使用这些局部起点及完整顶针/堆叠尾部；零Pin首轮由[`minimal_start`](prefix_closure.py)求两个切向的[强制最小前缀](../4q5l/prefix-closure.md)，每切向至多20次补格及一次最终检查。Pin后的S仍完整遍历，由[四次尾部Pin改写定理](../4q5l/three-pin-tail.md)按最高C的零基层号H限定max(0,H−1)条递归边、最多三条，实际搜索分支仍需压缩。理论上每个可制作四象限目标存在至多616节点的制造树。六象限另有通用两列角构造，但不能据此判断全部六象限含晶体目标。
+
+偶数n≥6、任意H的`CornerBuilder.build(column, quadrant, direction)`统一使用[三列释放构造](../general/angle-synthesis.md)，列条件A是存在相邻N/P助手的充要条件。`CornerBuilder.pair(target)`制造指定q0/q1稳定两列目标，允许目标另一列含C及含针支撑环；默认`Constructor`自动识别任意朝向的这类目标。失败不推断一般全图不可制作。列A必要筛选现应用于所有参数；4q任意H的充分性仍未闭合，固定电路及ROM尚未迁移到新的参数化角程序。
 
 `pin_families`、`cut_families`是独立的惰性物理逆像接口。候选能产生目标，不等于候选本身可制作；使用者须给实际族成员补制造证明。
 
@@ -81,7 +83,7 @@ if result.recipe is not None:
 
 `Recipe.step_count`在建立节点时计算`1+sum(输入.step_count)`，等于消费式步骤展开的条数。共享子配方引用仍按每份实体分别计数。这个指标用于选配方，不代表建筑数量或游戏耗时，也不保证全局最短。
 
-用户手工复现用的[二十六个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每类给一个明确目标及全部中间产物，不调用完整搜索。
+用户手工复现用的[二十六个代表配方](../examples/README.md)由`python -m shapez2_tmam.synthesis.examples --output shapez2_tmam/examples`导出。每份给出明确目标及全部中间产物，不调用完整搜索；这些是观察机制的样本，不是必须保留的独立加工模板。
 
 面向游戏材料寄存器可用 `Solver4(rules, certificate_first=True)`。`pin_families(..., check_output=False)`用[`pin_image_matches`](pin_constraints.py)按最大静止集合及块支撑精确匹配物理输出，无需先编码任意原生候选；[充要证明](../4q5l/pin-image-exact.md)补齐了原必要筛选。候选仍须递归取得制造证书，实际制造的Pin结果也须与目标相同；物理匹配不代替可制作性。两列判据使用[按层扫描](../4q5l/half-row-stability.md)。CLI保留默认正向Pin检查模式，两种物理检查接受同一规范化逆像族；均没有实用搜索复杂度承诺。
 
