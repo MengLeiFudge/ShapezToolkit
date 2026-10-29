@@ -1,6 +1,6 @@
 # 两列半形的按层稳定性判据
 
-任意相邻两列、任意高度的 N/P/C 网格，其重力开始前的最大粘连组是否全部静止，可以只按层扫描，不必求十格连通矩阵。五层实现见 [`CornerBuilder.stable_half`](../synthesis/corners.py)、[`half_stable`](../half_circuit.py) 及 [`material-half-4q5l.spz2bp`](../blueprints/material-half-4q5l.spz2bp)。本结论只用于两列，不适用于六象限的三列半形。
+任意相邻两列、任意高度的 N/P/C 网格，其重力开始前的最大粘连组是否全部静止，可以只按层扫描，不必求十格连通矩阵。五层实现见 [`CornerBuilder.stable_half`](../synthesis/corners.py)、[`half_stable`](../half_circuit.py) 及 [`material-half-4q5l.spz2bp`](../blueprints/material-half-4q5l.spz2bp)。本结论用于两列，不直接适用于一般三列半形。若第三列已知是一根全高N边柱，可按[脚手架支撑证明](../general/scaffold-halves.md#共用两列扫描省去后续三列分组)，把与该柱相接加入区间支撑标志，继续复用本扫描；六象限根半形仍需完整分组判定。
 
 ## 每层至多一个非针组
 

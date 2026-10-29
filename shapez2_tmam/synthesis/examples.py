@@ -55,6 +55,40 @@ def whole_shape_examples() -> list[Example]:
     return examples
 
 
+def tail_pin_example() -> Example:
+    """零尾Pin已由两侧悬空N排除；从明确双半形起点导出一次Pin配方。"""
+    constructor = Constructor(Rules(4))
+    source = constructor.rules.parse("Cu--cr--:crCucrCu:----cr--:----cr--:----cr--")
+    prepared = constructor.paired_halves(source, 0)
+    if prepared is None:
+        raise RuntimeError("一次尾部Pin代表没有取得双半形起点")
+    result = constructor.builder.apply("pin", prepared)
+    target = constructor.rules.parse("P---P---:Cu------:crCu--Cu")
+    if result.result != target:
+        raise RuntimeError("一次尾部Pin没有产生两侧悬空N的完整目标")
+    return Example("4q-required-tail-pin", "四象限完整目标：一次尾部顶针不可省",
+                   "先拼接两个稳定半形，再顶破q2辅助晶体塔。两侧悬空N都必须在零尾起点中，"
+                   "但任何两列分割都会使其中一侧失去晶体支撑，所以目标不能只由双半形加普通料追加得到。",
+                   4, result, (("双半形起点", prepared), ("一次尾部Pin成品", result)))
+
+
+def multicrystal_half_example() -> Example:
+    """用同一个递归脚手架制造含两根晶体列的环，再拼接两份完整半形。"""
+    constructor = Constructor(Rules(6))
+    target = constructor.rules.parse(
+        "Cu----Cu----:------------:crCuCucrCuCu:cr--crcr--cr:crCuCucrCuCu")
+    result = constructor.paired_halves(target, 0)
+    if result is None:
+        raise RuntimeError("多晶体列双环未取得递归脚手架制造证书")
+    half = constructor.rules.parse("Cu----------:------------:crCuCu------:cr--cr------:crCuCu------")
+    prepared = constructor.half(half)
+    assert prepared is not None
+    return Example("6q-multicrystal-loop", "六象限完整目标：多晶体列共用脚手架",
+                   "把H内侧的普通格改为晶体，两个不同晶体组仍互相支撑。脚手架逐列接管支撑，"
+                   "反向反复调用同一角程序；两份半形最后拼接，不追加重力。",
+                   6, result, (("两个晶体组互相支撑的半形", prepared), ("双半形拼接成品", result)))
+
+
 def corner_examples() -> list[Example]:
     """每种间隙或顶破构造分支取一个固定主列，并保留必要辅助列。"""
     builder = Builder(Rules(4))
@@ -285,7 +319,7 @@ def pin_framed_rectangle_example() -> Example:
     """五层矩形用共同针前缀及交错N/P后缀包住同色段核心。"""
     rules = Rules(6)
     target = rules.parse("P-P-P-P-P-P-:crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu:CuP-CuP-CuP-")
-    result = Constructor(rules).construct(target).recipe
+    result = Builder(rules).rectangular_columns(target)
     if result is None or result.result != target:
         raise RuntimeError("六象限带针矩形未生成并行制造代表配方")
     return Example("6q-pin-framed-rectangle", "共同针前缀与交错后缀的并行制造",
@@ -297,7 +331,7 @@ def grouped_columns_example() -> Example:
     """半面混色不能整体结晶时，仍合并相邻同模板的两列。"""
     rules = Rules(6)
     target = rules.parse("CuSrCuCuCuCu:crcrcbCuCuCu")
-    result = Constructor(rules).construct(target).recipe
+    result = Builder(rules).independent_columns(target)
     if result is None or result.result != target:
         raise RuntimeError("六象限相邻列分组未生成代表配方")
     return Example("6q-grouped-columns", "半面混色时合并相邻兼容列",
@@ -309,7 +343,7 @@ def rectangular_example() -> Example:
     """同色的多行晶体共用结晶加工，六列三层直接制造。"""
     rules = Rules(6)
     target = rules.parse("crCucrCucrCu:CucrCucrCucr:cbCucbCucbCu")
-    result = Constructor(rules).construct(target).recipe
+    result = Builder(rules).rectangular_columns(target)
     if result is None or result.result != target:
         raise RuntimeError("六象限同色层未生成并行列代表配方")
     return Example("6q-rectangular-columns", "同层同色晶体的六列并行制造",
@@ -323,7 +357,10 @@ def replicated_stack_example() -> Example:
     small = Rules(4).parse("CuCu----:--P-----:crCu----:--Cu----:--Cu----")
     expanded = rules.parse(":".join("".join(cell * 2 for cell in row) for row in small.layers))
     target = rules.rotate(expanded, 1)
-    result = Constructor(rules).construct(target).recipe
+    source = Constructor(Rules(4)).construct(small).recipe
+    assert source is not None
+    builder = Builder(rules)
+    result = builder.apply("rotate", builder.replicate(source), parameter=1)
     if result is None or result.result != target:
         raise RuntimeError("八象限复制商图未生成间隙代表配方")
     return Example("8q-replicated-gap", "把四象限晶体间隙配方提升到八象限",
@@ -431,7 +468,7 @@ def main() -> int:
     parser.add_argument("--instructions", action="store_true", help="另为四/六象限五层代表生成六槽指令包；其他配置仅导出步骤")
     args = parser.parse_args()
     examples = whole_shape_examples() + corner_examples() + wide_half_examples()
-    examples.extend((interleaved_stack_example(), general_stack_example()))
+    examples.extend((tail_pin_example(), multicrystal_half_example(), interleaved_stack_example(), general_stack_example()))
     examples.extend((protected_half_example(), two_quadrant_example(), packed_stack_example(),
                      layered_stack_example(), pin_prefix_stack_example(), replicated_stack_example(), rectangular_example(),
                      pin_framed_rectangle_example(), grouped_columns_example(), multiblock_summary_example(),

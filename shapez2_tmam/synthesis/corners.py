@@ -56,10 +56,12 @@ class CornerBuilder:
         return self.stable_half(tuple(row[:2] for row in target.layers))
 
     @staticmethod
-    def stable_half(rows: tuple[tuple[str, ...], ...]) -> bool:
-        """两列每层至多一个非针组；沿晶体竖边扫描各组的外部支撑。"""
+    def stable_half(rows: tuple[tuple[str, ...], ...], *, supported_column: int | None = None) -> bool:
+        """扫描两列的组支撑；可指定某列外侧另有一根等高的完整N柱。"""
         if not rows or any(len(row) != 2 for row in rows):
             raise ValueError("半形稳定性需要非空的两列原层位网格")
+        if supported_column not in (None, 0, 1):
+            raise ValueError("外侧N柱只能支撑两列中的0或1")
         links = [False] + [any(rows[z][q][0] == "c" and rows[z - 1][q][0] == "c"
                                for q in (0, 1)) for z in range(1, len(rows))]
         supported = False
@@ -71,6 +73,7 @@ class CornerBuilder:
                 supported = z == 0 or any(rows[z - 1][q] != EMPTY for q in nonpins)
             else:
                 supported |= any(rows[z - 1][q] == PIN for q in nonpins)
+            supported |= supported_column in nonpins
             if nonpins and not supported and (z + 1 == len(rows) or not links[z + 1]):
                 return False
         return True
@@ -155,33 +158,57 @@ class CornerBuilder:
         return result
 
     def supported_half(self, target: Shape) -> Recipe | None:
-        """以外侧N/P助手和普通脚手架制造半形；完整目标允许无针支撑环。"""
+        """逐列转交给外侧N脚手架，反向复用角程序；中间半形不稳定则未覆盖。"""
         n, height = self.rules.quadrants, self.rules.height
         half = n // 2
         if n < 6 or any(cell != EMPTY for row in target.layers for cell in row[half:]):
             raise ValueError("脚手架半形需要至少六象限，且仅占标准前半面")
+        if any(cell == "cu" for row in target.layers for cell in row):
+            return None
+        if any(not self.admissible(tuple(row[q] for row in target.layers)) for q in range(half)):
+            return None
         cells = self.rules.cells(target)
         if self.rules.stationary(cells) != cells.keys():
             return None
         for edge, direction, outside, start in ((0, -1, half, 1 - half), (half - 1, 1, n - 1, half - 1)):
-            if any(cell[0] == "c" and q != edge for (_, q), cell in cells.items()):
-                continue
-            scaffold = self.rules.fold({**{pos: cell for pos, cell in cells.items() if pos[1] != edge},
-                                        **{(z, outside): "Cu" for z in range(height)}})
-            assert scaffold is not None
-            support = self.builder.noncrystal(scaffold)
+            goal = target
+            stages = []
+            support = None
+            # 固定方向每次去掉一根原目标列，并在另一端补N柱；至多half次后不再含C。
+            for _ in range(half + 1):
+                cells = self.rules.cells(goal)
+                if stages:
+                    if n == 6:
+                        rows = tuple(row[:2] if direction == -1 else row[1:3] for row in goal.layers)
+                        stable = self.stable_half(rows, supported_column=1 if direction == -1 else 0)
+                    else:
+                        stable = self.rules.stationary(cells) == cells.keys()
+                    if not stable:
+                        break
+                if not any(cell[0] == "c" for cell in cells.values()):
+                    support = self.builder.noncrystal(goal)
+                    if support is None:
+                        raise RuntimeError("静止的无晶体脚手架未生成逐层制造证书")
+                    break
+                stages.append(goal)
+                scaffold = self.rules.fold({**{pos: cell for pos, cell in cells.items() if pos[1] != edge},
+                                            **{(z, outside): "Cu" for z in range(height)}})
+                assert scaffold is not None
+                goal = self.rules.rotate(scaffold, direction)
             if support is None:
                 continue
-            column = tuple(row[edge] for row in target.layers)
-            if any(cell != EMPTY for cell in column):
-                main = self.build(column, edge, direction)
-                if main is None:
-                    continue
-                support = self.builder.join(main, support, start)
-            result = self.builder.window(support, 0)
-            if result.result != target:
-                raise RuntimeError("半形及脚手架通过支撑条件，但去助手后没有得到目标")
-            return result
+            for original in reversed(stages):
+                support = self.builder.apply("rotate", support, parameter=-direction)
+                column = tuple(row[edge] for row in original.layers)
+                if any(cell != EMPTY for cell in column):
+                    main = self.build(column, edge, direction)
+                    if main is None:
+                        raise RuntimeError("通过列A的脚手架边列未生成通用角证书")
+                    support = self.builder.join(main, support, start)
+                support = self.builder.window(support, 0)
+                if support.result != original:
+                    raise RuntimeError("半形及脚手架通过支撑条件，但去助手后没有得到目标")
+            return support
         return None
 
     def _release_corner(self, cells: tuple[str, ...], helper: int) -> Recipe:

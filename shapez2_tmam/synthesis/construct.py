@@ -39,7 +39,7 @@ class Constructor:
         if n == 4:
             result = CornerBuilder(self.builder).pair(target)
         else:
-            result = self._adjacent_pair(target)
+            result = self._adjacent_pair(target) if n > 6 else None
             if result is None:
                 result = CornerBuilder(self.builder).supported_half(target)
         self.halves[target] = result
