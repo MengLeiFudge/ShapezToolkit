@@ -69,7 +69,7 @@ class CornerBuilder:
 
     @staticmethod
     def helper(cells: tuple[str, ...]) -> tuple[str, ...]:
-        """返回角构造最终保留的五格助手；普通格固定为Cu，供精确半形匹配。"""
+        """返回角构造最终保留的五格助手；普通格固定为Cu，供角构造及最终产物核对。"""
         word = "".join("-" if cell == EMPTY else "P" if cell == PIN else "C" if cell[0] == "c" else "N"
                        for cell in cells).ljust(5, "-")
         if word.startswith("-N-C"):

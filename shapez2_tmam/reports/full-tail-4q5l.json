@@ -7,23 +7,23 @@
     "enable": 1211001
   },
   "outputs": {
-    "window": 1237084,
-    "sample": 1237085,
-    "done": 1237087,
-    "status": 1237096,
-    "result": 1237099,
+    "window": 1236204,
+    "sample": 1236205,
+    "done": 1236207,
+    "status": 1236216,
+    "result": 1236219,
     "instruction": {
-      "opcode": 1237088,
-      "a": 1237089,
-      "b": 1237090,
-      "destination": 1237091,
-      "base": 1237092,
-      "color": 1237093,
-      "request": 1237094
+      "opcode": 1236208,
+      "a": 1236209,
+      "b": 1236210,
+      "destination": 1236211,
+      "base": 1236212,
+      "color": 1236213,
+      "request": 1236214
     }
   },
-  "generated_gates": 25978,
-  "omitted_gates": 570,
+  "generated_gates": 25098,
+  "omitted_gates": 497,
   "reserved_channels": [
     1211000,
     1276535
@@ -33,232 +33,232 @@
   "initial_max_gate_depth": 148,
   "step_critical_path": [
     {
-      "node": 19125,
+      "node": 18368,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 19153,
+      "node": 18395,
       "port": 0,
       "kind": "LogicGateCompare"
     },
     {
-      "node": 20682,
+      "node": 19869,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 20688,
+      "node": 19877,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 20691,
+      "node": 19881,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 20692,
+      "node": 19883,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 20693,
+      "node": 19884,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22558,
+      "node": 21678,
       "port": 0,
       "kind": "VirtualAnalyzer"
     },
     {
-      "node": 22560,
+      "node": 21680,
       "port": 0,
       "kind": "LogicGateCompare"
     },
     {
-      "node": 22562,
+      "node": 21682,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22564,
+      "node": 21684,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22593,
+      "node": 21713,
       "port": 0,
       "kind": "VirtualRotator"
     },
     {
-      "node": 22595,
+      "node": 21715,
       "port": 0,
       "kind": "LogicGateCompare"
     },
     {
-      "node": 22598,
+      "node": 21718,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22601,
+      "node": 21721,
       "port": 0,
       "kind": "LogicGateCompare"
     },
     {
-      "node": 22604,
+      "node": 21724,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22607,
+      "node": 21727,
       "port": 0,
       "kind": "LogicGateCompare"
     },
     {
-      "node": 22610,
+      "node": 21730,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22614,
+      "node": 21734,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22741,
+      "node": 21861,
       "port": 0,
       "kind": "VirtualRotatorCCW"
     },
     {
-      "node": 22744,
+      "node": 21864,
       "port": 0,
       "kind": "VirtualRotatorCCW"
     },
     {
-      "node": 22747,
+      "node": 21867,
       "port": 0,
       "kind": "VirtualRotatorCCW"
     },
     {
-      "node": 22748,
+      "node": 21868,
       "port": 0,
       "kind": "VirtualAnalyzer"
     },
     {
-      "node": 22749,
+      "node": 21869,
       "port": 0,
       "kind": "LogicGateCompare"
     },
     {
-      "node": 22752,
+      "node": 21872,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 22754,
+      "node": 21874,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 22755,
+      "node": 21875,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 22784,
+      "node": 21904,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 22786,
+      "node": 21906,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 22787,
+      "node": 21907,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 22865,
+      "node": 21985,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22867,
+      "node": 21987,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22871,
+      "node": 21991,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 22873,
+      "node": 21993,
       "port": 0,
       "kind": "LogicGateCompare"
     },
     {
-      "node": 22874,
+      "node": 21994,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 22875,
+      "node": 21995,
       "port": 0,
       "kind": "LogicGateNot"
     },
     {
-      "node": 22876,
+      "node": 21996,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 22883,
+      "node": 22003,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 24364,
+      "node": 23484,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 24403,
+      "node": 23523,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24409,
+      "node": 23529,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24412,
+      "node": 23532,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24414,
+      "node": 23534,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24415,
+      "node": 23535,
       "port": 0,
       "kind": "LogicGateNot"
     },
     {
-      "node": 24416,
+      "node": 23536,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 24694,
+      "node": 23814,
       "port": 0,
       "kind": "LogicGateIf"
     }
@@ -794,137 +794,137 @@
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23575,
+      "node": 22695,
       "port": 0,
       "kind": "LogicGateNot"
     },
     {
-      "node": 23577,
+      "node": 22697,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 23580,
+      "node": 22700,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 23582,
+      "node": 22702,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23589,
+      "node": 22709,
       "port": 0,
       "kind": "LogicGateNot"
     },
     {
-      "node": 23591,
+      "node": 22711,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23698,
+      "node": 22818,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23700,
+      "node": 22820,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23701,
+      "node": 22821,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23704,
+      "node": 22824,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 23746,
+      "node": 22866,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23748,
+      "node": 22868,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23749,
+      "node": 22869,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23750,
+      "node": 22870,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 23780,
+      "node": 22900,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 23791,
+      "node": 22911,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 23793,
+      "node": 22913,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 23794,
+      "node": 22914,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24361,
+      "node": 23481,
       "port": 0,
       "kind": "LogicGateNot"
     },
     {
-      "node": 24362,
+      "node": 23482,
       "port": 0,
       "kind": "LogicGateAnd"
     },
     {
-      "node": 24402,
+      "node": 23522,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24408,
+      "node": 23528,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24412,
+      "node": 23532,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24414,
+      "node": 23534,
       "port": 0,
       "kind": "LogicGateOr"
     },
     {
-      "node": 24415,
+      "node": 23535,
       "port": 0,
       "kind": "LogicGateNot"
     },
     {
-      "node": 24416,
+      "node": 23536,
       "port": 0,
       "kind": "LogicGateIf"
     },
     {
-      "node": 24694,
+      "node": 23814,
       "port": 0,
       "kind": "LogicGateIf"
     }
@@ -952,11 +952,11 @@
   "shared_leaf_parent_append": true,
   "direct_active_instruction_successor": true,
   "column_crystal_color_runs": true,
-  "noncrystal_pin_row_segments": true,
+  "noncrystal_pin_row_segments": false,
   "search_frames": 4,
   "tail_pin_limit": "max(0, 最高原目标C层号-1)，层号从0开始",
   "item_registers": 6,
-  "program_rom_rows": 262,
+  "program_rom_rows": 251,
   "physical_check": {
     "horizontal_path_max": 2,
     "upper_upward_sweeps": 2,
@@ -975,9 +975,9 @@
   },
   "shared_angle_rows": 228,
   "angle_calls": 4,
-  "noncrystal_half_max_instructions": 9,
-  "instruction_bound": 1001,
-  "leaf_program_rows": 261,
+  "uniform_half_corner_path": true,
+  "instruction_bound": 979,
+  "leaf_program_rows": 250,
   "parent_tail_rows": 11,
   "shared_append_rows": 10,
   "statuses": {
@@ -996,15 +996,15 @@
   "proof": "4q5l/prefix-closure.md；optional-top.md；family-grounding.md；three-pin-tail.md；pin-source-conflicts.md；full-tail-circuit.md；shared-angle.md；shared-append.md；../general/pin-row-segments.md；color-run-program.md；multicycle-control.md；pin-grounded.md；grounded-tail.md；pin-base.md；pin-image-exact.md；support-reachability.md；support-row-scan.md；tail-solver.md；pin-patterns.md；valid-slot-cursor.md；inactive-rom-runs.md；packed-timing.md；clocked-control.md。",
   "verification": "仅静态网表、频道依赖及理论时序；没有布线、装箱或占地检查，未运行目标、模拟或测试。",
   "mode": "netlist_report",
-  "logical_gates": 25408,
+  "logical_gates": 24601,
   "logical_gate_counts": {
     "ConstantSignal": 37,
     "ControlledSignalReceiver": 2,
-    "LogicGateAnd": 7756,
-    "LogicGateCompare": 1457,
-    "LogicGateIf": 6163,
-    "LogicGateNot": 2097,
-    "LogicGateOr": 7609,
+    "LogicGateAnd": 7494,
+    "LogicGateCompare": 1429,
+    "LogicGateIf": 5822,
+    "LogicGateNot": 1990,
+    "LogicGateOr": 7550,
     "LogicGateXOr": 18,
     "VirtualAnalyzer": 48,
     "VirtualCrystalGenerator": 11,
@@ -1012,21 +1012,21 @@
     "VirtualHalvesSwapper": 1,
     "VirtualPainter": 44,
     "VirtualPinPusher": 1,
-    "VirtualRotator": 29,
+    "VirtualRotator": 24,
     "VirtualRotatorCCW": 46,
-    "VirtualStacker": 46,
+    "VirtualStacker": 41,
     "VirtualUnstacker": 41
   },
   "local_gate_pairs": 0,
   "building_counts_without_wires": {
-    "ConstantSignal": 74011,
-    "ControlledSignalReceiver": 45620,
-    "ControlledSignalTransmitter": 25498,
-    "LogicGateAnd": 7756,
-    "LogicGateCompare": 1457,
-    "LogicGateIf": 6163,
-    "LogicGateNot": 2097,
-    "LogicGateOr": 7609,
+    "ConstantSignal": 71702,
+    "ControlledSignalReceiver": 44182,
+    "ControlledSignalTransmitter": 24691,
+    "LogicGateAnd": 7494,
+    "LogicGateCompare": 1429,
+    "LogicGateIf": 5822,
+    "LogicGateNot": 1990,
+    "LogicGateOr": 7550,
     "LogicGateXOr": 18,
     "VirtualAnalyzer": 48,
     "VirtualCrystalGenerator": 11,
@@ -1034,12 +1034,12 @@
     "VirtualHalvesSwapper": 1,
     "VirtualPainter": 44,
     "VirtualPinPusher": 1,
-    "VirtualRotator": 29,
+    "VirtualRotator": 24,
     "VirtualRotatorCCW": 46,
-    "VirtualStacker": 46,
+    "VirtualStacker": 41,
     "VirtualUnstacker": 41
   },
-  "buildings_without_wires": 170498,
+  "buildings_without_wires": 165137,
   "building_count_basis": "按当前门、输入常量、无线收发器与固定局部模板计数；不含线缆和平台。",
   "layout_generated": false,
   "timing_basis": "全部Ref按无线边计算的网表DAG。"

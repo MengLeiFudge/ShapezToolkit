@@ -8,7 +8,7 @@
 
 `P-Cu:crP-:CuCu:cr--:CuCu:--P-`
 
-共17步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。
+共18步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。
 物品槽峰值为3，不含搜索状态及传输缓存；[槽数调度证明](../general/recipe-slots.md)。
 同一子配方出现两次时分别生产。Cut/Swap的另一个出口弃置；按表中出口继续。
 
@@ -37,11 +37,12 @@
 | 6 | cut | 5 | 0 | `cr--:Cu--:cr--` |
 | 7 | pin | 6 | — | `P---:cr--:Cu--:cr--` |
 | 8 | base | — | — | `--Cu` |
-| 9 | base | — | — | `--Cu` |
-| 10 | pin | 9 | — | `--P-:--Cu` |
-| 11 | stack | 8, 10 | — | `--Cu:--P-:--Cu` |
-| 12 | swap | 7, 11 | 0 | `P-Cu:crP-:CuCu:cr--` |
-| 13 | base | — | — | `CuCu` |
-| 14 | stack | 12, 13 | — | `P-Cu:crP-:CuCu:cr--:CuCu` |
-| 15 | base | — | — | `--P-` |
-| 16 | stack | 14, 15 | — | `P-Cu:crP-:CuCu:cr--:CuCu:--P-` |
+| 9 | base | — | — | `--P-` |
+| 10 | stack | 8, 9 | — | `--Cu:--P-` |
+| 11 | base | — | — | `--Cu` |
+| 12 | stack | 10, 11 | — | `--Cu:--P-:--Cu` |
+| 13 | swap | 7, 12 | 0 | `P-Cu:crP-:CuCu:cr--` |
+| 14 | base | — | — | `CuCu` |
+| 15 | stack | 13, 14 | — | `P-Cu:crP-:CuCu:cr--:CuCu` |
+| 16 | base | — | — | `--P-` |
+| 17 | stack | 15, 16 | — | `P-Cu:crP-:CuCu:cr--:CuCu:--P-` |

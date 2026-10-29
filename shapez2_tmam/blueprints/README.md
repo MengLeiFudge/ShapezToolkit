@@ -71,11 +71,11 @@ target保持，enable=0至少1612tick后启用；window上升后48tick采一次�
 
 两份完整蓝图使用145项状态、262行ROM和六物品槽，每格只查本列9项标签。target保持，enable=0在未压缩版至少2032tick、固定局部压缩版至少1792tick；每完整window上升后96tick读一次，sample为真先收包再处理done。采用[慢更新冻结协议](../4q5l/multicycle-control.md)，未压缩版制造周期80模拟秒，压缩版按[固定局部边计时](../4q5l/packed-timing.md)为68模拟秒；慢状态更新后额外等待一轮。
 
-[两角共用](../4q5l/shared-angle.md)压缩含C半形制造ROM，无C半形按[纯针行段](../general/pin-row-segments.md)直接制造，最多9条加工指令；叶端和父帧[共用同一S追加段](../4q5l/shared-append.md)，仅父帧先执行Pin。[直接有效行后继](../4q5l/inactive-rom-runs.md)跳过不发包的普通行，[同色段结晶](../4q5l/color-run-program.md)进一步减少制造发令。[强制闭包](../4q5l/prefix-closure.md)把首轮改成每切向至多21次检查；[可选顶格](../4q5l/optional-top.md)让每族共用A→S检查，失败后用[全族G筛选](../4q5l/family-grounding.md)排除没有地面可达成员的族，其余才逐成员搜Pin尾部。[来源槽约束](../4q5l/pin-source-conflicts.md)提前排除强制C冲突及邻接N的非法下落；[最大顶盖](../4q5l/maximal-cap.md)物理失败时排除同一前四层的全部顶盖，通过仍逐族找证书。Pin分支仍过大，尚未通过实用性能验收。完整覆盖、帧回退、重放及互斥选择证明见[四帧控制](../4q5l/full-tail-circuit.md)。
+[两角共用](../4q5l/shared-angle.md)压缩含C半形制造ROM，现存蓝图仍含无C半形直接制造和纯针行段快捷路径，最多9条加工指令；源码已按[通用两角流程](../4q5l/shared-angle.md)合并这些路径。叶端和父帧[共用同一S追加段](../4q5l/shared-append.md)，仅父帧先执行Pin。[直接有效行后继](../4q5l/inactive-rom-runs.md)跳过不发包的普通行，[同色段结晶](../4q5l/color-run-program.md)进一步减少制造发令。[强制闭包](../4q5l/prefix-closure.md)把首轮改成每切向至多21次检查；[可选顶格](../4q5l/optional-top.md)让每族共用A→S检查，失败后用[全族G筛选](../4q5l/family-grounding.md)排除没有地面可达成员的族，其余才逐成员搜Pin尾部。[来源槽约束](../4q5l/pin-source-conflicts.md)提前排除强制C冲突及邻接N的非法下落；[最大顶盖](../4q5l/maximal-cap.md)物理失败时排除同一前四层的全部顶盖，通过仍逐族找证书。Pin分支仍过大，尚未通过实用性能验收。完整覆盖、帧回退、重放及互斥选择证明见[四帧控制](../4q5l/full-tail-circuit.md)。
 
 `full-tail-packed-4q5l.spz2bp`把固定常量放到输入旁，合并5579对单消费者内部组合门，再按真实占地装箱。共563块3×3大平台，占5067个区块，外框72×72个区块（每区块20×20建筑格），独占频道1277000～1342535；含147216个非线缆建筑。未压缩版为25408块平台、170498个非线缆建筑。两版都省去公开输出[依赖闭包](../4q5l/output-cone.md)以外的570个门，被吸收或省去的内部频道不能用于外接监测。逐端口核对及[装箱证明](../4q5l/packed-circuit.md)说明占地与时序边界。
 
-本目录两份完整蓝图及旁置JSON已与[网表报告](../reports/README.md)同步，实际建筑计数与网表计数一致。输入和输出频道须读取新版JSON，不能沿用旧快照的输出频道。其他独立部件保留各自原产物。生产编译不代表已在游戏中验证。
+本目录两份完整蓝图及旁置JSON保留合并前快照；[最新网表报告](../reports/README.md)为251行ROM、压缩版142463个非线缆建筑，本轮未生成新布局。使用现存蓝图必须读取本目录相邻JSON，不能混用新报告的输出频道。其他独立部件保留各自原产物。生产编译不代表已在游戏中验证。
 
 ## 递归候选的固定标签网格
 

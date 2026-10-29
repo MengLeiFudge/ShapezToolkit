@@ -437,7 +437,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
         "support_row_closures": 10, "pin_base_precheck": True, "crystal_conflict_slot_skip": True,
         "top_crystal_forbidden_above_retained": True, "source_slots_use_valid_successors": True, "integer_source_cursors": True,
         "retained_crystal_neighbor_motion_filter": True, "shared_leaf_parent_append": True,
-        "direct_active_instruction_successor": True, "column_crystal_color_runs": True, "noncrystal_pin_row_segments": True,
+        "direct_active_instruction_successor": True, "column_crystal_color_runs": True, "noncrystal_pin_row_segments": False,
         "search_frames": 4, "tail_pin_limit": "max(0, 最高原目标C层号-1)，层号从0开始",
         "item_registers": 6, "program_rom_rows": len(instructions),
         "physical_check": {"horizontal_path_max": 2, "upper_upward_sweeps": 2, "upper_downward_sweeps": 1,
@@ -447,7 +447,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
                            "final_checks_per_direction": 1, "pin_pass_keeps_full_enumeration": True,
                            "optional_top_for_ground_crystal_families": True,
                            "shared_leaf_check_for_all_families": True},
-        "shared_angle_rows": corner_last + 1, "angle_calls": 4, "noncrystal_half_max_instructions": 9,
+        "shared_angle_rows": corner_last + 1, "angle_calls": 4, "uniform_half_corner_path": True,
         "instruction_bound": (2 * (macro_last + corner_last + 2) + len(instructions) - parent_start - 1
                               + 3 * (len(instructions) - parent_start)),
         "leaf_program_rows": len(instructions) - 1, "parent_tail_rows": len(instructions) - parent_start,

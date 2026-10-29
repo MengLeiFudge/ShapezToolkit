@@ -1,7 +1,7 @@
 {
   "name": "6q-multiblock-summary",
   "title": "多块复杂上料替换为无晶体载体",
-  "mechanism": "原上料q0为CCCN、q3为NPN；辅助C抬高后全碎。摘要落地时四块不合并，改用q0地面N和q3的NPN，四步准备后堆到q0单N下料。",
+  "mechanism": "原上料q0为CCCN、q3为NPN；辅助C抬高后全碎。摘要落地时四块不合并，改用q0地面N和q3的NPN，五步准备后堆到q0单N下料。",
   "quadrants": 6,
   "height": 5,
   "target": "Cu----Cu----:Cu----P-----:------Cu----",
@@ -35,40 +35,48 @@
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "------Cu----"
+      "result": "------P-----"
     },
     {
       "id": 2,
-      "operation": "pin",
-      "inputs": [
-        1
-      ],
-      "parameter": null,
-      "result": "------P-----:------Cu----"
-    },
-    {
-      "id": 3,
       "operation": "stack",
       "inputs": [
         0,
-        2
+        1
+      ],
+      "parameter": null,
+      "result": "Cu----Cu----:------P-----"
+    },
+    {
+      "id": 3,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "------Cu----"
+    },
+    {
+      "id": 4,
+      "operation": "stack",
+      "inputs": [
+        2,
+        3
       ],
       "parameter": null,
       "result": "Cu----Cu----:------P-----:------Cu----"
     },
     {
-      "id": 4,
+      "id": 5,
       "operation": "base",
       "inputs": [],
       "parameter": null,
       "result": "Cu----------"
     },
     {
-      "id": 5,
+      "id": 6,
       "operation": "stack",
       "inputs": [
-        4,
-        3
+        5,
+        4
       ],
       "parameter": null,
       "result": "Cu----Cu----:Cu----P-----:------Cu----"

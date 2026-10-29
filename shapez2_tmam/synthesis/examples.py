@@ -132,7 +132,7 @@ def multiblock_summary_example() -> Example:
     if result is None:
         raise RuntimeError("六象限多块摘要未生成无晶体替换配方")
     return Example("6q-multiblock-summary", "多块复杂上料替换为无晶体载体",
-                   "原上料q0为CCCN、q3为NPN；辅助C抬高后全碎。摘要落地时四块不合并，改用q0地面N和q3的NPN，四步准备后堆到q0单N下料。",
+                   "原上料q0为CCCN、q3为NPN；辅助C抬高后全碎。摘要落地时四块不合并，改用q0地面N和q3的NPN，五步准备后堆到q0单N下料。",
                    6, result, (("原复杂上料", source), ("同摘要无晶体上料", result.inputs[1]),
                                ("一次堆叠成品", result)))
 

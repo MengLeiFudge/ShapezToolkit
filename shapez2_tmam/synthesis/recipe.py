@@ -249,8 +249,8 @@ class Builder:
                 source = self.window(source, start)
         for _ in range(prefix):
             source = self.apply("pin", source)
-        for segment in self._noncrystal_segments(target.layers[top + 1:]):
-            source = self.apply("stack", source, segment)
+        for row in target.layers[top + 1:]:
+            source = self.apply("stack", source, self.base(row))
         if source.result != target:
             raise RuntimeError("同色层的并行列制造结果与目标不一致")
         return source
@@ -286,8 +286,8 @@ class Builder:
         for _ in range(prefix):
             result = self.apply("pin", result)
         rows = tuple(tuple(cell if q == quadrant else EMPTY for q in range(self.rules.quadrants)) for cell in cells[top + 1:])
-        for segment in self._noncrystal_segments(rows):
-            result = self.apply("stack", result, segment)
+        for row in rows:
+            result = self.apply("stack", result, self.base(row))
         return result
 
     def independent_columns(self, target: Shape) -> Recipe | None:
@@ -381,27 +381,14 @@ class Builder:
         source = self.independent_columns(prefix)
         return self.append_noncrystal(source, target) if source is not None else None
 
-    def _noncrystal_segments(self, rows: tuple[tuple[str, ...], ...]) -> Iterator[Recipe]:
-        """把非空无C行分成纯针前缀段；每段只需一个活动物品槽。"""
-        bottom = 0
-        while bottom < len(rows):
-            top = bottom
-            while top + 1 < len(rows) and rows[top] == tuple(
-                    PIN if cell != EMPTY else EMPTY for cell in rows[top + 1]):
-                top += 1
-            segment = self.base(rows[top])
-            for _ in range(top - bottom):
-                segment = self.apply("pin", segment)
-            yield segment
-            bottom = top + 1
-
     def noncrystal(self, target: Shape) -> Recipe | None:
-        """按纯针行段制造无C目标；失败精确表示此类目标不可制作。"""
+        """统一逐层供料和堆叠；失败精确表示无C目标不可制作。"""
         if any(cell[0] == "c" for row in target.layers for cell in row):
             raise ValueError("无晶体构造不接受含晶体目标")
         if any(all(cell == EMPTY for cell in row) for row in target.layers):
             return None
         source = None
-        for segment in self._noncrystal_segments(target.layers):
-            source = segment if source is None else self.apply("stack", source, segment)
+        for row in target.layers:
+            layer = self.base(row)
+            source = layer if source is None else self.apply("stack", source, layer)
         return source if source is not None and source.result == target else None

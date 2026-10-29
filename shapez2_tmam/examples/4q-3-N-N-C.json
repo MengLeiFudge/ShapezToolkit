@@ -5,7 +5,7 @@
   "quadrants": 4,
   "height": 5,
   "target": "CuP-----:--Cu----:CuCu----:--P-----:crCu----",
-  "register_count": 3,
+  "register_count": 4,
   "evidence": "依据局部物理与已证配方变换生成中间产物；未在游戏或Mod中验证。",
   "milestone_orientation": null,
   "milestones": [],
@@ -575,112 +575,136 @@
       "operation": "base",
       "inputs": [],
       "parameter": null,
-      "result": "----Cu--"
+      "result": "----P---"
     },
     {
       "id": 66,
-      "operation": "pin",
-      "inputs": [
-        65
-      ],
+      "operation": "base",
+      "inputs": [],
       "parameter": null,
-      "result": "----P---:----Cu--"
+      "result": "----P---"
     },
     {
       "id": 67,
-      "operation": "pin",
+      "operation": "stack",
       "inputs": [
+        65,
         66
       ],
       "parameter": null,
-      "result": "----P---:----P---:----Cu--"
+      "result": "----P---:----P---"
     },
     {
       "id": 68,
-      "operation": "pin",
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "----P---"
+    },
+    {
+      "id": 69,
+      "operation": "stack",
       "inputs": [
-        67
+        67,
+        68
+      ],
+      "parameter": null,
+      "result": "----P---:----P---:----P---"
+    },
+    {
+      "id": 70,
+      "operation": "base",
+      "inputs": [],
+      "parameter": null,
+      "result": "----Cu--"
+    },
+    {
+      "id": 71,
+      "operation": "stack",
+      "inputs": [
+        69,
+        70
       ],
       "parameter": null,
       "result": "----P---:----P---:----P---:----Cu--"
     },
     {
-      "id": 69,
+      "id": 72,
       "operation": "swap",
       "inputs": [
         64,
-        68
+        71
       ],
       "parameter": 0,
       "result": "--crP---:--crP---:--crP---:--crCu--:--cr----"
     },
     {
-      "id": 70,
+      "id": 73,
       "operation": "rotate",
       "inputs": [
-        69
+        72
       ],
       "parameter": 1,
       "result": "----crP-:----crP-:----crP-:----crCu:----cr--"
     },
     {
-      "id": 71,
+      "id": 74,
       "operation": "swap",
       "inputs": [
         50,
-        70
+        73
       ],
       "parameter": 0,
       "result": "--CucrP-:CucrcrP-:CuCucrP-:cr--crCu:----cr--"
     },
     {
-      "id": 72,
+      "id": 75,
       "operation": "pin",
       "inputs": [
-        71
+        74
       ],
       "parameter": null,
       "result": "CuP-P-P-:--Cu--P-:CuCu--P-:------P-:cr----Cu"
     },
     {
-      "id": 73,
+      "id": 76,
       "operation": "base",
       "inputs": [],
       "parameter": null,
       "result": "--P-----"
     },
     {
-      "id": 74,
+      "id": 77,
       "operation": "stack",
       "inputs": [
-        72,
-        73
+        75,
+        76
       ],
       "parameter": null,
       "result": "CuP-P-P-:--Cu--P-:CuCu--P-:--P---P-:cr----Cu"
     },
     {
-      "id": 75,
+      "id": 78,
       "operation": "base",
       "inputs": [],
       "parameter": null,
       "result": "--Cu----"
     },
     {
-      "id": 76,
+      "id": 79,
       "operation": "stack",
       "inputs": [
-        74,
-        75
+        77,
+        78
       ],
       "parameter": null,
       "result": "CuP-P-P-:--Cu--P-:CuCu--P-:--P---P-:crCu--Cu"
     },
     {
-      "id": 77,
+      "id": 80,
       "operation": "cut",
       "inputs": [
-        76
+        79
       ],
       "parameter": 0,
       "result": "CuP-----:--Cu----:CuCu----:--P-----:crCu----"
