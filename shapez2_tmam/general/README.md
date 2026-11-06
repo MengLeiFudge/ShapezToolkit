@@ -41,7 +41,7 @@
 | [T₂的一次顶针排除](t2-one-pin-exclusion.md) | 排除两种半切方向及任意前后Stack，将T₂的最少尾部Pin数证明为2 |
 | [T₂的全局交替下界](t2-forced-interleaving.md) | 排除任意起点的连续两次Pin，证明两次Pin之间必须有有效Stack |
 | [T₃的三次顶针下界](t3-pin-lower-bound.md) | 排除任意起点的一次、两次Pin路线，证明原4q12l目标最少恰需三次；不据此宣称任意序列已证 |
-| [T₃的指定顺序下界](t3-forced-order.md) | 第一次、第二次Pin之间必须Stack，第二次后只差截盖抬升；最短词恰为P→S→P→P |
+| [T₃的指定顺序下界](t3-forced-order.md) | T₃最短词为P→S→P→P；[三塔候选与格子图](three-tower-candidate.md)另给三次真实破坏路线，但可换起点缩成两次尾部顶破 |
 | [一次Pin后的无界必要Stack段](forced-stack-length.md) | 显式四象限族迫使后段次数随H增长；每个整数都有精确最少次数的存在性，含提高准备高度后预制普通层的构造 |
 | [任意序列的两种推广障碍](tail-sequence-extension.md) | 首次无顶破Pin可移入半形准备；T₂抬高r≥2层最少恰需两次Pin，含同高度上限PSP配方与4q13l短代码 |
 | [两象限任意层数直接合成](two-quadrant-synthesis.md) | 稳定性、Q与最高C以下连续前缀的充要判据已接入默认Constructor；O(H)制造步骤、3槽；另给单层构造与融合屏障 |
