@@ -42,7 +42,7 @@
 | [T₂的全局交替下界](t2-forced-interleaving.md) | 排除任意起点的连续两次Pin，证明两次Pin之间必须有有效Stack |
 | [T₃的三次顶针下界](t3-pin-lower-bound.md) | 排除任意起点的一次、两次Pin路线，证明原4q12l目标最少恰需三次；不据此宣称任意序列已证 |
 | [T₃的指定顺序下界](t3-forced-order.md) | T₃最短词为P→S→P→P；[三塔候选](three-tower-candidate.md)可缩为两次尾部顶破；[固定来源五步构造](three-tower-fixed-source.md)锁住两个Stack间隔，但另换起点可零尾Pin制造 |
-| [四象限三次顶破的几何限制](ceiling-destruction-bound.md) | DDD不可能；[DDLD改写](ddld-reduction.md)与[DLʳDD改写](dl-dd-reduction.md)排除四次Pin中的三次必要破坏，三破坏候选至少五次Pin、七层 |
+| [四象限三次顶破的几何限制](ceiling-destruction-bound.md) | DDD不可能；[DDLD](ddld-reduction.md)、[DLʳDD](dl-dd-reduction.md)及[D Lᵃ D L D](dl-dl-d-reduction.md)均可减少破坏；三D候选最后两D之间至少两次L、至少七层；[高处破坏前缀](high-destruction-prefix.md)进一步要求前两座中恰有一座深入第三座顶层 |
 | [Pin计数前缀与尾部改写](pin-clock-prefix.md) | 一般偶数象限下，至少H−1次Pin的路线具有零尾Pin替代；配合尾部改写排除四象限六层及以下目标强制三次晶体破坏 |
 | [一次Pin后的无界必要Stack段](forced-stack-length.md) | 显式四象限族迫使后段次数随H增长；每个整数都有精确最少次数的存在性，含提高准备高度后预制普通层的构造 |
 | [任意序列的两种推广障碍](tail-sequence-extension.md) | 首次无顶破Pin可移入半形准备；T₂抬高r≥2层最少恰需两次Pin，含同高度上限PSP配方与4q13l短代码 |

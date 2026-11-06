@@ -136,7 +136,7 @@ q2 = N N N C C .
 
 ## 7. 对全局三塔命题的剩余范围
 
-现有结论把四象限问题收紧为：必须排除全部少于四次Pin的替代，且四次Pin候选至少涉及DDLD或DLDD。[Pin计数前缀定理](pin-clock-prefix.md)进一步证明正的最少尾Pin数不超过H−2，因此四象限五层不能强制三次晶体破坏，任意高度候选至少需要H≥6。[DDLD完整改写](ddld-reduction.md)又排除了整个DDLD顺序：其目标另有至多三次Pin、至多两次破坏的路线，首塔向下多延一层的分支甚至只需一次尾Pin。[DLʳDD改写](dl-dd-reduction.md)覆盖所有r≥1，并排除剩余的DLDD。因此三次必要破坏至少需要五次Pin、H≥7；DDLLD、DLDLD等更长尾部仍需处理。一般高度不能借外部rank≤3摘要直接判为不存在；仍需完整的全高度上界证明或逐目标全局下界。
+现有结论把四象限问题收紧为：必须排除全部少于四次Pin的替代，且四次Pin候选至少涉及DDLD或DLDD。[Pin计数前缀定理](pin-clock-prefix.md)进一步证明正的最少尾Pin数不超过H−2，因此四象限五层不能强制三次晶体破坏，任意高度候选至少需要H≥6。[DDLD完整改写](ddld-reduction.md)又排除了整个DDLD顺序：其目标另有至多三次Pin、至多两次破坏的路线，首塔向下多延一层的分支甚至只需一次尾Pin。[DLʳDD改写](dl-dd-reduction.md)覆盖所有r≥1，并排除剩余的DLDD。因此三次必要破坏至少需要五次Pin、H≥7。[D Lᵃ D L D改写](dl-dl-d-reduction.md)又覆盖DLDLD及任意a≥0；剩余三D路线的后两D之间必须至少有两次L，例如DDLLD。一般高度不能借外部rank≤3摘要直接判为不存在；仍需完整的全高度上界证明或逐目标全局下界。
 
 六象限的第二个D不必位于第一个D的正对列，第2节的矛盾不成立。[固定来源五步构造](three-tower-fixed-source.md)已经给出合法DDD及两个不可合并的Stack间隔，但其目标有零尾Pin替代；所以六象限还缺任意来源下的必要性。
 
