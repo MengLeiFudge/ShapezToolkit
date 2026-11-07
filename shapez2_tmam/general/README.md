@@ -30,7 +30,7 @@
 | [接地来源与潜在粘合](addition-components.md) | K_add支撑证书及堆叠闭包；危险高度两圈扫描与跨标签边传播已接入Python，六象限H也可逐层追加 |
 | [接地屏障等价性](grounded-barriers.md) | 环形空列区间的屏障只在端点；提前阻断水平传播不改变旧组分区，无需增加逐行屏障状态机 |
 | [一次结算后进入安全范围](settled-stacking.md) | 原下料可不稳定；以纯C上料真实触发一次F，再进入K_add基础追加，涵盖六象限V；候选接口已实现 |
-| [堆叠进展量与尾部界](stack-progress.md) | 有效Stack严格增加N/P数减C数；一般含C尾部至多n(3H−1)次主干Stack/Pin |
+| [堆叠进展量与尾部界](stack-progress.md) | 有效Stack严格增加N/P数减C数；一般含C尾部至多n(3H−1)次主干Stack/Pin；纯N/P组及纯C组均有直接支撑，首次可下落组必须混合N/C |
 | [任意有限次重新结算级联](gravity-cascade.md) | n=4k+6、H=6k−1的可制作族恰经k次重力才稳定；含十八象限十七层的三次代表 |
 | [双半形交换后的支撑船级联](alternating-cascade.md) | 核对用户20q21l短代码、40→28→16→4的三轮下落及顶针限制；n=4k+8、H=5k+6的同族扩展 |
 | [重复下落的空间界](cascade-space.md) | 单串船为n=2k+6、H=5k+1；补12q16l截图准备形的制造证明，区分可行上界和最小参数 |
@@ -49,6 +49,8 @@
 | [一次Pin后的无界必要Stack段](forced-stack-length.md) | 显式四象限族迫使后段次数随H增长；每个整数都有精确最少次数的存在性，含提高准备高度后预制普通层的构造 |
 | [任意长度的完整P S^k操作词](forced-stack-word.md) | 对每个偶数n≥4、k≥1给出明确目标；任意来源恰有一次Pin且后段至少k次单层Stack，显式路线达到下界；没有前置Stack补偿 |
 | [两次Pin之间的任意长Stack段](forced-middle-stack-word.md) | 四象限H=k+11的明确目标Wₖ强制完整最短词P S^k P；原T₂是k=1，全部k枚新料只能在两次Pin之间加入 |
+| [加宽Wₖ的两种一次Pin替代](temporary-cap-bridge.md) | 六象限中，普通连接列允许临时顶桥；复制保留C及针链则增加屋顶落点；两族均由P S^k P改为P S^(k+4)，不能保留原强阶段下界 |
+| [晶体封顶目标的条件改写](capped-target-pin-elimination.md) | 每列为空或以保留C封顶，且低部两半有固定剥离证书时，可预置底针，把全部尾部P/S改为纯C单层Stack；不声称一般半形都满足制造前提 |
 | [任意序列的两种推广障碍](tail-sequence-extension.md) | 首次无顶破Pin可移入半形准备；T₂抬高r≥2层最少恰需两次Pin，含同高度上限PSP配方与4q13l短代码 |
 | [两象限任意层数直接合成](two-quadrant-synthesis.md) | 稳定性、Q与最高C以下连续前缀的充要判据已接入默认Constructor；O(H)制造步骤、3槽；另给单层构造与融合屏障 |
 | [相邻象限复制与配方提升](sector-replication.md) | 证明全部制造操作与等宽复制对应；默认构造可提升较小商图证书，间隙代表已扩到八象限 |
