@@ -6,7 +6,7 @@
 
 全局命题的状态：
 
-1. **已证明**：T₂强制全局最短词P→S→P；[参数族Wₖ](forced-middle-stack-word.md)进一步对每个k≥1强制P S^k P，所有k次Stack都必须位于两次Pin之间。另有[单段明确参数族](forced-stack-word.md)，对每个偶数n≥4和k≥1强制完整最短词P S^k；四象限十三层目标E的[最短词PPP](forced-initial-pin-block.md)则证明初始Pin段不能统一压成至多两次。
+1. **已证明**：T₂强制全局最短词P→S→P；[参数族Wₖ](forced-middle-stack-word.md)进一步对每个k≥1强制P S^k P，所有k次Stack都必须位于两次Pin之间。另有[单段明确参数族](forced-stack-word.md)，对每个偶数n≥4和k≥1强制完整最短词P S^k；四象限十一层目标E的[最短词PPP](forced-initial-pin-block.md)则证明初始Pin段不能统一压成至多两次。
 2. **四象限的强顺序版本已证伪**：不存在必须保留`P S P S P S`阶段顺序的四象限目标；任意高度都能改写掉一个交替间隔，单层Stack至多增加1次。见[序列重排证明](forced-sequence-obstruction.md)。
 3. **原来的可变偶数象限命题仍未解决**：对每个有限正整数序列(a₁,b₁,a₂,b₂,…)分别选择偶数象限数n、共同制造上限H和完整目标T，是否都能强制该序列。四象限的否定不能排除在六象限或更宽范围实现。
 

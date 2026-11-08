@@ -43,7 +43,7 @@
 | [T₂的全局交替下界](t2-forced-interleaving.md) | 排除任意起点的连续两次Pin，证明两次Pin之间必须有有效Stack |
 | [T₃的三次顶针下界](t3-pin-lower-bound.md) | 排除任意起点的一次、两次Pin路线，证明原4q12l目标最少恰需三次；不据此宣称任意序列已证 |
 | [T₃的指定顺序下界](t3-forced-order.md) | T₃最短词为P→S→P→P；[三塔候选](three-tower-candidate.md)可缩为两次尾部顶破；[固定来源五步构造](three-tower-fixed-source.md)锁住两个Stack间隔，但另换起点可零尾Pin制造 |
-| [连续三次Pin的全局最短词](forced-initial-pin-block.md) | 四象限H=13目标E排除任意来源的零、一、两次Pin；临时N–针–N环与跨半形支撑交接实现PPP，不能把初始Pin段一律压到两次 |
+| [连续三次Pin的全局最短词](forced-initial-pin-block.md) | 目标E在每个H≥11下都强制最短词PPP；整体抬升族Eᵣ仍最少三次，可行次数恰为3至r+2；长针环可改用三层环，不能强制更多Pin |
 | [四象限三次顶破的几何限制](ceiling-destruction-bound.md) | DDD不可能；[DDLD](ddld-reduction.md)、[DLʳDD](dl-dd-reduction.md)及[D Lᵃ D L D](dl-dl-d-reduction.md)均可减少破坏；[任意长前缀后的DD/DLD](dl-dl-d-reduction.md#4-任意长前缀之后的dd和dld)可压到两次破坏；必要三破坏目标的末两D之间至少两次L；[唯一低处释放](single-deep-release.md)把制造高度下界推进到十层；[高处破坏前缀](high-destruction-prefix.md)进一步要求前两座中恰有一座深入第三座顶层 |
 | [Pin计数前缀与尾部改写](pin-clock-prefix.md) | 一般偶数象限下，至少H−1次Pin有零尾Pin替代；保留C列的地面针前缀r在p>r时锁定最低N首次落地于第p−r次Pin之后，适用于全部来源；[截短稳定改写](single-deep-release.md)及[支撑顶盖](half-support-cap.md)另处理四象限破坏次数 |
 | [六象限最低两层来源的双顶破改写](six-quadrant-low-source.md) | 保留晶体来源只在起点最低两层时，至多两次晶体顶破；补齐双触发塔半形的真实制造及非K原状态的局部重放，排除六象限五层强制三破坏 |
@@ -86,7 +86,7 @@
 
 - **重复结算**：[同列复用](reused-column-cascade.md)已给出固定八象限、H=6k−1的任意有限轮构造。四象限已被K定理排除，继续研究六象限能达到哪些轮数，以及更低准备高度；此结论不是最终目标的最少总体加工数。
 - **rank 下界**：先定义到底计数顶针、顶破、交换后的顶破，还是某种阶段切换，并约定制造树的其他支路是否计入。展示一条含三次操作的路径只给出上界；要证明最少需要三次，必须排除全部更低代价路径。
-- **强制工序**：[T₂的全局P→S→P下界](t2-forced-interleaving.md)已推广为[每个k≥1的完整P S^k P构造](forced-middle-stack-word.md)，k枚新料全部必须在两次Pin之间加入。另有[完整P S^k构造](forced-stack-word.md)，对每个偶数n≥4、k≥1锁定一次Pin后的全部k次单层Stack，前置Stack不能补偿。[指定序列重排](forced-sequence-obstruction.md)否定了四象限任意高度的强顺序版本，但可能增加一次单层Stack，不能用于否定最短总步数版本；允许象限数随序列增加的原命题仍开放。六象限任意有限D/L时钟的紧列族最终均有零尾Pin来源，不能证明全局阶段必要。[推广障碍与完整计数](tail-sequence-extension.md)证明T₂抬高r≥2层的可行Pin数没有空档，恰为2至r+2。T₃最短词为[PSPP](t3-forced-order.md)，另有四象限十三层目标E的[PPP全局最短词](forced-initial-pin-block.md)。任意长度首段及任意多个Stack窗口的组合仍未解决。
+- **强制工序**：[T₂的全局P→S→P下界](t2-forced-interleaving.md)已推广为[每个k≥1的完整P S^k P构造](forced-middle-stack-word.md)，k枚新料全部必须在两次Pin之间加入。另有[完整P S^k构造](forced-stack-word.md)，对每个偶数n≥4、k≥1锁定一次Pin后的全部k次单层Stack，前置Stack不能补偿。[指定序列重排](forced-sequence-obstruction.md)否定了四象限任意高度的强顺序版本，但可能增加一次单层Stack，不能用于否定最短总步数版本；允许象限数随序列增加的原命题仍开放。六象限任意有限D/L时钟的紧列族最终均有零尾Pin来源，不能证明全局阶段必要。[推广障碍与完整计数](tail-sequence-extension.md)证明T₂抬高r≥2层的可行Pin数没有空档，恰为2至r+2。T₃最短词为[PSPP](t3-forced-order.md)，另有四象限十一层目标E的[PPP全局最短词](forced-initial-pin-block.md)。任意长度首段及任意多个Stack窗口的组合仍未解决。
 - **条件化约化**：寻找足以保证堆叠约化、稳定性或逆向唯一性的结构条件，并给出闭包范围。保留原始单次输出，不能把它直接替换为反复结算的最终稳定态。
 
 这些方向不要求先枚举所有图形。交付一个明确的构造族、下界不变量或限制条件，并写清尚未排除的其他路径，比仅列更多实例更接近覆盖性证明。
