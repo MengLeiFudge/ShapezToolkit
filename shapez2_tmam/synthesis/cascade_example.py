@@ -183,7 +183,7 @@ def main() -> int:
     lines += ["## 全部制作步骤格子图", "", "每页九步，先从左到右，再从上到下。输入编号对应先前步骤的产物。", ""]
     for number, page in enumerate(pages, 1):
         lines += [f"### 第{number}页", "", f"![第{number}页制作步骤]({page})", ""]
-    lines += ["## 依据", "", "[级联构造证明](../../general/gravity-cascade.md)。固定配方及中间产物由本地模型导出，未在游戏或Mod中验证。", ""]
+    lines += ["## 依据", "", "[级联构造证明](../../research/proofs/05-cascades.md#s05-01)。固定配方及中间产物由本地模型导出，未在游戏或Mod中验证。", ""]
     (assets / "README.md").write_text("\n".join(lines), encoding="utf-8")
     print(f"{len(document['steps'])}步，{document['register_count']}槽，{len(pages)}页格子图 → {assets / 'README.md'}")
     return 0

@@ -444,7 +444,7 @@ def export(example: Example, output: Path, *, instructions: bool = False) -> tup
     lines = [f"# {example.title}", "", example.mechanism, "", f"配置：{example.quadrants}象限、{example.recipe.height}层上限。",
              "", "目标（从底到顶，q0为每层最左格）：", "", f"`{example.recipe.result.to_key()}`", "",
              f"共{len(steps)}步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。",
-             f"物品槽峰值为{example.recipe.register_count}，不含搜索状态及传输缓存；[槽数调度证明](../general/recipe-slots.md)。",
+             f"物品槽峰值为{example.recipe.register_count}，不含搜索状态及传输缓存；[槽数调度证明](../research/proofs/04-stacking.md#s04-19)。",
              "同一子配方出现两次时分别生产。Cut/Swap的另一个出口弃置；按表中出口继续。", "",
              "[操作与方向说明](README.md)；本配方未在游戏中验证。", ""]
     if example.milestones:

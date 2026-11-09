@@ -1,114 +1,33 @@
-# x 象限 y 层
+# 偶数象限与任意高度
 
-本部分研究象限数和层数上限可变时的可制作性。具体构造必须明确象限数、层数上限、旋转粒度及切割规则；“任意参数”不代表可以省略这些定义。目前的具体反例采用偶数象限、等分半切和单象限旋转，奇数象限的切割规则尚未约定。
+先读[研究 PPT](../research/TMAM研究.pptx)第 14–32 页及[论文第 6–7 节](../research/TMAM研究.md#6-一般偶数象限与任意高度)。`n` 只取偶数，`H` 限制整个准备和制造过程；旋转粒度、半切规则和单次重力顺序必须随模型明确。
 
-## 接手目标与阅读顺序
+## 按证明主线阅读
 
-固定偶数参数已有有限搜索覆盖保证。[两象限任意层数](two-quadrant-synthesis.md)进一步取得直接充要判据、O(H)制造构造及3个物品槽上界；单层任意偶数象限也可直接制造。一般宽度的结构化简包括[Stack/Pin主干线性界](stack-progress.md)、[受保护普通块](protected-stack.md)和[接地来源与危险粘合](addition-components.md)，后者把六象限非K半形H纳入安全逐层堆叠范围。更宽图形的完整求解起点、上料凭据及搜索规模仍需研究。
+| 主线 | 入口 | 边界 |
+|---|---|---|
+| 物理与支撑 | [卷 01](../research/proofs/01-foundations.md) | 通用 Q/J；四象限任意 H 的 `R⊆K`；更宽图形可非 K、可不稳定 |
+| 四象限列与半形 | [完整 S 列构造](../research/proofs/02-four-quadrants.md#s02-11)、[零尾 Pin 闭包](../research/proofs/02-four-quadrants.md#s02-14) | 理论已闭合；完整构造及全高度闭包尚未接入 Python |
+| 一般列与脚手架 | [卷 03](../research/proofs/03-general-construction.md) | n≥6 的列条件 A 充要；局部构造不等于全图紧凑分解 |
+| 堆叠与上料 | [卷 04](../research/proofs/04-stacking.md) | 安全范围、来源摘要和实体制造证书必须同时保留 |
+| 重复下落 | [卷 05](../research/proofs/05-cascades.md) | 固定八象限可需任意有限 k 轮；最小偶数宽度仍在 6 与 8 之间 |
+| 强制工序 | [卷 06](../research/proofs/06-forced-words.md) | PS^k、PS^kP、T₂/T₃、PPP 和次数谱；一般指定序列仍开放 |
+| 反例与约化 | [卷 07](../research/proofs/07-reductions.md) | 区分固定来源下界、全局最小性及条件重排 |
 
-1. 先读[三列以上半形的无限构造族](wide-half-loops.md)，核对 n=2k≥6、H≥5 的非 K 半形及不稳定拼合输出，再读[六象限的具体矩阵](../6q5l/non-k-half.md)。
-2. 再读[通用列内不变量](column-invariants.md)，确认 Q、J 和顶针位置约束只使用局部事实，没有依赖整体稳定性。
-3. 查[一般尾部计数](stack-progress.md)、[扩大后的安全堆叠范围](addition-components.md)及[接地屏障等价性](grounded-barriers.md)：不稳定输出仍保留；Python采用K_add，用两圈危险高度扫描和反向支撑可达完成判定。额外按行阻断X不会改变接受范围。
-4. 读[原八象限八层构造](general-model.md)，其中复杂堆叠无法从同一下料改成逐块堆叠的反例仍有独立作用；再对照[六象限完整配方目录](../6q5l/synthesis.md)及其参数推广，区分完整搜索和结构约化。
+## 最终命题
 
-## 研究结果索引
+给定任意有限正整数序列 `(a1,b1,a2,b2,...)`，能否选择偶数 `n`、共同 `H` 和目标 T，使所有合法最后 Swap 来源都无法绕过指定的 Pin/单层 Stack 阶段？
 
-| 文档 | 内容 |
-|---|---|
-| [完整目标的流程与分类](whole-shape-synthesis.md) | 4q5l按是否必须尾Pin分两个整图集合，共用双半形起点及Pin/S循环；6q5l完整少类数量仍未知 |
-| [外侧脚手架半形](scaffold-halves.md) | 递归转交支撑覆盖六象限原两列角、H/V及多晶体列环；后续阶段复用两列扫描 |
-| [四象限任意层直接释放](four-quadrant-release.md) | 现有Python的直接落脚分支；任意悬空落点的完整S列构造见下行 |
-| [四象限完整列构造](column-construction-complete.md) · [文献核对](column-paper-assessment.md) | 递归、环下落及批量顶破补齐S列充分性，与[前态约化](half-predecessor-reduction.md)及[历史必要性](half-history-normalization.md)合成任意H半边充要判据 |
-| [任意高度零尾针来源](zero-pin-source-closure.md) | 强制前缀闭包与完整半边判据结合，给出O(H²)判定和制造证书；尚未接入程序 |
-| [外部研究摘录](tmam-context-extract.md) · [本模型局部化简](external-local-reductions.md) | 已证顶盖至多四种物理效果、无顶破Pin追加交换；游标状态及全高度rank上界仍需各自证明 |
-| [参数化模型与反例](general-model.md) | 八象限八层中，可制作的无针悬空环、不稳定输出，以及复杂堆叠无法从同一下料改成逐块堆叠的构造 |
-| [任意层角的充要条件与释放构造](angle-synthesis.md) | n≥6时A当且仅当主列可配N/P助手；三列释放统一落地/中停及多间隙，指定稳定两列角可保留含针环；4q任意层另用完整S判据 |
-| [通用列内不变量](column-invariants.md) | 不依赖整体稳定性的 Q、J 证明，以及顶针逆向的晶体位置、地面针占用约束 |
-| [三列以上半形的无限构造族](wide-half-loops.md) | 对所有偶数 n≥6、H≥5 显式构造非 K 半形和不稳定输出；固定偶数参数的有限合成保证及尚未解决的压缩问题 |
-| [K下料的通用堆叠化简](conditional-stacking.md) | K范围的基础块约化证明；当前实现采用更强的K_add范围 |
-| [受列顶保护的普通块](protected-stack.md) | 普通内块也可保护支撑环；n≥8、H≥5的显式非K可制造族 |
-| [接地来源与潜在粘合](addition-components.md) | K_add支撑证书及堆叠闭包；危险高度两圈扫描与跨标签边传播已接入Python，六象限H也可逐层追加 |
-| [接地屏障等价性](grounded-barriers.md) | 环形空列区间的屏障只在端点；提前阻断水平传播不改变旧组分区，无需增加逐行屏障状态机 |
-| [一次结算后进入安全范围](settled-stacking.md) | 原下料可不稳定；以纯C上料真实触发一次F，再进入K_add基础追加，涵盖六象限V；候选接口已实现 |
-| [堆叠进展量与尾部界](stack-progress.md) | 有效Stack严格增加N/P数减C数；一般含C尾部至多n(3H−1)次主干Stack/Pin；纯N/P组及纯C组均有直接支撑，首次可下落组必须混合N/C |
-| [任意有限次重新结算级联](gravity-cascade.md) | n=4k+6、H=6k−1的可制作族恰经k次重力才稳定；含十八象限十七层的三次代表 |
-| [双半形交换后的支撑船级联](alternating-cascade.md) | 核对用户20q21l短代码、40→28→16→4的三轮下落及顶针限制；n=4k+8、H=5k+6的同族扩展 |
-| [重复下落的空间界](cascade-space.md) | 单串船为n=2k+6、H=5k+1；补12q16l截图准备形的制造证明，区分可行上界和最小参数 |
-| [八象限同列复用级联](reused-column-cascade.md) | 固定n=8、H=6k−1实现任意有限k轮；底条晶体碎裂分离单格，复用同一下落通道 |
-| [强制顶针与堆叠顺序](forced-tail-order.md) | 4q12目标T₂的全局最短尾部为P→S→P；允许象限数及高度随序列增加的任意序列猜想仍开放 |
-| [指定序列的重排障碍](forced-sequence-obstruction.md) | 四象限PSPSPS不能成为不可绕过的阶段顺序，至多增加一次单层Stack；一般偶数宽度的稳定路径仍可重排；六象限旧料落地会阻止固定起点的SL→LS*，该例另有零尾Pin来源 |
-| [第一次顶针的支撑闭包](first-pin-support.md) | 四象限任意H的单次Pin证明；整个尾部闭包另由历史屏障归纳完成 |
-| [四象限任意层的K支撑定理](four-quadrant-tail-support.md) | 整个Pin/Stack尾部保持K；补齐其他根操作后得R(4,H)⊆K，排除四象限非平凡纯重新结算 |
-| [T₂的一次顶针排除](t2-one-pin-exclusion.md) | 排除两种半切方向及任意前后Stack，将T₂的最少尾部Pin数证明为2 |
-| [T₂的全局交替下界](t2-forced-interleaving.md) | 排除任意起点的连续两次Pin，证明两次Pin之间必须有有效Stack |
-| [T₃的三次顶针下界](t3-pin-lower-bound.md) | 排除任意起点的一次、两次Pin路线，证明原4q12l目标最少恰需三次；不据此宣称任意序列已证 |
-| [T₃的指定顺序下界](t3-forced-order.md) | T₃最短词为P→S→P→P；[三塔候选](three-tower-candidate.md)可缩为两次尾部顶破；[固定来源五步构造](three-tower-fixed-source.md)锁住两个Stack间隔，但另换起点可零尾Pin制造 |
-| [连续三次Pin的全局最短词](forced-initial-pin-block.md) | 目标E在每个H≥11下都强制最短词PPP；整体抬升族Eᵣ仍最少三次，可行次数恰为3至r+2；长针环可改用三层环，不能强制更多Pin |
-| [四象限三次顶破的几何限制](ceiling-destruction-bound.md) | DDD不可能；[DDLD](ddld-reduction.md)、[DLʳDD](dl-dd-reduction.md)及[D Lᵃ D L D](dl-dl-d-reduction.md)均可减少破坏；[任意长前缀后的DD/DLD](dl-dl-d-reduction.md#4-任意长前缀之后的dd和dld)可压到两次破坏；必要三破坏目标的末两D之间至少两次L；[唯一低处释放](single-deep-release.md)把制造高度下界推进到十层；[高处破坏前缀](high-destruction-prefix.md)进一步要求前两座中恰有一座深入第三座顶层 |
-| [Pin计数前缀与尾部改写](pin-clock-prefix.md) | 一般偶数象限下，至少H−1次Pin有零尾Pin替代；保留C列的地面针前缀r在p>r时锁定最低N首次落地于第p−r次Pin之后，适用于全部来源；[截短稳定改写](single-deep-release.md)及[支撑顶盖](half-support-cap.md)另处理四象限破坏次数 |
-| [六象限最低两层来源的双顶破改写](six-quadrant-low-source.md) | 保留晶体来源只在起点最低两层时，至多两次晶体顶破；补齐双触发塔半形的真实制造及非K原状态的局部重放，排除六象限五层强制三破坏 |
-| [一次Pin后的无界必要Stack段](forced-stack-length.md) | 显式四象限族迫使后段次数随H增长；每个整数都有精确最少次数的存在性，含提高准备高度后预制普通层的构造 |
-| [任意长度的完整P S^k操作词](forced-stack-word.md) | 对每个偶数n≥4、k≥1给出明确目标；任意来源恰有一次Pin且后段至少k次单层Stack，显式路线达到下界；没有前置Stack补偿 |
-| [两次Pin之间的任意长Stack段](forced-middle-stack-word.md) | 四象限H=k+11的明确目标Wₖ强制完整最短词P S^k P；原T₂是k=1，全部k枚新料只能在两次Pin之间加入 |
-| [加宽Wₖ的两种一次Pin替代](temporary-cap-bridge.md) | 六象限中，普通连接列允许临时顶桥；复制保留C及针链则增加屋顶落点；两族均由P S^k P改为P S^(k+4)，不能保留原强阶段下界 |
-| [晶体封顶目标的条件改写](capped-target-pin-elimination.md) | 每列为空或以保留C封顶，且低部两半有固定剥离证书时，可预置底针，把全部尾部P/S改为纯C单层Stack；不声称一般半形都满足制造前提 |
-| [任意序列的推广障碍与完整Pin计数](tail-sequence-extension.md) | 首次无顶破Pin可移入半形准备；T₂抬高r≥2层最少恰需两次Pin，可行Pin总数恰为2至r+2；含PSP与临时针环的P^(r+1) S^5配方 |
-| [两象限任意层数直接合成](two-quadrant-synthesis.md) | 稳定性、Q与最高C以下连续前缀的充要判据已接入默认Constructor；O(H)制造步骤、3槽；另给单层构造与融合屏障 |
-| [相邻象限复制与配方提升](sector-replication.md) | 证明全部制造操作与等宽复制对应；默认构造可提升较小商图证书，间隙代表已扩到八象限 |
-| [同色层的多列并行制造](rectangular-columns.md) | 矩形核心共用同色段结晶，另补共同针前缀和各列连续但不等高的无C后缀；半面混色时仍合并相邻同模板列；全圈L层至多3L−1步、两物品槽，与象限数无关 |
-| [交换的半形结果与原输入凭据](swap-witnesses.md) | 按切后结果合并候选；保留原输入避免重复重力；给定目标直接投影查表 |
-| [不新增针的单次堆叠](ordinary-stack.md) | 对任意下料直接构造紧密N/C上料，保留一次Stack；包括非K和不稳定下料，不遍历任意上料树 |
-| [针尾与列前缀上料](pin-tail-stack.md) | 推广到每列普通格在下、针尾在上；用非针掩码递减产生的支撑森林证明全体上料下落，省去空列及多余顶层辅助C |
-| [参数化Python模型](python-model.md) | Rules/Builder及通用局部构造支持偶数n≥2、H≥2；完整4q5l算法及原生电路维持明确边界 |
-| [任意堆叠的输入摘要](stack-summaries.md) | 任意上料编译为有效N/P块序列；排除必超高分支，按摘要共用原输入凭据及规范上料替换 |
-| [多块摘要的无晶体实体](noncrystal-carrier.md) | 空地面落点块数保持，当且仅当有同摘要无C载体；唯一候选对任意下料等价，目录已按成本采用 |
-| [按摘要构造含晶体载体](crystal-carrier.md) | 无同摘要无C实体时，按块及列内次序求紧凑C间隙；保持任意下料上的效果，六象限代表按当前统一制造流程由26步减至19步 |
-| [同秩块的三着色重排](carrier-ordering.md) | 相邻独立普通块交错来源层，保留每列先后；满圈单格摘要在任意偶数象限只需两层、四步制造 |
-| [交错N/P的单次堆叠载体](interleaved-stack.md) | 用块数守恒充要判据取得紧凑无C上料，失配后检查补C连续列；保持原下料只加工一次 |
-| [列内压紧的单次上料](packed-column-stack.md) | 用O(nH)条高度约束压掉内部空隙，只在列底补C；已实现第三载体，覆盖旧两候选均失败的六象限实例 |
-| [保留针下间隙的上料](layer-constraint-stack.md) | 以物理块来源层为变量补C；触地针前缀规范化免去每列模式组合，制造几何与全体释放分开判断 |
-| [单次物理结算扫描](physics-scan.md) | 一次排序分组、反向支撑队列和固定障碍事件扫描，保持原分组及高处障碍边界 |
-| [无C制造统一逐层追加](pin-row-segments.md) | 通用base/Stack覆盖纯针行段，删除专用识别与选择；接受较多制造步骤，减少电路建筑 |
-| [恒等加工与用途成本](orientation-cost.md) | 合并旋转、删除恒等一元加工；交换凭据按前/后用途分别取低成本 |
-| [整树朝向安排](recipe-orientation.md) | 固定制造骨架的朝向动态规划；半圈推入基料/出口，任意偶数n净转至多四分之一圈，4/6q每表项一包，保持物品槽 |
-| [制造树的物品槽调度](recipe-slots.md) | 先制造槽需求较大的子树，降低或保持活跃物品峰值；保留上下料语义 |
-| [具体制造路径](../examples/README.md) | 三十一份二/四/六/八/十八象限代表配方，含逐步编号、参数、中间产物及槽数；三次级联另有格子图 |
+[主命题与量词](../research/proofs/06-forced-words.md#s06-01)仍未证明或证伪。四象限的[PSPSPS 重排反证](../research/proofs/06-forced-words.md#s06-11)只否定强阶段版本，且可能增加一次 Stack；不能外推到可变偶数宽度，也不能据此否定最短总步数版本。
 
-一般模型不能把所有可制作状态预先限制为稳定图形或 K 支撑类，也不能默认单次重力结算幂等。上述反例有参数化源码规则下的人工构造；群内八分八层 Mod 的报告和本机实际运行验证分别记录，不相互替代。
+局部时钟、三座塔或指定来源的成功路线不足以证明全局强制。尚缺多个支撑交接的全来源串接论证，以及排除改换切向、提前上料和窗口合并的方法。
 
-一般研究已有覆盖整个参数区域的反例族，以及不依赖K的尾部进展量。下一步重点是K_add之外的上料凭据和更紧凑的起点分解；重复结算已有晶体数上界及[任意有限次数的可制作族](gravity-cascade.md)，[八象限同列复用](reused-column-cascade.md)已证明固定宽度可实现任意有限轮，四象限任意H已证明R⊆K，非平凡纯重新结算的最小偶数宽度因此收紧为6或8。六象限轮数边界、更高rank及任意指定次数序列仍开放；T₂已给出全局强制交替实例。
+## 实现与来源
 
-固定范围的结论分别放在[4 象限 5 层](../4q5l/README.md)和[6 象限 5 层](../6q5l/README.md)。五层独立单列的 264 种计数，以及依赖四象限稳定性证明的逆向特例，仅在对应部分陈述。
+[Python 模型](../synthesis/README.md)支持明确参数下的局部操作与制造证书。[具体例子](../examples/README.md)保留短代码和逐步产物。[外部资料核对](../research/proofs/09-sources.md)区分已吸收的列构造、局部公式与仍缺全文的上界主张。
 
-## 下一步的具体问题
+游戏源码入口为 `D:\project\shapez\DecompiledSource\Game.Content.Features` 的 `ShapeLogic` 与 `ShapeOperationStack/PushPin/SwapHalves/Rotate`；来源指纹见[卷 01](../research/proofs/01-foundations.md#s01-09-h18)。具体 Mod 仍须核对操作规则，不能只替换 n/H。
 
-优先寻找比完整状态目录更紧凑、仍保持覆盖的合成分解。固定偶数参数已有有限搜索保证，但它不提供实用复杂度。需要研究级联或 rank 时，以下问题仍须独立证明。
+后续证明直接更新对应参考卷，稳定章节锚点保持不变；[来源映射](../research/sources.json)保留旧文件定位。摘要、PPT 与工程状态分别同步。
 
-- **重复结算**：[同列复用](reused-column-cascade.md)已给出固定八象限、H=6k−1的任意有限轮构造。四象限已被K定理排除，继续研究六象限能达到哪些轮数，以及更低准备高度；此结论不是最终目标的最少总体加工数。
-- **rank 下界**：先定义到底计数顶针、顶破、交换后的顶破，还是某种阶段切换，并约定制造树的其他支路是否计入。展示一条含三次操作的路径只给出上界；要证明最少需要三次，必须排除全部更低代价路径。
-- **强制工序**：[T₂的全局P→S→P下界](t2-forced-interleaving.md)已推广为[每个k≥1的完整P S^k P构造](forced-middle-stack-word.md)，k枚新料全部必须在两次Pin之间加入。另有[完整P S^k构造](forced-stack-word.md)，对每个偶数n≥4、k≥1锁定一次Pin后的全部k次单层Stack，前置Stack不能补偿。[指定序列重排](forced-sequence-obstruction.md)否定了四象限任意高度的强顺序版本，但可能增加一次单层Stack，不能用于否定最短总步数版本；允许象限数随序列增加的原命题仍开放。六象限任意有限D/L时钟的紧列族最终均有零尾Pin来源，不能证明全局阶段必要。[推广障碍与完整计数](tail-sequence-extension.md)证明T₂抬高r≥2层的可行Pin数没有空档，恰为2至r+2。T₃最短词为[PSPP](t3-forced-order.md)，另有四象限十一层目标E的[PPP全局最短词](forced-initial-pin-block.md)。任意长度首段及任意多个Stack窗口的组合仍未解决。
-- **条件化约化**：寻找足以保证堆叠约化、稳定性或逆向唯一性的结构条件，并给出闭包范围。保留原始单次输出，不能把它直接替换为反复结算的最终稳定态。
-
-这些方向不要求先枚举所有图形。交付一个明确的构造族、下界不变量或限制条件，并写清尚未排除的其他路径，比仅列更多实例更接近覆盖性证明。
-
-## 模型与证据边界
-
-使用 n 表示象限数、H 表示制造全过程的层数上限。基础输入是任意不含晶体的单层图形；N、C、P 分别表示普通形状、晶体和顶针。R 是合法操作可达集合；K 的定义见上述堆叠文档，一般范围不能预先假设 R ⊆ K。最终成品高度较低，不表示准备过程可以在同样低的层数上限下完成。
-
-无限构造族、六象限五层及原八象限八层构造均依据参数化源码规则人工推导，未运行游戏、Mod或通用仿真验证。一般有限搜索保证采用偶数n≥2、H≥2；H=1已由不使用Pin的单层构造覆盖，Python配置仍要求H≥2。奇数象限暂不研究。任意有限次数才稳定已有参数化构造；八象限已有随高度增长的无界轮数构造，四/六象限的轮数边界、rank严格最小性及强制任意工序仍是待证事项。
-
-游戏源码位于 `D:\project\shapez\DecompiledSource\Game.Content.Features`。优先定位 `ShapeLogic.BuildGroups/SplitGroupIntoKeepAndVanish/SimulateFallDownPhysics/Collapse` 和 `ShapeOperationStack/PushPin/SwapHalves/Rotate`；方法核对范围与程序集指纹见[来源记录](../4q5l/coverage-research.md#8-来源及核对范围)。采用具体 Mod 时须另核对旋转粒度、切割与层数参数，不能只改 n、H 就声称与该 Mod 一致。
-
-群文件入口为[本机阅读索引](../data/reading-index.md)，原件在 `../data/group_files/`。`data/` 由 Git 忽略；新克隆缺少原件时应注明，下载方式见[总目录](../README.md)。现有理论正文已写出可独立阅读的构造和矩阵，群聊截图只作补充来源。
-
-## 当前研究顺序
-
-当前以完整目标的少数制造流程为目标，角和循环次数作为内部参数。4q5l已统一双半形起点，并证明存在必须一次尾Pin的整图，r/m角ROM已生产编译；6q5l递归脚手架合并原两列角并覆盖多晶体列环，尚未证明全覆盖。四象限任意层S列、半边及零尾Pin来源理论已闭合，后续接入参数制造流程；继续研究六象限无法固定方向剥离的半形及复杂Stack尾部；逐项证明覆盖后再替换旧工序，最后统计元件并走线。游戏实现继续时序复用，独立组合判断并行。
-
-新结果写入本目录专题文档，并更新本页入口；每个结果附参数、操作前提、逐步论证和证据类型。具体机器适配及运行验证由用户另行安排。
-
-可直接给新线程的任务：
-
-> 先读whole-shape-synthesis、column-construction-complete、zero-pin-source-closure及scaffold-halves。4q5l是一套完整参数主程序，按是否必须尾Pin分两个非空整图集合；6q5l递归脚手架已合并原两列角并覆盖多晶体列环，但完整少类分解仍缺。4q任意层S列与半边理论已闭合，接下来衔接Python；6q无法固定方向剥离的半形和复杂Stack尾部仍待解决；不把局部角/参数个数当整图类数，不凭重命名宣称电路缩小。
-
-[返回总目录](../README.md)
+[研究总入口](../research/README.md) · [返回总目录](../README.md)

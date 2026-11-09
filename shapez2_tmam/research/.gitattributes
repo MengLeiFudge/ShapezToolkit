@@ -1,0 +1,4 @@
+# 导出演示为二进制文件，保留字体流、ZIP内容及原始字节。
+*.pdf binary
+*.pptx binary
+*.png binary
