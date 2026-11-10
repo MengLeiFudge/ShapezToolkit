@@ -4,17 +4,17 @@
 
 ## 先看这三份
 
-1. [论文式正文](TMAM研究.md)：定义、主定理、代表构造、强制工序边界和工程状态。
-2. [演示文稿](TMAM研究.pptx)：43 页、16:9、格子图和表格均为可编辑对象；PowerPoint 备注包含证明要点与来源。
-3. [同版 PDF](TMAM研究.pdf)：适合连续阅读和打印；[43 页总览图](overview.png)可用于快速定位章节。
+1. [论文式正文 PDF](TMAM研究.pdf)：A4 连续排版，包含封面、目录、正文、表格、代码块、页眉和页码，适合阅读和打印。
+2. [论文正文 Markdown](TMAM研究.md)：PDF 的文字源，便于检索和后续修改。
+3. [九卷参考证明](#九卷参考证明)：完整保留逐行构造、反例、工程记录和来源映射。
 
-演示与 PDF 均由 [slides.json](slides.json) 和 [build_presentation.py](build_presentation.py) 生成。修改讲稿时先改 `slides.json`，再运行：
+PDF 由 [build_paper_pdf.py](build_paper_pdf.py) 从 `TMAM研究.md` 生成：
 
 ```bash
-PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/research/build_presentation.py
+PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/research/build_paper_pdf.py
 ```
 
-依赖为 `python-pptx 1.0.2`、`reportlab 5.1.0`；示例路径是本机隔离安装目录。其他环境可安装到自己的 Python 环境后直接运行。中文字体默认读取 Windows 微软雅黑；可用 `--font`、`--bold-font` 指定支持中文的 TrueType 字体。该命令只排版文档。
+依赖为 `reportlab 5.1.0`；中文字体默认读取 Windows 微软雅黑，也可在脚本中更换字体路径。该命令只排版文档，不运行游戏、物理模拟、全量枚举或测试。
 
 ## 结论导航
 
@@ -43,7 +43,7 @@ PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/research/build_presen
 
 134 篇专题已合并为 9 卷，原专题从工作目录移入本机 `.codex/trash/tmam-paper/` 归档；Git 历史也保留迁移前全文。现有 Markdown 链接已经指向新卷及对应章节。蓝图内的旧 `proof` 字符串作为历史来源标识保留，可由 `sources.json` 解析。
 
-后续完整证明直接维护参考卷；论文正文负责连贯论述，`slides.json` 负责演示要点与讲者备注。修改结论时同步对应摘要，不再恢复零散专题副本。`sources.json` 中 SHA-256 标识迁移前原件，不是后续编辑后的卷校验值。
+后续完整证明直接维护参考卷；论文正文负责连贯论述，`build_paper_pdf.py` 负责从正文重新排版。修改结论时同步正文和对应参考卷，不再恢复零散专题副本。
 
 ## 证据边界
 

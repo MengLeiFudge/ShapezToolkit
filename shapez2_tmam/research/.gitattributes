@@ -1,4 +1,2 @@
-# 导出演示为二进制文件，保留字体流、ZIP内容及原始字节。
+# PDF包含嵌入字体流，按二进制文件处理。
 *.pdf binary
-*.pptx binary
-*.png binary
