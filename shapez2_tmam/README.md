@@ -14,7 +14,7 @@
 
 ## 目录结构
 
-- `theory/`：四篇理论论文的 Markdown 正文。
+- `theory/`：理论论文及附录的 Markdown 正文。
 - `papers/`：论文 PDF、范围入口和 PDF 生成器。
 - `proofs/`：九卷完整证明与来源映射。
 - `synthesis/`：Python 合成模型和制造证书。
