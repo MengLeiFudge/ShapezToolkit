@@ -1,6 +1,6 @@
 # 二代 TMAM：理论、构造与电路
 
-先看[论文式正文 PDF](research/TMAM研究.pdf)。PDF与[论文正文 Markdown](research/TMAM研究.md)内容一致；完整证明收拢为 [九卷参考资料](research/README.md)。[论文式正文](research/TMAM研究.md)按“模型 → 不变量 → 覆盖 → 构造 → 下界 → 电路”组织；完整证明收拢为 [九卷参考资料](research/README.md)。
+先看[四篇理论论文](research/README.md#理论论文)。总入口见[理论论文集索引](research/TMAM研究.md)；完整证明收拢为[九卷参考资料](research/README.md#九卷参考证明)。[论文式正文](research/TMAM研究.md)按“模型 → 不变量 → 覆盖 → 构造 → 下界 → 电路”组织；完整证明收拢为 [九卷参考资料](research/README.md)。
 
 ## 按范围阅读
 

@@ -1,6 +1,7 @@
 """将 TMAM研究.md 排版为论文式 A4 PDF，不执行游戏模型。"""
 from __future__ import annotations
 
+import argparse
 import html
 import re
 from pathlib import Path
@@ -99,9 +100,9 @@ class PaperDocTemplate(BaseDocTemplate):
             canvas.line(20 * mm, PAGE_H - 13 * mm, PAGE_W - 20 * mm, PAGE_H - 13 * mm)
             canvas.setFont(FONT, 8)
             canvas.setFillColor(MUTED)
-            canvas.drawString(20 * mm, PAGE_H - 10 * mm, "Shapez 2 TMAM｜理论、构造与电路")
+            canvas.drawString(20 * mm, PAGE_H - 10 * mm, "Shapez 2 TMAM｜理论证明")
             canvas.drawRightString(PAGE_W - 20 * mm, 10 * mm, f"{doc.page}")
-            canvas.drawString(20 * mm, 10 * mm, "研究论文式总览｜基于源码静态核对与人工证明")
+            canvas.drawString(20 * mm, 10 * mm, "理论论文｜基于操作模型与人工证明")
         canvas.restoreState()
 
     def afterFlowable(self, flowable) -> None:
@@ -282,36 +283,40 @@ def parse_markdown(text: str, styles: dict[str, ParagraphStyle]):
     return story
 
 
-def build() -> None:
+def build(source: Path = SOURCE, output: Path = OUTPUT) -> None:
     register_fonts()
     styles = make_styles()
-    source = SOURCE.read_text(encoding="utf-8")
-    title_match = re.search(r"^#\s+(.+)$", source, re.MULTILINE)
+    source_text = source.read_text(encoding="utf-8")
+    title_match = re.search(r"^#\s+(.+)$", source_text, re.MULTILINE)
     title = title_match.group(1).strip() if title_match else "Shapez 2 TMAM"
-    doc = PaperDocTemplate(str(OUTPUT), styles)
+    doc = PaperDocTemplate(str(output.resolve()), styles)
     toc = TableOfContents()
     toc.levelStyles = [styles["TOC0"], styles["TOC1"]]
     story = [
         Spacer(1, 34 * mm),
         Paragraph(inline(title), styles["PaperTitle"]),
-        Paragraph("研究论文式总览｜从可制作性证明到可复用电路", styles["PaperSubtitle"]),
+        Paragraph("理论论文集｜模型、构造与证明", styles["PaperSubtitle"]),
         Spacer(1, 7 * mm),
         HRFlowable(width="55%", thickness=1.2, color=TEAL, hAlign="CENTER"),
         Spacer(1, 8 * mm),
         Paragraph("Shapez 2 TMAM", styles["PaperSubtitle"]),
-        Paragraph("当前仓库证明汇总 · 仅基于源码静态核对与人工证明", styles["PaperSmall"]),
+        Paragraph("Shapez 2 TMAM · 理论证明整理版", styles["PaperSmall"]),
         Spacer(1, 26 * mm),
         Paragraph("阅读说明", styles["PaperH2"]),
-        Paragraph("本文是证明内容的连续阅读入口。逐行构造、反例和工程记录保留在九卷参考资料中；理论完备性、实用复杂度和具体存档验收始终分开。", styles["PaperBody"]),
+        Paragraph("本文只保留理论定义、定理、构造和证明。操作实现、程序、电路、蓝图和外部资料不属于本论文正文。", styles["PaperBody"]),
         PageBreak(),
         Paragraph("目录", styles["TOCHeading"]),
         toc,
         PageBreak(),
     ]
-    story.extend(parse_markdown(source, styles))
+    story.extend(parse_markdown(source_text, styles))
     doc.multiBuild(story)
-    print(f"已生成论文式PDF：{OUTPUT}，来源正文：{SOURCE}")
+    print(f"已生成论文式PDF：{output}，来源正文：{source}")
 
 
 if __name__ == "__main__":
-    build()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", type=Path, default=SOURCE)
+    parser.add_argument("--output", type=Path, default=OUTPUT)
+    args = parser.parse_args()
+    build(args.source, args.output)

@@ -2,19 +2,22 @@
 
 这里是 Shapez 2 TMAM 理论、构造和电路资料的统一入口。正文按论文顺序阅读，参考卷保留完整证明。
 
-## 先看这三份
+## 理论论文
 
-1. [论文式正文 PDF](TMAM研究.pdf)：A4 连续排版，包含封面、目录、正文、表格、代码块、页眉和页码，适合阅读和打印。
-2. [论文正文 Markdown](TMAM研究.md)：PDF 的文字源，便于检索和后续修改。
-3. [九卷参考证明](#九卷参考证明)：完整保留逐行构造、反例、工程记录和来源映射。
+四篇论文均为 A4 连续排版，正文包含定理、构造、证明和适用边界；不混入 Python、电路、蓝图、建筑数量或外部资料。
 
-PDF 由 [build_paper_pdf.py](build_paper_pdf.py) 从 `TMAM研究.md` 生成：
+1. [理论 I：模型、物理结算与列内不变量](TMAM理论I-模型与不变量.pdf)
+2. [理论 II：四象限五层的完整合成](TMAM理论II-四象限五层合成.pdf)
+3. [理论 III：一般偶数象限的列构造与循环支撑](TMAM理论III-一般偶数象限构造.pdf)
+4. [理论 IV：重复下落与强制工序](TMAM理论IV-级联与强制工序.pdf)
+
+论文正文源文件位于 [theory/](../theory/)；使用 [build_paper_pdf.py](build_paper_pdf.py) 重新排版单篇：
 
 ```bash
-PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/research/build_paper_pdf.py
+PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/research/build_paper_pdf.py --source shapez2_tmam/theory/02-four-quadrants.md --output shapez2_tmam/research/TMAM理论II-四象限五层合成.pdf
 ```
 
-依赖为 `reportlab 5.1.0`；中文字体默认读取 Windows 微软雅黑，也可在脚本中更换字体路径。该命令只排版文档，不运行游戏、物理模拟、全量枚举或测试。
+依赖为 `reportlab 5.1.0`；中文字体默认读取 Windows 微软雅黑。该命令只排版理论正文。
 
 ## 结论导航
 
@@ -41,7 +44,7 @@ PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/research/build_paper_
 
 ## 收拢策略
 
-134 篇专题已合并为 9 卷，原专题从工作目录移入本机 `.codex/trash/tmam-paper/` 归档；Git 历史也保留迁移前全文。现有 Markdown 链接已经指向新卷及对应章节。蓝图内的旧 `proof` 字符串作为历史来源标识保留，可由 `sources.json` 解析。
+134 篇专题已合并为 9 卷，原专题从工作目录移入本机 `.codex/trash/tmam-paper/` 归档；Git 历史也保留迁移前全文。四篇理论论文从这些证明中按定理依赖拆出。现有 Markdown 链接已经指向新卷及对应章节。蓝图内的旧 `proof` 字符串作为历史来源标识保留，可由 `sources.json` 解析。
 
 后续完整证明直接维护参考卷；论文正文负责连贯论述，`build_paper_pdf.py` 负责从正文重新排版。修改结论时同步正文和对应参考卷，不再恢复零散专题副本。
 
