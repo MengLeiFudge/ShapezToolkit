@@ -456,4 +456,4 @@ crcrcrcrcrcrcrcrcrcrcrcrcrcrcrcrcrcr
 
 ## 依据
 
-[级联构造证明](../../research/proofs/05-cascades.md#s05-01)。固定配方及中间产物由本地模型导出，未在游戏或Mod中验证。
+[级联构造证明](../../proofs/05-cascades.md#s05-01)。固定配方及中间产物由本地模型导出，未在游戏或Mod中验证。

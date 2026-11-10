@@ -14,7 +14,7 @@
 论文正文源文件位于 [theory/](../theory/)；使用 [build_paper_pdf.py](build_paper_pdf.py) 重新排版单篇：
 
 ```bash
-PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/research/build_paper_pdf.py --source shapez2_tmam/theory/02-four-quadrants.md --output shapez2_tmam/research/TMAM理论II-四象限五层合成.pdf
+PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/papers/build_paper_pdf.py --source shapez2_tmam/theory/02-four-quadrants.md --output shapez2_tmam/papers/TMAM理论II-四象限五层合成.pdf
 ```
 
 依赖为 `reportlab 5.1.0`；中文字体默认读取 Windows 微软雅黑。该命令只排版理论正文。
@@ -23,24 +23,24 @@ PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/research/build_paper_
 
 | 范围 | 当前结论 | 入口 |
 |---|---|---|
-| 4 象限 5 层 | 完整有限合成与覆盖证明；整图按零尾 Pin / 必须尾 Pin 两类共用主程序 | [论文第 4 节](TMAM研究.md#4-四象限五层完整覆盖定理) |
-| 6 象限 5 层 | 保留真实操作输出的精确有限闭包完备；`4^30−1` 是状态上界，不是实用电路 | [论文第 5 节](TMAM研究.md#5-六象限五层完备但不实用的基线) |
-| 4 象限任意高度 | `R⊆K`、完整 S 列与半形判据、零尾 Pin 来源闭包已证；程序接入仍未完成 | [论文第 6 节](TMAM研究.md#6-一般偶数象限与任意高度) |
-| 偶数象限任意高度 | 列级构造、级联族、若干强制词族已证；任意指定交替序列仍未证明或证伪 | [论文第 7 节](TMAM研究.md#7-已证的强制工序与原命题边界) |
+| 4 象限 5 层 | 完整有限合成与覆盖证明；整图按零尾 Pin / 必须尾 Pin 两类共用主程序 | [论文第 4 节](TMAM理论II-四象限五层合成.pdf) |
+| 6 象限 5 层 | 保留真实操作输出的精确有限闭包完备；`4^30−1` 是状态上界，不是实用电路 | [论文第 5 节](TMAM理论III-一般偶数象限构造.pdf) |
+| 4 象限任意高度 | `R⊆K`、完整 S 列与半形判据、零尾 Pin 来源闭包已证；程序接入仍未完成 | [论文第 6 节](TMAM理论III-一般偶数象限构造.pdf) |
+| 偶数象限任意高度 | 列级构造、级联族、若干强制词族已证；任意指定交替序列仍未证明或证伪 | [论文第 7 节](TMAM理论IV-级联与强制工序.pdf) |
 
 ## 九卷参考证明
 
-参考卷是按主题合并的完整正文。每个原文件的标题、原始路径、SHA-256 和章节锚点都记录在 [sources.json](sources.json)；正文中的 `sXX-YY` 锚点用于从旧引用定位到合并卷。
+参考卷是按主题合并的完整正文。每个原文件的标题、原始路径、SHA-256 和章节锚点都记录在 [sources.json](../proofs/sources.json)；正文中的 `sXX-YY` 锚点用于从旧引用定位到合并卷。
 
-1. [模型、不变量与物理闭包](proofs/01-foundations.md)
-2. [四象限的完整合成与来源判定](proofs/02-four-quadrants.md)
-3. [六象限与一般偶数象限构造](proofs/03-general-construction.md)
-4. [堆叠约化与上料构造](proofs/04-stacking.md)
-5. [重复下落与空间构造](proofs/05-cascades.md)
-6. [全局强制工序与精确下界](proofs/06-forced-words.md)
-7. [顶破约化与候选排除](proofs/07-reductions.md)
-8. [时序电路、程序与实现记录](proofs/08-circuits.md)
-9. [Mari 与外部研究记录](proofs/09-sources.md)
+1. [模型、不变量与物理闭包](../proofs/01-foundations.md)
+2. [四象限的完整合成与来源判定](../proofs/02-four-quadrants.md)
+3. [六象限与一般偶数象限构造](../proofs/03-general-construction.md)
+4. [堆叠约化与上料构造](../proofs/04-stacking.md)
+5. [重复下落与空间构造](../proofs/05-cascades.md)
+6. [全局强制工序与精确下界](../proofs/06-forced-words.md)
+7. [顶破约化与候选排除](../proofs/07-reductions.md)
+8. [时序电路、程序与实现记录](../proofs/08-circuits.md)
+9. [Mari 与外部研究记录](../proofs/09-sources.md)
 
 ## 收拢策略
 

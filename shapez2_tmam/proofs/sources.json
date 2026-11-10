@@ -2,47 +2,47 @@
   "source_count": 134,
   "volumes": [
     {
-      "file": "proofs/01-foundations.md",
+      "file": "01-foundations.md",
       "title": "模型、不变量与物理闭包",
       "count": 19
     },
     {
-      "file": "proofs/02-four-quadrants.md",
+      "file": "02-four-quadrants.md",
       "title": "四象限的完整合成与来源判定",
       "count": 15
     },
     {
-      "file": "proofs/03-general-construction.md",
+      "file": "03-general-construction.md",
       "title": "六象限与一般偶数象限构造",
       "count": 8
     },
     {
-      "file": "proofs/04-stacking.md",
+      "file": "04-stacking.md",
       "title": "堆叠约化与上料构造",
       "count": 20
     },
     {
-      "file": "proofs/05-cascades.md",
+      "file": "05-cascades.md",
       "title": "重复下落与空间构造",
       "count": 4
     },
     {
-      "file": "proofs/06-forced-words.md",
+      "file": "06-forced-words.md",
       "title": "全局强制工序与精确下界",
       "count": 11
     },
     {
-      "file": "proofs/07-reductions.md",
+      "file": "07-reductions.md",
       "title": "顶破约化与候选排除",
       "count": 13
     },
     {
-      "file": "proofs/08-circuits.md",
+      "file": "08-circuits.md",
       "title": "时序电路、程序与实现记录",
       "count": 39
     },
     {
-      "file": "proofs/09-sources.md",
+      "file": "09-sources.md",
       "title": "Mari与外部研究记录",
       "count": 5
     }
@@ -51,7 +51,7 @@
     {
       "id": "01-01",
       "original": "general/column-invariants.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-01",
       "title": "通用列内不变量与顶针位置约束",
       "sha256": "d84a85262812442df363cc3bd7ce8b17f4a25f233f6a105a8d6353902db16455",
@@ -70,7 +70,7 @@
     {
       "id": "01-02",
       "original": "general/physics-scan.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-02",
       "title": "单次物理结算的队列与列顶扫描",
       "sha256": "d356f765e0e892e80dcc08770772f8fa328dd13ea15be5a616b0d19f87511984",
@@ -88,7 +88,7 @@
     {
       "id": "01-03",
       "original": "general/general-model.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-03",
       "title": "任意层数与象限数：可制作但不稳定的构造",
       "sha256": "5f804d99f528ba31a06bfa0be570293b0c1a957ec0e5980b2bd9dac2d02d2842",
@@ -107,7 +107,7 @@
     {
       "id": "01-04",
       "original": "general/wide-half-loops.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-04",
       "title": "一般参数：三列以上半形的悬空环与不稳定输出族",
       "sha256": "3a2cf2b442725031344b5da909fcd36c4f02668c5f184e82e783d3497f59696f",
@@ -124,7 +124,7 @@
     {
       "id": "01-05",
       "original": "general/first-pin-support.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-05",
       "title": "四象限任意层：交换后第一次顶针保持 K",
       "sha256": "8bc76734bd4dda9abec30ced04565a9f499354cf0cbe0adbc15d99fd1b85eb15",
@@ -144,7 +144,7 @@
     {
       "id": "01-06",
       "original": "general/four-quadrant-tail-support.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-06",
       "title": "四象限任意层：交换后的整个顶针／堆叠尾部保持 K",
       "sha256": "3e4322268ef5f3dcd1ab8f0ee25ea18ccbf4f533086edf5817795c9067f2a667",
@@ -162,7 +162,7 @@
     {
       "id": "01-07",
       "original": "general/stack-progress.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-07",
       "title": "一般参数下的堆叠进展量与线性尾部界",
       "sha256": "4d5b6fea296d0732bf0db7189f294c802db32f2ddcbe8705a9a937d59250e383",
@@ -182,7 +182,7 @@
     {
       "id": "01-08",
       "original": "general/pin-clock-prefix.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-08",
       "title": "Pin计数以下的普通材料前缀与可省的高次数尾部",
       "sha256": "730c48af94d372db13bdf5e15ec8bcd3efc14cbaf8933e08bc98cccefc280663",
@@ -208,7 +208,7 @@
     {
       "id": "01-09",
       "original": "4q5l/coverage-research.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-09",
       "title": "四象限五层图形的覆盖性研究",
       "sha256": "36bf6e5c9a6fd0cc7960ec1def2c17286e7b375b91fd9546d8fda2be8a9806be",
@@ -237,7 +237,7 @@
     {
       "id": "01-10",
       "original": "4q5l/column-theory.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-10",
       "title": "四象限五层：独立单列与顶针逆向",
       "sha256": "01dfd3cd14fea561ed1fb5a446b31381e202a56d07762329dda544176a7c38e6",
@@ -256,7 +256,7 @@
     {
       "id": "01-11",
       "original": "4q5l/stacking-proof.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-11",
       "title": "堆叠约化：支撑不变量、精确判据与适用边界",
       "sha256": "7319c701fd2f92c31c2c969c8961377d24cf207d4d5846317174b71eb1f5eb9b",
@@ -278,7 +278,7 @@
     {
       "id": "01-12",
       "original": "4q5l/support-closure.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-12",
       "title": "四象限五层中，合法加工保持 K 支撑性质",
       "sha256": "8be36c5000e7ec41e0d06343a35d11b211efd3cf0f104c3ee3a73f87ea342484",
@@ -299,7 +299,7 @@
     {
       "id": "01-13",
       "original": "4q5l/pin-inverse.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-13",
       "title": "顶破、碎晶与下落的完整顶针逆像",
       "sha256": "df00c9f0e69d70ad1cf45e5c458d5bf614a1c3b72a263b73b94fba2b4c85da66",
@@ -320,7 +320,7 @@
     {
       "id": "01-14",
       "original": "4q5l/crystal-boundary.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-14",
       "title": "四列晶体的顶边连通扫描",
       "sha256": "2eabaceaff86256192ee448c852411354107d6deba818abcf99589fd9af61a06",
@@ -335,7 +335,7 @@
     {
       "id": "01-15",
       "original": "4q5l/pin-grounded.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-15",
       "title": "顶针静止格等于地面可达格",
       "sha256": "c5a4d1aca7b0e3afd91115a6c92088149d1b26c468c67fb2e54e17eacdddecce",
@@ -349,7 +349,7 @@
     {
       "id": "01-16",
       "original": "4q5l/pin-image-exact.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-16",
       "title": "顶针像：静止集合补全后的充要判据",
       "sha256": "fdf60f90fd5e01e6214410f83e372ede934dc7bb0de0e317d1f7ce887a84c9ff",
@@ -365,7 +365,7 @@
     {
       "id": "01-17",
       "original": "4q5l/support-reachability.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-17",
       "title": "K支撑类的一次格位洪泛",
       "sha256": "cef1af9cccecf2631047851548cc9f461351183497861c0525d6a24125f00f59",
@@ -381,7 +381,7 @@
     {
       "id": "01-18",
       "original": "4q5l/support-row-scan.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-18",
       "title": "列A网格的十次行闭包",
       "sha256": "b722d3c02539ccfe5042347297dacd2a6300404c4fa9c2fac59f7ec8101937d1",
@@ -398,7 +398,7 @@
     {
       "id": "01-19",
       "original": "4q5l/half-row-stability.md",
-      "volume": "research/proofs/01-foundations.md",
+      "volume": "proofs/01-foundations.md",
       "anchor": "s01-19",
       "title": "两列半形的按层稳定性判据",
       "sha256": "a947fcb303056eab9e02894cd56238fd8b1450609e8b440ed75f9b72f487ec0a",
@@ -414,7 +414,7 @@
     {
       "id": "02-01",
       "original": "4q5l/synthesis.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-01",
       "title": "四象限五层的统一合成算法与覆盖定理",
       "sha256": "44dc1809fb9f8f3e54e76731df9c300b93be98cb62cc29dd6f9057ac48a4706b",
@@ -439,7 +439,7 @@
     {
       "id": "02-02",
       "original": "4q5l/half-closure.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-02",
       "title": "全部两列半形的有限构造判据",
       "sha256": "32677a100d74d62310f4fdcce2d287f1e75db7b6a935124b3279a32804929653",
@@ -464,7 +464,7 @@
     {
       "id": "02-03",
       "original": "4q5l/corner-synthesis.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-03",
       "title": "四象限五层：逐列角构造与半形的局部充要条件",
       "sha256": "3d10597bb3cd7c53aa8da728b9fa37811bc91764e1b4ecb370b0aa8e48fecb58",
@@ -484,7 +484,7 @@
     {
       "id": "02-04",
       "original": "4q5l/compact-synthesis.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-04",
       "title": "面向电路的堆叠压缩与尾部标准化",
       "sha256": "7eae8b6b069d20b2cebae3d7a5230ccd9366a64ec1a986c8d94c53a8d48ddf92",
@@ -507,7 +507,7 @@
     {
       "id": "02-05",
       "original": "4q5l/compact-inverse.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-05",
       "title": "半切与顶针逆像的压缩，以及一次半切的制造证书",
       "sha256": "62d8978c6a53f0bcfe22c5a50305408d6ad8bc03ca5c36feba70b56a67affc54",
@@ -526,7 +526,7 @@
     {
       "id": "02-06",
       "original": "4q5l/tail-solver.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-06",
       "title": "四象限五层：无需半形目录的完整逆推",
       "sha256": "3fd95e5514a5d3b2f217008f2d1e7f069d754dc70c4d7f7c127820143426a362",
@@ -545,7 +545,7 @@
     {
       "id": "02-07",
       "original": "4q5l/three-pin-tail.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-07",
       "title": "四次尾部Pin可以改写为A→S",
       "sha256": "b45c030be411653a7978fd4fed8427c07078449b5b00138f16481526af48e1b4",
@@ -564,7 +564,7 @@
     {
       "id": "02-08",
       "original": "4q5l/necessary-tail-pin.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-08",
       "title": "四象限五层：确实存在不能省去尾部顶针的完整目标",
       "sha256": "7bbfbf74aa36b7ede045d3cf0cd5b35087830938a2b26231b72971c0a62f35fd",
@@ -581,7 +581,7 @@
     {
       "id": "02-09",
       "original": "4q5l/prefix-closure.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-09",
       "title": "A→S前缀的强制闭包",
       "sha256": "3e7dc4a19e96d9b4506d84aeac403005e68e298089fe2cf11cb0f72a76454ddb",
@@ -597,7 +597,7 @@
     {
       "id": "02-10",
       "original": "4q5l/pin-barriers.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-10",
       "title": "保留晶体屏障与顶针候选界",
       "sha256": "71878b5f15225182dec9b5d52059775a353032076925af6faf6e7e2a90f7f7e8",
@@ -613,7 +613,7 @@
     {
       "id": "02-11",
       "original": "general/column-construction-complete.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-11",
       "title": "四象限任意高度：带普通支柱列的完整构造",
       "sha256": "fe297bd162092a449fbc69aabaed7498f1902ef2c6233f61690989a2d9ad76ac",
@@ -644,7 +644,7 @@
     {
       "id": "02-12",
       "original": "general/half-history-normalization.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-12",
       "title": "四象限半边：两个候选的必要性与列条件下界",
       "sha256": "516b689b2f84fe4e8afab0c2a80973ec989769f80788437ce408072016b9ad10",
@@ -671,7 +671,7 @@
     {
       "id": "02-13",
       "original": "general/half-predecessor-reduction.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-13",
       "title": "两列前态的两个候选约化",
       "sha256": "44c566f7a0a300ec1deef0689e35f23e42488b4d0ed4b985fbe02f6e66afa520",
@@ -697,7 +697,7 @@
     {
       "id": "02-14",
       "original": "general/zero-pin-source-closure.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-14",
       "title": "四象限任意高度的零尾针起点闭包",
       "sha256": "45f88c43993c4b0c491612ebd5b3f0cf00866cf870d0e6bd1f7230bb2b153404",
@@ -713,7 +713,7 @@
     {
       "id": "02-15",
       "original": "general/four-quadrant-release.md",
-      "volume": "research/proofs/02-four-quadrants.md",
+      "volume": "proofs/02-four-quadrants.md",
       "anchor": "s02-15",
       "title": "四象限任意层：直接释放构造的覆盖边界",
       "sha256": "e1728ea02913080c12d885afc8e0e847d386b4aff6c1f571de452b8594dbb047",
@@ -729,7 +729,7 @@
     {
       "id": "03-01",
       "original": "6q5l/synthesis.md",
-      "volume": "research/proofs/03-general-construction.md",
+      "volume": "proofs/03-general-construction.md",
       "anchor": "s03-01",
       "title": "六象限五层的统一合成算法与覆盖定理",
       "sha256": "c329f13e1f261763c123cdc456b0cc723de57098efe5ef596a4d06d92f945119",
@@ -752,7 +752,7 @@
     {
       "id": "03-02",
       "original": "6q5l/non-k-half.md",
-      "volume": "research/proofs/03-general-construction.md",
+      "volume": "proofs/03-general-construction.md",
       "anchor": "s03-02",
       "title": "六象限五层：无针悬空环与不稳定的可制作输出",
       "sha256": "aa19c1dedab1398b686f2a54ea0345a0a857c4a602003891ede9786c12a38060",
@@ -769,7 +769,7 @@
     {
       "id": "03-03",
       "original": "general/angle-synthesis.md",
-      "volume": "research/proofs/03-general-construction.md",
+      "volume": "proofs/03-general-construction.md",
       "anchor": "s03-03",
       "title": "任意层角的列条件与三列释放构造",
       "sha256": "1497c38709cb2d14dbb51448167af1219f9ac26209190fd34aa332979d63d919",
@@ -792,7 +792,7 @@
     {
       "id": "03-04",
       "original": "general/scaffold-halves.md",
-      "volume": "research/proofs/03-general-construction.md",
+      "volume": "proofs/03-general-construction.md",
       "anchor": "s03-04",
       "title": "递归外侧脚手架：用同一个角程序制造多晶体列半形",
       "sha256": "2316c9dd05ea8cce637306a3d22960fb154b7b6f7f27f0ec7734d13f609383a9",
@@ -810,7 +810,7 @@
     {
       "id": "03-05",
       "original": "general/two-quadrant-synthesis.md",
-      "volume": "research/proofs/03-general-construction.md",
+      "volume": "proofs/03-general-construction.md",
       "anchor": "s03-05",
       "title": "两象限任意层数的直接合成判据",
       "sha256": "c33f0c6ffd0a0252c00e8b4d90e2cc79bdced44eaaadcf62bd8893b50fd33124",
@@ -831,7 +831,7 @@
     {
       "id": "03-06",
       "original": "general/rectangular-columns.md",
-      "volume": "research/proofs/03-general-construction.md",
+      "volume": "proofs/03-general-construction.md",
       "anchor": "s03-06",
       "title": "同色晶体层的多列并行制造",
       "sha256": "cb55d467a3e1924e33d9ce54db17a3c1999a9e4633bc5dee7f0d13921b73ce5c",
@@ -847,7 +847,7 @@
     {
       "id": "03-07",
       "original": "general/sector-replication.md",
-      "volume": "research/proofs/03-general-construction.md",
+      "volume": "proofs/03-general-construction.md",
       "anchor": "s03-07",
       "title": "相邻象限等宽复制与配方提升",
       "sha256": "3afa9379c0743dedf5990039bf1ca44ed4839ef9d7876f780089da88ac90cf47",
@@ -863,7 +863,7 @@
     {
       "id": "03-08",
       "original": "general/whole-shape-synthesis.md",
-      "volume": "research/proofs/03-general-construction.md",
+      "volume": "proofs/03-general-construction.md",
       "anchor": "s03-08",
       "title": "完整目标的制造流程与覆盖范围",
       "sha256": "f6ac8af2f10fda1fb101b054c1733bdb1de188cd3fed0831a1ee06557f69a517",
@@ -880,7 +880,7 @@
     {
       "id": "04-01",
       "original": "general/conditional-stacking.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-01",
       "title": "K下料的通用堆叠化简",
       "sha256": "9f99175103b1be5e142e0452e954d3ca1bed9669c4e9716128884ca4663f4dc3",
@@ -895,7 +895,7 @@
     {
       "id": "04-02",
       "original": "general/addition-components.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-02",
       "title": "按接地来源与潜在粘合扩大堆叠约化范围",
       "sha256": "2d07691d4b0e047fdb8ba02159b6e5665066b59288f2282272454154f57ef036",
@@ -916,7 +916,7 @@
     {
       "id": "04-03",
       "original": "general/grounded-barriers.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-03",
       "title": "环形象限上的接地屏障等价性",
       "sha256": "8ab3615da611002cc06227b9d9dcd799c9a8b05eab652f67938ac66365afe87d",
@@ -932,7 +932,7 @@
     {
       "id": "04-04",
       "original": "general/settled-stacking.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-04",
       "title": "一次结算后进入安全范围的堆叠约化",
       "sha256": "349210ca54e32ad42bd547bc65bd6e560f2d774e1375a5e301533b7d7aa31b9b",
@@ -947,7 +947,7 @@
     {
       "id": "04-05",
       "original": "general/protected-stack.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-05",
       "title": "受列顶保护的普通块与更大的堆叠约化范围",
       "sha256": "94b6bfd92e23cee06759352c2fd69067e11eacba84c6ed5716d26e74736d0aee",
@@ -965,7 +965,7 @@
     {
       "id": "04-06",
       "original": "general/stack-summaries.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-06",
       "title": "任意堆叠的输入摘要与原配方凭据",
       "sha256": "b33ab1318fd950567c3df4163738fdc4528e28c6043b13a11660a79590896aa1",
@@ -983,7 +983,7 @@
     {
       "id": "04-07",
       "original": "general/noncrystal-carrier.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-07",
       "title": "多块上料摘要的无晶体实体替换",
       "sha256": "5846477e221662eea9b100045c5580374b02b9a703b544d90145612310be95ee",
@@ -999,7 +999,7 @@
     {
       "id": "04-08",
       "original": "general/crystal-carrier.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-08",
       "title": "从上料摘要构造含晶体的紧凑载体",
       "sha256": "6b6fa0fc868c1772f99948851cc028d55ddc8ec13ce564201bddcb4eef262828",
@@ -1015,7 +1015,7 @@
     {
       "id": "04-09",
       "original": "general/carrier-ordering.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-09",
       "title": "同秩普通块的三着色重排",
       "sha256": "7b8bd4c3266bea2d00949af1f7ef09a188fd84d5e14d4a44708b55b6413bdfd0",
@@ -1030,7 +1030,7 @@
     {
       "id": "04-10",
       "original": "general/ordinary-stack.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-10",
       "title": "不新增针的单次堆叠：任意下料的直接构造",
       "sha256": "3c23ebcbc4bd049479c658595203f0528451a377de074262d87f189235c77013",
@@ -1045,7 +1045,7 @@
     {
       "id": "04-11",
       "original": "general/interleaved-stack.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-11",
       "title": "交错普通格与针的单次堆叠载体",
       "sha256": "415accce40762319bbb806ff83f87013dceb239dfac99dcb6e04e4495dfbae9e",
@@ -1059,7 +1059,7 @@
     {
       "id": "04-12",
       "original": "general/packed-column-stack.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-12",
       "title": "列内压紧与差分约束的单次上料",
       "sha256": "6f364410789d362eefd43f297f5839e3f88b74bcaea43ead28921558eb76f089",
@@ -1075,7 +1075,7 @@
     {
       "id": "04-13",
       "original": "general/layer-constraint-stack.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-13",
       "title": "保留针下间隙的上料层高约束",
       "sha256": "862dda6b062c4d4138869eddbd26b1b927412372c7c2fab95902314fe3cf12fe",
@@ -1094,7 +1094,7 @@
     {
       "id": "04-14",
       "original": "general/pin-tail-stack.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-14",
       "title": "单次堆叠中的针尾：列前缀上料构造",
       "sha256": "8f406ae467699d522639db9ecc7f2fa7612e0408c383461dfa8c7f11ec8f0227",
@@ -1110,7 +1110,7 @@
     {
       "id": "04-15",
       "original": "general/pin-row-segments.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-15",
       "title": "无晶体制造统一使用逐层供料与堆叠",
       "sha256": "8c9a4f8046713f9fa5149509e0c8d95e52026fbf9e6cf3118a359445bb374e6f",
@@ -1125,7 +1125,7 @@
     {
       "id": "04-16",
       "original": "general/swap-witnesses.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-16",
       "title": "交换只需半形结果与原输入凭据",
       "sha256": "7861dfa6bb030c9cc585801dcd353fe6ce6e82cc0a5084d7382e3b0075c117f4",
@@ -1139,7 +1139,7 @@
     {
       "id": "04-17",
       "original": "general/orientation-cost.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-17",
       "title": "恒等加工消除与交换凭据的用途成本",
       "sha256": "83a5742a379961c60c41f9609fa0cbcda9e6dd8f58be8dfba6446f848ed67be2",
@@ -1154,7 +1154,7 @@
     {
       "id": "04-18",
       "original": "general/recipe-orientation.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-18",
       "title": "制造树的全局朝向安排",
       "sha256": "b94114729d243b0b87fc25bd7062afd82efd8d0d465d60ba29c67c0f173f3f96",
@@ -1171,7 +1171,7 @@
     {
       "id": "04-19",
       "original": "general/recipe-slots.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-19",
       "title": "制造树的物品槽调度",
       "sha256": "4b044d998647870dacae3ba380aacb81a161baeced12a18e5fa32acb5a762202",
@@ -1187,7 +1187,7 @@
     {
       "id": "04-20",
       "original": "general/python-model.md",
-      "volume": "research/proofs/04-stacking.md",
+      "volume": "proofs/04-stacking.md",
       "anchor": "s04-20",
       "title": "偶数参数的Python模型与构造边界",
       "sha256": "7b375161994de534dda4c4db3c3006c5db4c1b89da3ab876efb9ac07a6e70f00",
@@ -1201,7 +1201,7 @@
     {
       "id": "05-01",
       "original": "general/gravity-cascade.md",
-      "volume": "research/proofs/05-cascades.md",
+      "volume": "proofs/05-cascades.md",
       "anchor": "s05-01",
       "title": "可制作图形的任意有限次重新结算级联",
       "sha256": "5cd59d849dbdacc023d632edb98cf18f707f06e4a409d9a237387cde21308e31",
@@ -1218,7 +1218,7 @@
     {
       "id": "05-02",
       "original": "general/alternating-cascade.md",
-      "volume": "research/proofs/05-cascades.md",
+      "volume": "proofs/05-cascades.md",
       "anchor": "s05-02",
       "title": "双半形交换后的三次下落及任意有限级扩展",
       "sha256": "9b879fe4d91e159d11de8664a924d7e4a42609693a94b8f089c36942c2a3f9b0",
@@ -1240,7 +1240,7 @@
     {
       "id": "05-03",
       "original": "general/cascade-space.md",
-      "volume": "research/proofs/05-cascades.md",
+      "volume": "proofs/05-cascades.md",
       "anchor": "s05-03",
       "title": "重复下落的空间界与单串船构造",
       "sha256": "c79adce844d2bce305f30e376a8d3c95118253e873ef8373ddde05501d7af0ed",
@@ -1260,7 +1260,7 @@
     {
       "id": "05-04",
       "original": "general/reused-column-cascade.md",
-      "volume": "research/proofs/05-cascades.md",
+      "volume": "proofs/05-cascades.md",
       "anchor": "s05-04",
       "title": "八象限复用同列的任意有限次下落",
       "sha256": "c3e466b88b6e35070462271cce611865907ff11537d06994ea8bb88599da0925",
@@ -1276,7 +1276,7 @@
     {
       "id": "06-01",
       "original": "general/forced-tail-order.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-01",
       "title": "交换后的强制顶针与堆叠顺序：全局交替实例与任意序列问题",
       "sha256": "38fe9c694f537a8f32fa7655587bfe0074e631778b604b839156e08bc7a5f0b7",
@@ -1297,7 +1297,7 @@
     {
       "id": "06-02",
       "original": "general/t2-one-pin-exclusion.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-02",
       "title": "T₂ 不能由任意交换起点只经一次顶针得到",
       "sha256": "9bf88099396cb6dd12565a4e1142d9e17bcf2f72867258967fdb16390f336dc7",
@@ -1319,7 +1319,7 @@
     {
       "id": "06-03",
       "original": "general/t2-forced-interleaving.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-03",
       "title": "T₂ 强制两次顶针之间堆叠：任意交换起点的排除证明",
       "sha256": "f4e231b82fad682fa643a5c18e12cd905a991bdd4f5bad567eda4fe6c16d473d",
@@ -1341,7 +1341,7 @@
     {
       "id": "06-04",
       "original": "general/t3-pin-lower-bound.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-04",
       "title": "T₃ 的最少尾部顶针数：从任意交换起点都需要三次",
       "sha256": "984c6e6380ae581848636924d499c788b2eb318737dfa13562efcd9603bc5bc8",
@@ -1362,7 +1362,7 @@
     {
       "id": "06-05",
       "original": "general/t3-forced-order.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-05",
       "title": "T₃ 的最短尾部操作词恰为 P→S→P→P",
       "sha256": "3ee40bfa6d1a5730fa8db94c2f079cff9cce6ffa9c269a30f99ab1a35f0e5279",
@@ -1380,7 +1380,7 @@
     {
       "id": "06-06",
       "original": "general/forced-stack-length.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-06",
       "title": "一次顶针之后，逐层堆叠的必要次数没有常数上界",
       "sha256": "7d146bfdf5848dfe40e0b32f00e95fb7578a612f6f0b5a09b604f4c554557705",
@@ -1399,7 +1399,7 @@
     {
       "id": "06-07",
       "original": "general/forced-stack-word.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-07",
       "title": "任意长度的完整操作词P S^k：明确目标与全局下界",
       "sha256": "626050505b78885a5162fe9710b304e67473bc5ad0d9b46512824bbe84c1985f",
@@ -1422,7 +1422,7 @@
     {
       "id": "06-08",
       "original": "general/forced-middle-stack-word.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-08",
       "title": "两次Pin之间任意长的必要Stack段",
       "sha256": "51cda2f877bb14602ead155f38d834da5ac2eec6060046c9a91df3db4b318d20",
@@ -1441,7 +1441,7 @@
     {
       "id": "06-09",
       "original": "general/forced-initial-pin-block.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-09",
       "title": "连续三次Pin的全局最短词",
       "sha256": "115f7b4df7273436c68fd114b1db6f7b1cdbfe308dd7ed8067eee0a9633b472b",
@@ -1465,7 +1465,7 @@
     {
       "id": "06-10",
       "original": "general/tail-sequence-extension.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-10",
       "title": "任意强制序列的推广障碍：开头抬升与末尾补针",
       "sha256": "3ee423f67ca45073e87ca5b798b8c231b8ab3ce6c4b47f9b65191096814166d6",
@@ -1489,7 +1489,7 @@
     {
       "id": "06-11",
       "original": "general/forced-sequence-obstruction.md",
-      "volume": "research/proofs/06-forced-words.md",
+      "volume": "proofs/06-forced-words.md",
       "anchor": "s06-11",
       "title": "四象限不能强制三次Pin逐次交替",
       "sha256": "c2f73d6d914f4dbc0e340e585b728945959b11340b8d495f388c29a387dae1c9",
@@ -1518,7 +1518,7 @@
     {
       "id": "07-01",
       "original": "general/ceiling-destruction-bound.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-01",
       "title": "四象限三次顶破的几何限制与顶盖消去",
       "sha256": "31ec4ffa0421092e49d6ac33c961476dfaf692e5323de116297822f937eaff27",
@@ -1538,7 +1538,7 @@
     {
       "id": "07-02",
       "original": "general/ddld-reduction.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-02",
       "title": "四象限DDLD尾部必有至多两次破坏的替代",
       "sha256": "862f4ed8e9735ded5ae189a0050c6f8ff31e98d512bbdde052414bca3e8a527d",
@@ -1561,7 +1561,7 @@
     {
       "id": "07-03",
       "original": "general/dl-dd-reduction.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-03",
       "title": "四象限DLᵣDD尾部可改为至多两次破坏",
       "sha256": "12965dd5ab8b2085107ad13f370eb744b66973bcd362478f46b1e1dcd62ace8e",
@@ -1578,7 +1578,7 @@
     {
       "id": "07-04",
       "original": "general/dl-dl-d-reduction.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-04",
       "title": "四象限末两次顶破的短间隔改写",
       "sha256": "851b6c1a8c45b38f5bf4a1ded39ab239422663573694143fdf9aca951409e74e",
@@ -1601,7 +1601,7 @@
     {
       "id": "07-05",
       "original": "general/single-deep-release.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-05",
       "title": "四象限唯一低处释放与一次顶破的充分条件",
       "sha256": "784852655951a000f35401f6fd88772c89e9b313ea21d2c16d626770c43e4ba4",
@@ -1624,7 +1624,7 @@
     {
       "id": "07-06",
       "original": "general/high-destruction-prefix.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-06",
       "title": "高处破坏可整体移入四象限起点准备",
       "sha256": "50cd3599eca4d005389fad4dc3b699061d66a5c53f0f50bdc6c9ce9b4b6246c7",
@@ -1641,7 +1641,7 @@
     {
       "id": "07-07",
       "original": "general/half-support-cap.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-07",
       "title": "四象限截短半形的首个支撑顶盖",
       "sha256": "00e35eb15db45969135452c7c2da80eada8969dc636416eaaaeedc7b031f0b70",
@@ -1667,7 +1667,7 @@
     {
       "id": "07-08",
       "original": "general/six-quadrant-low-source.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-08",
       "title": "六象限最低两层来源的双顶破改写",
       "sha256": "45f3c82f6366c917a2dcaee2dcedcd78bfee6e346fd20357e17a6efa667f3359",
@@ -1685,7 +1685,7 @@
     {
       "id": "07-09",
       "original": "general/capped-target-pin-elimination.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-09",
       "title": "晶体封顶目标：带半形证书的零Pin改写",
       "sha256": "cfdf145768b62936e114fc9e587e1ab9eb7d4f95b033b597079f3e4711bc4963",
@@ -1702,7 +1702,7 @@
     {
       "id": "07-10",
       "original": "general/temporary-cap-bridge.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-10",
       "title": "加宽Wₖ的两种一次Pin替代：临时顶桥与新增屋顶落点",
       "sha256": "7856d9d94cfe9b3e7b0b02b7791ce317bb3c4d9159c0dd9962588e1ab520e1ad",
@@ -1721,7 +1721,7 @@
     {
       "id": "07-11",
       "original": "general/three-tower-candidate.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-11",
       "title": "三座晶体塔的尾部构造与两次顶破替代",
       "sha256": "55b7034ecdb400091ac6ddbd65ca72b446f827e1b0561dee09a8105f3bd77a5d",
@@ -1739,7 +1739,7 @@
     {
       "id": "07-12",
       "original": "general/three-tower-fixed-source.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-12",
       "title": "三塔的两次必要上料：固定起点五步与零尾针替代",
       "sha256": "51acf936db2ada1d5a6202828f9d8761e15b58d0bf63c64d642584b9b6d4c703",
@@ -1762,7 +1762,7 @@
     {
       "id": "07-13",
       "original": "general/external-local-reductions.md",
-      "volume": "research/proofs/07-reductions.md",
+      "volume": "proofs/07-reductions.md",
       "anchor": "s07-13",
       "title": "外部TMAM研究并入本模型的局部化简",
       "sha256": "785347654de6c1456cf7a17a1b21b56ed480a7275ea59c1ee8c41e8c020d4d5b",
@@ -1780,7 +1780,7 @@
     {
       "id": "08-01",
       "original": "6q5l/recipe-processor.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-01",
       "title": "六象限五层的消费式时序回放",
       "sha256": "e6c267fc20c8f1460647e204525d87bb8fb27b62cf0fe583ec6af71463e2223c",
@@ -1794,7 +1794,7 @@
     {
       "id": "08-02",
       "original": "4q5l/automatic-half.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-02",
       "title": "标准半形的自动合成电路",
       "sha256": "b8f27d42f61445b19b69873964eb75d5be1876a1b9280cf0b215df3e0aaca975",
@@ -1814,7 +1814,7 @@
     {
       "id": "08-03",
       "original": "4q5l/balanced-rom.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-03",
       "title": "分段共享的ROM地址译码",
       "sha256": "52b61759070d3231f45881799b4b23210594bf08da0401396fe2c7f038b2bb83",
@@ -1828,7 +1828,7 @@
     {
       "id": "08-04",
       "original": "4q5l/circuit-decoding.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-04",
       "title": "原层号解码与标准半形判定电路",
       "sha256": "0956d2ecdadee40d70ee92d6ec1621f16f97004c18e392f736608f7c596b0bb8",
@@ -1846,7 +1846,7 @@
     {
       "id": "08-05",
       "original": "4q5l/clocked-control.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-05",
       "title": "四阶段控制与等深锁存",
       "sha256": "a6f986d52d4b0a1c2277b864b32a00e4a855318385c3cd4521557642c1750f1e",
@@ -1861,7 +1861,7 @@
     {
       "id": "08-06",
       "original": "4q5l/color-run-program.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-06",
       "title": "独立柱微程序的同色段结晶",
       "sha256": "1d83ab49cbb35d0fafa8ca4bfadec507dc297c3a3a244cfcc11c4e53f905e376",
@@ -1875,7 +1875,7 @@
     {
       "id": "08-07",
       "original": "4q5l/family-grounding.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-07",
       "title": "顶针来源族共用地面可达筛选",
       "sha256": "ad8c6517b1949b111fcf9490962dee374501e379061156acf773a91323b403a7",
@@ -1890,7 +1890,7 @@
     {
       "id": "08-08",
       "original": "4q5l/frame-state.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-08",
       "title": "根目标直读与末帧只保留叶端状态",
       "sha256": "59a2e2c18d8ef1c1a62ccf87e34f2bdaad6932008715785174c7aef605ee281f",
@@ -1904,7 +1904,7 @@
     {
       "id": "08-09",
       "original": "4q5l/full-tail-circuit.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-09",
       "title": "四帧完整尾部电路与成功路径制造",
       "sha256": "910792acecba9539de942b136c54cc051427a4d36ebfb6281ddffc772c69a5a7",
@@ -1922,7 +1922,7 @@
     {
       "id": "08-10",
       "original": "4q5l/grounded-tail.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-10",
       "title": "含顶针尾部必须通向地面",
       "sha256": "eed06fb472c7547a76c4e06fa6ade2372a5daa9f2cf769e0764bbd331aba0b3f",
@@ -1937,7 +1937,7 @@
     {
       "id": "08-11",
       "original": "4q5l/inactive-rom-runs.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-11",
       "title": "制造ROM直接选择下一有效行",
       "sha256": "b2397b2f1cdd639c86351d432b18258c488fe6c913f0d6712db318c334ebc487",
@@ -1952,7 +1952,7 @@
     {
       "id": "08-12",
       "original": "4q5l/integer-prefix.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-12",
       "title": "S前缀的整数高度寄存器",
       "sha256": "c51c3c60953b0183870479c7a52e81b2b799eb7ef9af29d7b02ad601688e940a",
@@ -1965,7 +1965,7 @@
     {
       "id": "08-13",
       "original": "4q5l/iterative-scanner.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-13",
       "title": "自动循环拆层器",
       "sha256": "8ffeb23abe6438692ee97c426961156c7d0fb4736f2f37d16be89fb195a9dd7a",
@@ -1980,7 +1980,7 @@
     {
       "id": "08-14",
       "original": "4q5l/local-gate-pairs.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-14",
       "title": "单消费者组合门的本地合并",
       "sha256": "0bc3412d3fd456221c57143a7a4f53b9eed600ec1f9c767416e664a9b5a7c2a9",
@@ -1994,7 +1994,7 @@
     {
       "id": "08-15",
       "original": "4q5l/maximal-cap.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-15",
       "title": "最大允许晶体顶盖的整组否定",
       "sha256": "8eeae88ac44024fb3bc16a5b7ffc583c622be253a995b86d263b6109f1b06852",
@@ -2009,7 +2009,7 @@
     {
       "id": "08-16",
       "original": "4q5l/multicycle-control.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-16",
       "title": "慢状态更新后冻结一轮",
       "sha256": "227f90a9700af3726f1b721c9cf068e18492fec40b02d035ccd6c25b01f56593",
@@ -2024,7 +2024,7 @@
     {
       "id": "08-17",
       "original": "4q5l/optional-top.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-17",
       "title": "顶针来源族共用可选顶格闭包",
       "sha256": "3f0aa635d991452e5e8bc44588c7cd1cf51d2073f7f388c15fd639c09781d9ab",
@@ -2039,7 +2039,7 @@
     {
       "id": "08-18",
       "original": "4q5l/output-cone.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-18",
       "title": "只导出公开输出所依赖的网表",
       "sha256": "d6a6e531c97fec07d013f230e3bfea8f18dbde721ca69505ad1a623edf5730fb",
@@ -2053,7 +2053,7 @@
     {
       "id": "08-19",
       "original": "4q5l/packed-circuit.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-19",
       "title": "固定常量、局部门合并与占地装箱",
       "sha256": "f77868de933be880d75a62779f83b29445b30c5e0ced1fea1b22d015c172ad11",
@@ -2068,7 +2068,7 @@
     {
       "id": "08-20",
       "original": "4q5l/packed-timing.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-20",
       "title": "按固定局部接线计算压缩版时钟",
       "sha256": "22240b564a78acfb1155e75ea02dcab1330316e167b9b07a6f45a0e8650dc85e",
@@ -2083,7 +2083,7 @@
     {
       "id": "08-21",
       "original": "4q5l/parallel-state-writes.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-21",
       "title": "互斥状态写入的并行选择",
       "sha256": "bc706cc9dbff65d305c9eec6ba5da1707a109ebaf0e2bee51ec582f40b744555",
@@ -2094,7 +2094,7 @@
     {
       "id": "08-22",
       "original": "4q5l/pin-base.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-22",
       "title": "Pin尾部的低层晶体支撑预检",
       "sha256": "ca260eda1ed44cc0f75468d04b7fa5168021234b93f5c4141492780650f9a3ae",
@@ -2110,7 +2110,7 @@
     {
       "id": "08-23",
       "original": "4q5l/pin-column-circuit.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-23",
       "title": "八位控制的顶针单列候选与自动迭代",
       "sha256": "e5b1eb16bc06deb21cef2b247f0a75333979625a8346c971305f5c7fa681750e",
@@ -2126,7 +2126,7 @@
     {
       "id": "08-24",
       "original": "4q5l/pin-cursor.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-24",
       "title": "顶针游标的整段跳过",
       "sha256": "aa70920524fb7f053cacb4a41c3aad83e1c788f8919bbabdac5561efdff7183c",
@@ -2149,7 +2149,7 @@
     {
       "id": "08-25",
       "original": "4q5l/pin-image-constraints.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-25",
       "title": "顶针逆像：在制造以前筛掉组位移矛盾",
       "sha256": "8dfc59ca0acfe5a5df31d5e3bc79030345d73035f91ade568b36b62fbb46200c",
@@ -2165,7 +2165,7 @@
     {
       "id": "08-26",
       "original": "4q5l/pin-patterns.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-26",
       "title": "顶针单列二十槽与四列前态",
       "sha256": "316077dde16e0c237c2b325b55ef206f8e3fc3d4476a69557c3ec072f793ec2c",
@@ -2180,7 +2180,7 @@
     {
       "id": "08-27",
       "original": "4q5l/pin-source-conflicts.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-27",
       "title": "晶体保留状态冲突与来源槽跳过",
       "sha256": "722ef35410027aa350bd89f11f04eaa60d7746823e00ed65d5b69b2268ffa7ef",
@@ -2198,7 +2198,7 @@
     {
       "id": "08-28",
       "original": "4q5l/recipe-registers.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-28",
       "title": "六个物品寄存器的配方流与电路回放",
       "sha256": "0fb6409869a40fc7277dd3aa1ea46a73b44d2d28600b7b8ba72aab534030d99b",
@@ -2215,7 +2215,7 @@
     {
       "id": "08-29",
       "original": "4q5l/register-circuit.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-29",
       "title": "五平台信号寄存器及三阶段写入协议",
       "sha256": "6cafad47c0f120aad6a3ab84a547926c2139d8aad5644bc0365cc6f632f14bb0",
@@ -2233,7 +2233,7 @@
     {
       "id": "08-30",
       "original": "4q5l/s-tail-circuit.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-30",
       "title": "完整的起点到纯N/P追加段",
       "sha256": "c97ebd23b2813a0961473d353a01837dd154538805a1042408a16d7ea07d0adc",
@@ -2250,7 +2250,7 @@
     {
       "id": "08-31",
       "original": "4q5l/shared-angle.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-31",
       "title": "所有半形共用两角制造程序",
       "sha256": "f07381d2eaf1edda387fdedb6c3da66dbb0b4a69b34182898e79f55ded8803e1",
@@ -2265,7 +2265,7 @@
     {
       "id": "08-32",
       "original": "4q5l/shared-append.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-32",
       "title": "叶端与父帧共用追加程序",
       "sha256": "42f569f5008ac904ddbfc509f67b2abde75b2ff36edaac94ecbc596511bc9bc3",
@@ -2279,7 +2279,7 @@
     {
       "id": "08-33",
       "original": "4q5l/shared-controls.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-33",
       "title": "相同条件共用等深控制",
       "sha256": "7aec217e1842b3511745a3e2cf4819048dc715a2e4d76455e8a6805a48ba1f6f",
@@ -2292,7 +2292,7 @@
     {
       "id": "08-34",
       "original": "4q5l/signal-timing.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-34",
       "title": "共用电路的保守传播保持期",
       "sha256": "79210bc8d61c7aedcf03553b5f08a2ef2d78074b35050dae16c5547b84aba55e",
@@ -2309,7 +2309,7 @@
     {
       "id": "08-35",
       "original": "4q5l/source-counts.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-35",
       "title": "来源列共用解码与平衡前缀计数",
       "sha256": "d5ec8a62a0a70fb09609da042ce5da9047e3adff8f69e8d3cb57951aa7b0bc43",
@@ -2325,7 +2325,7 @@
     {
       "id": "08-36",
       "original": "4q5l/tagged-goal-grid.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-36",
       "title": "递归目标的固定标签表与原生结果比较",
       "sha256": "a575819c2893d736b8ca770e9b1f1ac67ad801dc6b9aebbe33a91db6be7c4796",
@@ -2341,7 +2341,7 @@
     {
       "id": "08-37",
       "original": "4q5l/tagged-leaf.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-37",
       "title": "编号目标的起点与S叶端",
       "sha256": "c8915ae6000f7ccb96eba98387bb59fad3a0701f773010d921f7f4c14c6278bf",
@@ -2355,7 +2355,7 @@
     {
       "id": "08-38",
       "original": "4q5l/two-half-startpoint.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-38",
       "title": "双半形起点：两遍共用一份角程序",
       "sha256": "f2d44c4d29f00122b4f1e5f7635ea9ef40edcf198193d6ac39137e8a2875764a",
@@ -2371,7 +2371,7 @@
     {
       "id": "08-39",
       "original": "4q5l/valid-slot-cursor.md",
-      "volume": "research/proofs/08-circuits.md",
+      "volume": "proofs/08-circuits.md",
       "anchor": "s08-39",
       "title": "单列合法槽直接后继",
       "sha256": "3e6224a5e09ef452429de476538afd8c10ba04bda2d7887de0e9f85307c4cac1",
@@ -2387,7 +2387,7 @@
     {
       "id": "09-01",
       "original": "4q5l/mari-tmam.md",
-      "volume": "research/proofs/09-sources.md",
+      "volume": "proofs/09-sources.md",
       "anchor": "s09-01",
       "title": "Mari 的 TMAM：接线、Python 模型与覆盖性",
       "sha256": "9911a1557680750839d3bc0c78962e8d47cd1949a4d7d29a92d21c70e52351e3",
@@ -2405,7 +2405,7 @@
     {
       "id": "09-02",
       "original": "4q5l/mari-corners.md",
-      "volume": "research/proofs/09-sources.md",
+      "volume": "proofs/09-sources.md",
       "anchor": "s09-02",
       "title": "Mari 角模板表与晶体间隙约束",
       "sha256": "1d2a0120bab28801775e6f7b7b763090b8027022756f59e69aa0221e6008b611",
@@ -2420,7 +2420,7 @@
     {
       "id": "09-03",
       "original": "4q5l/mari-empty-layer.md",
-      "volume": "research/proofs/09-sources.md",
+      "volume": "proofs/09-sources.md",
       "anchor": "s09-03",
       "title": "Mari 六候选的整层空隙反例",
       "sha256": "d3630804fc69357e5f8f1f6edc43f4942e4081908d1c39e36352f41bf29fc913",
@@ -2443,7 +2443,7 @@
     {
       "id": "09-04",
       "original": "general/column-paper-assessment.md",
-      "volume": "research/proofs/09-sources.md",
+      "volume": "proofs/09-sources.md",
       "anchor": "s09-04",
       "title": "everain《列与可分形状的判定和构造》：用途与核对记录",
       "sha256": "d98d3b6b282a4cbe76024cdff670be6734ad9445282f08d3877c23423bd17d01",
@@ -2460,7 +2460,7 @@
     {
       "id": "09-05",
       "original": "general/tmam-context-extract.md",
-      "volume": "research/proofs/09-sources.md",
+      "volume": "proofs/09-sources.md",
       "anchor": "s09-05",
       "title": "TMAM 外部研究摘录：可复用算法与本项目对应",
       "sha256": "bbc63553b18971b21be3f12fdf6d59272cfc4dc0550dd2dabccc1cd8681dfff7",

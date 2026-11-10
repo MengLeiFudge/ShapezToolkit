@@ -1,6 +1,6 @@
 # 参考卷 07｜顶破约化与候选排除
 
-本卷按专题保存完整论证。原文各节保留自己的符号与层号约定；阶段性工程数据以对应记录为准。统一阅读入口为[研究讲稿](../README.md)。
+本卷按专题保存完整论证。原文各节保留自己的符号与层号约定；阶段性工程数据以对应记录为准。统一阅读入口为[研究论文与资料](../papers/README.md)。
 
 ## 本卷目录
 
@@ -1649,7 +1649,7 @@ q1低C与q2高C在第5层融合，第一份辅助分量触顶；q4高塔是另�
 
 层号从0开始，q0与q5相邻。N取Cu，P为针。A、B、C标记三座辅助塔，X为最终保留的晶体；四种字母在短代码里都使用cr。
 
-![三塔起点与目标格子图](../../general/three-tower-candidate.svg)
+![三塔起点与目标格子图](../examples/three-tower-candidate.svg)
 
 起点D：
 
@@ -1846,7 +1846,7 @@ V = ----CgCg----
 T = P-CuP-P-P-P-:P-CuP-P-P-P-:P-CuP-P-P-P-:CuCuCuCuCuCu:----P-Cu--Cu:----CuCucrCu:CrCbCb--cr--:--------P---:--------P---:--------P---:--------P---:--------P---:----CgCgCy--
 ```
 
-目标占13层，制造仍固定使用14层上限；不能把目标高度当成制造高度上限。[起点与目标格子图](../../general/three-tower-fixed-source.svg)按上述短代码绘制。
+目标占13层，制造仍固定使用14层上限；不能把目标高度当成制造高度上限。[起点与目标格子图](../examples/three-tower-fixed-source.svg)按上述短代码绘制。
 
 <a id="s07-12-h2"></a>
 
@@ -2020,7 +2020,7 @@ q2、q3、q4的列顶分别为6、5、11。因此W一次落在第12层，逐格�
 
 #### 与PinFamily的连接方式
 
-[`pin_families`](../../synthesis/inverse.py)目前固定lower后逐个顶C掩码计算物理关系；[`PinFamily.members`](../../synthesis/inverse.py)再展开NPC顶盖以寻找真实来源配方。
+[`pin_families`](../synthesis/inverse.py)目前固定lower后逐个顶C掩码计算物理关系；[`PinFamily.members`](../synthesis/inverse.py)再展开NPC顶盖以寻找真实来源配方。
 
 可共享的结果应以“同一个完整lower及其破坏集合”为键。物理失配可以否定该效果下所有掩码；物理匹配之后，仍保留每个允许掩码及NPC成员的制造分支。不能把一个可制造来源替换成同效果但尚无制造凭据的最简顶盖。
 

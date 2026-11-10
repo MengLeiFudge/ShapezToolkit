@@ -4,10 +4,10 @@
 
 | 论文 | 正文 | PDF | 内容 |
 |---|---|---|---|
-| I | [模型、物理结算与列内不变量](01-model-and-invariants.md) | [PDF](../research/TMAM理论I-模型与不变量.pdf) | 操作模型、一次结算、支撑、Q/J、不变量 |
-| II | [四象限五层的完整合成](02-four-quadrants.md) | [PDF](../research/TMAM理论II-四象限五层合成.pdf) | 半形闭包、顶针逆像、堆叠约化、完整覆盖 |
-| III | [一般偶数象限的列构造与循环支撑](03-even-constructions.md) | [PDF](../research/TMAM理论III-一般偶数象限构造.pdf) | 列充要条件、三列释放、脚手架、非 K 半形 |
-| IV | [重复下落与强制工序](04-cascades-and-forced-words.md) | [PDF](../research/TMAM理论IV-级联与强制工序.pdf) | 级联族、强制词、全局下界、未决命题 |
+| I | [模型、物理结算与列内不变量](01-model-and-invariants.md) | [PDF](../papers/TMAM理论I-模型与不变量.pdf) | 操作模型、一次结算、支撑、Q/J、不变量 |
+| II | [四象限五层的完整合成](02-four-quadrants.md) | [PDF](../papers/TMAM理论II-四象限五层合成.pdf) | 半形闭包、顶针逆像、堆叠约化、完整覆盖 |
+| III | [一般偶数象限的列构造与循环支撑](03-even-constructions.md) | [PDF](../papers/TMAM理论III-一般偶数象限构造.pdf) | 列充要条件、三列释放、脚手架、非 K 半形 |
+| IV | [重复下落与强制工序](04-cascades-and-forced-words.md) | [PDF](../papers/TMAM理论IV-级联与强制工序.pdf) | 级联族、强制词、全局下界、未决命题 |
 
 ## 阅读方法
 

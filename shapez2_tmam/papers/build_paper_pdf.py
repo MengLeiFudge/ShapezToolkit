@@ -1,4 +1,4 @@
-"""将 TMAM研究.md 排版为论文式 A4 PDF，不执行游戏模型。"""
+"""将理论 Markdown 排版为论文式 A4 PDF，不执行游戏模型。"""
 from __future__ import annotations
 
 import argparse
@@ -31,8 +31,8 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parent
-SOURCE = ROOT / "TMAM研究.md"
-OUTPUT = ROOT / "TMAM研究.pdf"
+SOURCE = ROOT.parent / "theory" / "01-model-and-invariants.md"
+OUTPUT = ROOT / "TMAM理论I-模型与不变量.pdf"
 PAGE_W, PAGE_H = A4
 NAVY = colors.HexColor("#172B40")
 TEAL = colors.HexColor("#007F78")
