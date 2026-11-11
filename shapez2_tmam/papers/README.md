@@ -18,7 +18,9 @@
 PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/papers/build_paper_pdf.py --source shapez2_tmam/theory/02-four-quadrants.md --output shapez2_tmam/papers/TMAM理论II-四象限五层合成.pdf
 ```
 
-依赖为 `reportlab 5.1.0`；中文字体默认读取 Windows 微软雅黑。该命令只排版理论正文。
+依赖为 `reportlab 5.1.0`；中文字体读取 Windows 微软雅黑，数学字形读取系统的 DejaVu Sans 常规与粗体字体。排版器对正文、公式块和目录补齐上下标及关系符号；两套字体均不包含的字符会中止导出并报告 Unicode 码位。该命令只排版理论正文。
+
+导出含数学记号的正文时，须检查所用字形均有字体覆盖，并检查 PDF 的页尺寸、文字边界和关键公式。文字提取成功不能代替字形覆盖检查。
 
 ## 结论导航
 
@@ -28,7 +30,7 @@ PYTHONPATH=/tmp/tmam-presentation-deps python shapez2_tmam/papers/build_paper_pd
 | 6 象限 5 层 | 保留真实操作输出的精确有限闭包完备；`4^30−1` 是状态上界，不是实用电路 | [论文第 5 节](TMAM理论III-一般偶数象限构造.pdf) |
 | 4 象限任意高度 | `R⊆K`、完整 S 列与半形判据、零尾 Pin 来源闭包已证；程序接入仍未完成 | [论文第 6 节](TMAM理论III-一般偶数象限构造.pdf) |
 | 6 象限任意高度 | 真实半切输出稳定；首个无向下顶破 Pin 可由至多一次单层 Stack 替代 | [附录第 7、8 节](TMAM理论IV附录-交替工序约化.pdf) |
-| 偶数象限任意高度 | 列级构造、级联族、若干强制词族已证；任意指定交替序列仍未证明或证伪 | [论文第 7 节](TMAM理论IV-级联与强制工序.pdf) |
+| 偶数象限任意高度 | 全局来源与上料窗口判据；四象限族 P S^k P P 已证，任意指定交替序列仍未证明或证伪 | [附录第 10—12 节](TMAM理论IV附录-交替工序约化.pdf) |
 
 ## 九卷参考证明
 

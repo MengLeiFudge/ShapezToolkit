@@ -25,7 +25,7 @@ from reportlab.platypus import (
     PageBreak,
     PageTemplate,
     Paragraph,
-    Preformatted,
+    XPreformatted,
     Spacer,
     Table,
 )
@@ -42,15 +42,39 @@ LINE = colors.HexColor("#CFDCE4")
 FONT = "TMAM-CJK"
 BOLD = "TMAM-CJK-Bold"
 MONO = "TMAM-CJK-Mono"
+MATH = "TMAM-Math"
+MATH_BOLD = "TMAM-Math-Bold"
 
 
 def register_fonts() -> None:
-    """注册中文字体；默认使用 Windows 微软雅黑集合的第一个字形。"""
+    """注册中文及数学字体；数学字体补齐雅黑缺少的上下标和关系符号。"""
     regular = "/mnt/c/Windows/Fonts/msyh.ttc"
     bold = "/mnt/c/Windows/Fonts/msyhbd.ttc"
     pdfmetrics.registerFont(TTFont(FONT, regular, subfontIndex=0))
     pdfmetrics.registerFont(TTFont(BOLD, bold, subfontIndex=0))
     pdfmetrics.registerFont(TTFont(MONO, regular, subfontIndex=0))
+    pdfmetrics.registerFont(TTFont(MATH, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
+    pdfmetrics.registerFont(TTFont(MATH_BOLD, "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"))
+    pdfmetrics.registerFontFamily(MATH, normal=MATH, bold=MATH_BOLD,
+                                  italic=MATH, boldItalic=MATH_BOLD)
+
+
+def math_glyphs(markup: str) -> str:
+    """为已转义文字及受控排版标记中的缺失字形补字体；不改数学记号。"""
+    base = pdfmetrics.getFont(FONT).face.charToGlyph
+    bold = pdfmetrics.getFont(BOLD).face.charToGlyph
+    math = pdfmetrics.getFont(MATH).face.charToGlyph
+    math_bold = pdfmetrics.getFont(MATH_BOLD).face.charToGlyph
+    parts = []
+    for char in markup:
+        code = ord(char)
+        if char.isspace() or code in base and code in bold:
+            parts.append(char)
+        elif code in math and code in math_bold:
+            parts.append(f'<font name="{MATH}">{char}</font>')
+        else:
+            raise ValueError(f"论文正文含无可用字形的字符 {char!r}（U+{code:04X}）")
+    return "".join(parts)
 
 
 def anchor(text: str) -> str:
@@ -74,7 +98,7 @@ def inline(text: str) -> str:
     text = re.sub(r"\[([^]]+)\]\([^)]*\)", r"\1", text)
     for index, value in enumerate(code):
         text = text.replace(f"\x00CODE{index}\x00", f'<font name="{MONO}">{value}</font>')
-    return text
+    return math_glyphs(text)
 
 
 def line_paragraph(text: str, style: ParagraphStyle) -> Paragraph:
@@ -115,7 +139,7 @@ class PaperDocTemplate(BaseDocTemplate):
         text = flowable.getPlainText()
         key = anchor(text)
         self.canv.bookmarkPage(key)
-        self.notify("TOCEntry", (level, text, self.page))
+        self.notify("TOCEntry", (level, math_glyphs(html.escape(text)), self.page))
 
 
 def make_styles() -> dict[str, ParagraphStyle]:
@@ -218,7 +242,8 @@ def parse_markdown(text: str, styles: dict[str, ParagraphStyle]):
                 index += 1
             if index < len(lines):
                 index += 1
-            story.append(Preformatted("\n".join(code_lines), styles["PaperCode"]))
+            code = math_glyphs(html.escape("\n".join(code_lines)))
+            story.append(XPreformatted(code, styles["PaperCode"]))
             continue
         heading = re.match(r"^(#{1,6})\s+(.+?)\s*#*$", line)
         if heading:
