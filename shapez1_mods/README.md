@@ -11,6 +11,7 @@
 | [mod_publish.py](mod_publish.py) | `publish_mods`：调用 QQBot 本地发布接口 |
 | `data/downloads`（本机，不上传） | 模组 ZIP，沿用 `模组名_版本.zip` |
 | `data/catalog`（本机，不上传） | 原 CSV、Excel、下载状态、当前版本与群同步结果 |
+| `data/trash`（本机，不上传） | 清理时移出的重复、旧版和明确废弃包及移动记录 |
 
 路径在 [common/settings.py](../common/settings.py) 的 `MOD_DIR` 中设置。
 
@@ -40,7 +41,7 @@ python main.py mods clean
 
 列表请求和单项任务遇到连接中断、超时、临时 HTTP 错误或文件校验失败时，最多尝试 4 次，重试前等待 2、4、8 秒。证书、元数据和磁盘错误直接报告；下载地址失效时重新获取一次地址。单项最终失败后继续处理其他模组，写入 `data/catalog/download-state.json`；列表最终失败则停止。再次运行会复用已完成文件。
 
-明确废弃、重复和已替换的旧包移入工具箱的 `.codex/trash/mods-<时间>/`，`moves.json` 记录原路径、目标和 SHA-256。重复识别采用 ZIP 内部文件名和内容哈希。只有作者在名称、标签或自身说明中明确标记 Deprecated、已弃用或不再工作才判为废弃；更新时间早或下载失败不作为依据。无法确认版本的历史包和无法读取的 ZIP 会保留并报告，不加入当前版本上传清单。
+明确废弃、重复和已替换的旧包移入 `data/trash/mods-<时间>/`，`moves.json` 记录原路径、目标和 SHA-256。重复识别采用 ZIP 内部文件名和内容哈希。只有作者在名称、标签或自身说明中明确标记 Deprecated、已弃用或不再工作才判为废弃；更新时间早或下载失败不作为依据。无法确认版本的历史包和无法读取的 ZIP 会保留并报告，不加入当前版本上传清单。
 
 ## QQBot 群文件同步
 

@@ -3,8 +3,12 @@
 当前重点是合并4q5l与6q5l的处理方式，优先减少总电路建筑。通用方式已经覆盖专用方式时，统一使用通用方式并删除专用判定、选择、ROM与状态，允许制造步骤增加。时间另按组合关键路径、时序调用次数和搜索规模衡量；步骤少不等于电路小，周期不变也不等于所有目标总耗时不变。
 
 ```bash
-python -m shapez2_tmam.full_solver_circuit --report-only --output shapez2_tmam/reports/full-tail-4q5l.json
-python -m shapez2_tmam.full_solver_circuit --report-only --pack --output shapez2_tmam/reports/full-tail-packed-4q5l.json
+# 统一命令一键生成两份静态报告
+python main.py tmam2 blueprint --reports
+
+# 或直接调用电路模块
+python -m shapez2_tmam.circuits.full_solver_circuit --report-only --output shapez2_tmam/reports/full-tail-4q5l.json
+python -m shapez2_tmam.circuits.full_solver_circuit --report-only --pack --output shapez2_tmam/reports/full-tail-packed-4q5l.json
 ```
 
 命令只编译生产网表，不运行目标、模拟或布局。报告记录逻辑门、非线缆建筑、状态、固定配对、DAG深度、周期和复位界。
@@ -25,9 +29,9 @@ python -m shapez2_tmam.full_solver_circuit --report-only --pack --output shapez2
 | 阶段 | 压缩版非线缆建筑 | ROM行数 | 周期tick |
 |---|---:|---:|---:|
 | 合并前 | 147216 | 262 | 816 |
-| [纯针段并入通用逐层追加](../proofs/04-stacking.md#s04-15) | 143692 | 262 | 816 |
-| [所有半形统一两角流程](../proofs/08-circuits.md#s08-31) | 142463 | 251 | 816 |
-| [按落点参数制造角、合并同层补料](../proofs/02-four-quadrants.md#s02-03) | 142255 | 249 | 816 |
+| [纯针段并入通用逐层追加](../docs/proofs/04-stacking.md#s04-15) | 143692 | 262 | 816 |
+| [所有半形统一两角流程](../docs/proofs/08-circuits.md#s08-31) | 142463 | 251 | 816 |
+| [按落点参数制造角、合并同层补料](../docs/proofs/02-four-quadrants.md#s02-03) | 142255 | 249 | 816 |
 
 第一项删除纯针掩码比较、段顶反向选择、动态Pin/Stack及源槽选择，减少3524个建筑。第二项删除无C半形直接制造ROM与含C分流条件，继续共用同一角程序，另减少1229个建筑。这两项合计减少4753个，约3.23%。随后参数角ROM再减少208个，总计4961个，约3.37%；没有把整图流程名称合并计为电路节省。Python半形入口还删除了自带助手的一角快捷路径；其覆盖由同一个两角定理保证，不把纯Python删分支另算作电路收益。
 

@@ -52,11 +52,27 @@ def build_parser() -> argparse.ArgumentParser:
     solve.add_argument("shape", type=int, help="16 位结构编号，1..65535，低四位为底层")
     solve.add_argument("--events", action="store_true", help="同时输出指令、模式和重试信号的变化 tick")
     solve.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数，默认 4096")
-    tmam2 = tools.add_parser("tmam2", help="二代 Mari 四象限五层 TMAM")
+    tmam2 = tools.add_parser("tmam2", help="二代 TMAM 通用合成、原生电路编译、Mari 模型与论文排版")
     tmam2_commands = tmam2.add_subparsers(dest="command", required=True)
-    solve2 = tmam2_commands.add_parser("solve", help="按 Mari 六候选逻辑计算虚拟重建和工厂指令")
-    solve2.add_argument("shape", help="四象限、最多五层的完整图形短代码")
-    solve2.add_argument("--iteration", type=int, choices=range(1, 7), help="只计算指定候选；默认依次选择最小匹配编号")
+    synth2 = tmam2_commands.add_parser("synth", help="按通用偶数象限合成器输出制造证书或六槽指令")
+    synth2.add_argument("target", help="保留原层号的图形短代码")
+    synth2.add_argument("--quadrants", type=int, default=4, help="偶数象限数，至少 2，默认 4")
+    synth2.add_argument("--height", type=int, default=5, help="整个制造过程的层数上限，至少 2，默认 5")
+    synth2.add_argument("--complete", action="store_true", help="启用完整四象限五层尾部搜索")
+    synth2.add_argument("--instructions", action="store_true", help="另导出四/六象限五层的六寄存器消费式指令")
+    mari2 = tmam2_commands.add_parser("mari", aliases=["solve"], help="按 Mari 六候选逻辑计算虚拟重建和工厂指令（兼容旧名 solve）")
+    mari2.add_argument("shape", help="四象限、最多五层的完整图形短代码")
+    mari2.add_argument("--iteration", type=int, choices=range(1, 7), help="只计算指定候选；默认依次选择最小匹配编号")
+    bp2 = tmam2_commands.add_parser("blueprint", help="编译二代原生电路蓝图或导出静态网表报告")
+    bp2.add_argument("targets", nargs="*", metavar="NAME", help="预设蓝图名称（不带 .spz2bp 后缀）")
+    bp2.add_argument("--list", action="store_true", help="列出全部预设蓝图目标")
+    bp2.add_argument("--all", action="store_true", help="按预设频道重新编译全部 24 份蓝图")
+    bp2.add_argument("--reports", action="store_true", help="更新 shapez2_tmam/reports/ 下的静态网表报告")
+    bp2.add_argument("--output-dir", type=Path, help="自定义蓝图输出目录")
+    paper2 = tmam2_commands.add_parser("paper", help="将二代 TMAM 理论 Markdown 排版为 A4 PDF")
+    paper2.add_argument("--source", type=Path, help="理论 Markdown 源文件路径")
+    paper2.add_argument("--output", type=Path, help="导出 PDF 路径")
+    paper2.add_argument("--all", action="store_true", help="重新排版全部四篇正文论文与附录")
     return parser
 
 
@@ -65,6 +81,45 @@ def main() -> int:
     args = build_parser().parse_args()
     try:
         if args.tool == "tmam2":
+            if args.command == "synth":
+                from shapez2_tmam.synthesis.__main__ import main as synth_main
+                argv = ["--quadrants", str(args.quadrants), "--height", str(args.height)]
+                if args.complete:
+                    argv.append("--complete")
+                if args.instructions:
+                    argv.append("--instructions")
+                argv.extend(["--", args.target])
+                return synth_main(argv)
+            if args.command == "blueprint":
+                from shapez2_tmam.circuits.__main__ import BLUEPRINT_DIR, main as circuits_main
+                argv = []
+                if args.list:
+                    argv.append("--list")
+                if args.all:
+                    argv.append("--all")
+                if args.reports:
+                    argv.append("--reports")
+                if args.output_dir is not None:
+                    argv.extend(["--output-dir", str(args.output_dir)])
+                else:
+                    argv.extend(["--output-dir", str(BLUEPRINT_DIR)])
+                argv.extend(args.targets)
+                return circuits_main(argv)
+            if args.command == "paper":
+                import importlib.util
+                pdf_script = Path(__file__).resolve().parent / "shapez2_tmam/docs/papers/build_paper_pdf.py"
+                spec = importlib.util.spec_from_file_location("build_paper_pdf", pdf_script)
+                assert spec is not None and spec.loader is not None
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                argv = []
+                if args.all:
+                    argv.append("--all")
+                if args.source is not None:
+                    argv.extend(["--source", str(args.source)])
+                if args.output is not None:
+                    argv.extend(["--output", str(args.output)])
+                return module.main(argv)
             from shapez2_tmam.mari import Mari, Shape
             machine = Mari()
             target = Shape.from_key(args.shape)

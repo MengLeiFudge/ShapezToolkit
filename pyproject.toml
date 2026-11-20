@@ -1,3 +1,17 @@
+[project]
+name = "shapez-toolkit"
+version = "0.1.0"
+description = "Shapez 1 & Shapez 2 工具箱：模组同步、谜题资料、TMAM 拆解验证与合成电路"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+docs = [
+    "Pillow>=10.0",
+    "typst>=0.14",
+]
+
 [tool.ty.environment]
 python-platform = "win32"
 python-version = "3.10"

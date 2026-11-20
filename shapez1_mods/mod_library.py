@@ -158,9 +158,8 @@ def clean_library(destination: Path, state: dict[str, Any], progress: Callable[[
                 removed[item["path"]] = "duplicates"
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-    # 默认数据目录位于所属功能的 data 下；自定义目录则在其本地 .codex 下保留恢复文件。
-    project = next((parent for parent in destination.parents if (parent / "main.py").is_file()), destination)
-    trash = project / ".codex/trash" / f"mods-{stamp}"
+    # 重复、旧版及废弃包移入所属数据目录的 trash 下保留恢复清单。
+    trash = destination / "trash" / f"mods-{stamp}"
     moves = []
     for path, reason in removed.items():
         moves.append({"source": str(path), "target": str(trash / path.relative_to(downloads)), "reason": reason, "sha256": infos[path]["sha256"]})

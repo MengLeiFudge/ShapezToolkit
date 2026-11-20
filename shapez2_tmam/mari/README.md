@@ -2,16 +2,16 @@
 
 本目录把 Mari 主控的实际接线写成可追溯的 Python 组合模型：固定目标和候选编号，计算虚拟重建、四个角、五个 Hybrid 载荷及 51 路工厂指令。原机有六种候选；程序按编号从小到大选择匹配项。
 
-**原包默认目标直通配置下，六候选算法已被证明不全覆盖。** [整层空隙反例](../proofs/09-sources.md#s09-03)给出一个合法可制作目标，并从接线与操作规则统一排除六条候选路径。模型保留原机规则。`matched` 仅表示虚拟匹配；`no_candidate` 不表示目标不可制作。完整范围见 [Mari 调查记录](../proofs/09-sources.md#s09-01)。
+**原包默认目标直通配置下，六候选算法已被证明不全覆盖。** [整层空隙反例](../docs/proofs/09-sources.md#s09-03)给出一个合法可制作目标，并从接线与操作规则统一排除六条候选路径。模型保留原机规则。`matched` 仅表示虚拟匹配；`no_candidate` 不表示目标不可制作。完整范围见 [Mari 调查记录](../docs/proofs/09-sources.md#s09-01)。
 
 ## 使用
 
-使用 Python 3.10 或更新版本，无第三方依赖。在仓库根目录调用：
+使用 Python 3.10 或更新版本，无第三方依赖。在仓库根目录调用（兼容旧子命令名 `solve`）：
 
 ```text
-python main.py tmam2 solve CuCuCuCu
-python main.py tmam2 solve --iteration 3 CuCuCuCu
-python main.py tmam2 solve -- --Cu----
+python main.py tmam2 mari CuCuCuCu
+python main.py tmam2 mari --iteration 3 CuCuCuCu
+python main.py tmam2 mari -- --Cu----
 ```
 
 图形代码以 `--` 开头时，用独立的 `--` 结束选项解析。以上是调用方式，未作为运行通过的案例报告。
@@ -86,4 +86,4 @@ export(Path("shapez2_tmam/data/group_files/Mari的TMAM.zip"),
 
 提取只解码蓝图和分析连线，不执行图形加工。仅接受 SHA-256 为 `573cfd23dcd0149fd77279ce86287f19c04e1c3485d87b1a9b27ee4aaeeb89cd` 的原包；更换蓝图时需重新核对边界坐标和竞争配对。
 
-已完成的静态检查包括：端口定义对应、核心拓扑无环、输出引用完整，以及 51 路下发频道与工厂接收接口对应。没有运行目标图形、功能测试、全量枚举或游戏。[41 项角模板表](../proofs/09-sources.md#s09-02)记录局部分类；[整层空隙反例](../proofs/09-sources.md#s09-03)记录合法制造树、输入拆层接线及六候选排除证明。
+已完成的静态检查包括：端口定义对应、核心拓扑无环、输出引用完整，以及 51 路下发频道与工厂接收接口对应。没有运行目标图形、功能测试、全量枚举或游戏。[41 项角模板表](../docs/proofs/09-sources.md#s09-02)记录局部分类；[整层空隙反例](../docs/proofs/09-sources.md#s09-03)记录合法制造树、输入拆层接线及六候选排除证明。

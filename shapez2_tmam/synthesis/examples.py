@@ -430,8 +430,10 @@ def export(example: Example, output: Path, *, instructions: bool = False) -> tup
                 "milestone_orientation": "关键阶段按原构造的标准朝向示意，实际方向与物品编号见steps。" if example.milestones else None,
                 "milestones": [{"name": name, "result": recipe.result.to_key()} for name, recipe in example.milestones],
                 "steps": steps}
-    stem = output / example.name
-    stem.with_suffix(".json").write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    json_dir = output / "json"
+    json_dir.mkdir(parents=True, exist_ok=True)
+    json_stem = json_dir / example.name
+    json_stem.with_suffix(".json").write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if instructions and example.quadrants in (4, 6) and recipe.height == 5:
         packets = list(recipe.instructions())
         packet_document = {"name": example.name, "quadrants": example.quadrants, "height": recipe.height,
@@ -439,12 +441,12 @@ def export(example: Example, output: Path, *, instructions: bool = False) -> tup
                            "register_budget": 6, "register_count": recipe.register_count,
                            "packet_count": len(packets), "instructions": packets,
                            "verification": "从已交付制造树编译消费式指令；未执行回放、反馈模拟或游戏。"}
-        stem.with_suffix(".instructions.json").write_text(
+        json_stem.with_suffix(".instructions.json").write_text(
             json.dumps(packet_document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     lines = [f"# {example.title}", "", example.mechanism, "", f"配置：{example.quadrants}象限、{example.recipe.height}层上限。",
              "", "目标（从底到顶，q0为每层最左格）：", "", f"`{example.recipe.result.to_key()}`", "",
              f"共{len(steps)}步，含基础供料；不是最短路径。输入编号指向已完成物品，使用后消耗。",
-             f"物品槽峰值为{example.recipe.register_count}，不含搜索状态及传输缓存；[槽数调度证明](../proofs/04-stacking.md#s04-19)。",
+             f"物品槽峰值为{example.recipe.register_count}，不含搜索状态及传输缓存；[槽数调度证明](../docs/proofs/04-stacking.md#s04-19)。",
              "同一子配方出现两次时分别生产。Cut/Swap的另一个出口弃置；按表中出口继续。", "",
              "[操作与方向说明](README.md)；本配方未在游戏中验证。", ""]
     if example.milestones:
@@ -457,7 +459,7 @@ def export(example: Example, output: Path, *, instructions: bool = False) -> tup
         inputs = ", ".join(str(index) for index in step["inputs"]) or "—"
         parameter = "—" if step["parameter"] is None else str(step["parameter"])
         lines.append(f"| {step['id']} | {step['operation']} | {inputs} | {parameter} | `{step['result']}` |")
-    stem.with_suffix(".md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (output / f"{example.name}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return example.name, example.title, len(steps)
 
 

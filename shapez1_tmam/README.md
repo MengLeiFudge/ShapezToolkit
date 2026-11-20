@@ -31,7 +31,7 @@ python main.py tmam verify --machine XianYu-20221129 --saves "C:\Users\MLJ\AppDa
 
 需要自行准备原始存档和 `data/shapes/shapes.json`。目前端口与格式支持限定为无模组的一代 1010 存档，输入输出坐标绑定已分析的布局，不按任意显示名称自动匹配。
 
-`--machine` 可以选择 `BugFix-20210622`、`XianYu-20221129`；`CTMAM` 是 BugFix 的兼容别名，不能与新名重复选择。省略时验证这两台机器。旧 XianYu 的入口和目录已移除，原资料保存在 `.codex/trash/`，历史比较报告保留当时结论。
+`--machine` 可以选择 `BugFix-20210622`、`XianYu-20221129`；`CTMAM` 是 BugFix 的兼容别名，不能与新名重复选择。省略时验证这两台机器。旧 XianYu 的入口和目录已移除，历史比较报告保留当时结论。
 
 每台机器的新报告默认保存在自身的 `verification/<时间>/`。使用 `--output 目录` 时，报告写入该目录下的各机器子目录；控制台返回汇总和实际路径。每台目录独立保存电路快照、分段 CSV、合并 CSV 和 `summary.json`。
 

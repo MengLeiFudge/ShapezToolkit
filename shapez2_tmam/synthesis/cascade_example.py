@@ -142,18 +142,26 @@ class GridImages:
         return files
 
 
+def _default_font() -> Path:
+    for candidate in (Path("C:/Windows/Fonts/msyh.ttc"),
+                      Path("/mnt/c/Windows/Fonts/msyh.ttc"),
+                      Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc")):
+        if candidate.is_file():
+            return candidate
+    return Path("C:/Windows/Fonts/msyh.ttc")
+
+
 def main() -> int:
     """生成此固定代表的文字、JSON和PNG交付物，不运行搜索或其他代表。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="examples输出目录")
-    parser.add_argument("--font", type=Path, default=Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
-                        help="支持中文的字体文件")
+    parser.add_argument("--font", type=Path, default=_default_font(), help="支持中文的字体文件")
     args = parser.parse_args()
     renderer = GridImages(args.font)
     example = cascade_example()
     args.output.mkdir(parents=True, exist_ok=True)
     export(example, args.output)
-    document = json.loads((args.output / f"{NAME}.json").read_text(encoding="utf-8"))
+    document = json.loads((args.output / "json" / f"{NAME}.json").read_text(encoding="utf-8"))
     assets = args.output / NAME
     assets.mkdir(exist_ok=True)
     stages = document["milestones"]
@@ -173,7 +181,7 @@ def main() -> int:
              "3. 准备一层18格针，用红色结晶得到单层纯红晶体。",
              "4. 连续三次把一份纯晶体层作为上料堆到当前物品上，晶体数依次18→12→6→0。每次重新准备一份上料。", "",
              f"完整配方共{len(document['steps'])}步，物品槽峰值{document['register_count']}；含供料，不是最短路径。",
-             f"[完整文字步骤](../{NAME}.md) · [全部步骤JSON](../{NAME}.json) · [一行式短代码文本](shortcodes.txt)", "",
+             f"[完整文字步骤](../{NAME}.md) · [全部步骤JSON](../json/{NAME}.json) · [一行式短代码文本](shortcodes.txt)", "",
              "Stack输入顺序为下料、上料。Rotate参数按象限计，一格为20°。Cut出口0留q0至q8、出口1留q9至q17。",
              "Swap出口0取第一输入前半和第二输入后半，出口1反之。使用后的输入物品消耗，未选出口弃置。",
              "基础供料必须按对应格子准备；其余加工不要省略。分页图与完整文字步骤朝向一致，总览显示标准朝向。", "",
@@ -183,7 +191,7 @@ def main() -> int:
     lines += ["## 全部制作步骤格子图", "", "每页九步，先从左到右，再从上到下。输入编号对应先前步骤的产物。", ""]
     for number, page in enumerate(pages, 1):
         lines += [f"### 第{number}页", "", f"![第{number}页制作步骤]({page})", ""]
-    lines += ["## 依据", "", "[级联构造证明](../../proofs/05-cascades.md#s05-01)。固定配方及中间产物由本地模型导出，未在游戏或Mod中验证。", ""]
+    lines += ["## 依据", "", "[级联构造证明](../../docs/proofs/05-cascades.md#s05-01)。固定配方及中间产物由本地模型导出，未在游戏或Mod中验证。", ""]
     (assets / "README.md").write_text("\n".join(lines), encoding="utf-8")
     print(f"{len(document['steps'])}步，{document['register_count']}槽，{len(pages)}页格子图 → {assets / 'README.md'}")
     return 0

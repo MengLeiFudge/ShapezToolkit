@@ -14,7 +14,7 @@
 4. 连续三次把一份纯晶体层作为上料堆到当前物品上，晶体数依次18→12→6→0。每次重新准备一份上料。
 
 完整配方共854步，物品槽峰值4；含供料，不是最短路径。
-[完整文字步骤](../18q17l-cascade.md) · [全部步骤JSON](../18q17l-cascade.json) · [一行式短代码文本](shortcodes.txt)
+[完整文字步骤](../18q17l-cascade.md) · [全部步骤JSON](../json/18q17l-cascade.json) · [一行式短代码文本](shortcodes.txt)
 
 Stack输入顺序为下料、上料。Rotate参数按象限计，一格为20°。Cut出口0留q0至q8、出口1留q9至q17。
 Swap出口0取第一输入前半和第二输入后半，出口1反之。使用后的输入物品消耗，未选出口弃置。
@@ -456,4 +456,4 @@ crcrcrcrcrcrcrcrcrcrcrcrcrcrcrcrcrcr
 
 ## 依据
 
-[级联构造证明](../../proofs/05-cascades.md#s05-01)。固定配方及中间产物由本地模型导出，未在游戏或Mod中验证。
+[级联构造证明](../../docs/proofs/05-cascades.md#s05-01)。固定配方及中间产物由本地模型导出，未在游戏或Mod中验证。
