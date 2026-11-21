@@ -273,7 +273,7 @@ ROM共459行，PC为九个二进制位。地址采用[共用分段译码](#s08-0
 
 下一步将此叶端接入全四象限S/Pin候选与递归帧，再给完整求解输出配方。六象限的三列半形不满足本页两角判据，必须另推；本部件不能作为六象限完整性依据。
 
-[全部蓝图](../../blueprints/README.md) · [角构造证明](02-four-quadrants.md#s02-03) · [完整四象限尾部](02-four-quadrants.md#s02-06) · [返回四象限目录](../papers/4q5l.md)
+[全部蓝图](../../blueprints/README.md) · [角构造证明](02-four-quadrants.md#s02-03) · [完整四象限尾部](02-four-quadrants.md#s02-06) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -408,7 +408,7 @@ ROM共459行，PC为九个二进制位。地址采用[共用分段译码](#s08-0
 
 [`signal-register`](#s08-29) 每个信号只用5平台，但写入必须遵守明确的三阶段控制。扫描前保持当前输入到组合传播结束，锁存读出的数据，然后提交新下半，再进行下一次。寄存器、扫描数据通路均已生成蓝图；自动阶段时钟和完整搜索控制器尚未生成。
 
-[蓝图输入输出及重编译](../../blueprints/README.md) · [返回四象限目录](../papers/4q5l.md)
+[蓝图输入输出及重编译](../../blueprints/README.md) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -498,7 +498,7 @@ R(t) = load(t−24) 为真 ? data(t−12) : R(t−12)。
 
 源码依据：`ConnectableBuildingSimulation`、`SignalProviderConnector`、`SignalReceiverConnector`、`SignalNetworkConnector`、`SimulationGraph`、`SimulationCluster`、`Simulator`、`MapLayout`、`ActionModifyIsland`、`SignalBuffer`、`SignalNetworkSimulation`、`SignalChannelRingBuffer`、`ProcessingUpdateStrategy` 以及前页核实的正常推进调用链。结论来自静态源码与递推证明，未运行时钟、门级模拟或游戏。
 
-[蓝图与频道](../../blueprints/README.md) · [拆层数据通路](#s08-04) · [返回四象限目录](../papers/4q5l.md)
+[蓝图与频道](../../blueprints/README.md) · [拆层数据通路](#s08-04) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -771,7 +771,7 @@ leaf_direction只在首轮使用；挂起父帧总在Pin遍次，子帧改方向
 
 本轮修改文件LSP零诊断；两份报告通过生产网表、组合DAG与固定配对编译。统一逐层追加、两角半形及参数角ROM后，压缩版非线缆建筑147216→142255，减少4961个；全无线版170498→164898。本次参数角及同层补料合并贡献其中208/239个建筑，搜索部分保持。状态、物品槽、组合关键路径和周期保持，制造步骤可以增加。现存蓝图仍是563块大平台/147216建筑及25408块小平台/170498建筑的旧快照，不得把新网表计数用于旧布局或混用输出频道。通用标签及独立半形部件也沿用原产物。没有运行搜索、反馈模拟、测试或游戏。
 
-[返回目录](../papers/4q5l.md) · [蓝图接口](../../blueprints/README.md)
+[返回目录](../4q5l.md) · [蓝图接口](../../blueprints/README.md)
 
 
 ---
@@ -976,7 +976,7 @@ sample与done使用同一个阶段3窗口，并分别与已锁存有效标志、
 
 这些是模拟时间的上界，完整周期384tick、32模拟秒。五份非空层最多五个周期。该参数利用复位预计算和三阶段传播余量，尚不声称最短时间；只依赖本页和时钟页的静态证明，未运行扫描、样例、测试、门级模拟或游戏。
 
-[频道表与导入](../../blueprints/README.md) · [四阶段控制](#s08-05) · [返回四象限目录](../papers/4q5l.md)
+[频道表与导入](../../blueprints/README.md) · [四阶段控制](#s08-05) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -1156,7 +1156,7 @@ record_valid列入pulses，next为 `ready AND 原accepted`，冻结时写0；它
 
 本次四个Python文件LSP零诊断，两版完整蓝图通过组合DAG、逐端口和实际占地静态编译。通用标签及独立半形部件沿用原产物。未运行目标、搜索、指令、模拟、测试或游戏。
 
-[完整控制器](#s08-09) · [蓝图接口](../../blueprints/README.md) · [返回目录](../papers/4q5l.md)
+[完整控制器](#s08-09) · [蓝图接口](../../blueprints/README.md) · [返回目录](../4q5l.md)
 
 
 ---
@@ -1330,7 +1330,7 @@ record_valid列入pulses，next为 `ready AND 原accepted`，冻结时写0；它
 
 此前小平台装箱使用`[2,17]²`，没有正确处理外缘三格退让；旧8920平台/95×94外框只能作为已废弃的布局统计，不能作为合法小平台方案。当前实际占用5067区块；网表本身也已变化，不能据此宣称对最优合法小平台布局的面积改进。其他未重新生成的历史部件不因这次编译自动获得大平台布局。
 
-[返回目录](../papers/4q5l.md) · [局部门证明](#s08-14) · [蓝图使用](../../blueprints/README.md)
+[返回目录](../4q5l.md) · [局部门证明](#s08-14) · [蓝图使用](../../blueprints/README.md)
 
 
 ---
@@ -1561,7 +1561,7 @@ c'[k] = (c[k] AND NOT b) OR (c[k−1] AND b)。
 
 当前每轮52模拟秒，256轮约3小时42分。这是有限的保守整列遍历界，远未形成实用的完整搜索等待时间。四列笛卡尔组合、第五层掩码与成员、S前缀、递归帧、回退和角配方流仍须完成。所有结论为静态证明、LSP和生产编译；未运行候选枚举、反馈、游戏或测试。
 
-[材料半形判据](01-foundations.md#s01-19) · [完整尾部](02-four-quadrants.md#s02-06) · [蓝图频道](../../blueprints/README.md) · [返回四象限目录](../papers/4q5l.md)
+[材料半形判据](01-foundations.md#s01-19) · [完整尾部](02-four-quadrants.md#s02-06) · [蓝图频道](../../blueprints/README.md) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -1702,7 +1702,7 @@ NPC计数器从0开始，末成员为允许P时的2，否则为1；末成员归�
 
 本次四个Python文件ty诊断为0，两版完整蓝图及独立四列来源部件生产编译通过；3871平台必要筛选与来源通路共用平衡计数。没有运行目标、搜索、指令、测试或游戏。
 
-[完整控制](#s08-09) · [二十槽覆盖](#s08-26) · [返回四象限目录](../papers/4q5l.md)
+[完整控制](#s08-09) · [二十槽覆盖](#s08-26) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -1780,7 +1780,7 @@ Python在`check_output=False`族生成中调用补全F等式后的精确判据�
 
 [完整四象限控制](#s08-09)已接四列/顶盖游标、四帧回退、精确F检查与成功路径制造。必要筛选提供更早的拒绝点，仍未取得实用最坏搜索保证。六象限及一般偶数参数须按顺序另行完成。
 
-[全部蓝图](../../blueprints/README.md) · [完整顶针逆像](01-foundations.md#s01-13) · [标签目标网格](#s08-36) · [返回目录](../papers/4q5l.md)
+[全部蓝图](../../blueprints/README.md) · [完整顶针逆像](01-foundations.md#s01-13) · [标签目标网格](#s08-36) · [返回目录](../4q5l.md)
 
 
 ---
@@ -1843,7 +1843,7 @@ Python在`check_output=False`族生成中调用补全F等式后的精确判据�
 
 本次四个Python文件ty诊断为0；独立来源及两版完整蓝图的静态DAG、端口及实际占地编译通过。[四帧完整控制](#s08-09)已接S、回退和成功路径发令，实用性能仍需压缩。
 
-[返回四象限目录](../papers/4q5l.md) · [蓝图接口](../../blueprints/README.md)
+[返回四象限目录](../4q5l.md) · [蓝图接口](../../blueprints/README.md)
 
 
 ---
@@ -2071,7 +2071,7 @@ window先检查enable与started，再与phase3相与。保守给控制路径及�
 
 六个活跃物品槽不会替代搜索帧、前缀计数、候选索引或固定标签表。[完整四象限控制](#s08-09)已接入候选搜索、回退与成功路径发令；本独立部件只回放外部证书。当前每56模拟秒一条的周期是理论充分等待期，不能据此宣称完整求解已达到实用性能。
 
-[全部蓝图](../../blueprints/README.md) · [Python接口](../../synthesis/README.md) · [完整四象限尾部](02-four-quadrants.md#s02-06) · [返回四象限目录](../papers/4q5l.md)
+[全部蓝图](../../blueprints/README.md) · [Python接口](../../synthesis/README.md) · [完整四象限尾部](02-four-quadrants.md#s02-06) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -2174,7 +2174,7 @@ V 为空时同理：保持路关闭，写入路持续发布空，全部历史清
 
 本轮尚未生成自动阶段时钟、完整搜索控制器或制造指令流。已有寄存器和扫描部件不能单独称作完整 TMAM。
 
-[蓝图接法及生产编译](../../blueprints/README.md) · [原层号解码](#s08-04) · [返回四象限目录](../papers/4q5l.md)
+[蓝图接法及生产编译](../../blueprints/README.md) · [原层号解码](#s08-04) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -2271,7 +2271,7 @@ cu先返回供料范围3；列A违例可以直接返回2。程序错误返回4�
 
 [完整控制](#s08-09)已把同一材料叶端接入完整Pin逆像和至多四个递归帧，实用性能仍需压缩。范围仍是四象限，不能把本页充要判据用在六象限；六象限要保留已发现的非K和不稳定可制作状态。
 
-[全部蓝图](../../blueprints/README.md) · [完整尾部](02-four-quadrants.md#s02-06) · [双半形起点](#s08-38) · [返回目录](../papers/4q5l.md)
+[全部蓝图](../../blueprints/README.md) · [完整尾部](02-four-quadrants.md#s02-06) · [双半形起点](#s08-38) · [返回目录](../4q5l.md)
 
 
 ---
@@ -2500,7 +2500,7 @@ second_corner选择目标列和包变换。第一遍经过保存边界后PC回�
 
 源码核对包括 `SignalBuffer`、`SignalSimulation`、`SignalChannelRingBuffer`、受控无线收发器、`SignalNetworkSimulation/System`、`ConnectableSignalNetwork`、`SimulationCluster.Update`、`SimulationGraph.UpdateClusters`、`ProcessingUpdateStrategy`、`SimulationConstants` 以及 `GameSessionOrchestrator.Tick` 的推进分支及策略实例。结论为源码静态推导，未运行门级模拟、时序探针或游戏。
 
-[蓝图频道表与接法](../../blueprints/README.md) · [原层号解码](#s08-04) · [返回四象限目录](../papers/4q5l.md)
+[蓝图频道表与接法](../../blueprints/README.md) · [原层号解码](#s08-04) · [返回四象限目录](../4q5l.md)
 
 
 ---
@@ -2634,7 +2634,7 @@ actual_result先用保留原层号的解码器读取，不把连续拆层次数�
 
 [完整四象限控制](#s08-09)已接候选、帧回退、统一时序及成功后发令，规模与搜索仍须简化。独立比较部件不负责这些控制，某候选不匹配不能作为全部目标不可制作的结论。
 
-[全部蓝图](../../blueprints/README.md) · [完整S叶端](#s08-30) · [顶针单列](#s08-23) · [返回目录](../papers/4q5l.md)
+[全部蓝图](../../blueprints/README.md) · [完整S叶端](#s08-30) · [顶针单列](#s08-23) · [返回目录](../4q5l.md)
 
 
 ---
@@ -2677,7 +2677,7 @@ A→S的覆盖证明逐格依赖候选材料与标签，不要求这些格预先
 
 验证只包含生产蓝图编译的静态端口、占地及DAG检查，四个Python文件的ty诊断为0。没有执行目标、制造流、枚举、反馈模拟、测试或游戏。
 
-[返回四象限目录](../papers/4q5l.md) · [蓝图接口](../../blueprints/README.md)
+[返回四象限目录](../4q5l.md) · [蓝图接口](../../blueprints/README.md)
 
 
 ---
@@ -2748,7 +2748,7 @@ A→S的覆盖证明逐格依赖候选材料与标签，不要求这些格预先
 
 因此最大稳定前态失败不能否定较小前态；后续仍须完整覆盖S前缀选择，并只在条件已证明时剪枝。
 
-[全部蓝图](../../blueprints/README.md) · [自动半形](#s08-02) · [完整尾部](02-four-quadrants.md#s02-06) · [返回目录](../papers/4q5l.md)
+[全部蓝图](../../blueprints/README.md) · [自动半形](#s08-02) · [完整尾部](02-four-quadrants.md#s02-06) · [返回目录](../4q5l.md)
 
 
 ---

@@ -1,14 +1,14 @@
 # 二代 TMAM：理论、合成与原生电路
 
-先看[四篇理论论文](docs/papers/README.md#理论论文)。总入口见[理论论文集索引](docs/papers/README.md)；完整证明收拢为[九卷参考资料](docs/papers/README.md#九卷参考证明)。[理论正文](docs/theory/README.md)按“模型 → 覆盖 → 构造 → 下界”组织；工程实现、蓝图交付物和参考证明分别从下方入口进入。
+先看[六篇理论论文](docs/papers/README.md#理论论文)。总入口见[理论论文集索引](docs/papers/README.md)；完整证明收拢为[九卷参考资料](docs/papers/README.md#九卷参考证明)。[理论源码与编写规范](docs/theory/README.md)按“模型 → 四象限覆盖 → 偶数象限构造 → 级联与首轮强制词 → 交替重排与多窗口族 → 落地记录与容量下界”组织；工程实现、蓝图交付物和参考证明分别从下方入口进入。
 
 ## 按范围阅读
 
 | 范围 | 入口 | 已有结果与边界 |
 |---|---|---|
-| 4 象限 5 层 | [4q5l](docs/papers/4q5l.md) | 完整有限合成；统一双半形起点及有界 Pin/追加循环；游戏实用性尚未验收 |
-| 6 象限 5 层 | [6q5l](docs/papers/6q5l.md) | 精确有限闭包完备；紧凑全域求解及完整电路仍缺 |
-| 偶数象限、任意高度 | [general](docs/papers/general.md) | 四象限完整列与半形判据、重复下落族和强制词族；任意指定交替序列仍开放 |
+| 4 象限 5 层 | [4q5l](docs/4q5l.md) | 完整有限合成；统一双半形起点及有界 Pin/追加循环；游戏实用性尚未验收 |
+| 6 象限 5 层 | [6q5l](docs/6q5l.md) | 精确有限闭包完备；紧凑全域求解及完整电路仍缺 |
+| 偶数象限、任意高度 | [general](docs/general.md) | 四象限完整列与半形判据、重复下落族、多窗口强制词族与空间容量下界；任意指定交替序列仍开放 |
 
 目录名中 `q` 表示象限数，`l` 表示全过程的层数上限。基础输入为任意无晶体单层；每个定理还须满足对应参考卷的操作前提。理论覆盖、实用复杂度和具体存档验收分别记录。
 
@@ -19,7 +19,7 @@
 | [synthesis/](synthesis/README.md) | 代码包 | 通用偶数象限物理模型、角与脚手架构造、有界逆推与制造证书导出 |
 | [circuits/](circuits/README.md) | 代码包 | 原生二代信号门网表、3×3 大平台装箱、时序控制与 24 份蓝图编译器 |
 | [mari/](mari/README.md) | 代码包 | Mari 主控接线提取、组合方程与六候选求值模型 |
-| [docs/](docs/README.md) | 理论与证明 | `papers/`（范围导览与排版 PDF）、`theory/`（论文 Markdown 正文）、`proofs/`（九卷完整证明与来源映射）及 `assets/`（配图与长短代码） |
+| [docs/](docs/README.md) | 理论与证明 | 范围导览（`4q5l` / `6q5l` / `general`）、`papers/`（六篇学术版 PDF 与研究索引）、`theory/`（论文 Markdown 源码与编写规范）、`proofs/`（九卷完整证明与来源映射）及 `assets/`（配图与长短代码） |
 | [blueprints/](blueprints/README.md) | 导出产物 | 游戏 `SHAPEZ2-4` 电路蓝图（`.spz2bp`）及配套频道与时序说明（`.json`） |
 | [examples/](examples/README.md) | 导出产物 | 代表图形与特殊机制的逐步文字配方（`.md`）、`json/`（机器可读步骤与六槽指令）及 `18q17l-cascade/` 分页图 |
 | [reports/](reports/README.md) | 导出产物 | 完整四象限控制电路的静态元件规模与关键路径报告 |
@@ -40,7 +40,7 @@ python main.py tmam2 blueprint --reports
 # Mari 六候选主控模型求值
 python main.py tmam2 mari CuCuCuCu
 
-# 重新排版理论论文 PDF（需安装 reportlab）
+# 重新编译全部六篇理论论文 PDF（需安装 typst，见 pip install -e ".[docs]"）
 python main.py tmam2 paper --all
 ```
 

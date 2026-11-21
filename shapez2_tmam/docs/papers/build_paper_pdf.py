@@ -15,7 +15,8 @@ PAPERS: tuple[tuple[str, str, str], ...] = (
     ("02-four-quadrants.md", "TMAM理论II-四象限五层合成.pdf", "Shapez 2 TMAM 形式化理论系列 · 第二篇"),
     ("03-even-constructions.md", "TMAM理论III-一般偶数象限构造.pdf", "Shapez 2 TMAM 形式化理论系列 · 第三篇"),
     ("04-cascades-and-forced-words.md", "TMAM理论IV-级联与强制工序.pdf", "Shapez 2 TMAM 形式化理论系列 · 第四篇"),
-    ("04-appendix-forced-sequence.md", "TMAM理论IV附录-交替工序约化.pdf", "Shapez 2 TMAM 形式化理论系列 · 第四篇附录"),
+    ("05-alternating-reductions.md", "TMAM理论V-交替重排与多窗口参数族.pdf", "Shapez 2 TMAM 形式化理论系列 · 第五篇"),
+    ("06-landing-and-capacity-bounds.md", "TMAM理论VI-落地记录与空间容量下界.pdf", "Shapez 2 TMAM 形式化理论系列 · 第六篇"),
 )
 SOURCE = THEORY_DIR / PAPERS[0][0]
 OUTPUT = ROOT / PAPERS[0][1]
@@ -544,7 +545,18 @@ def render_inline(text: str) -> str:
             nxt += 1
         tokens.append(escape_typst_text(text[i:nxt]))
         i = nxt
-    return "".join(tokens)
+    out: list[str] = []
+    for tok in tokens:
+        if out:
+            prev = out[-1]
+            if (
+                prev.endswith("$") and tok and "\u4e00" <= tok[0] <= "\u9fff"
+            ) or (
+                tok.startswith("$") and prev and "\u4e00" <= prev[-1] <= "\u9fff"
+            ):
+                out.append(" ")
+        out.append(tok)
+    return "".join(out)
 
 
 def _strip_heading_number(title: str) -> str:
@@ -1110,7 +1122,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=SOURCE, help="理论 Markdown 源文件路径")
     parser.add_argument("--output", type=Path, default=OUTPUT, help="导出 PDF 路径")
-    parser.add_argument("--all", action="store_true", help="重新编译全部四篇正文论文与附录")
+    parser.add_argument("--all", action="store_true", help="重新编译全部六篇理论论文")
     args = parser.parse_args(argv)
     if args.all:
         for src_name, pdf_name, label in PAPERS:

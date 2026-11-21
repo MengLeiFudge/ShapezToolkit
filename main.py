@@ -72,7 +72,7 @@ def build_parser() -> argparse.ArgumentParser:
     paper2 = tmam2_commands.add_parser("paper", help="将二代 TMAM 理论 Markdown 排版为 A4 PDF")
     paper2.add_argument("--source", type=Path, help="理论 Markdown 源文件路径")
     paper2.add_argument("--output", type=Path, help="导出 PDF 路径")
-    paper2.add_argument("--all", action="store_true", help="重新排版全部四篇正文论文与附录")
+    paper2.add_argument("--all", action="store_true", help="重新排版全部六篇理论论文")
     return parser
 
 
