@@ -10,7 +10,7 @@
 | II | [02-four-quadrants.md](02-four-quadrants.md) | [PDF](../papers/TMAM理论II-四象限五层合成.pdf) | 固定 $(4,5)$ 完整理论：半形闭包、顶针逆像、堆叠约化与整图有限完备覆盖 |
 | III | [03-even-constructions.md](03-even-constructions.md) | [PDF](../papers/TMAM理论III-一般偶数象限构造.pdf) | 正向局部构造与存在性闭包：偶数象限列条件 $A$、三列释放、递归脚手架、$(6,5)$ 精确闭包与 $(4,H)$ 零尾针闭包对照 |
 | IV | [04-cascades-and-forced-words.md](04-cascades-and-forced-words.md) | [PDF](../papers/TMAM理论IV-级联与强制工序.pdf) | 多轮物理动力学与首轮强制词：重复下落级联族、$P S^k / P S^k P / P P P$ 强制族、$P S P S P S$ 重排反例与一般交替主命题 |
-| V | [05-alternating-reductions.md](05-alternating-reductions.md) | [PDF](../papers/TMAM理论V-交替重排与多窗口参数族.pdf) | 序列重排正规形与多窗口参数族：跨 $L$ 改写与四象限八次顶针上界、三列结算稳定与跨半障碍、全局窗口见证及 $P S^k P P$、$P S^a P S^b$、六象限 $P S^a P$ 族 |
+| V | [05-alternating-reductions.md](05-alternating-reductions.md) | [PDF](../papers/TMAM理论V-交替重排与多窗口参数族.pdf) | 序列重排正规形与多窗口参数族：跨 $L$ 改写与四象限以顶针开头的完全交替唯一最短词八针上界、三列结算稳定与跨半障碍、全局窗口见证及 $P S^k P P$、$P S^a P S^b$、六象限 $P S^a P$ 族 |
 | VI | [06-landing-and-capacity-bounds.md](06-landing-and-capacity-bounds.md) | [PDF](../papers/TMAM理论VI-落地记录与空间容量下界.pdf) | 几何落地记录与空间容量下界：最浅来源 $4m$ 界、十象限半切失稳分界、逐层独立集容量 $\alpha(A_h)$、无中停落地与混合浅来源排除、底针反推与错层宽度界 $n\ge3m+e$ |
 
 ### 阅读与维护约定

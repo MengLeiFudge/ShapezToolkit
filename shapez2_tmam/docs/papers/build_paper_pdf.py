@@ -546,15 +546,22 @@ def render_inline(text: str) -> str:
         tokens.append(escape_typst_text(text[i:nxt]))
         i = nxt
     out: list[str] = []
+    cjk_close = "，。；：！？、）》」』】”’"
+    cjk_open = "（《「『【“‘"
     for tok in tokens:
-        if out:
+        if out and tok:
             prev = out[-1]
-            if (
-                prev.endswith("$") and tok and "\u4e00" <= tok[0] <= "\u9fff"
-            ) or (
-                tok.startswith("$") and prev and "\u4e00" <= prev[-1] <= "\u9fff"
-            ):
-                out.append(" ")
+            if prev:
+                if (
+                    prev.endswith("$") and "\u4e00" <= tok[0] <= "\u9fff"
+                ) or (
+                    tok.startswith("$") and "\u4e00" <= prev[-1] <= "\u9fff"
+                ):
+                    out.append(" ")
+                elif (prev.endswith("$") or prev.startswith("#raw(")) and tok[0] in cjk_close:
+                    out.append("\u2060")
+                elif prev[-1] in cjk_open and (tok.startswith("$") or tok.startswith("#raw(")):
+                    out.append("\u2060")
         out.append(tok)
     return "".join(out)
 
@@ -1028,17 +1035,11 @@ def markdown_to_typst(source_text: str, series_label: str) -> str:
   set par(first-line-indent: 0em)
   set text(font: ("New Computer Modern", "SimHei"), weight: "bold")
   if it.level == 1 {{
-    v(1.35em, weak: true)
-    text(size: 13.5pt)[#it]
-    v(0.75em, weak: true)
+    block(sticky: true, above: 1.35em, below: 0.75em)[#text(size: 13.5pt)[#it]]
   }} else if it.level == 2 {{
-    v(1.05em, weak: true)
-    text(size: 11.5pt)[#it]
-    v(0.55em, weak: true)
+    block(sticky: true, above: 1.05em, below: 0.55em)[#text(size: 11.5pt)[#it]]
   }} else {{
-    v(0.85em, weak: true)
-    text(size: 10.5pt)[#it]
-    v(0.45em, weak: true)
+    block(sticky: true, above: 0.85em, below: 0.45em)[#text(size: 10.5pt)[#it]]
   }}
 }}
 
