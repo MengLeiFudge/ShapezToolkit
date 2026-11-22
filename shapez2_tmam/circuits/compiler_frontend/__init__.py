@@ -758,6 +758,10 @@ class _Lowering:
             return self.short_circuit(node)
         if isinstance(node, ast.Compare):
             return self.compare(node)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.BitAnd, ast.BitOr)):
+            left, right = self.expression(node.left, BOOL), self.expression(node.right, BOOL)
+            operation = "and" if isinstance(node.op, ast.BitAnd) else "or"
+            return self.apply(operation, BOOL, left.operand, right.operand)
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
             left, right = self.expression(node.left, INT), self.expression(node.right, INT)
             return self.add(node, left, right)

@@ -1,5 +1,6 @@
 """角与脚手架半形：任意层释放及四象限五层顶破，共用稳定半形拼装。"""
 
+from .column_rules import column_admissible
 from .physics import EMPTY, PIN, Shape
 from .recipe import Builder, Recipe
 
@@ -18,6 +19,10 @@ class CornerBuilder:
     @staticmethod
     def admissible(cells: tuple[str, ...]) -> bool:
         """检查针前缀、晶体间隙及独立针的直接支撑这些列内必要条件。"""
+        if len(cells) <= 5:
+            materials = tuple(0 if cell == EMPTY else 2 if cell == PIN else 3 if cell[0] == "c" else 1
+                              for cell in cells)
+            return column_admissible(*(materials + (0,) * (5 - len(cells))))
         prefix = True
         outside_pin = False
         below = EMPTY

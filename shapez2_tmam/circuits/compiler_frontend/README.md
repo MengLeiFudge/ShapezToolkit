@@ -18,8 +18,10 @@ program = compile_method(path.read_text(encoding="utf-8"), "append_five", filena
 | 控制流 | `if`、`elif`、`else`，提前 `return`，短路 `and`、`or`，定长 `for` 和定步长 `while`。循环体可用 `break`、`continue` |
 | 只读表 | 可用整数索引读取非空的同类型固定元组。给元组命名时，可在方法内定义一次，或直接在同文件顶层用一个赋值定义字面量元组。所有到达读取位置的路径都必须保证索引合法 |
 | 字面量 | `True`、`False`，有符号 32 位整数，颜色单字符如 `"r"`，以及图形短代码如 `shape_literal("Cu------")` |
-| 标量操作 | `not`，同类型 `==`、`!=`，对 `None` 的 `is`、`is not`，整数单次比较及可证明不溢出的加法 |
+| 标量操作 | `not`，布尔 `&`、`\|`，同类型 `==`、`!=`，对 `None` 的 `is`、`is not`，整数单次比较及可证明不溢出的加法 |
 | 调用 | 以固定位置参数调用同文件顶层方法，或用 `from .模块 import 方法` 导入调用，支持 `as` 别名。调用图必须无环。图形操作使用共享合同中 `BUILTINS` 的保留名称 |
+
+布尔 `&` 和 `|` 会求值两侧，再生成对应的逻辑门。用比较结果作操作数时加括号，例如 `(z0 == 0) & (z1 == 2)`。索引和加法仍须在求值位置证明范围安全。`and` 和 `or` 按 Python 规则短路。
 
 例如相邻的 `assembly.py` 可以用 `from .layer_methods import append_layer as append` 再调用 `append(lower, upper)`。编译时将 `assembly.py` 的实际路径传给 `filename`。按入口可达的调用查找同包源码，跨文件方法以模块路径区分。同名顶层绑定和调用环会定位到冲突定义和触发调用的位置。
 
