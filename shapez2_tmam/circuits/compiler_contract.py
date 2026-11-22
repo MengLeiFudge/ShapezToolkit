@@ -51,6 +51,11 @@ BUILTINS = {
     "swap_front_a": ((SHAPE, SHAPE), SHAPE),
     "swap_front_b": ((SHAPE, SHAPE), SHAPE),
     "crystal": ((SHAPE, COLOR), SHAPE),
+    # 拆层保留原下半层号，顶层移到地面。分析读取底层 q0。
+    "unstack_lower": ((SHAPE,), SHAPE),
+    "unstack_upper": ((SHAPE,), SHAPE),
+    "analyze_part": ((SHAPE,), SHAPE),
+    "analyze_color": ((SHAPE,), COLOR),
 }
 
 

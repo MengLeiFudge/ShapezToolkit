@@ -27,6 +27,8 @@ _NATIVE = {
     "cut_front": "VirtualHalfCutter", "pin": "VirtualPinPusher", "stack": "VirtualStacker",
     "swap_front_a": "VirtualHalvesSwapper", "swap_front_b": "VirtualHalvesSwapper",
     "crystal": "VirtualCrystalGenerator",
+    "unstack_lower": "VirtualUnstacker", "unstack_upper": "VirtualUnstacker",
+    "analyze_part": "VirtualAnalyzer", "analyze_color": "VirtualAnalyzer",
 }
 
 
@@ -305,7 +307,7 @@ class Lowering:
                 result = self.circuit.add(kind, result)
         else:
             result = self.circuit.add(_NATIVE[operation], *signals)
-            if operation == "swap_front_b":
+            if operation in ("swap_front_b", "unstack_upper", "analyze_color"):
                 result = Ref(result.node, 1)
         return _Value(result_type, result)
 
