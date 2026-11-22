@@ -25,3 +25,17 @@ python -m shapez2_tmam.circuits.compiler_backend append_five_timed --channel-bas
 两块内部的门网均无环。记 `S(t)` 为状态模块发布的索引和累计值，`F` 为按索引运行一步的计算。复位时 `S(t)=(0, initial)`，一个往返后状态模块持续收到 `F(0, initial)`。启动后 `S(t)=F(S(t−24))`，第一轮在 `run` 抵达状态模块时已经可读。其余每轮相隔 24 tick，末轮索引和结果在后续往返中保持。运行前提见[固定频道边](../../docs/proofs/08-circuits.md#s08-05)。
 
 采样时间包含启动和结果的各一次 12 tick 频道传播、后续各轮的 24 tick 往返及余量。生产编译核对常量、端口和收发频道。游戏内导入和时序观察单独验收。
+
+### 同步更新多个状态字段
+
+`timed.compile_state_fold(programs, steps, channel_base)` 按 `programs` 的映射顺序定义状态字段。映射的每个值是一个 `Program`，其入口按该顺序接收所有旧字段，并以本轮 `item` 为最后一个参数。它返回映射键所指字段的下一值。各入口的参数类型须一致，每个字段的初值、旧值、下一值和结果使用同一类型。
+
+同一轮的各个入口共用同一份旧状态和当前 `item`。所有下一值都有相同的 12 tick 回程延迟，由状态平台同时发布到下一轮。复位、每轮 24 tick 的往返和 `done` 采样协议与单字段一致。向 `initial_<字段>` 提供初值，完成后从 `result_<字段>` 读取结果。频道表的 `module_links` 按两个方向列出索引以及各字段的类型和频道。
+
+状态平台每侧占用 `2N+2` 个无线口，计算平台占用 `N+1+steps` 个接收口，其中 `N` 是字段数。每个平台每侧可放 10 个无线口，因此最多支持四个字段，四字段最多折叠五轮。每个模块的门网还须能在对应平台上完成布线。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-base 1700060 --output scalar_ring_timed.spz2bp
+```
+
+这个例子有两个整数状态 `a`、`b` 和三个布尔 `item`。每轮输入为 1 时，两字段各取对方的旧值。给定初值 `a=3`、`b=7`，依次输入 `1, 0, 0`，预期结果是 `a=7`、`b=3`。

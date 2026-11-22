@@ -1,11 +1,14 @@
 """在公开状态和单步方法之间复用有限次折叠。"""
 
+from collections.abc import Mapping
+from dataclasses import dataclass
+
 from ...mari.blueprint import Wiring
 from ...mari.signals import decode_constant
 from ..circuit import Circuit, Literal, Ref
-from ..compiler_contract import BOOL, INT, Function, Program
+from ..compiler_contract import BOOL, INT, Function, Program, ValueType
 from ..sequential_circuit import select
-from ._layout import layout
+from ._layout import _RADIO_ROWS, layout
 from ._lower import Lowering, _Value
 
 
@@ -30,89 +33,144 @@ def _verify_radios(document: dict, ports: tuple[tuple[set[int], set[int]], ...])
     if tuple(by_platform) != ports:
         raise ValueError("状态与计算模块的实际收发频道和接口表不一致")
 
-def _state(inputs: dict[str, int], channels: dict[str, int], outputs: dict[str, int], steps: int) -> dict:
+
+@dataclass(frozen=True)
+class _Ports:
+    run: int
+    initial: dict[str, int]
+    done: int
+    result: dict[str, int]
+    items: dict[str, int]
+    index: int
+    value: dict[str, int]
+    next_index: int
+    next_value: dict[str, int]
+
+
+def _state(ports: _Ports, steps: int) -> dict:
     circuit = Circuit()
-    run, initial, next_index, next_value = (circuit.add("ControlledSignalReceiver", Literal(channel)) for channel in
-                                            (inputs["run"], inputs["initial"],
-                                             channels["next_index"], channels["next_value"]))
-    index = select(circuit, run, next_index, Literal(0))
-    value = select(circuit, run, next_value, initial)
+    sources = (ports.run, *ports.initial.values(), ports.next_index, *ports.next_value.values())
+    signals = {channel: circuit.add("ControlledSignalReceiver", Literal(channel)) for channel in sources}
+    run = signals[ports.run]
+    index = select(circuit, run, signals[ports.next_index], Literal(0))
+    values = tuple(select(circuit, run, signals[nxt], signals[initial])
+                   for initial, nxt in zip(ports.initial.values(), ports.next_value.values()))
     terminal = circuit.add("LogicGateCompare", index, Literal(steps), config="AQ==")
     done = circuit.add("LogicGateAnd", run, terminal)
-    result = circuit.add("LogicGateIf", value, done)
-    document, _ = layout(circuit, {channels["index"]: index, channels["value"]: value,
-                                   outputs["done"]: done, outputs["result"]: result})
+    results = (circuit.add("LogicGateIf", value, done) for value in values)
+    document, _ = layout(circuit, {ports.index: index, **dict(zip(ports.value.values(), values)),
+                                   ports.done: done, **dict(zip(ports.result.values(), results))})
     return document["BP"]["Entries"][0]
 
 
-def _worker(lowering: Lowering, step: Function, channels: dict[str, int], item_channels: tuple[int, ...]) -> dict:
-    circuit = lowering.circuit
-    index, value, *items = (circuit.add("ControlledSignalReceiver", Literal(channel)) for channel in
-                            (channels["index"], channels["value"], *item_channels))
+def _worker(lowerings: tuple[Lowering, ...], methods: tuple[Function, ...],
+            ports: _Ports, signature: tuple[ValueType, ...]) -> dict:
+    circuit = lowerings[0].circuit
+    index, *signals = (circuit.add("ControlledSignalReceiver", Literal(channel)) for channel in
+                       (ports.index, *ports.value.values(), *ports.items.values()))
+    count = len(ports.value)
+    values, items = signals[:count], signals[count:]
     limit = len(items)
     active = [circuit.add("LogicGateCompare", index, Literal(i), config="AQ==") for i in range(limit + 1)]
-    item = lowering._merge(list(zip(active, items)))
-    computed = lowering.invoke(step.name, (_Value(step.inputs[0].type, value), _Value(step.inputs[1].type, item)))
-    next_value = select(circuit, active[-1], value, computed.signal)
-    next_index = lowering._merge([(guard, Literal(min(i + 1, limit))) for i, guard in enumerate(active)])
+    item = lowerings[0]._merge(list(zip(active, items)))
+    old = tuple(_Value(type_, signal) for type_, signal in zip(signature, (*values, item)))
+    # 各更新方法只接收这同一份旧状态。下一值只送到状态模块。
+    computed = (lowering.invoke(method.name, old) for lowering, method in zip(lowerings, methods))
+    next_values = tuple(select(circuit, active[-1], old_value, update.signal)
+                        for old_value, update in zip(values, computed))
+    next_index = lowerings[0]._merge([(guard, Literal(min(i + 1, limit))) for i, guard in enumerate(active)])
     assert isinstance(next_index, Ref)
-    document, _ = layout(circuit, {channels["next_index"]: next_index, channels["next_value"]: next_value})
+    document, _ = layout(circuit, {ports.next_index: next_index,
+                                   **dict(zip(ports.next_value.values(), next_values))})
     return document["BP"]["Entries"][0]
 
 
 def compile_fold(program: Program, steps: int, channel_base: int) -> tuple[dict, dict]:
     """复用一个 (累积值, 本轮输入) → 累积值方法，依次折叠固定数量的公开输入。"""
-    if (program.quadrants, program.height) != (4, 5):
-        raise ValueError("原生后端需要四象限五层 Program")
-    if type(steps) is not int or not 1 <= steps <= 8:
-        raise ValueError("折叠需要 1～8 轮，计算模块还占用两个状态输入口")
-    if type(channel_base) is not int or not 1 <= channel_base <= (1 << 24) - (8 + steps):
+    return _compile_fold({"": program}, steps, channel_base)
+
+
+def compile_state_fold(programs: Mapping[str, Program], steps: int, channel_base: int) -> tuple[dict, dict]:
+    """每个方法接收依声明顺序排列的旧字段和本轮输入，返回同名字段的下一值。"""
+    if any(not isinstance(name, str) or not name.isidentifier() for name in programs):
+        raise ValueError("状态字段名须为有效标识符")
+    return _compile_fold(programs, steps, channel_base)
+
+
+def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int) -> tuple[dict, dict]:
+    count = len(programs)
+    side = len(_RADIO_ROWS)
+    fields_max = (side - 2) // 2
+    if not 1 <= count <= fields_max:
+        raise ValueError(f"时序折叠需要 1～{fields_max} 个状态字段")
+    steps_max = side - count - 1
+    if type(steps) is not int or not 1 <= steps <= steps_max:
+        raise ValueError(f"{count} 个状态字段可折叠 1～{steps_max} 轮")
+    width = steps + 4 * count + 4
+    if type(channel_base) is not int or not 1 <= channel_base <= (1 << 24) - width:
         raise ValueError("所有频道都必须在 1～16777215 内")
-    lowering = Lowering(program)
-    step = lowering.functions[program.entry]
-    if len(step.inputs) != 2 or step.inputs[0].type is not step.result:
-        raise ValueError(f"{step.name} 需要两个参数，且第一个参数必须与返回值同类型")
-    run, initial, done, result = range(channel_base, channel_base + 4)
-    item_channels = tuple(range(channel_base + 4, channel_base + 4 + steps))
-    inputs = {"run": run, "initial": initial, **{f"item{i}": ch for i, ch in enumerate(item_channels)}}
-    outputs = {"done": done, "result": result}
-    channels = dict(zip(("index", "value", "next_index", "next_value"),
-                        range(channel_base + 4 + steps, channel_base + 8 + steps)))
-    state = _state(inputs, channels, outputs, steps)
-    worker = _worker(lowering, step, channels, item_channels)
+    if any((program.quadrants, program.height) != (4, 5) for program in programs.values()):
+        raise ValueError("原生后端需要四象限五层 Program")
+    lowerings = tuple(Lowering(program) for program in programs.values())
+    methods = tuple(lowering.functions[program.entry] for lowering, program in zip(lowerings, programs.values()))
+    field_types = tuple(method.result for method in methods)
+    signature = tuple(arg.type for arg in methods[0].inputs)
+    if len(signature) != count + 1 or signature[:-1] != field_types:
+        raise ValueError("更新方法须按字段顺序接收同类型旧值，并在最后接收本轮输入")
+    for name, method, lowering in zip(programs, methods, lowerings):
+        if tuple(arg.type for arg in method.inputs) != signature:
+            raise ValueError(f"字段 {name!r} 的更新方法 {method.name} 参数类型与本轮参数不一致")
+        lowering.circuit = lowerings[0].circuit
+
+    channels = iter(range(channel_base, channel_base + width))
+
+    def field_ports(prefix: str) -> dict[str, int]:
+        return {f"{prefix}_{name}" if name else prefix: next(channels) for name in programs}
+
+    ports = _Ports(next(channels), field_ports("initial"), next(channels), field_ports("result"),
+                   {f"item{i}": next(channels) for i in range(steps)}, next(channels), field_ports("value"),
+                   next(channels), field_ports("next_value"))
+    state = _state(ports, steps)
+    worker = _worker(lowerings, methods, ports, signature)
     worker["X"] = 3
     document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": [state, worker]}}
-    state_link = {channels["index"], channels["value"]}
-    worker_link = {channels["next_index"], channels["next_value"]}
-    _verify_radios(document, (({run, initial, *worker_link}, {done, result, *state_link}),
-                              ({*item_channels, *state_link}, worker_link)))
-    input_types = {"run": BOOL, "initial": step.result,
-                   **{f"item{i}": step.inputs[1].type for i in range(steps)}}
+    state_link = {ports.index, *ports.value.values()}
+    worker_link = {ports.next_index, *ports.next_value.values()}
+    _verify_radios(document, (({ports.run, *ports.initial.values(), *worker_link},
+                              {ports.done, *ports.result.values(), *state_link}),
+                              ({*ports.items.values(), *state_link}, worker_link)))
+
+    def typed(named: dict[str, int], types: tuple[ValueType, ...]) -> dict:
+        return {name: {"channel": channel, "type": type_.value}
+                for (name, channel), type_ in zip(named.items(), types, strict=True)}
+
+    inputs = {"run": ports.run, **ports.initial, **ports.items}
+    outputs = {"done": ports.done, **ports.result}
     entries = [entry for platform in (state, worker) for entry in platform["B"]["Entries"]]
     round_ticks = 2 * _CHANNEL_TICKS
+    names = {"method": methods[0].name} if "" in programs else {
+        "methods": {name: method.name for name, method in zip(programs, methods)}
+    }
     report = {
-        "method": step.name,
+        **names,
         "schedule": "bounded_fold",
-        "quadrants": program.quadrants,
-        "height": program.height,
+        "quadrants": 4,
+        "height": 5,
         "steps": steps,
-        "inputs": {name: {"channel": ch, "type": input_types[name].value} for name, ch in inputs.items()},
-        "outputs": {"done": {"channel": done, "type": BOOL.value},
-                    "result": {"channel": result, "type": step.result.value}},
+        "inputs": typed(inputs, (BOOL, *field_types) + (signature[-1],) * steps),
+        "outputs": typed(outputs, (BOOL, *field_types)),
         "module_links": {
-            "state_to_step": {"index": {"channel": channels["index"], "type": INT.value},
-                              "value": {"channel": channels["value"], "type": step.result.value}},
-            "step_to_state": {"next_index": {"channel": channels["next_index"], "type": INT.value},
-                              "next_value": {"channel": channels["next_value"], "type": step.result.value}},
+            "state_to_step": typed({"index": ports.index, **ports.value}, (INT, *field_types)),
+            "step_to_state": typed({"next_index": ports.next_index, **ports.next_value}, (INT, *field_types)),
         },
-        "reserved_channels": [channel_base, channel_base + 7 + steps],
+        "reserved_channels": [channel_base, channel_base + width - 1],
         "timing": {
             "channel_signal_ticks": _CHANNEL_TICKS,
             "round_signal_ticks": round_ticks,
             "reset_hold_signal_ticks": _RESET_TICKS,
             "start_to_sample_signal_ticks": (steps - 1) * round_ticks + _IO_MARGIN_TICKS,
             "conditions": "整件批量导入或完整重载。常速 Hybrid 或 AlwaysHighUPS，固定接线与配置，每批最多 4 信号 tick，保留频道由本实例独占。",
-            "protocol": "保持本次 initial 和所有 item，从 run=0 复位开始，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。",
+            "protocol": "从 run=0 复位开始，保持本次所有初值和 item，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。",
         },
         "platform_type": "Foundation_3x3",
         "platforms": 2,

@@ -1,4 +1,4 @@
-"""手写逐层补料方法的中间表示，供后端单独编译。"""
+"""手写中间表示样例，供后端单独编译。"""
 
 from ..compiler_contract import (
     BOOL, INT, SHAPE, Apply, Bind, Block, Branch, Call, Constant, Function,
@@ -42,3 +42,18 @@ def layer_program(entry: str) -> Program:
         Block("return", (), Return(lower)),
     ), 27)
     return Program(entry, (append_layer, append_five))
+
+
+def scalar_ring_programs(fields: tuple[str, ...] = ("a", "b")) -> dict[str, Program]:
+    """每轮按布尔输入决定是否各取下一字段的旧值。"""
+    inputs = (*[Variable(name, INT) for name in fields], Variable("advance", BOOL))
+    programs = {}
+    for i, field in enumerate(fields):
+        partner = fields[(i + 1) % len(fields)]
+        method = Function(f"update_{field}", inputs, INT, (), (
+            Block("entry", (), Branch(Reference("advance"), "move", "keep")),
+            Block("move", (), Return(Reference(partner))),
+            Block("keep", (), Return(Reference(field))),
+        ), 2)
+        programs[field] = Program(method.name, (method,))
+    return programs
