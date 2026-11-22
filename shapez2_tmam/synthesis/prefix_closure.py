@@ -6,20 +6,33 @@ from .row_support import addition_needs_lower
 from .support import in_support_class
 
 
+def _unanchored_row(desired: dict[Position, str], z: int, added: dict[int, str]) -> set[int]:
+    states = {}
+    for q, cell in added.items():
+        supported = z == 0 or (z - 1, q) in desired
+        states[q] = (3 if cell == PIN else 1) + int(supported)
+    return {q for q, cell in states.items() if addition_needs_lower(
+        cell, states.get((q - 1) % 4, 0), states.get((q + 1) % 4, 0), states.get((q + 2) % 4, 0))}
+
+
+def close_stack_prefix(desired: dict[Position, str], heights: list[int], layers: int) -> None:
+    """四象限保晶前缀从上至下纳入每层缺少下挡的新增块。"""
+    for z in range(layers - 1, -1, -1):
+        added = {q: desired[z, q] for q in range(4) if z >= heights[q] and (z, q) in desired}
+        for q in _unanchored_row(desired, z, added):
+            heights[q] = z + 1
+
+
 def unanchored_additions(rules: Rules, desired: dict[Position, str], lower: dict[Position, str],
                          *, optional_top: bool = False) -> set[Position]:
     """找出没有直接下挡的新增块；这些块的每一格都须预置在下料。"""
     delta = {pos: cell for pos, cell in desired.items() if pos not in lower
              and not (optional_top and pos[0] == rules.height - 1 and cell[0] != "c")}
     if rules.quadrants == 4 and all(cell[0] != "c" for cell in delta.values()):
-        states = {}
+        rows: dict[int, dict[int, str]] = {}
         for (z, q), cell in delta.items():
-            supported = z == 0 or (z - 1, q) in desired
-            states[z, q] = (3 if cell == PIN else 1) + int(supported)
-        return {(z, q) for (z, q), cell in states.items()
-                if addition_needs_lower(cell, states.get((z, (q - 1) % 4), 0),
-                                        states.get((z, (q + 1) % 4), 0),
-                                        states.get((z, (q + 2) % 4), 0))}
+            rows.setdefault(z, {})[q] = cell
+        return {(z, q) for z, added in rows.items() for q in _unanchored_row(desired, z, added)}
     forced = set()
     for block in rules.groups(delta):
         if not any(z == 0 or (z - 1, q) in desired for z, q in block):

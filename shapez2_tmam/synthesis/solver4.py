@@ -7,7 +7,7 @@ from .construct import Constructor, Result
 from .inverse import PinFamily, pin_families
 from .physics import Rules, Shape
 from .pin_constraints import pin_base_possible, pin_prefix_limits
-from .prefix_closure import minimal_start, unanchored_additions
+from .prefix_closure import close_stack_prefix, minimal_start, unanchored_additions
 from .recipe import Recipe
 from .support import in_support_class
 
@@ -33,13 +33,7 @@ class Solver4:
         columns = [sorted((z, cell) for (z, column), cell in desired.items() if column == q)
                    for q in range(4)]
         heights = [max((z + 1 for z, cell in column if cell[0] == "c"), default=0) for column in columns]
-        while True:
-            lower = {pos: cell for pos, cell in desired.items() if pos[0] < heights[pos[1]]}
-            forced = unanchored_additions(self.rules, desired, lower)
-            if not forced:
-                break
-            for z, q in forced:
-                heights[q] = max(heights[q], z + 1)
+        close_stack_prefix(desired, heights, len(target.layers))
         counts_min = [sum(z < height for z, _ in column) for column, height in zip(columns, heights)]
         ranges = [range(required, min(len(column), limit) + 1)
                   for column, required, limit in zip(columns, counts_min, limits)]
