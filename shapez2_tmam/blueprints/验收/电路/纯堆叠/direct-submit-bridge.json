@@ -1,0 +1,45 @@
+{
+  "inputs": {
+    "address": 1640000,
+    "length": 1640043,
+    "reset": 1640012,
+    "candidate_fields": {
+      "opcode": 1680001,
+      "a": 1680002,
+      "b": 1680003,
+      "destination": 1680004,
+      "base": 1680005,
+      "color": 1680006
+    },
+    "accepted": 1640045
+  },
+  "outputs": {
+    "fields": {
+      "opcode": 1640002,
+      "a": 1640003,
+      "b": 1640004,
+      "destination": 1640005,
+      "base": 1640006,
+      "color": 1640007
+    },
+    "commit_address": 1680008,
+    "packet_tag": 1640046,
+    "candidate_address": 1680007
+  },
+  "reserved_internal_channels": [
+    1681000,
+    1681021
+  ],
+  "timing": {
+    "hold_signal_ticks": 1664,
+    "radio_signal_ticks": 12,
+    "delay_steps": 139,
+    "timer": "counter",
+    "timer_islands": 4,
+    "eligible_to_commit_signal_ticks": 1668,
+    "commit_to_public_signal_ticks": 12,
+    "public_to_tag_signal_ticks": 24
+  },
+  "islands": 15,
+  "buildings": 13344
+}

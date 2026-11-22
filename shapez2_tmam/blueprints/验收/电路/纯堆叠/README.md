@@ -1,6 +1,6 @@
 # 纯堆叠配方电路
 
-目标通过本册的空隙判定和五轮扫描后，可读取每个工段的动态配方。下列蓝图把结果送到制作层提交器的私有频道。完整的动态提交仍待接入验证。
+目标通过本册的空隙判定和五轮扫描后，电路按工段地址输出动态配方。提交桥向六槽工道提交配方。已离线核对蓝图频道及两层订单，游戏内锁存与持续出货仍待验收。
 
 | 蓝图 | 输入 | 输出 |
 |---|---|---|
@@ -10,10 +10,11 @@
 | [工序和槽号](direct-recipe-fields.json) | 工段地址、配方长度 | `opcode`、`a`、`b`、`destination` |
 | [基础料深度](direct-base-depth.json) | 同一工段地址和配方长度 | 从目标顶层往下数的距离，顶层为 0 |
 | [读基础料](direct-base-read.json) | 原目标、基础料深度 | 对应的原生单层图形，无基础料时为空 |
+| [动态提交桥](direct-submit-bridge.json) | 工道地址、换单状态、通过位和候选六字段 | 工道六字段与确认标签 |
 
 对于不超过五层的连续目标，配方长度为 `2h−1`。地址 0 读取底层并写槽 0。其余基础料地址 `1、3、5、7` 从第二层起依次取料并写槽 1。每次取料后的堆叠读槽 0 和槽 1，结果写回槽 0。基础料工段的两个操作数和所有工段的颜色信号留空。
 
-保持地址、长度和原目标后，基础料经过两块板。其保持时间按两张接口表相加，当前合计 1664 信号 tick。工序和槽号与这两块板并行计算。提交器需要确认当前地址的各字段稳定。
+保持地址、长度和原目标后，基础料经过两块板。按两张接口表合计须等待 1664 信号 tick。工序和槽号与基础料并行计算。提交桥以 12 tick 为节拍复用计数器，实际等待 1668 tick。工道地址变动或资格中断会重计。游戏内使用外置主控版实体线，并保持 `1600000` 的目标直到该单排空。
 
 ## 重新生成
 
@@ -55,4 +56,7 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/direct_sta
   --field base=direct_base_at_depth --input-channel target=1600000 \
   --input-channel depth=1700580 --output-channel base=1680005 \
   --output direct-base-read.spz2bp
+
+python -m shapez2_tmam.circuits.factory_assembly.submit_bridge \
+  --direct-stack --hold-signal-ticks 1664 --output direct-submit-bridge.spz2bp
 ```
