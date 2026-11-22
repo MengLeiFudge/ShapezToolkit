@@ -184,3 +184,26 @@ def pack_stack_row(row: Shape | None, below: Shape | None, ground: bool) -> Shap
     front = pack_stack_half(row, below, ground)
     back = pack_stack_half(rotate_ccw(rotate_ccw(row)), rotate_ccw(rotate_ccw(below)), ground)
     return _merge_stack_corners(front, rotate_ccw(rotate_ccw(back)))
+
+
+def _tail_stack_corner(row: Shape | None, level: int, prefix: int) -> Shape | None:
+    if level < prefix:
+        return None
+    part = analyze_part(row)
+    if part is None or part == shape_literal("cu------"):
+        return None
+    return _cut_ground_corner(row)
+
+
+def tail_stack_half(row: Shape | None, level: int, left_prefix: int, right_prefix: int) -> Shape | None:
+    """读取 q0/q1 未纳入前态的 N/P 原料，level 从 0 开始。"""
+    left = _tail_stack_corner(row, level, left_prefix)
+    right = _tail_stack_corner(rotate_ccw(row), level, right_prefix)
+    return _merge_stack_corners(left, rotate_cw(right))
+
+
+def tail_stack_row(row: Shape | None, level: int, h0: int, h1: int, h2: int, h3: int) -> Shape | None:
+    """按已闭合前缀，从原单层选择本轮实际堆叠的原料。"""
+    front = tail_stack_half(row, level, h0, h1)
+    back = tail_stack_half(rotate_ccw(rotate_ccw(row)), level, h2, h3)
+    return _merge_stack_corners(front, rotate_cw(rotate_cw(back)))
