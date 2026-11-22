@@ -15,6 +15,10 @@ def crystal(target: Shape | None, color: Color) -> Shape | None:
     return _RULES.crystal(target, color) if target is not None else None
 
 
+def rotate_ccw(target: Shape | None) -> Shape | None:
+    return _RULES.rotate(target, -1) if target is not None else None
+
+
 def unstack_lower(target: Shape | None) -> Shape | None:
     if target is None:
         return None

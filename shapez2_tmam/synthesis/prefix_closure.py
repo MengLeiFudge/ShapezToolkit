@@ -14,6 +14,18 @@ def _row_states(desired: dict[Position, str], z: int, added: dict[int, str]) -> 
     return tuple(states)
 
 
+def stack_scan_rows(target: Shape) -> tuple[Shape | None, ...]:
+    """将支持判定的五行按扫描顺序编码为单层信号。"""
+    desired = Rules(4, 5).cells(target)
+    codes = (EMPTY, "Cu", "Ru", "Su", "Wu")
+    rows = []
+    for z in range(4, -1, -1):
+        cells = {q: cell for q in range(4) if (cell := desired.get((z, q), EMPTY)) != EMPTY and cell[0] != "c"}
+        states = _row_states(desired, z, cells)
+        rows.append(Shape((tuple(codes[state] for state in states),)) if any(states) else None)
+    return tuple(rows)
+
+
 def close_stack_prefix(desired: dict[Position, str], heights: list[int], layers: int) -> None:
     """四象限保晶前缀从上至下纳入每层缺少下挡的新增块。"""
     for z in range(layers - 1, -1, -1):
