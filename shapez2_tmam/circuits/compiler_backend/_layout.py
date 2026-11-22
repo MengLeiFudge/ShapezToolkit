@@ -135,12 +135,6 @@ def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
     arrangements = []
     if len(gates) > 50:
         arrangements.append(_spread_sites(circuit, channels, radios, gates, outputs))
-        # 错开各层门位，让高扇出网络在门阵列之间有换层空间。
-        shifts = (
-            [(x + z, y + (2 * z) % 3, z) for x, y in row_sites for z in levels],
-            [(x + z, y + (2 * z) % 3, z) for x, y in col_sites for z in levels],
-        )
-        shapes = (*shifts, *shapes)
     last_error = None
     arrangements.extend((gates, sites) for sites in shapes)
     for order, sites in arrangements:
