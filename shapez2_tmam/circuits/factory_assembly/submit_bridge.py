@@ -83,6 +83,69 @@ def _delay(steps):
         previous = channel
 
 
+def _same_address(module):
+    module.gate('LogicGateCompare', ('eligible', 'previous'), ('same',), 'AQ==')
+    module.gate('LogicGateCompare', ('eligible', None), ('present',), 'Bg==')
+    module.gate('LogicGateAnd', ('same', 'present'), ('continuing',))
+
+
+def _count_digit(channel, lower):
+    inputs = {'eligible': _ELIGIBLE, 'previous': _DELAY_BASE, 'digit': channel}
+    inputs.update({f'lower{i}': lower_channel for i, lower_channel in enumerate(lower)})
+    module = Module(inputs)
+    _same_address(module)
+    module.gate('LogicGateNot', ('continuing',), ('restart',))
+    module.gate('LogicGateIf', (0, 'restart'), ('count',))
+    module.lookup('digit', 'incremented', ((value, (value + 1) % 8) for value in range(8)))
+    if lower:
+        full = []
+        for index in range(len(lower)):
+            signal = f'full{index}'
+            module.gate('LogicGateCompare', (f'lower{index}', 7), (signal,), 'AQ==')
+            full.append(signal)
+        carry = full[0]
+        if len(full) > 1:
+            _all(module, full, 'carry')
+            carry = 'carry'
+        module.gate('LogicGateNot', (carry,), ('no_carry',))
+        module.gate('LogicGateAnd', ('continuing', 'no_carry'), ('keep',))
+        module.gate('LogicGateIf', ('digit', 'keep'), ('count',))
+        module.gate('LogicGateAnd', ('continuing', carry), ('advance',))
+    else:
+        module.gate('LogicGateAnd', ('continuing', 1), ('advance',))
+    module.gate('LogicGateIf', ('incremented', 'advance'), ('count',))
+    module.outputs = {'count': channel}
+    return module
+
+
+def _counter(steps):
+    threshold = steps - 2
+    digits = tuple(int(digit) for digit in reversed(f'{threshold:o}'))
+    channels = tuple(range(_DELAY_BASE + 1, _DELAY_BASE + 1 + len(digits)))
+    for index, channel in enumerate(channels):
+        yield _count_digit(channel, channels[:index])
+    inputs = {'eligible': _ELIGIBLE, 'previous': _DELAY_BASE, 'committed': COMMIT}
+    inputs.update({f'digit{i}': channel for i, channel in enumerate(channels)})
+    module = Module(inputs)
+    _same_address(module)
+    matches = []
+    for index, digit in enumerate(digits):
+        signal = f'match{index}'
+        module.gate('LogicGateCompare', (f'digit{index}', digit), (signal,), 'AQ==')
+        matches.append(signal)
+    reached = matches[0]
+    if len(matches) > 1:
+        _all(module, matches, 'reached')
+        reached = 'reached'
+    module.gate('LogicGateCompare', ('eligible', 'committed'), ('already',), 'AQ==')
+    module.gate('LogicGateOr', (reached, 'already'), ('ready',))
+    module.gate('LogicGateAnd', ('continuing', 'ready'), ('commit',))
+    module.gate('LogicGateIf', ('eligible', 'commit'), ('stamp',))
+    module.gate('LogicGateIf', ('eligible', 1), ('previous_stamp',))
+    module.outputs = {'stamp': COMMIT, 'previous_stamp': _DELAY_BASE}
+    yield module
+
+
 def _publish(names, *, stamp=False):
     module = Module({'address': WRITE_STATUS['address'], 'eligible': _ELIGIBLE, 'commit': COMMIT,
                      **{name: _BUFFERED[name] for name in names}})
@@ -137,16 +200,19 @@ def _direct_candidate():
     return module
 
 
-def build(hold_ticks: int, *, direct_stack: bool = False) -> tuple[dict, dict]:
+def build(hold_ticks: int, *, direct_stack: bool = False, delay_chain: bool = False) -> tuple[dict, dict]:
     if type(hold_ticks) is not int or hold_ticks < 1:
         raise ValueError('稳定等待须为正整数信号 tick')
     steps = (hold_ticks + RADIO_TICKS - 1) // RADIO_TICKS
     if steps > _CHANNEL_LIMIT - _DELAY_BASE:
         raise ValueError('稳定等待超出提交桥的保留频道范围')
+    timed = not delay_chain and steps > 1
+    timer = tuple(_counter(steps) if timed else _delay(steps))
+    last_channel = _DELAY_BASE + (len(timer) - 1 if timed else steps - 2)
     low, high = _GROUPS
     modules = (*(_copy_fields(names) for names in _GROUPS),
                *(_stage_fields(names, stable) for names, stable in zip(_GROUPS, _STABLE)),
-               _eligible(), *_delay(steps), _publish(low, stamp=True), _publish(high),
+               _eligible(), *timer, _publish(low, stamp=True), _publish(high),
                *(_readback(names, matched) for names, matched in zip(_GROUPS, _MATCHED)), _tag())
     if direct_stack:
         modules += (_direct_candidate(),)
@@ -160,11 +226,13 @@ def build(hold_ticks: int, *, direct_stack: bool = False) -> tuple[dict, dict]:
         'inputs': {'address': WRITE_STATUS['address'], 'length': ORDER_INPUTS['length'], 'reset': WRITE_RESET,
                    'candidate_address': CANDIDATE_ADDRESS, 'candidate_fields': CANDIDATE_FIELDS},
         'outputs': {'fields': FIELDS, 'commit_address': COMMIT, 'packet_tag': PACKET_TAG},
-        'reserved_internal_channels': [min(_PREVIOUS.values()), _DELAY_BASE + steps - 2],
+        'reserved_internal_channels': [min(_PREVIOUS.values()), last_channel],
         'timing': {'hold_signal_ticks': hold_ticks, 'radio_signal_ticks': RADIO_TICKS, 'delay_steps': steps,
+                   'timer': 'counter' if timed else 'delay_chain', 'timer_islands': len(timer),
                    'eligible_to_commit_signal_ticks': steps * RADIO_TICKS,
                    'commit_to_public_signal_ticks': RADIO_TICKS, 'public_to_tag_signal_ticks': 2 * RADIO_TICKS},
         'islands': len(entries),
+        'buildings': sum(len(island['B']['Entries']) for island in entries),
     }
     if direct_stack:
         report['inputs']['accepted'] = ORDER_INPUTS['accepted']
@@ -179,6 +247,7 @@ def main() -> int:
     timing.add_argument('--hold-signal-ticks', type=int, help='编译报告给出的稳定等待时间')
     timing.add_argument('--settling-report', type=Path, help='含 settling.hold_signal_ticks 的编译接口 JSON')
     parser.add_argument('--direct-stack', action='store_true', help='从通过纯堆叠回放的工道地址生成候选地址')
+    parser.add_argument('--delay-chain', action='store_true', help='导出逐级无线等待版，用于离线时序对照')
     parser.add_argument('--output', type=Path, required=True, help='原生 .spz2bp 文件，同名 JSON 保存接线和时序')
     args = parser.parse_args()
     if args.output.suffix != '.spz2bp':
@@ -188,7 +257,7 @@ def main() -> int:
         if args.settling_report is not None:
             data = json.loads(args.settling_report.read_text(encoding='utf-8-sig'))
             hold = data['settling']['hold_signal_ticks']
-        document, report = build(hold, direct_stack=args.direct_stack)
+        document, report = build(hold, direct_stack=args.direct_stack, delay_chain=args.delay_chain)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(encode_document(document) + '\n', encoding='utf-8')
         args.output.with_suffix('.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n',
