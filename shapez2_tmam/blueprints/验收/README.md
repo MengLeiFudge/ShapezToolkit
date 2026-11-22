@@ -15,6 +15,7 @@
 | 电路 | 无晶体路线的原层位及相邻层检查 | [空隙判定](电路/纯堆叠/direct-no-gaps.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 电路 | 纯堆叠配方的工序、槽号和基础料 | [接线和生成命令](电路/纯堆叠/README.md) |
 | 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) |
+| 电路 | 生成角的晶下落点参数 | [晶体层、落点及顶破选择](电路/双半形/corner-gap.json) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
 
@@ -26,11 +27,16 @@
 
 纯堆叠电路的目标输入为 `1600000`。空隙判定板同时转发目标和初始通过位。`initial_upper`、`initial_replay` 留空。按接口表启动五轮扫描，待 `done=1` 后再采样。装方信息板将实际回放与目标比较，通过后才发布配方长度和回放结果。
 
-列读取每次处理 `q0`。将待查列旋转到 `q0`，原图接 `initial_remaining`，`initial_word` 留空，`initial_height` 置 5。五轮后输出保留全部原层位的材料图形，其中 `Cu`、`Ru`、`Su`、`Wu` 依次表示空、普通格、针和晶体。两件蓝图共用材料频道。等读取器到采样时刻且 `done=1` 后，再按判定板接口表等满保持时间，读取 `column_a`。换列前重新复位。
+列读取每次处理 `q0`。将待查列旋转到 `q0`，原图接 `initial_remaining`，`initial_word` 留空，`initial_height` 置 5。五轮后输出保留全部原层位的材料图形，其中 `Cu`、`Ru`、`Su`、`Wu` 依次表示空、普通格、针和晶体。判定与落点两块板共用材料频道。等读取器到采样时刻且 `done=1` 后，再按各接口表等满保持时间。`column_a=1` 时，`crystal` 和 `landing` 给出晶下间隙的原层号，从 0 起算。无间隙时两者为 `-1`。`needs_pin=1` 表示该落点须走顶破路线。换列前重新复位。
 
 ```bash
 python -m shapez2_tmam.circuits.compile_stack_scan --read-rows --channel-base 1700300 --output read-target-rows.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --channel-base 1700200 --output stack-prefix-scan.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --check-direct --channel-base 1700450 --output direct-stack-scan.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --read-column --channel-base 1700560 --output read-column.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_scan.py \
+  --field crystal=column_gap_crystal --field landing=column_gap_landing \
+  --field needs_pin=column_gap_needs_pin --input-channel word=1700566 \
+  --output-channel crystal=1700577 --output-channel landing=1700578 \
+  --output-channel needs_pin=1700579 --output corner-gap.spz2bp
 ```

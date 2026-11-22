@@ -55,3 +55,40 @@ def column_word_admissible(word: Shape | None) -> bool:
         z0 == crystal, z1 == crystal, z2 == crystal, z3 == crystal, z4 == crystal,
         z0 == ordinary, z1 == ordinary, z2 == ordinary, z3 == ordinary,
     )
+
+
+def column_gap_crystal(word: Shape | None) -> int:
+    """返回已通过列 A 检查的晶下间隙上端，无间隙时为 -1。"""
+    crystal = shape_literal("Wu------")
+    empty = shape_literal("Cu------")
+    upper = unstack_upper(word)
+    for height in (4, 3, 2):
+        word = unstack_lower(word)
+        below = unstack_upper(word)
+        if (upper == crystal) & (below == empty):
+            return height
+        upper = below
+    return -1
+
+
+def column_gap_landing(word: Shape | None) -> int:
+    """返回唯一一处晶下间隙要移动的普通格层号，无间隙时为 -1。"""
+    height = column_gap_crystal(word)
+    if height < 0:
+        return -1
+    word = unstack_lower(unstack_lower(word))
+    if (height == 4) & (unstack_upper(word) == shape_literal("Ru------")):
+        return 2
+    word = unstack_lower(word)
+    if (height >= 3) & (unstack_upper(word) == shape_literal("Ru------")):
+        return 1
+    return 0
+
+
+def column_gap_needs_pin(word: Shape | None) -> bool:
+    """落点下方为空且不触地时，选用顶破构造。"""
+    landing = column_gap_landing(word)
+    first_two = unstack_lower(unstack_lower(unstack_lower(word)))
+    empty = shape_literal("Cu------")
+    return ((landing == 1) & (unstack_lower(first_two) == empty)
+            | (landing == 2) & (unstack_upper(first_two) == empty))
