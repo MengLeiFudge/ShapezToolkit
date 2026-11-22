@@ -22,3 +22,27 @@ def direct_recipe_level(address: int) -> int:
     if address < 0 or address > 8:
         return 0
     return BASE_LEVELS[address]
+
+
+def direct_recipe_destination(address: int, length: int) -> int:
+    """首份基础料进槽 0，其他上料进槽 1，堆叠结果写回槽 0。"""
+    opcode = direct_recipe_opcode(address, length)
+    if opcode == 0:
+        return -1
+    if opcode == 14 and address != 0:
+        return 1
+    return 0
+
+
+def direct_recipe_lower(address: int, length: int) -> int:
+    """返回下料槽号，-1 表示本地址无需此操作数。"""
+    if direct_recipe_opcode(address, length) == 7:
+        return 0
+    return -1
+
+
+def direct_recipe_upper(address: int, length: int) -> int:
+    """返回上料槽号，-1 表示本地址无需此操作数。"""
+    if direct_recipe_opcode(address, length) == 7:
+        return 1
+    return -1

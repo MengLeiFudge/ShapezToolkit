@@ -14,15 +14,24 @@ _GATE_COLUMNS = range(8, 43, 5)
 _RADIO_ROWS = range(5, 51, 5)
 
 
-def _route(board: _Board):
+def _route(board: _Board, *, short_first: bool = False):
     for net in sorted({net for net, _ in board.terminals}):
         levels = [z for z in range(3) if (net, z) in board.terminals]
         for low, high in zip(levels, levels[1:]):
             board.riser(net, low, high)
     pads = board.traces
-    order = sorted(board.terminals, key=lambda key: (-len(board.terminals[key]), key))
+    def priority(key):
+        points = board.terminals[key]
+        if short_first:
+            xs, ys, _ = zip(*points)
+            span = max(xs) - min(xs) + max(ys) - min(ys)
+            return span, -len(points), key
+        return -len(points), key
+
+    order = sorted(board.terminals, key=priority)
     tried = set()
-    while len(tried) < 6 and tuple(order) not in tried:
+    attempts = 8 if short_first else 6
+    while len(tried) < attempts and tuple(order) not in tried:
         tried.add(tuple(order))
         board.traces = defaultdict(dict, {p: {net: set(ports) for net, ports in dots.items()}
                                           for p, dots in pads.items()})
@@ -134,12 +143,18 @@ def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
     )
     arrangements = []
     if len(gates) > 50:
-        arrangements.append(_spread_sites(circuit, channels, radios, gates, outputs))
+        order, sites = _spread_sites(circuit, channels, radios, gates, outputs)
+        arrangements.append((order, sites, False))
     last_error = None
-    arrangements.extend((gates, sites) for sites in shapes)
-    for order, sites in arrangements:
+    arrangements.extend((gates, sites, False) for sites in shapes)
+    if len(gates) > 50:
+        # 先完成附近的连接，给剩余长线绕开已占门位的机会。
+        spread_order, sites, _ = arrangements[0]
+        staggered = [(x, y - z + (2 * z) % 3, z) for x, y, z in sites]
+        arrangements.append((spread_order, staggered, True))
+    for order, sites, short_first in arrangements:
         try:
-            return _place(circuit, channels, (radios, order), used, sites, outputs)
+            return _place(circuit, channels, (radios, order), used, sites, outputs, short_first=short_first)
         except _RoutingError as error:
             last_error = error
     raise LayoutCapacityError(f"三层平台未布通 {len(gates)} 个门，{last_error}") from last_error
@@ -154,7 +169,7 @@ class _RoutingError(ValueError):
 
 
 def _place(circuit: Circuit, channels: dict[Ref, int], groups: tuple[list[int], list[int]], used: set[int],
-           sites: list[tuple[int, int, int]], outputs: dict[int, Ref]) -> tuple[dict, int]:
+           sites: list[tuple[int, int, int]], outputs: dict[int, Ref], *, short_first: bool = False) -> tuple[dict, int]:
     radios, gates = groups
     board = _Board()
     drivers = defaultdict(list)
@@ -209,7 +224,7 @@ def _place(circuit: Circuit, channels: dict[Ref, int], groups: tuple[list[int], 
         transmitters.append(out)
 
     try:
-        blueprint = _route(board)
+        blueprint = _route(board, short_first=short_first)
     except ValueError as error:
         raise _RoutingError(str(error)) from error
     wiring = Wiring(blueprint)

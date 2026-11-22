@@ -132,18 +132,18 @@
     "protocol": "从 run=0 复位开始，保持本次所有初值和 item，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。"
   },
   "platform_type": "Foundation_3x3",
-  "platforms": 6,
+  "platforms": 4,
   "island_footprint_chunks": [
     6,
-    6
+    3
   ],
   "buildings_by_layer": [
-    3361,
-    2956,
-    1892
+    3013,
+    2461,
+    1697
   ],
-  "building_entries": 8209,
-  "global_receivers": 60,
+  "building_entries": 7171,
+  "global_receivers": 40,
   "global_transmitters": 15,
   "internal_global_devices_per_module": 0,
   "round_values": [
@@ -155,12 +155,8 @@
   ],
   "worker_partitions": [
     [
-      1700220
-    ],
-    [
-      1700221
-    ],
-    [
+      1700220,
+      1700221,
       1700222
     ],
     [
@@ -179,32 +175,17 @@
         1700223,
         1700224
       ],
-      "reason": "三层平台未布通 159 个门，三层平台内无法完成本地信号 1000127 的布线"
-    },
-    {
-      "outputs": [
-        1700220,
-        1700221,
-        1700222
-      ],
-      "reason": "三层平台未布通 102 个门，三层平台内无法完成本地信号 1000000 的布线"
-    },
-    {
-      "outputs": [
-        1700220,
-        1700221
-      ],
-      "reason": "三层平台未布通 71 个门，三层平台内无法完成本地信号 1000055 的布线"
+      "reason": "三层平台未布通 159 个门，三层平台内无法完成本地信号 1000110 的布线"
     },
     {
       "outputs": [
         1700223,
         1700224
       ],
-      "reason": "三层平台未布通 96 个门，三层平台内无法完成本地信号 1000178 的布线"
+      "reason": "三层平台未布通 96 个门，三层平台内无法完成本地信号 1000133 的布线"
     }
   ],
-  "worker_logic_gates": 272,
+  "worker_logic_gates": 232,
   "worker_logic_gates_before_reuse": 224,
   "worker_logic_gates_after_reuse": 159
 }
