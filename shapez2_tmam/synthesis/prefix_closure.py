@@ -2,6 +2,7 @@
 
 from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
+from .row_support import addition_needs_lower
 from .support import in_support_class
 
 
@@ -10,6 +11,15 @@ def unanchored_additions(rules: Rules, desired: dict[Position, str], lower: dict
     """找出没有直接下挡的新增块；这些块的每一格都须预置在下料。"""
     delta = {pos: cell for pos, cell in desired.items() if pos not in lower
              and not (optional_top and pos[0] == rules.height - 1 and cell[0] != "c")}
+    if rules.quadrants == 4 and all(cell[0] != "c" for cell in delta.values()):
+        states = {}
+        for (z, q), cell in delta.items():
+            supported = z == 0 or (z - 1, q) in desired
+            states[z, q] = (3 if cell == PIN else 1) + int(supported)
+        return {(z, q) for (z, q), cell in states.items()
+                if addition_needs_lower(cell, states.get((z, (q - 1) % 4), 0),
+                                        states.get((z, (q + 1) % 4), 0),
+                                        states.get((z, (q + 2) % 4), 0))}
     forced = set()
     for block in rules.groups(delta):
         if not any(z == 0 or (z - 1, q) in desired for z, q in block):
