@@ -20,7 +20,17 @@
 
 ## 编译命令
 
-在仓库根目录可通过统一入口或包入口调用：
+### 从 Python 方法导出
+
+指定源码文件、顶层方法名和起始频道。命令生成可导入的 `.spz2bp` 与相邻的 `.json` 接口表。支持的写法见[编译器前端](compiler_frontend/README.md)，布局和采样条件见[编译器后端](compiler_backend/README.md)。
+
+```bash
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/layer_methods.py append_five --channel-base 1700020 --output append_five.spz2bp
+```
+
+### 编译现有预设
+
+在仓库根目录运行以下命令。
 
 ```bash
 # 查看全部预设蓝图目标

@@ -8,19 +8,16 @@ from ..compiler_contract import (
     Constant, Function, Instruction, Jump, Operand, Program, Reference,
     Return, ValueType, Variable,
 )
+from ._ranges import _Bounds, _INT_BOUNDS, _add_bounds, _add_failure, _fits_int
 
 
 __all__ = ["FrontendError", "compile_method"]
 
-_INT_MIN = -(1 << 31)
-_INT_MAX = (1 << 31) - 1
-_INT_BOUNDS = (_INT_MIN, _INT_MAX)
 _TYPES = {"bool": BOOL, "int": INT, "Shape": SHAPE, "Color": COLOR}
 _STATEMENTS = (ast.AnnAssign, ast.Assign, ast.Expr, ast.For, ast.If, ast.Pass, ast.Return)
 _COMPARISONS = {ast.Eq: "eq", ast.NotEq: "ne", ast.Is: "eq", ast.IsNot: "ne",
                 ast.Lt: "lt", ast.LtE: "le", ast.Gt: "lt", ast.GtE: "le"}
 
-_Bounds = tuple[int, int]
 _Assigned = dict[str, _Bounds | None]
 
 
@@ -146,6 +143,7 @@ class _Lowering:
         self.assigned: _Assigned = {arg.name: None for arg in self.inputs}
         self.locals: list[Variable] = []
         self.blocks: list[_Block] = []
+        self.unproved_additions: dict[str, ast.AST] = {}
         self.loop_visits = 1
         self.temp_number = 0
         self.current: _Block | None = self.block()
@@ -164,8 +162,20 @@ class _Lowering:
         for block in self.blocks:
             assert block.end is not None
             blocks.append(Block(block.name, tuple(block.instructions), block.end))
-        return Function(self.method.name, self.inputs, self.result, tuple(self.locals), tuple(blocks),
-                        sum(block.visits for block in self.blocks))
+        function = Function(self.method.name, self.inputs, self.result, tuple(self.locals), tuple(blocks),
+                            sum(block.visits for block in self.blocks))
+        if self.unproved_additions:
+            failure = _add_failure(function, self.unproved_additions)
+            if failure is not None:
+                target, bounds = failure
+                if bounds is None:
+                    message = "加法的范围分析超过块状态预算，请缩小循环范围或拆分方法"
+                else:
+                    lo, hi = bounds
+                    message = (f"无法证明加法结果在有符号 32 位范围内（推导范围 {lo}～{hi}），"
+                               "请限定操作数的范围")
+                raise self.module.error(self.unproved_additions[target], message)
+        return function
 
     def block(self, visits: int | None = None) -> _Block:
         block = _Block(f"b{len(self.blocks)}", self.loop_visits if visits is None else visits)
@@ -266,9 +276,10 @@ class _Lowering:
         self.current, self.assigned = done, _join(yes_assigned, self.assigned)
 
     def checked_int(self, node: ast.AST, value: int) -> _Value:
-        if not _INT_MIN <= value <= _INT_MAX:
+        bounds = (value, value)
+        if not _fits_int(bounds):
             raise self.module.error(node, "整数字面值超出有符号 32 位范围")
-        return _Value(Constant(INT, value), INT, (value, value))
+        return _Value(Constant(INT, value), INT, bounds)
 
     def tuple_items(self, node: ast.Tuple, kind: ValueType | None, written: set[str]) -> list[_Value]:
         values: list[_Value | None] = []
@@ -403,12 +414,17 @@ class _Lowering:
             return self.compare(node)
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
             left, right = self.expression(node.left, INT), self.expression(node.right, INT)
-            a, b = left.bounds or _INT_BOUNDS, right.bounds or _INT_BOUNDS
-            low, high = a[0] + b[0], a[1] + b[1]
-            if low < _INT_MIN or high > _INT_MAX:
-                raise self.module.error(node, "无法证明加法结果在有符号 32 位范围内，请用可静态限定范围的操作数")
-            return self.apply("add", INT, left.operand, right.operand, bounds=(low, high))
+            return self.add(node, left, right)
         raise self.module.error(node, f"不支持表达式 {type(node).__name__}，请使用标量、比较、加法或直接调用")
+
+    def add(self, node: ast.expr, left: _Value, right: _Value) -> _Value:
+        bounds = _add_bounds(left.bounds or _INT_BOUNDS, right.bounds or _INT_BOUNDS)
+        slot = self.temp(INT)
+        self.emit(Apply(slot, "add", (left.operand, right.operand)))
+        if _fits_int(bounds):
+            return _Value(Reference(slot), INT, bounds)
+        self.unproved_additions[slot] = node
+        return _Value(Reference(slot), INT)
 
     def short_circuit(self, node: ast.BoolOp) -> _Value:
         slot = self.temp(BOOL)
@@ -463,7 +479,10 @@ class _Lowering:
             types, result = tuple(arg.type for arg in method.inputs), method.result
         if len(types) != len(node.args):
             raise self.module.error(node, f"“{name}”需要 {len(types)} 个参数，收到 {len(node.args)} 个")
-        args = tuple(self.expression(arg, kind).operand for arg, kind in zip(node.args, types))
+        values = tuple(self.expression(arg, kind) for arg, kind in zip(node.args, types))
+        if name == "add":
+            return self.add(node, values[0], values[1])
+        args = tuple(value.operand for value in values)
         if name in BUILTINS:
             return self.apply(name, result, *args)
         slot = self.temp(result)
