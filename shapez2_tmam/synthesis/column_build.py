@@ -2,8 +2,8 @@
 
 from .layer_methods import append_layer, stack
 from .physics import Shape
-from .shape_methods import (Color, analyze_color, analyze_part, crystal, cut_front, rotate_ccw,
-                            rotate_cw, shape_literal)
+from .shape_methods import (Color, analyze_color, analyze_part, crystal, cut_front, pin, rotate_ccw,
+                            rotate_cw, shape_literal, swap_front_a)
 
 
 def dense_column_base(source: Shape | None, pending: Color | None, row: Shape | None) -> Shape | None:
@@ -44,3 +44,23 @@ def dense_column_finish(source: Shape | None, pending: Color | None) -> Shape | 
     if pending is not None:
         source = crystal(source, pending)
     return rotate_ccw(cut_front(rotate_cw(cut_front(source))))
+
+
+def simple_corner_release(retained: Shape | None, far: Shape | None) -> Shape | None:
+    """远锚统一在 q0，转到 q3 后带走主列填充晶体。"""
+    if far is None:
+        return retained
+    return cut_front(swap_front_a(retained, rotate_ccw(far)))
+
+
+def pin_corner_release(initial: Shape | None, anchor: Shape | None,
+                       complement: Shape | None) -> Shape | None:
+    """重放底部碎晶、两次支撑交接和顶破。输入近锚在 q0。"""
+    near_supported = cut_front(initial)
+    far = shape_literal("------Cu:------Cu:------Cu:------Cu:------Cu")
+    both = swap_front_a(near_supported, far)
+    away = cut_front(rotate_cw(both))
+    near_anchor = rotate_cw(rotate_cw(anchor))
+    transferred = swap_front_a(away, near_anchor)
+    retained = cut_front(rotate_ccw(transferred))
+    return pin(swap_front_a(retained, complement))

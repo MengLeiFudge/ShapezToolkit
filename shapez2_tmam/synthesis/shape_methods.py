@@ -28,6 +28,16 @@ def cut_front(target: Shape | None) -> Shape | None:
     return _RULES.cut(target)[0] if target is not None else None
 
 
+def swap_front_a(front: Shape | None, back: Shape | None) -> Shape | None:
+    if front is None or back is None:
+        return None
+    return _RULES.swap(front, back)[0]
+
+
+def pin(target: Shape | None) -> Shape | None:
+    return _RULES.pin(target) if target is not None else None
+
+
 def unstack_lower(target: Shape | None) -> Shape | None:
     if target is None:
         return None
