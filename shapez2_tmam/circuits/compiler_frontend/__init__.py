@@ -1,7 +1,10 @@
 """将受支持的纯 Python 方法编译为蓝图后端共用的 Program。"""
 
 import ast
+import tokenize
+from collections.abc import Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from ...synthesis.physics import COLORS, Rules
 from ..compiler_contract import (
@@ -13,7 +16,7 @@ from ._ranges import _Bounds, _INT_BOUNDS, _add_bounds, _analyze_ranges, _fits_i
 from ._sources import FrontendError, _Method, _Source, _Sources
 
 
-__all__ = ["FrontendError", "compile_method"]
+__all__ = ["FrontendError", "compile_method", "compile_field_methods"]
 
 _SHAPE_LITERAL = "shape_literal"
 _RULES = Rules()
@@ -64,6 +67,39 @@ class _WhileCursor:
 def compile_method(source: str, entry: str, *, filename: str = "<source>") -> Program:
     """从指定源码与显式相对导入的方法生成 IR。"""
     return _Compilation(_Sources(source, filename)).compile(entry)
+
+
+def compile_field_methods(
+    path: str | Path, methods: Mapping[str, str], *, publish_when: Mapping[str, str] | None = None,
+) -> tuple[dict[str, Program], dict[str, Program]]:
+    """从同一源码按字段名编译值方法和可选的布尔发布条件。"""
+    if not methods or any(not isinstance(name, str) or not name.isidentifier() for name in methods):
+        raise ValueError("至少需要一个有效标识符作为输出字段名")
+    conditions = {} if publish_when is None else publish_when
+    if set(conditions) - set(methods):
+        raise ValueError("发布条件须对应已声明的输出字段")
+
+    with tokenize.open(path) as file:
+        sources = _Sources(file.read(), str(path))
+    programs = {name: _Compilation(sources).compile(entry) for name, entry in methods.items()}
+    inputs = next(iter(programs.values())).functions[0].inputs
+
+    for name, program in programs.items():
+        if program.functions[0].inputs != inputs:
+            binding = sources.root.binding(program.entry)
+            assert binding is not None
+            raise sources.root.error(binding.node, f"字段 {name!r} 须按相同顺序声明同名、同类型的输入")
+
+    guards = {}
+    for name, entry in conditions.items():
+        program = _Compilation(sources).compile(entry)
+        function = program.functions[0]
+        if function.inputs != inputs or function.result is not BOOL:
+            binding = sources.root.binding(entry)
+            assert binding is not None
+            raise sources.root.error(binding.node, f"字段 {name!r} 的发布方法须接收相同参数并返回 bool")
+        guards[name] = program
+    return programs, guards
 
 
 def _is_empty(node: ast.AST) -> bool:

@@ -11,6 +11,33 @@ path = Path("shapez2_tmam/synthesis/layer_methods.py")
 program = compile_method(path.read_text(encoding="utf-8"), "append_five", filename=str(path))
 ```
 
+## 编译共享输入的多个字段
+
+`compile_field_methods(path, methods, publish_when=...)` 从一个文件读取多个顶层方法。`methods` 将字段名映射到值方法名。可选的 `publish_when` 为字段指定返回 `bool` 的发布方法。所有方法的参数顺序、名称和类型须一致。
+
+```python
+from pathlib import Path
+
+from shapez2_tmam.circuits.compiler_frontend import compile_field_methods
+
+path = Path("shapez2_tmam/synthesis/direct_recipe.py")
+programs, conditions = compile_field_methods(path, {
+    "opcode": "direct_recipe_opcode",
+    "a": "direct_recipe_lower",
+    "b": "direct_recipe_upper",
+    "destination": "direct_recipe_destination",
+})
+```
+
+将两张映射分别传给后端 `fields.compile_fields` 的 `programs` 和 `publish_when`。上例的 `conditions` 为空。若要单独控制下料槽的发布，可在同一文件定义下面的方法，再传入 `publish_when={"a": "publish_lower"}`。
+
+```python
+def publish_lower(address: int, length: int) -> bool:
+    return 0 <= direct_recipe_lower(address, length)
+```
+
+## 支持的 Python 语法
+
 | 用途 | 源码写法 |
 |---|---|
 | 类型 | 参数和返回值标注 `bool`、`int`、`Shape` 或 `Color`。图形与颜色可写 `\| None`，空值从赋值、返回、参数或比较的类型推断 |
