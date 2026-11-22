@@ -28,6 +28,20 @@
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/layer_methods.py append_five --channel-base 1700020 --output append_five.spz2bp
 ```
 
+同一文件中的多个方法共用一组输入时，用 `--field 字段=方法` 对应每个输出，并为方法参数和输出字段指定频道。所有方法的参数顺序、名称和类型须相同。
+
+```bash
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/direct_recipe.py \
+  --field opcode=direct_recipe_opcode --field a=direct_recipe_lower \
+  --field b=direct_recipe_upper --field destination=direct_recipe_destination \
+  --input-channel address=1640000 --input-channel length=1640043 \
+  --output-channel opcode=1640002 --output-channel a=1640003 \
+  --output-channel b=1640004 --output-channel destination=1640005 \
+  --output direct_recipe.spz2bp
+```
+
+用 `--publish-when 字段=方法` 为某个字段指定同文件、同参数的布尔发布方法。条件为假时，该字段输出空信号。现有配方值方法仍可和发布方法一起编译，见[发布方法示例](compiler_frontend/README.md#编译共享输入的多个字段)。
+
 ### 编译现有预设
 
 在仓库根目录运行以下命令。
