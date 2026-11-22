@@ -35,6 +35,22 @@ def column_scan_height(remaining: Shape | None, word: Shape | None, height: int)
     return (0, 0, 1, 2, 3, 4)[height]
 
 
+def column_prefix_remaining(remaining: Shape | None, word: Shape | None, height: int,
+                            prefix_height: int) -> Shape | None:
+    return column_scan_remaining(remaining, word, height)
+
+
+def column_prefix_word(remaining: Shape | None, word: Shape | None, height: int,
+                       prefix_height: int) -> Shape | None:
+    if height > prefix_height:
+        remaining = None
+    return column_scan_word(remaining, word, height)
+
+
+def column_prefix_height(remaining: Shape | None, word: Shape | None, height: int, prefix_height: int) -> int:
+    return column_scan_height(remaining, word, height)
+
+
 def column_word_admissible(word: Shape | None) -> bool:
     """检查扫描完成后的五层材料字。"""
     z4 = unstack_upper(word)

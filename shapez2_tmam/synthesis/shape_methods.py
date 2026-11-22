@@ -79,6 +79,13 @@ def read_labeled_corner(row: Shape | None) -> Shape | None:
     return _cut_ground_corner(row)
 
 
+def read_prefix_corner(row: Shape | None, row_height: int, prefix_height: int) -> Shape | None:
+    """保留前缀内的一格原料，层高从 1 起算。"""
+    if (row_height < 1) | (row_height > prefix_height):
+        return None
+    return read_labeled_corner(row)
+
+
 def target_height(target: Shape | None) -> int:
     """测量原高度，计入空底层和空中间层。"""
     dense = crystal(target, "r")

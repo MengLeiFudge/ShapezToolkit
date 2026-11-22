@@ -1,0 +1,59 @@
+{
+  "method": "pack_prefix_half",
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "row": {
+      "channel": 1700820,
+      "type": "shape"
+    },
+    "below": {
+      "channel": 1700821,
+      "type": "shape"
+    },
+    "ground": {
+      "channel": 1700822,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "result": {
+      "channel": 1700823,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1700820,
+    1700823
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "pack_prefix_half": 1,
+    "_pack_support_half": 1,
+    "_pack_support_corner": 28,
+    "_merge_stack_corners": 5
+  },
+  "settling": {
+    "max_gate_depth": 19,
+    "hold_signal_ticks": 1344,
+    "hold_simulation_seconds": 112.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取频道结果。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    656,
+    739,
+    511
+  ],
+  "logic_gates": 68,
+  "logic_gates_before_reuse": 68,
+  "building_entries": 1906,
+  "global_receivers": 3,
+  "global_transmitters": 1,
+  "internal_global_devices": 0
+}

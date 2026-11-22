@@ -20,6 +20,7 @@ def main() -> int:
     modes.add_argument("--read-column", action="store_true", help="生成 q0 列材料读取与列 A 判定电路")
     modes.add_argument("--build-dense-column", action="store_true", help="生成紧柱逐层回放与完工电路")
     modes.add_argument("--close-prefix", action="store_true", help="生成双半形前缀的五轮逐层闭包")
+    modes.add_argument("--read-prefix-column", action="store_true", help="生成已闭合前缀的 q0 列材料读取电路")
     args = parser.parse_args()
     if args.close_prefix:
         path = Path(row_support.__file__)
@@ -33,16 +34,19 @@ def main() -> int:
     elif args.build_dense_column:
         path = Path(column_build.__file__)
         entries = {field: f"dense_column_{field}" for field in ("source", "pending")}
-    elif args.read_column:
+    elif args.read_column or args.read_prefix_column:
         path = Path(column_scan.__file__)
-        entries = {field: f"column_scan_{field}" for field in ("remaining", "word", "height")}
+        stem = "column_prefix" if args.read_prefix_column else "column_scan"
+        entries = {field: f"{stem}_{field}" for field in ("remaining", "word", "height")}
     else:
         path = Path(row_support.__file__)
         entries = {f"h{q}": f"stack_scan_q{q}" for q in range(4)}
     try:
         source = path.read_text(encoding="utf-8")
         methods = {field: compile_method(source, method, filename=str(path)) for field, method in entries.items()}
-        if args.check_direct or args.read_column:
+        if args.read_prefix_column:
+            document, report = compile_state_steps(methods, 5, args.channel_base, held_inputs=("prefix_height",))
+        elif args.check_direct or args.read_column:
             document, report = compile_state_steps(methods, 5, args.channel_base)
         elif args.build_dense_column:
             document, report = compile_state_fold(methods, 5, args.channel_base)
