@@ -33,7 +33,7 @@ python main.py tmam2 blueprint decoder-4q5l recipe-processor-4q5l
 python main.py tmam2 blueprint --reports
 
 # 自定义参数单独调用某个部件模块
-python -m shapez2_tmam.circuits.operation_core --quadrants 4 --channel-base 1000000 --output shapez2_tmam/blueprints/operation-core-4q5l.spz2bp
+python -m shapez2_tmam.circuits.operation_core --quadrants 4 --channel-base 1000000 --output shapez2_tmam/blueprints/电路/加工与指令/operation-core-4q5l.spz2bp
 ```
 
 [导出蓝图说明](../blueprints/README.md) · [静态元件报告](../reports/README.md) · [返回二代总目录](../README.md)

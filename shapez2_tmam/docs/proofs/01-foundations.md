@@ -2440,7 +2440,7 @@ M只有一个非针分量时，新增即覆盖该分量；M有两个分量时，
 
 原文标识：`4q5l/half-row-stability.md`。
 
-任意相邻两列、任意高度的 N/P/C 网格，其重力开始前的最大粘连组是否全部静止，可以只按层扫描，不必求十格连通矩阵。五层实现见 [`CornerBuilder.stable_half`](../../synthesis/corners.py)、[`half_stable`](../../circuits/half_circuit.py) 及 [`material-half-4q5l.spz2bp`](../../blueprints/material-half-4q5l.spz2bp)。本结论用于两列，不直接适用于一般三列半形。若第三列已知是一根全高N边柱，可按[脚手架支撑证明](03-general-construction.md#s03-04-h5)，把与该柱相接加入区间支撑标志，继续复用本扫描；六象限根半形仍需完整分组判定。
+任意相邻两列、任意高度的 N/P/C 网格，其重力开始前的最大粘连组是否全部静止，可以只按层扫描，不必求十格连通矩阵。五层实现见 [`CornerBuilder.stable_half`](../../synthesis/corners.py)、[`half_stable`](../../circuits/half_circuit.py) 及 [`material-half-4q5l.spz2bp`](../../blueprints/电路/起点与半形/material-half-4q5l.spz2bp)。本结论用于两列，不直接适用于一般三列半形。若第三列已知是一根全高N边柱，可按[脚手架支撑证明](03-general-construction.md#s03-04-h5)，把与该柱相接加入区间支撑标志，继续复用本扫描；六象限根半形仍需完整分组判定。
 
 <a id="s01-19-h1"></a>
 

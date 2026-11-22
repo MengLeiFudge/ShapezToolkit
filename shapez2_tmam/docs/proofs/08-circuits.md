@@ -91,7 +91,7 @@
 
 原文标识：`6q5l/recipe-processor.md`。
 
-[`recipe-processor-6q5l.spz2bp`](../../blueprints/recipe-processor-6q5l.spz2bp)把已取得的制造证书逐条回放。它复用一份加工通路、六个物品槽及四阶段时钟；不按配方长度复制加工器。它不搜索目标，也不独立判断六象限目标可制作性。
+[`recipe-processor-6q5l.spz2bp`](../../blueprints/电路/加工与指令/recipe-processor-6q5l.spz2bp)把已取得的制造证书逐条回放。它复用一份加工通路、六个物品槽及四阶段时钟；不按配方长度复制加工器。它不搜索目标，也不独立判断六象限目标可制作性。
 
 <a id="s08-01-h1"></a>
 
@@ -115,7 +115,7 @@
 
 其余事务与[四象限回放证明](#s08-28)相同：新请求才执行；两输入地址不同；目的槽为空或是本次被消费槽；合法操作消费源槽并写入目的槽。错误请求确认后status=2、六槽保持，不能据此判目标不可制作。初始槽为空，故每件回放产物均可追溯至合法基础料和已接受操作。
 
-输入为opcode、a、b、destination、base、color、request、enable；输出为window、ack、status及六个物品槽。具体频道、阶段长度和复位时间见[接口JSON](../../blueprints/recipe-processor-6q5l.json)。实例默认独占1343000～1345047，不与完整四象限压缩控制器共用频道。
+输入为opcode、a、b、destination、base、color、request、enable；输出为window、ack、status及六个物品槽。具体频道、阶段长度和复位时间见[接口JSON](../../blueprints/电路/加工与指令/recipe-processor-6q5l.json)。实例默认独占1343000～1345047，不与完整四象限压缩控制器共用频道。
 
 <a id="s08-01-h3"></a>
 
@@ -138,7 +138,7 @@
 
 原文标识：`4q5l/automatic-half.md`。
 
-[`automatic-half-4q5l.spz2bp`](../../blueprints/automatic-half-4q5l.spz2bp)接受一个原生目标，自动判断标准q0/q1半形、输出消费式制造指令，并用原生虚拟加工回放到最终目标。它把既有半形判据和角构造接成闭环，不需要外部先准备逆像图形或完整制造树。
+[`automatic-half-4q5l.spz2bp`](../../blueprints/电路/起点与半形/automatic-half-4q5l.spz2bp)接受一个原生目标，自动判断标准q0/q1半形、输出消费式制造指令，并用原生虚拟加工回放到最终目标。它把既有半形判据和角构造接成闭环，不需要外部先准备逆像图形或完整制造树。
 
 范围是四象限五层、q2/q3全空、晶体颜色为rgbcmyw。当前蓝图7108平台、459条条件ROM行、六个物品槽。非标准半形和未界定供料的cu返回范围状态；任意四象限全图的搜索控制仍待接入。规模和等待时间仍需压缩，不能据此宣布完整TMAM已达实用要求。
 
@@ -925,7 +925,7 @@ PC初值为0，重复调用写0，进入父尾部写parent_start，普通推进�
 
 原文标识：`4q5l/iterative-scanner.md`。
 
-[`iterative_scanner.py`](../../circuits/iterative_scanner.py) 把一份[单步拆层测高通路](#s08-04)接到[四阶段时钟和等深锁存器](#s08-05)，自动输出至多五份非空层及其原层号。生成蓝图为 [`iterative-scanner-4q5l.spz2bp`](../../blueprints/iterative-scanner-4q5l.spz2bp)，127块平台。它是完整TMAM的输入扫描部件，尚不判断可制作性，也不把信号拆层当作实体制造。
+[`iterative_scanner.py`](../../circuits/iterative_scanner.py) 把一份[单步拆层测高通路](#s08-04)接到[四阶段时钟和等深锁存器](#s08-05)，自动输出至多五份非空层及其原层号。生成蓝图为 [`iterative-scanner-4q5l.spz2bp`](../../blueprints/电路/扫描与时序/iterative-scanner-4q5l.spz2bp)，127块平台。它是完整TMAM的输入扫描部件，尚不判断可制作性，也不把信号拆层当作实体制造。
 
 <a id="s08-13-h1"></a>
 
@@ -1282,7 +1282,7 @@ record_valid列入pulses，next为 `ready AND 原accepted`，冻结时写0；它
 
 原文标识：`4q5l/packed-circuit.md`。
 
-完整控制器可用 `python -m shapez2_tmam.circuits.full_solver_circuit --pack --output shapez2_tmam/blueprints/full-tail-packed-4q5l.spz2bp` 编译压缩布局。产物为[蓝图](../../blueprints/full-tail-packed-4q5l.spz2bp)及[接口](../../blueprints/full-tail-packed-4q5l.json)。默认频道1277000～1342535，与未压缩版独立。
+完整控制器可用 `python -m shapez2_tmam.circuits.full_solver_circuit --pack --output shapez2_tmam/blueprints/电路/完整主控/full-tail-packed-4q5l.spz2bp` 编译压缩布局。产物为[蓝图](../../blueprints/电路/完整主控/full-tail-packed-4q5l.spz2bp)及[接口](../../blueprints/电路/完整主控/full-tail-packed-4q5l.json)。默认频道1277000～1342535，与未压缩版独立。
 
 当前蓝图使用145项状态、262行ROM和六物品槽，已包含直接有效行后继、同色段结晶、共用S追加、纯针行段和公开输出依赖裁剪，属于合并前快照。[最新网表报告](../../reports/README.md)已删除纯针段和无C半形快捷路径，并统一参数角补料，降至142255个非线缆建筑、249行ROM，本轮尚未重新布局。以下平台与接线数据仍描述现存旧蓝图。压缩布局为563块3×3大平台，占5067个区块，上下两层共同投影为51×51个区块；含147216个非线缆建筑。两版均采用[慢更新冻结协议](#s08-16)，固定局部模板版周期816信号tick、68模拟秒，未压缩版960tick、80模拟秒；慢更新后额外等待一轮。最坏搜索复杂度仍须压缩，尚未通过游戏实用性能验收。
 
@@ -1488,7 +1488,7 @@ Python的[`pin_base_possible`](../../synthesis/pin_constraints.py)表达上述�
 
 顶针前态的前四层，每列可以用四个N/P来源位K和四个辅助晶体位E描述。目标列的五个材料格和标签保持不变时，八位共256种控制字覆盖该列全部结构候选；地面掩码将通过本地约束的候选限制为至多20个，含保留C的一列至多12个。这里只恢复材料和标签，不计算整图重力，也不把通过当作可制作性。
 
-Python单步为 [`inverse.pin_column`](../../synthesis/inverse.py)，原生组合部件为 [`pin-column-4q5l.spz2bp`](../../blueprints/pin-column-4q5l.spz2bp)，555平台。自动遍历同一通路的 [`pin-column-iterator-4q5l.spz2bp`](../../blueprints/pin-column-iterator-4q5l.spz2bp) 使用911平台。两份均由生产编译核对实际占地和本地接线；没有运行目标或枚举循环。
+Python单步为 [`inverse.pin_column`](../../synthesis/inverse.py)，原生组合部件为 [`pin-column-4q5l.spz2bp`](../../blueprints/电路/顶针逆推/pin-column-4q5l.spz2bp)，555平台。自动遍历同一通路的 [`pin-column-iterator-4q5l.spz2bp`](../../blueprints/电路/顶针逆推/pin-column-iterator-4q5l.spz2bp) 使用911平台。两份均由生产编译核对实际占地和本地接线；没有运行目标或枚举循环。
 
 <a id="s08-23-h1"></a>
 
@@ -1698,7 +1698,7 @@ NPC计数器从0开始，末成员为允许P时的2，否则为1；末成员归�
 
 每次SOURCE_NEXT或精确Pin关系失配，游标都严格进入按上述顺序的后继地址或一段后继地址。跳过段全部已获否定依据，故不会漏解；最后来源列进位时才宣告当前S前缀的来源耗尽。
 
-当前状态规模和周期见[完整控制接口](../../blueprints/full-tail-4q5l.json)。游标跳过减少重复地址和递归；最坏分支数仍须继续压缩。最新平台与时序见[完整控制](#s08-09)。
+当前状态规模和周期见[完整控制接口](../../blueprints/电路/完整主控/full-tail-4q5l.json)。游标跳过减少重复地址和递归；最坏分支数仍须继续压缩。最新平台与时序见[完整控制](#s08-09)。
 
 本次四个Python文件ty诊断为0，两版完整蓝图及独立四列来源部件生产编译通过；3871平台必要筛选与来源通路共用平衡计数。没有运行目标、搜索、指令、测试或游戏。
 
@@ -1713,7 +1713,7 @@ NPC计数器从0开始，末成员为允许P时的2，否则为1；末成员归�
 
 原文标识：`4q5l/pin-image-constraints.md`。
 
-[`pin-image-4q5l.spz2bp`](../../blueprints/pin-image-4q5l.spz2bp)在给候选找制造证书以前，检查其晶体融合删除、同组静止/移动一致性及移动N/P块的落点支撑。Python的[`pin_image_matches`](../../synthesis/pin_constraints.py)在此基础上另补最大静止集合等式，形成[精确判据](01-foundations.md#s01-16)；本页3871平台独立部件仍只检查必要部分。
+[`pin-image-4q5l.spz2bp`](../../blueprints/电路/顶针逆推/pin-image-4q5l.spz2bp)在给候选找制造证书以前，检查其晶体融合删除、同组静止/移动一致性及移动N/P块的落点支撑。Python的[`pin_image_matches`](../../synthesis/pin_constraints.py)在此基础上另补最大静止集合等式，形成[精确判据](01-foundations.md#s01-16)；本页3871平台独立部件仍只检查必要部分。
 
 这是必要筛选。输出`necessary_pass=1`仍须递归制造来源、在真实产物上做原生Pin并比较目标；它不证明前态可制作，也没有证明推定的F是最大静止集合。
 
@@ -1837,7 +1837,7 @@ Python在`check_output=False`族生成中调用补全F等式后的精确判据�
 
 ### 4. 产物与边界
 
-[`pin-source-4q5l.spz2bp`](../../blueprints/pin-source-4q5l.spz2bp)使用8788平台，保留频道1194000～1210383；输入、输出见旁置JSON。额外输出has_slots、四列first_slots、next_slots及last_slots，供外部游标直接跳槽。组合通路D=82，全输入保持5376信号tick后读取，无完成脉冲。
+[`pin-source-4q5l.spz2bp`](../../blueprints/电路/顶针逆推/pin-source-4q5l.spz2bp)使用8788平台，保留频道1194000～1210383；输入、输出见旁置JSON。额外输出has_slots、四列first_slots、next_slots及last_slots，供外部游标直接跳槽。组合通路D=82，全输入保持5376信号tick后读取，无完成脉冲。
 
 单列扫描槽数从256降为20；四列固定槽空间从`256^4`降为`20^4=160000`，其中真正有效的含C四列组合仍不超过96000。完整顶盖另有`4^4=256`种，S前缀和递归也另计。因此当前进展减少搜索控制的无效地址，并未取得实用求解时间保证。
 
@@ -1961,7 +1961,7 @@ S前缀保留帧目标的全部C，因此禁位可直接读取帧目标，当前
 
 原文标识：`4q5l/recipe-registers.md`。
 
-四象限当前构造无需同时保存整棵制造树的全部产物。按原输入顺序后序展开，六个物品寄存器足以保存所有仍会被消费的中间产物；新的槽数降序调度不会增加这个上界。Python的[`Recipe.instructions`](../../synthesis/recipe.py)把制造树编成消费式指令流；[`recipe-processor-4q5l.spz2bp`](../../blueprints/recipe-processor-4q5l.spz2bp)用443平台在原生虚拟操作上回放这份流。
+四象限当前构造无需同时保存整棵制造树的全部产物。按原输入顺序后序展开，六个物品寄存器足以保存所有仍会被消费的中间产物；新的槽数降序调度不会增加这个上界。Python的[`Recipe.instructions`](../../synthesis/recipe.py)把制造树编成消费式指令流；[`recipe-processor-4q5l.spz2bp`](../../blueprints/电路/加工与指令/recipe-processor-4q5l.spz2bp)用443平台在原生虚拟操作上回放这份流。
 
 本部件执行制造证书。它没有搜索目标、生成角宏指令或判定完整可制作性；这些仍须接到完整控制器。
 
@@ -2082,7 +2082,7 @@ window先检查enable与started，再与phase3相与。保守给控制路径及�
 
 原文标识：`4q5l/register-circuit.md`。
 
-[`signal-register.spz2bp`](../../blueprints/signal-register.spz2bp) 保存任意整数、图形、颜色或空信号。它由三个输入接收器及两个 IF 门组成，共五块平台。输入为 `data`、`load`、`retain`；输出频道 `value` 由两个 IF 兼容驱动：
+[`signal-register.spz2bp`](../../blueprints/电路/扫描与时序/signal-register.spz2bp) 保存任意整数、图形、颜色或空信号。它由三个输入接收器及两个 IF 门组成，共五块平台。输入为 `data`、`load`、`retain`；输出频道 `value` 由两个 IF 兼容驱动：
 
 ```text
 写入路 D = IF(data, load)
@@ -2090,7 +2090,7 @@ window先检查enable与started，再与phase3相与。保守给控制路径及�
 value = 频道合并(D, H)
 ```
 
-H 读取的正是 D/H 共用频道，因而是有无线延迟的反馈，不适用组合 DAG 的传播保持期。具体频道见[配套说明](../../blueprints/signal-register.json)。本次只做生产编译及静态核对，没有执行反馈循环或游戏。
+H 读取的正是 D/H 共用频道，因而是有无线延迟的反馈，不适用组合 DAG 的传播保持期。具体频道见[配套说明](../../blueprints/电路/扫描与时序/signal-register.json)。本次只做生产编译及静态核对，没有执行反馈循环或游戏。
 
 <a id="s08-29-h1"></a>
 
@@ -2185,7 +2185,7 @@ V 为空时同理：保持路关闭，写入路持续发布空，全部历史清
 
 原文标识：`4q5l/s-tail-circuit.md`。
 
-[`s-tail-4q5l.spz2bp`](../../blueprints/s-tail-4q5l.spz2bp)输入四象限五层原生目标，完整查找`A→S`，命中后自动输出全部消费式制造指令，并回放比较完整目标。A是[双半形起点](#s08-38)，S是逐层无晶体追加；本部件尚不包含顶针逆推。含C未命中返回3，不能判不可制作。
+[`s-tail-4q5l.spz2bp`](../../blueprints/电路/起点与半形/s-tail-4q5l.spz2bp)输入四象限五层原生目标，完整查找`A→S`，命中后自动输出全部消费式制造指令，并回放比较完整目标。A是[双半形起点](#s08-38)，S是逐层无晶体追加；本部件尚不包含顶针逆推。含C未命中返回3，不能判不可制作。
 
 当前10651平台，一份475行ROM共用两遍、六个物品槽、四个整数前缀高度和found/exhausted两位。没有保存半形目录、制造树或全量候选。target全程保持；enable=0至少1612信号tick，再改为1。window上升后48tick在本窗口内读一次；sample为真先接收instruction，再处理同窗done/status。
 
@@ -2578,7 +2578,7 @@ second_corner选择目标列和包变换。第一遍经过保存边界后PC回�
 
 原文标识：`4q5l/tagged-goal-grid.md`。
 
-[`tagged-goal-4q5l.spz2bp`](../../blueprints/tagged-goal-4q5l.spz2bp)把20份候选格编号还原成原层号的材料、部件和颜色信号，并将另一份非空原生加工结果与这份网格完整比较。它给完整顶针帧提供候选输入接口，不负责判可制作性或生成候选原生物品。
+[`tagged-goal-4q5l.spz2bp`](../../blueprints/电路/顶针逆推/tagged-goal-4q5l.spz2bp)把20份候选格编号还原成原层号的材料、部件和颜色信号，并将另一份非空原生加工结果与这份网格完整比较。它给完整顶针帧提供候选输入接口，不负责判可制作性或生成候选原生物品。
 
 当前5768平台，频道见相邻JSON。输入original_target始终是本次求解的固定原目标；20份tags按五层四列排列，保留空底层及中间空层。actual_result是已实际虚拟加工得到的非空图形。enable启用输出。整组输入保持2368信号tick（最大DAG深度35的保守界）后读valid、matches和逐格信号；它没有完成脉冲。
 
@@ -2645,7 +2645,7 @@ actual_result先用保留原层号的解码器读取，不把连续拆层次数�
 
 原文标识：`4q5l/tagged-leaf.md`。
 
-本部件把[固定标签网格](#s08-36)接到[完整A→S构造](#s08-30)。生产入口为 [`build_startpoint(..., tagged_goal=True)`](../../circuits/startpoint_circuit.py)，产物是 [`tagged-leaf-4q5l.spz2bp`](../../blueprints/tagged-leaf-4q5l.spz2bp)。它解决递归候选尚无原生图形信号时的叶端制造问题，尚未包含Pin递归控制。
+本部件把[固定标签网格](#s08-36)接到[完整A→S构造](#s08-30)。生产入口为 [`build_startpoint(..., tagged_goal=True)`](../../circuits/startpoint_circuit.py)，产物是 [`tagged-leaf-4q5l.spz2bp`](../../blueprints/电路/起点与半形/tagged-leaf-4q5l.spz2bp)。它解决递归候选尚无原生图形信号时的叶端制造问题，尚未包含Pin递归控制。
 
 <a id="s08-37-h1"></a>
 
@@ -2688,7 +2688,7 @@ A→S的覆盖证明逐格依赖候选材料与标签，不要求这些格预先
 
 原文标识：`4q5l/two-half-startpoint.md`。
 
-[`startpoint-4q5l.spz2bp`](../../blueprints/startpoint-4q5l.spz2bp)将任意四象限五层目标按两种切向检查。若存在一对互补半面，各自满足稳定性及列A，就自动输出完整制造流，并用原生加工回放比较完整目标。它精确覆盖[有界尾部定理](02-four-quadrants.md#s02-06)的全部起点A，尚未接S和顶针搜索。
+[`startpoint-4q5l.spz2bp`](../../blueprints/电路/起点与半形/startpoint-4q5l.spz2bp)将任意四象限五层目标按两种切向检查。若存在一对互补半面，各自满足稳定性及列A，就自动输出完整制造流，并用原生加工回放比较完整目标。它精确覆盖[有界尾部定理](02-four-quadrants.md#s02-06)的全部起点A，尚未接S和顶针搜索。
 
 蓝图8644平台，一份465行ROM、九位PC、一个遍次位、六个物品槽。target保持不变，enable=0至少1420信号tick后启用。每个window上升后等48tick，在本窗口内读一次；sample为真时先保存instruction，再处理同窗done/status。状态0运行、1成功、2违反列A、3不在直接构造范围或cu、4内部失配。3和4都不能当作不可制作。
 

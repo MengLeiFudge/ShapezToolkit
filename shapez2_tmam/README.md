@@ -17,10 +17,10 @@
 | 目录 | 定位 | 内容 |
 |---|---|---|
 | [synthesis/](synthesis/README.md) | 代码包 | 通用偶数象限物理模型、角与脚手架构造、有界逆推与制造证书导出 |
-| [circuits/](circuits/README.md) | 代码包 | 原生二代信号门网表、3×3 大平台装箱、时序控制与 24 份蓝图编译器 |
+| [circuits/](circuits/README.md) | 代码包 | 原生二代信号门网表、3×3 大平台装箱、时序控制、实体工道和单节货运站场的蓝图编译器 |
 | [mari/](mari/README.md) | 代码包 | Mari 主控接线提取、组合方程与六候选求值模型 |
 | [docs/](docs/README.md) | 理论与证明 | 范围导览（`4q5l` / `6q5l` / `general`）、`papers/`（六篇学术版 PDF 与研究索引）、`theory/`（论文 Markdown 源码与编写规范）、`proofs/`（九卷完整证明与来源映射）及 `assets/`（配图与长短代码） |
-| [blueprints/](blueprints/README.md) | 导出产物 | 游戏 `SHAPEZ2-4` 电路蓝图（`.spz2bp`）及配套频道与时序说明（`.json`） |
+| [blueprints/](blueprints/README.md) | 导出产物 | 游戏 `SHAPEZ2-4` 蓝图册，按电路、实体、火车分目录，电路附频道与时序说明 |
 | [examples/](examples/README.md) | 导出产物 | 代表图形与特殊机制的逐步文字配方（`.md`）、`json/`（机器可读步骤与六槽指令）及 `18q17l-cascade/` 分页图 |
 | [reports/](reports/README.md) | 导出产物 | 完整四象限控制电路的静态元件规模与关键路径报告 |
 | `data/` | 本机资料 | 群文件原件、清单与本地提取文本（Git 忽略，保留归档层级） |

@@ -33,6 +33,7 @@ def height_flags(circuit: Circuit, source: Ref, valid: Ref, maximum: int = 5) ->
     """给当前原始图形生成高度一热标志；空输入的全部标志为假。"""
     if not 1 <= maximum <= 5:
         raise ValueError("高度测量上界需要在1～5之间")
+    start = len(circuit.gates)
     filled = circuit.add("VirtualCrystalGenerator", source, Literal("color:r"))
     flags = []
     for _ in range(maximum):
@@ -42,6 +43,8 @@ def height_flags(circuit: Circuit, source: Ref, valid: Ref, maximum: int = 5) ->
         last = circuit.add("LogicGateAnd", upper_exists, lower_empty)
         flags.append(circuit.add("LogicGateAnd", last, valid))
         filled = split
+    if circuit.wire_methods:
+        circuit.method_ranges.append((range(start, len(circuit.gates)), tuple(flags)))
     return tuple(flags)
 
 

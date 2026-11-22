@@ -93,6 +93,6 @@ python -m shapez2_tmam.synthesis.cascade_example --output shapez2_tmam/examples
 python -m shapez2_tmam.synthesis.examples --instructions --output shapez2_tmam/examples
 ```
 
-四/六象限五层的26份代表在 `json/` 子目录下另有同名`.instructions.json`，可逐包提交到对应[六槽回放器](../blueprints/README.md#六寄存器配方回放)。[半圈规范化](../docs/proofs/04-stacking.md#s04-18-h6)使这些最终配方每个表项只发一包；[六象限H](json/6q-H.instructions.json)为45包、3个活动槽。未经规范化的自定义六象限树仍可能把两格旋转拆包，因此提交时以指令id与request为准。两象限六层、八象限及十八象限代表没有此原生指令产品，仍按步骤表使用符合配置的设备。
+四/六象限五层的26份代表在 `json/` 子目录下另有同名`.instructions.json`，可逐包提交到对应[六槽回放器](../blueprints/电路/README.md#六寄存器配方回放)。[半圈规范化](../docs/proofs/04-stacking.md#s04-18-h6)使这些最终配方每个表项只发一包；[六象限H](json/6q-H.instructions.json)为45包、3个活动槽。未经规范化的自定义六象限树仍可能把两格旋转拆包，因此提交时以指令id与request为准。两象限六层、八象限及十八象限代表没有此原生指令产品，仍按步骤表使用符合配置的设备。
 
 这些步骤数是当前明确配方的长度，不是最短路径证明，也不是电路元件数。一个rotate表项描述净朝向；若当前机器不能一次转到该角度，需要连续调用旋转设备，因此表项数也不等于原生设备调用次数。长配方可以由同一个旋转/切割/堆叠模块按时序循环执行。对应理论见[四象限角构造](../docs/proofs/02-four-quadrants.md#s02-03)、[六象限非K半形](../docs/proofs/03-general-construction.md#s03-02)和[一般偶数象限构造族](../docs/proofs/01-foundations.md#s01-04)。

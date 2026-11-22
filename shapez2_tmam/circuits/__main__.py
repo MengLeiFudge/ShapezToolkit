@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+from .factory_book import TRAIN_BOOK, WORKSHOP_BOOK
+
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 BLUEPRINT_DIR = PACKAGE_ROOT / "blueprints"
 REPORT_DIR = PACKAGE_ROOT / "reports"
@@ -38,7 +40,24 @@ BLUEPRINT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
     "pin-source-4q5l": ("pin_source_circuit", ("--channel-base", "1194000")),
     "full-tail-4q5l": ("full_solver_circuit", ("--channel-base", "1211000")),
     "full-tail-packed-4q5l": ("full_solver_circuit", ("--pack",)),
+    "factory-control-4q5l": ("full_solver_circuit", ("--pack", "--factory")),
 }
+
+# 按游戏蓝图库的目录分册。同一模块的四、六象限版本放在一起。
+CIRCUIT_BOOKS = {
+    "完整主控": ("full_solver_circuit",),
+    "扫描与时序": ("scan_circuit", "iterative_scanner", "register_circuit", "sequential_circuit", "decoder_circuit"),
+    "起点与半形": ("half_circuit", "material_half_circuit", "half_synthesizer", "startpoint_circuit", "noncrystal_circuit"),
+    "顶针逆推": ("pin_column_circuit", "pin_column_iterator", "pin_image_circuit", "pin_source_circuit", "tagged_goal_circuit"),
+    "加工与指令": ("operation_core", "recipe_processor"),
+}
+BOOK_BY_MODULE = {module: Path("电路", book) for book, modules in CIRCUIT_BOOKS.items() for module in modules}
+
+BOOK_BY_TARGET = {name: BOOK_BY_MODULE[module] for name, (module, _) in BLUEPRINT_TARGETS.items()}
+for section, books in (("实体", WORKSHOP_BOOK), ("火车", TRAIN_BOOK)):
+    for name, book in books.items():
+        BLUEPRINT_TARGETS[name] = ("factory_book", (name,))
+        BOOK_BY_TARGET[name] = Path(section, book)
 
 REPORT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
     "full-tail-4q5l": ("full_solver_circuit", ("--report-only",)),
@@ -59,7 +78,7 @@ def compile_blueprints(names: list[str], output_dir: Path = BLUEPRINT_DIR) -> in
         if name not in BLUEPRINT_TARGETS:
             raise ValueError(f"未知蓝图目标：{name}（可用 --list 查看全部预设名称）")
         module_name, extra_args = BLUEPRINT_TARGETS[name]
-        output = output_dir / f"{name}.spz2bp"
+        output = output_dir / BOOK_BY_TARGET[name] / f"{name}.spz2bp"
         code = run_module_main(module_name, [*extra_args, "--output", str(output)])
         if code != 0:
             return code
@@ -81,7 +100,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="编译二代 TMAM 原生纯电路蓝图与静态网表报告")
     parser.add_argument("targets", nargs="*", metavar="NAME", help="要编译的蓝图名称（不带 .spz2bp 后缀）")
     parser.add_argument("--list", action="store_true", help="列出全部预设蓝图名称与对应模块")
-    parser.add_argument("--all", action="store_true", help="按预设频道重新编译全部 24 份蓝图")
+    parser.add_argument("--all", action="store_true", help="按功能分册重新编译全部蓝图")
     parser.add_argument("--reports", action="store_true", help="生成 reports/ 下的两份完整网表统计报告")
     parser.add_argument("--output-dir", type=Path, default=BLUEPRINT_DIR, help="蓝图输出目录（默认 shapez2_tmam/blueprints）")
     args = parser.parse_args(argv)
@@ -89,7 +108,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.list:
         for name, (module_name, extra_args) in BLUEPRINT_TARGETS.items():
             flags = " ".join(extra_args) or "(默认参数)"
-            print(f"{name:28s} <- {module_name} [{flags}]")
+            print(f"{name:28s} {BOOK_BY_TARGET[name].as_posix()}  {module_name} [{flags}]")
         return 0
 
     if not args.all and not args.reports and not args.targets:

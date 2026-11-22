@@ -116,7 +116,7 @@ class _Board:
             "$type": "Building", "BinaryVersion": 1137, "Entries": self.entries}}]}
 
 
-def wired_module(circuit: Circuit, outputs: dict[str, int]) -> dict:
+def wired_module(circuit: Circuit, outputs: dict[str, int], *, exports: dict[int, int] | None = None) -> dict:
     """单平台组合部件。核对每个输入的全部几何驱动，包括共用母线的互斥输出。"""
     board = _Board()
     channels = circuit.channel_map()
@@ -176,7 +176,7 @@ def wired_module(circuit: Circuit, outputs: dict[str, int]) -> dict:
                 if net in used:
                     board.pin(net, x + dx, y + dy, level + dz, direction)
     for net in dict.fromkeys(outputs.values()):
-        index, x, y = radio("ControlledSignalTransmitter", net)
+        index, x, y = radio("ControlledSignalTransmitter", net if exports is None else exports[net])
         board.pin(net, x - 1, y, 0, 2)
         expected[index, 1] = net
     for net in sorted(used):
@@ -205,3 +205,39 @@ def wired_module(circuit: Circuit, outputs: dict[str, int]) -> dict:
         if not sources or wiring.sources(*pin) != sources:
             raise ValueError(f"本地端口 {pin} 的实际来源 {wiring.sources(*pin)}，应为 {sources}")
     return {"V": 1137, "BP": blueprint}
+
+
+def method_platforms(circuit: Circuit, channels: dict[Ref, int]) -> list[dict]:
+    """只在方法的真实参数与返回值处连接主网表，内部保留全部原生端口索引。"""
+    result = []
+    for nodes, returns in circuit.method_ranges:
+        exported = set(returns)
+        for node, gate in enumerate(circuit.gates):
+            if node in nodes:
+                continue
+            if any(isinstance(ref, Ref) and ref.node in nodes and ref not in exported for ref in gate.inputs):
+                raise ValueError("方法内部信号被外部直接引用")
+        if any(ref.node in nodes for group in circuit.aliases for ref in group):
+            raise ValueError("独立方法的内部频道与外部共用别名")
+        local = Circuit()
+        sources = {}
+        for node in nodes:
+            gate = circuit.gates[node]
+            inputs = []
+            for value in gate.inputs:
+                if isinstance(value, Literal):
+                    inputs.append(value)
+                    continue
+                if value not in sources:
+                    if value.node in nodes:
+                        raise ValueError("本地组合方法存在前向引用")
+                    sources[value] = local.add("ControlledSignalReceiver", Literal(channels[value]))
+                inputs.append(sources[value])
+            placed = local.add(gate.kind, *inputs, config=gate.config)
+            for port in range(len(PORTS[gate.kind][0])):
+                sources[Ref(node, port)] = Ref(placed.node, port)
+        wires = local.channel_map()
+        exports = {wires[sources[ref]]: channels[ref] for ref in returns}
+        document = wired_module(local, {str(net): net for net in exports}, exports=exports)
+        result.extend(document["BP"]["Entries"])
+    return result

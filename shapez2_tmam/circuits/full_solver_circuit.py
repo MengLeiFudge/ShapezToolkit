@@ -68,12 +68,13 @@ def _increment_value(program: CornerProgram, value: Ref, advance: Ref,
     return program.pick(wrap, program.zero, program.pick(advance, branches[0], value)), wrap
 
 
-def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tuple[Circuit, dict]:
+def build_solver(channel_base: int = 1_211_000, *, packed: bool = False, factory: bool = False) -> tuple[Circuit, dict]:
     """静态编译完整四象限控制；不运行搜索、目标、制造或反馈模拟。"""
     reserve = 65_536
     if not 1 <= channel_base < (1 << 24) - reserve:
         raise ValueError("频道基址需要保留后续65536个频道，并保持低于2^24")
     circuit = Circuit(channel_base + 32)
+    circuit.wire_methods = factory
     target = circuit.add("ControlledSignalReceiver", Literal(channel_base))
     enable = circuit.add("ControlledSignalReceiver", Literal(channel_base + 1))
     program = CornerProgram(circuit, share_controls=True)
@@ -210,14 +211,27 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
     packet["request"] = program.not_(ack)
     next_items = recipe_step(circuit, items, ack, item_status, packet)
     error = program.and_(packet["enable"], circuit.add("LogicGateCompare", next_items[7], Literal(2), config="AQ=="))
-    advance = program.and_(replay, program.not_(error))
+    if factory:
+        ready = program.and_(packet["enable"], program.not_(error))
+        # 只同步确认位。工厂在物品进入目标槽后才回送请求位，一直保持到下一次入槽。
+        incoming = circuit.add("ControlledSignalReceiver", Literal(channel_base + 2))
+        receipt = bank.add(None)
+        bank.put(receipt, incoming)
+        pending = bank.add(0)
+        issue = program.and_(ready, program.not_(pending))
+        matches = circuit.add("LogicGateCompare", receipt, packet["request"], config="AQ==")
+        commit = program.and_(ready, pending, matches)
+        bank.put_exclusive(pending, ((issue, 1), (commit, 0)))
+        advance = program.and_(replay, program.not_(error), program.or_(program.not_(selected), commit))
+    else:
+        advance = program.and_(replay, program.not_(error))
     end_macro = program.and_(advance, circuit.add("LogicGateCompare", pc, Literal(macro_last), config="AQ=="))
     repeat = program.and_(end_macro, program.not_(second_pass))
     repeat_corner = program.and_(advance, circuit.add("LogicGateCompare", pc, Literal(corner_last), config="AQ=="),
                                  program.not_(second_corner))
     tail_done = program.and_(advance, last)
     for read, source in zip((*items, ack, item_status), next_items):
-        bank.put(read, source)
+        bank.put(read, source, commit if factory else None)
     bank.put(pc, next_pc, advance)
     bank.put(pc, 0, program.or_(repeat, repeat_corner))
     bank.put(second_pass, program.or_(second_pass, repeat))
@@ -365,12 +379,18 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
         (descend, program.pick(family_checked, program.const(2), program.one)), (program.or_(commit_top, fail_pop), 0)))
 
     # 搜索仅保存材料参数与精确Pin关系；根成功后才执行并发布制造流。
-    accepted = program.and_(packet["enable"], program.not_(error), replay)
+    if not factory:
+        accepted = program.and_(packet["enable"], program.not_(error), replay)
     record = tuple(bank.add(None) for _ in RECORD_FIELDS)
-    record_valid = bank.add()
-    for read, name in zip(record, RECORD_FIELDS):
-        bank.put(read, packet[name])
-    bank.put(record_valid, accepted)
+    if factory:
+        record_valid = pending
+        for read, name in zip(record, RECORD_FIELDS):
+            bank.put(read, packet[name], issue)
+    else:
+        record_valid = bank.add()
+        for read, name in zip(record, RECORD_FIELDS):
+            bank.put(read, packet[name])
+        bank.put(record_valid, accepted)
     reset_cpu = root_solved
     for read in items:
         bank.put(read, None, reset_cpu)
@@ -409,7 +429,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
                       *frame.slots, *frame.top, *frame.cap_exclusions, frame.pin_search, frame.family_checked)))
     slow_event = program.or_(enter, next_cut, grow_prefix, begin_pin_search, grounded_ready, move_prefix, start_source, counter_event,
                              descend, commit_top, search_pop, fail_pop, root_solved, replay_up, repeat, repeat_corner)
-    timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=(record_valid,),
+    timing, state_report = bank.close(enable, slow_reads=slow_reads, slow_event=slow_event, pulses=() if factory else (record_valid,),
                                       local_pairs=True, packed_timing=packed)
     window = program.and_(timing.phases[3], enable)
     sample = program.and_(window, record_valid)
@@ -425,7 +445,8 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
         raise ValueError("完整四象限控制超出其保留频道范围")
     return circuit, {
         "component": "complete_four_quadrant_tail_solver", "quadrants": 4, "height": 5,
-        "inputs": {"target": channel_base, "enable": channel_base + 1},
+        "inputs": {"target": channel_base, "enable": channel_base + 1,
+                   **({"factory_ack": channel_base + 2} if factory else {})},
         "outputs": {"window": channels[window], "sample": channels[sample], "done": channels[done],
                     "status": channels[status_output], "result": channels[output],
                     "instruction": {name: channels[value] for name, value in zip(RECORD_FIELDS, instruction_outputs)}},
@@ -456,7 +477,7 @@ def build_solver(channel_base: int = 1_211_000, *, packed: bool = False) -> tupl
                      "2": "穷尽全部有界尾部后不可制作", "3": "cu晶体供料未界定", "4": "内部状态或回放失配，不能判不可制作",
                      "null": "输入无效、关闭或窗口之外"},
         "input_protocol": "target全程保持；enable=0持续timing规定的完整复位时间，再启用并保持到done。忽略启动的不完整阶段3。",
-        "output_protocol": "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
+        "output_protocol": "实体端与主控同步复位，factory_ack从整数0开始。每个完整window上升96tick后采样。sample为真且request与上次收货位不同时执行一次，目标槽入货后把factory_ack设为该request并保持。重复窗口只重发同一包。" if factory else "每个完整window上升后等96信号tick，窗口内读一次；sample为真收instruction，随后处理done/status。搜索期间不发布指令，无背压。",
         "resource_bound": "每格只查本列5个原标签及4种辅助料；根帧直接读固定目标；其余三帧各20目标ID，四帧各4整数前缀高度，仅前三帧各保存4整数来源槽、4整数NPC顶盖、4顶层C排除位、1遍次位及1族检查位；物理检查为组合通路，共享一份制造ROM及六槽；另有K模式、首轮切向、叶端模式、制造角遍次和冷却位，慢更新后冻结一轮且脉冲清零。成功参数留帧，重放一次，不保存数百条指令。",
         "termination": "最高原目标C层号H给出max(0,H-1)条尾部Pin边，至多三边；达到H次的历史可改写为A→S；最低C沿边仍严格下降；零Pin首轮每切向至多20次强制补格加一次最终检查；Pin第二轮每帧至多1296个S前缀，每前缀至多20^4×4^4个来源地址。每族共用两个可选顶格闭包；失败后，地面C族或无G成员族全拒，其余成员仅搜Pin尾部。完整穷尽才返回2。",
         "scope": "在既定基础单层及合法晶体供料模型内完整四象限五层尾部搜索；规模和最坏等待仍需压缩，未通过游戏实用性能验收。",
@@ -469,12 +490,17 @@ def main() -> int:
     """编译网表统计，或生成生产蓝图及接口；不执行目标求解。"""
     parser = argparse.ArgumentParser(description="生成四帧递归及成功路径重放的完整四象限尾部电路")
     parser.add_argument("--channel-base", type=int)
+    parser.add_argument("--factory", action="store_true", help="等待实体目标槽确认收货后才推进配方")
     parser.add_argument("--pack", action="store_true", help="合并内部组合门并装入3×3大平台；默认使用独立频道1277000")
     parser.add_argument("--report-only", action="store_true", help="仅输出JSON网表统计和理论时序，不生成布局或蓝图")
     parser.add_argument("--output", type=Path, required=True, help="蓝图路径；使用--report-only时为JSON报告路径")
     args = parser.parse_args()
-    default_base = 1_277_000 if args.pack else 1_211_000
-    circuit, report = build_solver(args.channel_base if args.channel_base is not None else default_base, packed=args.pack)
+    if args.factory:
+        if args.report_only:
+            parser.error("实体主控的建筑数以实际本地布线结果为准")
+        args.pack = True
+    default_base = 1_400_000 if args.factory else (1_277_000 if args.pack else 1_211_000)
+    circuit, report = build_solver(args.channel_base if args.channel_base is not None else default_base, packed=args.pack, factory=args.factory)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     if args.report_only:
         report.pop("gate_platforms")
@@ -491,6 +517,8 @@ def main() -> int:
         print(f"网表统计已生成：{args.output}；{report['logical_gates']} 个逻辑门；未生成布局。")
         return 0
     document = circuit.document(packed=args.pack)
+    if args.factory:
+        report["wired_height_scans"] = len(circuit.method_ranges)
     if args.pack:
         platforms = document["BP"]["Entries"]
         report.update({"logical_gates": sum(circuit.gate_counts().values()), "gate_platforms": len(platforms),

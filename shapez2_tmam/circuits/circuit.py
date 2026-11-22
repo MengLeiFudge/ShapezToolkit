@@ -12,7 +12,7 @@ from collections import Counter, deque
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from .circuit_packing import pack_components
+from .circuit_packing import pack_components, stack_platforms
 from ..mari.blueprint import Wiring
 from ..mari.ports import PORTS
 from ..synthesis.physics import Shape
@@ -136,6 +136,8 @@ class Circuit:
     def __init__(self, channel_base: int = 1_000_000):
         """分配一段低于 2^24 的正整数频道；使用者须为实例保留这段频道。"""
         self.gates: list[Gate] = []
+        self.wire_methods = False
+        self.method_ranges: list[tuple[range, tuple[Ref, ...]]] = []
         self.channel_base = channel_base
         self.aliases: list[tuple[Ref, ...]] = []
         self.local_nodes: set[int] = set()
@@ -313,9 +315,12 @@ class Circuit:
         received = {gate.inputs[0].value for gate in self.gates if gate.kind == "ControlledSignalReceiver"
                     and isinstance(gate.inputs[0], Literal)}
 
+        method_nodes = {node for nodes, _ in self.method_ranges for node in nodes}
+
         def eligible(node: int, port: int, source: Ref | Literal) -> bool:
             gate = self.gates[node]
             return (isinstance(source, Ref) and source.port == 0 and source.node in self.local_nodes
+                    and node not in method_nodes and source.node not in method_nodes
                     and source.node < node and uses[source] == 1 and source not in aliased and source not in public
                     and channels[source] not in received and self.gates[source.node].kind in kinds
                     and PORTS[gate.kind][1][port] in ((2, 0, 0, 0), (3, 0, 0, 0)))
@@ -381,8 +386,11 @@ class Circuit:
         absorbed = set(pairs.values())
         fixed_values = {Ref(node): gate.config for node, gate in enumerate(self.gates)
                         if gate.kind == "ConstantSignal" and Ref(node) not in aliased and gate.config is not None}
+        method_nodes = {node for nodes, _ in self.method_ranges for node in nodes}
+        if method_nodes and not packed:
+            raise ValueError("本地方法需要3×3平台布局")
         for i, gate in enumerate(self.gates):
-            if i in absorbed or (self.retained_nodes is not None and i not in self.retained_nodes):
+            if i in method_nodes or i in absorbed or (self.retained_nodes is not None and i not in self.retained_nodes):
                 continue
             component = len(platforms)
             entries = []
@@ -486,6 +494,10 @@ class Circuit:
             expected = [((mapping[pi][0], mapping[pi][1] + local, port),
                          (mapping[si][0], mapping[si][1] + slocal, sport))
                         for (pi, local, port), (si, slocal, sport) in expected]
+        if method_nodes:
+            from .wired_module import method_platforms
+            platforms.extend(method_platforms(self, channels))
+            stack_platforms(platforms)
         blueprint = {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}
         wiring = Wiring(blueprint)
         indices = {}
