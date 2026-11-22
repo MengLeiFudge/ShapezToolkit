@@ -1,8 +1,20 @@
-"""两列半形与追加块的强制支撑闭包；仅用于四象限零Pin起点。"""
+"""四象限五层的半形起点与堆叠所需前缀。"""
 
 from .corners import CornerBuilder
-from .physics import EMPTY, PIN, Rules, Shape
+from .physics import EMPTY, PIN, Position, Rules, Shape
 from .support import in_support_class
+
+
+def unanchored_additions(rules: Rules, desired: dict[Position, str], lower: dict[Position, str],
+                         *, optional_top: bool = False) -> set[Position]:
+    """找出没有直接下挡的新增块；这些块的每一格都须预置在下料。"""
+    delta = {pos: cell for pos, cell in desired.items() if pos not in lower
+             and not (optional_top and pos[0] == rules.height - 1 and cell[0] != "c")}
+    forced = set()
+    for block in rules.groups(delta):
+        if not any(z == 0 or (z - 1, q) in desired for z, q in block):
+            forced.update(block)
+    return forced
 
 
 def minimal_start(rules: Rules, target: Shape, start: int, *, optional_top: bool = False) -> Shape | None:
@@ -46,11 +58,7 @@ def minimal_start(rules: Rules, target: Shape, start: int, *, optional_top: bool
                         if lowest is not None:
                             forced.add(lowest)
                 lower = upper + 1
-        delta = {pos: cell for pos, cell in desired.items() if pos not in original
-                 and not (optional_top and pos[0] == 4 and cell[0] != "c")}
-        for block in rules.groups(delta):
-            if not any(z == 0 or (z - 1, q) in desired for z, q in block):
-                forced.update(block)
+        forced.update(unanchored_additions(rules, desired, original, optional_top=optional_top))
         if not forced:
             return rules.fold(original)
         for z, q in forced:
