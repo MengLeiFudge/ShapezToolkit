@@ -148,3 +148,45 @@ def simple_corner_far(original: Shape | None, moved: Shape | None, level: int,
     if (level <= highest) & (not _is_raised_source(level, crystal)) & ((level == landing) | (original is None)):
         return shape_literal("cr------")
     return shape_literal("Cu------")
+
+
+def pin_corner_source(above: Shape | None, moved: Shape | None, ground: Shape | None,
+                      level: int, highest: int, crystal: int) -> Shape | None:
+    """输出顶破前主列的一格，above 是目标上一层的原格。"""
+    if level < 0 or level >= highest:
+        return None
+    if ((crystal == 3) & (level == 1)) | ((crystal == 4) & (level == 2)):
+        return moved
+    if level >= 2 or ((crystal == 3) & (level >= 1)):
+        return above
+    ground_source = ((crystal == 3) & (level == 0)) | ((crystal == 4) & (level == 1))
+    if ground_source & (ground is not None) & (ground != shape_literal("P-------")):
+        return ground
+    return shape_literal("cr------")
+
+
+def pin_corner_base_far(above: Shape | None, moved: Shape | None, ground: Shape | None,
+                        level: int, highest: int, crystal: int) -> Shape | None:
+    """临时远柱只在被补齐的主列空底段内放晶体。"""
+    if level < 0 or level > 4:
+        return None
+    if ground is None:
+        if (level == 0) | ((crystal == 4) & (level == 1)):
+            return shape_literal("cr------")
+    elif (ground != shape_literal("P-------")) & (crystal == 4) & (level == 0):
+        return shape_literal("cr------")
+    return shape_literal("Cu------")
+
+
+def pin_corner_anchor(crystal: int, landing: int) -> Shape:
+    if crystal == 3:
+        return shape_literal("cr------:Cu------")
+    if landing == 1:
+        return shape_literal("cr------:cr------:Cu------")
+    return shape_literal("Cu------:cr------:Cu------")
+
+
+def pin_corner_trigger(crystal: int, landing: int) -> Shape:
+    if crystal == 3:
+        return shape_literal("P-------:P-------:Cu------")
+    return shape_literal("P-------:P-------:P-------:Cu------")

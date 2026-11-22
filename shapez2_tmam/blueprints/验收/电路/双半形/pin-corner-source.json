@@ -1,0 +1,86 @@
+{
+  "methods": {
+    "main": "pin_corner_source",
+    "far": "pin_corner_base_far"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "above": {
+      "channel": 1700630,
+      "type": "shape"
+    },
+    "moved": {
+      "channel": 1700624,
+      "type": "shape"
+    },
+    "ground": {
+      "channel": 1700631,
+      "type": "shape"
+    },
+    "level": {
+      "channel": 1700625,
+      "type": "int"
+    },
+    "highest": {
+      "channel": 1700588,
+      "type": "int"
+    },
+    "crystal": {
+      "channel": 1700577,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "main": {
+      "channel": 1700632,
+      "type": "shape"
+    },
+    "far": {
+      "channel": 1700633,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1700577,
+    1700588,
+    1700624,
+    1700625,
+    1700630,
+    1700631,
+    1700632,
+    1700633
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "main": {
+      "pin_corner_source": 11
+    },
+    "far": {
+      "pin_corner_base_far": 11
+    }
+  },
+  "settling": {
+    "max_gate_depth": 12,
+    "hold_signal_ticks": 896,
+    "hold_simulation_seconds": 74.66666666666667,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    562,
+    686,
+    571
+  ],
+  "logic_gates": 60,
+  "logic_gates_before_reuse": 67,
+  "building_entries": 1819,
+  "global_receivers": 6,
+  "global_transmitters": 2,
+  "internal_global_devices": 0
+}
