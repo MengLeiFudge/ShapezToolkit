@@ -109,3 +109,42 @@ def corner_helper_column(crystal: int, landing: int, suspended: bool) -> Shape:
     if crystal == 2:
         return shape_literal("Cu------:P-------:Cu------:Cu------:Cu------")
     return shape_literal("Cu------:Cu------:Cu------:Cu------:Cu------")
+
+
+def column_highest_crystal(word: Shape | None) -> int:
+    crystal = shape_literal("Wu------")
+    for z in (4, 3, 2, 1, 0):
+        if unstack_upper(word) == crystal:
+            return z
+        word = unstack_lower(word)
+    return -1
+
+
+def _is_raised_source(level: int, crystal: int) -> bool:
+    return ((level == 1) & (crystal == 2)
+            | (level == 2) & (crystal == 3)
+            | (level == 3) & (crystal == 4))
+
+
+def simple_corner_source(original: Shape | None, moved: Shape | None, level: int,
+                         highest: int, crystal: int, landing: int) -> Shape | None:
+    """生成直接释放的主列前态单格，传入保留原色的原格和落点原格。"""
+    if level < 0 or level > 4:
+        return None
+    if level > highest:
+        return original
+    if _is_raised_source(level, crystal):
+        return moved
+    if level == landing or original is None:
+        return shape_literal("cr------")
+    return original
+
+
+def simple_corner_far(original: Shape | None, moved: Shape | None, level: int,
+                      highest: int, crystal: int, landing: int) -> Shape | None:
+    """在需删除的填充晶体旁提供锚，其余格使用普通料。"""
+    if level < 0 or level > 4:
+        return None
+    if (level <= highest) & (not _is_raised_source(level, crystal)) & ((level == landing) | (original is None)):
+        return shape_literal("cr------")
+    return shape_literal("Cu------")

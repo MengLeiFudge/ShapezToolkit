@@ -1,0 +1,88 @@
+{
+  "methods": {
+    "main": "simple_corner_source",
+    "far": "simple_corner_far"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "original": {
+      "channel": 1700621,
+      "type": "shape"
+    },
+    "moved": {
+      "channel": 1700624,
+      "type": "shape"
+    },
+    "level": {
+      "channel": 1700625,
+      "type": "int"
+    },
+    "highest": {
+      "channel": 1700588,
+      "type": "int"
+    },
+    "crystal": {
+      "channel": 1700577,
+      "type": "int"
+    },
+    "landing": {
+      "channel": 1700578,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "main": {
+      "channel": 1700626,
+      "type": "shape"
+    },
+    "far": {
+      "channel": 1700627,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1700577,
+    1700578,
+    1700588,
+    1700621,
+    1700624,
+    1700625,
+    1700626,
+    1700627
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "main": {
+      "simple_corner_source": 11,
+      "_is_raised_source": 1
+    },
+    "far": {
+      "simple_corner_far": 6,
+      "_is_raised_source": 1
+    }
+  },
+  "settling": {
+    "max_gate_depth": 13,
+    "hold_signal_ticks": 960,
+    "hold_simulation_seconds": 80.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    601,
+    392,
+    378
+  ],
+  "logic_gates": 45,
+  "logic_gates_before_reuse": 64,
+  "building_entries": 1371,
+  "global_receivers": 6,
+  "global_transmitters": 2,
+  "internal_global_devices": 0
+}
