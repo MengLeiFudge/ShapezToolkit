@@ -16,6 +16,7 @@ REPORT_DIR = PACKAGE_ROOT / "reports"
 
 # 名称 -> (模块名, 默认参数列表)
 BLUEPRINT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "workcell-4q5l": ("local_workcell", ()),
     "cell-at-4q5l": ("cell_at", ()),
     "column-scan-4q5l": ("column_step", ("--scan",)),
     "column-step-4q5l": ("column_step", ()),
@@ -50,6 +51,7 @@ BLUEPRINT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
 
 # 按游戏蓝图库的目录分册。同一模块的四、六象限版本放在一起。
 CIRCUIT_BOOKS = {
+    "配方加工": ("local_workcell",),
     "目标取格": ("cell_at",),
     "列判据": ("column_step",),
     "基础料订单": ("quarter_order",),

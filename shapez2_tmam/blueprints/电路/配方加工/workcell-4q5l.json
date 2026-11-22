@@ -1,0 +1,29 @@
+{
+  "component": "workcell",
+  "inputs": {
+    "opcode": 1600050,
+    "a": 1600051,
+    "b": 1600052,
+    "color": 1600053
+  },
+  "outputs": {
+    "result": 1600054
+  },
+  "opcodes": [
+    "1 顺转",
+    "2 逆转",
+    "3 半周转",
+    "4 前半",
+    "5 后半",
+    "6 顶针",
+    "7 下a上b堆叠",
+    "8 取a前半与b后半",
+    "9 取b前半与a后半",
+    "10 按color结晶"
+  ],
+  "protocol": "输入原生图形，结晶颜色限可供给的七色。空产物返回空信号。固定输入后保持64信号tick再读结果。",
+  "timing_conditions": "整件批量导入或重载，固定接线、独占频道、Hybrid/AlwaysHighUPS常速连续推进。",
+  "platforms": 1,
+  "building_entries": 2253,
+  "internal_global_devices": 0
+}

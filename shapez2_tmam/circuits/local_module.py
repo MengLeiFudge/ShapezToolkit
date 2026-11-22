@@ -113,10 +113,30 @@ class Module:
                 taps[result][z].append(y-2)
                 # 门阵列位于左侧。查表边缘水平线只占 x≥46。
                 reserved[z] = -1
-        sites = [(y,z) for z in (0,1,2) for y in range(2,52,3) if y-1 > reserved[z]]
-        if len(self.gates) > len(sites):
-            raise ValueError(f"单板需要 {len(self.gates)} 个门位，可用 {len(sites)} 个")
-        for (kind,args,outs,config),(y,z) in zip(self.gates,sites):
+        swappers = [g for g in self.gates if g[0] == "VirtualHalvesSwapper"]
+        if len(swappers) > 1:
+            raise ValueError("单板只有一个双出口交换门位")
+        if swappers:
+            kind, args, outs, _ = swappers[0]
+            x, y, z = 2, 49, 2
+            index = put(kind+"Default",x,y,z)
+            cells[x,y-1,z] = index
+            for p, (arg, out) in enumerate(zip(args, outs)):
+                port_y = y-p
+                lead = port_y + (1 if p == 0 else -1)
+                expected[index,p] = arg
+                line(arg,z,(x,port_y),(x-1,port_y),(x-1,lead),(tracks[arg],lead))
+                taps[arg][z].append(lead)
+                drivers[out].append((index,p))
+                if out in tracks:
+                    line(out,z,(x,port_y),(tracks[out],port_y))
+                    taps[out][z].append(port_y)
+        gates = [g for g in self.gates if g[0] != "VirtualHalvesSwapper"]
+        sites = [(y,z) for z in (0,1,2) for y in range(2,52,3)
+                 if y-1 > reserved[z] and not (swappers and z == 2 and y >= 47)]
+        if len(gates) > len(sites):
+            raise ValueError(f"单板需要 {len(gates)} 个门位，可用 {len(sites)} 个")
+        for (kind,args,outs,config),(y,z) in zip(gates,sites):
             typ = kind + ("Default" if kind.startswith("Virtual") and kind != "VirtualRotatorCCW" else "")
             index = put(typ,2,y,z,config=config)
             for category, signals in enumerate((outs,args)):
