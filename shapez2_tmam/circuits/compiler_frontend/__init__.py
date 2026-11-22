@@ -9,7 +9,7 @@ from ..compiler_contract import (
     Constant, Function, Instruction, Jump, Operand, Program, Reference,
     Return, ValueType, Variable,
 )
-from ._ranges import _Bounds, _INT_BOUNDS, _add_bounds, _add_failure, _fits_int
+from ._ranges import _Bounds, _INT_BOUNDS, _add_bounds, _fits_int, _range_failure, _within
 
 
 __all__ = ["FrontendError", "compile_method"]
@@ -145,8 +145,10 @@ class _Lowering:
         self.slots = {arg.name: arg.name for arg in self.inputs}
         self.assigned: _Assigned = {arg.name: None for arg in self.inputs}
         self.locals: list[Variable] = []
+        self.tables: dict[str, list[_Value]] = {}
         self.blocks: list[_Block] = []
-        self.unproved_additions: dict[str, ast.AST] = {}
+        self.range_checks: dict[str, tuple[ast.AST, _Bounds]] = {}
+        self.table_edges: dict[str, set[str]] = {}
         self.loop_visits = 1
         self.temp_number = 0
         self.current: _Block | None = self.block()
@@ -161,24 +163,59 @@ class _Lowering:
         self.statements(body)
         if self.current is not None:
             raise self.module.error(self.method, "方法存在未返回值的路径，请在每条路径返回标注的类型")
+        function = self.function()
+        if self.range_checks:
+            required = {slot: allowed for slot, (_, allowed) in self.range_checks.items()}
+            failure = _range_failure(function, required, self.table_edges)
+            if failure is not None:
+                slot, bounds = failure
+                node, allowed = self.range_checks[slot]
+                subject = "加法" if allowed == _INT_BOUNDS else "索引"
+                if bounds is None:
+                    message = f"{subject}的范围分析超过块状态预算，请缩小循环范围或拆分方法"
+                elif allowed == _INT_BOUNDS:
+                    lo, hi = bounds
+                    message = (f"无法证明加法结果在有符号 32 位范围内（推导范围 {lo}～{hi}），"
+                               "请限定操作数的范围")
+                else:
+                    message = self.index_message(allowed, bounds)
+                raise self.module.error(node, message)
+            if self.prune_table_branches():
+                return self.function()
+        return function
+
+    def function(self) -> Function:
         blocks = []
         for block in self.blocks:
             assert block.end is not None
             blocks.append(Block(block.name, tuple(block.instructions), block.end))
-        function = Function(self.method.name, self.inputs, self.result, tuple(self.locals), tuple(blocks),
-                            sum(block.visits for block in self.blocks))
-        if self.unproved_additions:
-            failure = _add_failure(function, self.unproved_additions)
-            if failure is not None:
-                target, bounds = failure
-                if bounds is None:
-                    message = "加法的范围分析超过块状态预算，请缩小循环范围或拆分方法"
-                else:
-                    lo, hi = bounds
-                    message = (f"无法证明加法结果在有符号 32 位范围内（推导范围 {lo}～{hi}），"
-                               "请限定操作数的范围")
-                raise self.module.error(self.unproved_additions[target], message)
-        return function
+        return Function(self.method.name, self.inputs, self.result, tuple(self.locals), tuple(blocks),
+                        sum(block.visits for block in self.blocks))
+
+    def prune_table_branches(self) -> bool:
+        forced = {name: next(iter(edges)) for name, edges in self.table_edges.items() if len(edges) == 1}
+        if not forced:
+            return False
+        blocks = {block.name: block for block in self.blocks}
+        for name, successor in forced.items():
+            block = blocks[name]
+            block.end = Jump(successor)
+            block.instructions.pop()
+
+        reachable = set()
+        pending = [self.blocks[0].name]
+        while pending:
+            name = pending.pop()
+            if name in reachable:
+                continue
+            reachable.add(name)
+            end = blocks[name].end
+            if isinstance(end, Jump):
+                pending.append(end.target)
+            elif isinstance(end, Branch):
+                pending.extend((end.if_true, end.if_false))
+        self.blocks = [block for block in self.blocks if block.name in reachable]
+        return True
 
     def block(self, visits: int | None = None) -> _Block:
         block = _Block(f"b{len(self.blocks)}", self.loop_visits if visits is None else visits)
@@ -208,6 +245,8 @@ class _Lowering:
 
     def declare(self, target: ast.Name, kind: ValueType) -> None:
         name = target.id
+        if name in self.tables:
+            raise self.module.error(target, f"只读表“{name}”只允许定义一次")
         if name in self.types:
             self.require(target, kind, self.types[name])
         else:
@@ -250,14 +289,35 @@ class _Lowering:
             if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
                 raise self.module.error(node, "每条赋值需要一个局部变量名")
             target = node.targets[0]
-        if node.value is not None:
+        if isinstance(node, ast.Assign) and isinstance(node.value, ast.Tuple):
+            name = target.id
+            if name in self.types or name in self.tables:
+                raise self.module.error(target, f"只读表“{name}”需要单独的变量名并且只定义一次")
+            self.tables[name] = self.table_items(node.value, self.names)
+            self.assigned[name] = None
+        elif node.value is not None:
             self.bind(target, self.expression(node.value, self.types.get(target.id)))
 
+    def condition(self, node: ast.expr, yes: _Block, no: _Block) -> None:
+        if isinstance(node, ast.BoolOp):
+            for value in node.values[:-1]:
+                following = self.block()
+                if isinstance(node.op, ast.And):
+                    self.condition(value, following, no)
+                else:
+                    self.condition(value, yes, following)
+                self.current = following
+            self.condition(node.values[-1], yes, no)
+        elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            self.condition(node.operand, no, yes)
+        else:
+            value = self.expression(node, BOOL)
+            assert self.current is not None
+            self.current.end = Branch(value.operand, yes.name, no.name)
+
     def branch(self, node: ast.If) -> None:
-        condition = self.expression(node.test, BOOL)
-        assert self.current is not None
         yes, no = self.block(), self.block()
-        self.current.end = Branch(condition.operand, yes.name, no.name)
+        self.condition(node.test, yes, no)
         before = self.assigned.copy()
         self.current = yes
         self.statements(node.body)
@@ -306,6 +366,72 @@ class _Lowering:
             return []
         empty = _Value(Constant(kind, None), kind)
         return [empty if value is None else value for value in values]
+
+    def table_items(self, node: ast.Tuple, snapshots: set[str], expected: ValueType | None = None) -> list[_Value]:
+        if not node.elts:
+            raise self.module.error(node, "只读表需要至少一个元素")
+        return self.tuple_items(node, expected, snapshots)
+
+    @staticmethod
+    def index_message(allowed: _Bounds, bounds: _Bounds) -> str:
+        lo, hi = allowed
+        low, high = bounds
+        return f"无法证明索引在 {lo}～{hi} 内（推导范围 {low}～{high}），请限定索引范围"
+
+    def subscript(self, node: ast.Subscript, expected: ValueType | None) -> _Value:
+        table = node.value
+        if isinstance(table, ast.Tuple):
+            items = self.table_items(table, set(), expected)
+        elif isinstance(table, ast.Name) and table.id in self.tables:
+            if table.id not in self.assigned:
+                raise self.module.error(table, f"只读表“{table.id}”可能未定义，请在每条读取路径先定义它")
+            items = self.tables[table.id]
+        else:
+            raise self.module.error(table, "请索引固定元组或在方法内定义的只读表")
+        index = self.expression(node.slice, INT)
+        allowed = (-len(items), len(items) - 1)
+        operand = index.operand
+        if index.bounds is not None and _within(index.bounds, allowed):
+            low, high = index.bounds
+        elif isinstance(operand, Constant):
+            assert index.bounds is not None
+            raise self.module.error(node.slice, self.index_message(allowed, index.bounds))
+        else:
+            # 先在读取位置证明范围，选择树的叶块才可省略越界判断。
+            slot = self.temp(INT)
+            self.emit(Bind(slot, operand))
+            self.range_checks[slot] = (node.slice, allowed)
+            operand = Reference(slot)
+            low, high = allowed
+        if low == high:
+            return items[low]
+
+        candidates = [items[i] for i in range(low, high + 1)]
+        kind = items[0].type
+        result = self.temp(kind)
+        done = self.block()
+        self.table_selection(candidates, low, operand, result, done)
+        self.current = done
+        bounds = [value.bounds for value in candidates if value.bounds is not None]
+        result_bounds = ((min(lo for lo, _ in bounds), max(hi for _, hi in bounds))
+                         if len(bounds) == len(candidates) else None)
+        return _Value(Reference(result), kind, result_bounds)
+
+    def table_selection(self, items: list[_Value], first: int, index: Operand, result: str, done: _Block) -> None:
+        assert self.current is not None
+        if len(items) == 1:
+            self.emit(Bind(result, items[0].operand))
+            self.current.end = Jump(done.name)
+            return
+        middle = len(items) // 2
+        before, after = self.block(), self.block()
+        condition = self.apply("lt", BOOL, index, Constant(INT, first + middle))
+        self.current.end = Branch(condition.operand, before.name, after.name)
+        self.table_edges[self.current.name] = set()
+        self.current = before
+        self.table_selection(items[:middle], first, index, result, done)
+        self.current = after
+        self.table_selection(items[middle:], first + middle, index, result, done)
 
     def range_bounds(self, node: ast.expr) -> tuple[int, int]:
         if (not isinstance(node, ast.Call) or not isinstance(node.func, ast.Name)
@@ -396,7 +522,11 @@ class _Lowering:
                 raise self.module.error(node, f"未知变量“{node.id}”，请改用方法参数或局部变量")
             if node.id not in self.assigned:
                 raise self.module.error(node, f"变量“{node.id}”可能未赋值，请在读取前为每条路径赋值")
+            if node.id in self.tables:
+                raise self.module.error(node, f"通过整数索引读取只读表“{node.id}”的元素")
             return _Value(Reference(self.slots[node.id]), self.types[node.id], self.assigned[node.id])
+        if isinstance(node, ast.Subscript):
+            return self.subscript(node, expected)
         if isinstance(node, ast.Constant):
             if type(node.value) is bool:
                 return _Value(Constant(BOOL, node.value), BOOL)
@@ -433,7 +563,7 @@ class _Lowering:
         self.emit(Apply(slot, "add", (left.operand, right.operand)))
         if _fits_int(bounds):
             return _Value(Reference(slot), INT, bounds)
-        self.unproved_additions[slot] = node
+        self.range_checks[slot] = (node, _INT_BOUNDS)
         return _Value(Reference(slot), INT)
 
     def short_circuit(self, node: ast.BoolOp) -> _Value:

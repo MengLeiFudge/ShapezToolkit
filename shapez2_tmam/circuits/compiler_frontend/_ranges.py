@@ -1,6 +1,6 @@
-"""按基本块访问上界验证循环累计值与分支约束下的加法。"""
+"""按基本块访问上界验证整数加法及查表索引。"""
 
-from collections.abc import Collection
+from collections.abc import Mapping
 
 from ..compiler_contract import INT, Apply, Bind, Block, Branch, Constant, Function, Jump, Operand, Reference
 
@@ -18,8 +18,12 @@ def _add_bounds(left: _Bounds, right: _Bounds) -> _Bounds:
     return left[0] + right[0], left[1] + right[1]
 
 
+def _within(bounds: _Bounds, allowed: _Bounds) -> bool:
+    return allowed[0] <= bounds[0] <= bounds[1] <= allowed[1]
+
+
 def _fits_int(bounds: _Bounds) -> bool:
-    return _INT_MIN <= bounds[0] <= bounds[1] <= _INT_MAX
+    return _within(bounds, _INT_BOUNDS)
 
 
 def _bounds(operand: Operand, ranges: _Ranges) -> _Bounds:
@@ -85,7 +89,8 @@ def _branch_ranges(block: Block, end: Branch, ranges: _Ranges,
     return yes, no
 
 
-def _add_failure(function: Function, unproved: Collection[str]) -> tuple[str, _Bounds | None] | None:
+def _range_failure(function: Function, required: Mapping[str, _Bounds],
+                   table_edges: dict[str, set[str]]) -> tuple[str, _Bounds | None] | None:
     blocks = {block.name: block for block in function.blocks}
     integers = {var.name for var in (*function.inputs, *function.locals) if var.type is INT}
     current: dict[str, _Ranges] = {function.blocks[0].name: {}}
@@ -97,7 +102,7 @@ def _add_failure(function: Function, unproved: Collection[str]) -> tuple[str, _B
         following: dict[str, _Ranges] = {}
         for name, incoming in current.items():
             if budget == 0:
-                return next(iter(unproved)), None
+                return next(iter(required)), None
             budget -= 1
             block = blocks[name]
             ranges = incoming.copy()
@@ -106,18 +111,19 @@ def _add_failure(function: Function, unproved: Collection[str]) -> tuple[str, _B
                 if target not in integers:
                     continue
                 if isinstance(instruction, Bind):
-                    ranges[target] = _bounds(instruction.value, ranges)
+                    bounds = _bounds(instruction.value, ranges)
                 elif isinstance(instruction, Apply) and instruction.operation == "add":
                     left, right = instruction.args
                     bounds = _add_bounds(_bounds(left, ranges), _bounds(right, ranges))
-                    if _fits_int(bounds):
-                        ranges[target] = bounds
-                    elif target in unproved:
-                        return target, bounds
-                    else:
-                        # 快速检查已证明此加法安全，丢掉不够精确的区间。
-                        ranges.pop(target, None)
                 else:
+                    bounds = _INT_BOUNDS
+                allowed = required.get(target)
+                if allowed is not None and not _within(bounds, allowed):
+                    return target, bounds
+                if _fits_int(bounds):
+                    ranges[target] = bounds
+                else:
+                    # 快速检查已证明此加法安全，丢掉不够精确的区间。
                     ranges.pop(target, None)
             end = block.end
             if isinstance(end, Jump):
@@ -129,6 +135,8 @@ def _add_failure(function: Function, unproved: Collection[str]) -> tuple[str, _B
                 continue
             for successor, state in edges:
                 if state is not None:
+                    if name in table_edges:
+                        table_edges[name].add(successor)
                     previous = following.get(successor)
                     following[successor] = state if previous is None else _join_ranges(previous, state)
         current = following
