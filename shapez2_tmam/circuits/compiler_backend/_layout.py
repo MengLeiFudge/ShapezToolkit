@@ -1,6 +1,7 @@
 """把本地门网布置到三层 3×3 平台并核对实际输入来源。"""
 
 from collections import defaultdict
+from dataclasses import dataclass
 from graphlib import TopologicalSorter
 
 from ...mari.blueprint import DIRECTIONS, Wiring
@@ -12,6 +13,7 @@ from ..wired_module import _Board
 _GATE_ROWS = range(4, 51, 5)
 _GATE_COLUMNS = range(8, 43, 5)
 _RADIO_ROWS = range(5, 51, 5)
+_GATE_CAPACITY = len(_GATE_ROWS) * len(_GATE_COLUMNS) * 3
 
 
 def _route(board: _Board, *, short_first: bool = False):
@@ -128,18 +130,39 @@ def used_input_channels(circuit: Circuit, outputs: dict[int, Ref]) -> set[int]:
     return channels
 
 
+@dataclass(frozen=True)
+class _EdgeLinks:
+    incoming: dict[int, tuple[int, int]]
+    outgoing: dict[int, tuple[int, int]]
+
+
+@dataclass(frozen=True)
+class _PlacedPlatform:
+    entry: dict
+    expected: dict[tuple[int, int], tuple[tuple[int, int], ...]]
+    outputs: list[int]
+    receivers: dict[int, int]
+    senders: dict[int, int]
+
+
 def layout(circuit: Circuit, outputs: dict[int, Ref], *, retain_inputs: bool = True) -> tuple[dict, int]:
     """公开接口使用无线。网表内部按真实端口路由，包括双格交换门。"""
     channels = circuit.channel_map()
     live = _live_nodes(circuit, channels, outputs, retain_inputs=retain_inputs)
+    return _assemble([_layout_platform(circuit, channels, live, outputs)])
+
+
+def _layout_platform(circuit: Circuit, channels: dict[Ref, int], live: set[int], outputs: dict[int, Ref],
+                     links: _EdgeLinks | None = None) -> _PlacedPlatform:
     used = {channels[arg] for node in live for arg in circuit.gates[node].inputs if isinstance(arg, Ref)}
     used.update(channels[ref] for ref in outputs.values())
+    if links is not None:
+        used.update(links.outgoing)
 
     radios = [node for node in sorted(live) if circuit.gates[node].kind == "ControlledSignalReceiver"]
     gates = sorted(live - set(radios))
-    capacity = len(_GATE_ROWS) * len(_GATE_COLUMNS) * 3
-    if max(len(radios), len(outputs)) > len(_RADIO_ROWS) or len(gates) > capacity:
-        raise LayoutCapacityError(f"三层平台容量不足，{len(gates)}/{capacity} 个门，"
+    if max(len(radios), len(outputs)) > len(_RADIO_ROWS) or len(gates) > _GATE_CAPACITY:
+        raise LayoutCapacityError(f"三层平台容量不足，{len(gates)}/{_GATE_CAPACITY} 个门，"
                                   f"接收 {len(radios)}、发射 {len(outputs)}，每侧最多 {len(_RADIO_ROWS)} 个")
     # 保留规则门位，改变门的空间分布以绕开高扇出的布线拥塞。
     rows = (tuple(_GATE_ROWS), tuple(reversed(_GATE_ROWS)))
@@ -159,6 +182,13 @@ def layout(circuit: Circuit, outputs: dict[int, Ref], *, retain_inputs: bool = T
     if len(gates) > 50:
         order, sites = _spread_sites(circuit, channels, radios, gates, outputs)
         arrangements.append((order, sites, False))
+        if links is not None:
+            # 错开各层门位，让高扇出网络在门阵列之间有换层空间。
+            shifts = (
+                [(x + z, y + (2 * z) % 3, z) for x, y in row_sites for z in levels],
+                [(x + z, y + (2 * z) % 3, z) for x, y in col_sites for z in levels],
+            )
+            shapes = (*shifts, *shapes)
     last_error = None
     arrangements.extend((gates, sites, False) for sites in shapes)
     if len(gates) > 50:
@@ -168,7 +198,8 @@ def layout(circuit: Circuit, outputs: dict[int, Ref], *, retain_inputs: bool = T
         arrangements.append((spread_order, staggered, True))
     for order, sites, short_first in arrangements:
         try:
-            return _place(circuit, channels, (radios, order), used, sites, outputs, short_first=short_first)
+            return _render(circuit, channels, (radios, order), used, sites, outputs,
+                           short_first=short_first, links=links)
         except _RoutingError as error:
             last_error = error
     raise LayoutCapacityError(f"三层平台未布通 {len(gates)} 个门，{last_error}") from last_error
@@ -182,8 +213,9 @@ class _RoutingError(ValueError):
     pass
 
 
-def _place(circuit: Circuit, channels: dict[Ref, int], groups: tuple[list[int], list[int]], used: set[int],
-           sites: list[tuple[int, int, int]], outputs: dict[int, Ref], *, short_first: bool = False) -> tuple[dict, int]:
+def _render(circuit: Circuit, channels: dict[Ref, int], groups: tuple[list[int], list[int]], used: set[int],
+            sites: list[tuple[int, int, int]], outputs: dict[int, Ref], *, short_first: bool = False,
+            links: _EdgeLinks | None = None) -> _PlacedPlatform:
     radios, gates = groups
     board = _Board()
     drivers = defaultdict(list)
@@ -237,19 +269,68 @@ def _place(circuit: Circuit, channels: dict[Ref, int], groups: tuple[list[int], 
         sinks[out, 1] = net
         transmitters.append(out)
 
+    receivers, senders = {}, {}
+    if links is not None:
+        # 缺口在 _Board 的室内范围之外，导线从 x=0 或 x=53 开始。
+        for net, (y, level) in links.incoming.items():
+            index = _cross_port(board, "Receiver", -1, y, level)
+            receivers[net] = index
+            drivers[net].append((index, 0))
+            board.pin(net, -1, y, level, 0)
+        for net, (y, level) in links.outgoing.items():
+            index = _cross_port(board, "Sender", 54, y, level)
+            senders[net] = index
+            sinks[index, 0] = net
+            board.pin(net, 54, y, level, 2)
+
     try:
         blueprint = _route(board, short_first=short_first)
     except ValueError as error:
         raise _RoutingError(str(error)) from error
-    wiring = Wiring(blueprint)
-    dependencies = defaultdict(set)
     expected = {**fixed, **{pin: tuple(sorted(drivers[net])) for pin, net in sinks.items()}}
-    for (index, port), sources in expected.items():
-        actual = wiring.sources(index, port)
+    return _PlacedPlatform(blueprint["Entries"][0], expected, transmitters, receivers, senders)
+
+
+def _cross_port(board: _Board, role: str, x: int, y: int, level: int) -> int:
+    index = len(board.entries)
+    board.entries.append({"T": f"WireTransmitter{role}InternalVariant", "X": x - 17, "Y": y - 17,
+                          "L": level, "R": 0})
+    return index
+
+
+def _assemble(platforms: list[_PlacedPlatform]) -> tuple[dict, int]:
+    blueprint = {"$type": "Island", "BinaryVersion": 1137, "Entries": []}
+    expected, pairs = {}, {}
+    outputs = []
+    predecessors = {}
+    offset = 0
+    for column, platform in enumerate(platforms):
+        entry = platform.entry
+        if column:
+            entry = {**entry, "X": column * 3}
+        blueprint["Entries"].append(entry)
+        expected.update({(index + offset, port): tuple((source + offset, out) for source, out in sources)
+                         for (index, port), sources in platform.expected.items()})
+        if predecessors.keys() != platform.receivers.keys():
+            raise ValueError("跨平台切口的两侧信号不一致")
+        pairs.update({index + offset: predecessors[net] for net, index in platform.receivers.items()})
+        predecessors = {net: index + offset for net, index in platform.senders.items()}
+        outputs.extend(index + offset for index in platform.outputs)
+        offset += len(entry["B"]["Entries"])
+    if predecessors:
+        raise ValueError("末端平台的飞线没有接收器")
+
+    wiring = Wiring(blueprint)
+    if wiring.short_ports != pairs:
+        raise ValueError("跨平台飞线的实际配对与分板计划不一致")
+    dependencies = defaultdict(set, {receiver: {sender} for receiver, sender in pairs.items()})
+    for pin, sources in expected.items():
+        actual = tuple(sorted(wiring._direct_sources(*pin)))
         if not sources or actual != sources:
+            index, port = pin
             raise ValueError(f"端口 {wiring.sites[index]}/{port} 期望 {sources}，实际接到 {actual}")
-        dependencies[index].update(source for source, _ in sources)
+        dependencies[pin[0]].update(source for source, _ in actual)
     depths = {}
     for index in TopologicalSorter(dependencies).static_order():
         depths[index] = 1 + max((depths[src] for src in dependencies[index]), default=0)
-    return {"V": 1137, "BP": blueprint}, max(depths[out] for out in transmitters)
+    return {"V": 1137, "BP": blueprint}, max(depths[out] for out in outputs)

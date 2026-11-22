@@ -9,6 +9,7 @@ from ..compiler_contract import INT, Program
 from ._layout import LayoutCapacityError, layout, logic_gates
 from ._lower import Lowering, _Value
 from ._optimize import compact
+from ._split import layout_two_platforms
 from ._table import interval_table
 
 
@@ -46,16 +47,24 @@ def compile_program(program: Program, channel_base: int) -> tuple[dict, dict]:
     else:
         integer_table = len(entry.inputs) == 1 and entry.inputs[0].type is INT and entry.result is INT
         table = interval_table(circuit, result) if integer_table else None
+        reduced, reduced_outputs = variants[0]
         if table is not None:
             reduced, table_output = table
             reduced_outputs = {output_channel: table_output}
-            document, depth = layout(reduced, reduced_outputs)
-        elif len(failures) == 1:
-            raise failures[0]
-        else:
-            first, last = failures
-            raise LayoutCapacityError(f"复用后 {first}。未复用的网表也无法布置，{last}") from last
-    entries = document["BP"]["Entries"][0]["B"]["Entries"]
+            try:
+                document, depth = layout(reduced, reduced_outputs)
+            except LayoutCapacityError as error:
+                failures.append(error)
+            else:
+                failures.clear()
+        if failures:
+            try:
+                document, depth = layout_two_platforms(reduced, reduced_outputs)
+            except LayoutCapacityError as error:
+                details = "。".join(dict.fromkeys(map(str, failures)))
+                raise LayoutCapacityError(f"{details}。{error}") from error
+    platforms = document["BP"]["Entries"]
+    entries = [entry for platform in platforms for entry in platform["B"]["Entries"]]
     counts = Counter(e["T"].removesuffix("InternalVariant") for e in entries)
     hold_ticks = 64 * (depth + 2)
     report = {
@@ -74,8 +83,8 @@ def compile_program(program: Program, channel_base: int) -> tuple[dict, dict]:
             "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取频道结果。",
         },
         "platform_type": "Foundation_3x3",
-        "platforms": 1,
-        "island_footprint_chunks": [3, 3],
+        "platforms": len(platforms),
+        "island_footprint_chunks": [3 * len(platforms), 3],
         "buildings_by_layer": [sum(e["L"] == z for e in entries) for z in range(3)],
         "logic_gates": logic_gates(reduced, reduced_outputs),
         "logic_gates_before_reuse": logic_gates(circuit, outputs),
@@ -84,6 +93,8 @@ def compile_program(program: Program, channel_base: int) -> tuple[dict, dict]:
         "global_transmitters": counts["ControlledSignalTransmitter"],
         "internal_global_devices": 0,
     }
+    if len(platforms) > 1:
+        report["short_range_links"] = counts["WireTransmitterSender"]
     return document, report
 
 

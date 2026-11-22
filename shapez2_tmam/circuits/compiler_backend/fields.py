@@ -1,4 +1,4 @@
-"""把多个同签名的组合方法布置到一个共享输入的平台。"""
+"""把多个同签名的组合方法布置到共享输入的本地门网。"""
 
 from collections import Counter
 from collections.abc import Mapping
@@ -10,6 +10,7 @@ from . import _write_blueprint
 from ._layout import LayoutCapacityError, layout, logic_gates
 from ._lower import Lowering, _Value
 from ._optimize import compact
+from ._split import layout_two_platforms
 
 
 def compile_fields(programs: Mapping[str, Program], *, input_channels: Mapping[str, int],
@@ -71,15 +72,23 @@ def compile_fields(programs: Mapping[str, Program], *, input_channels: Mapping[s
         outputs[output_channels[field]] = (circuit.add("ConstantSignal", config=constant(value.value))
                                            if isinstance(value, Literal) else value)
     reduced, refs = compact(circuit, outputs)
-    try:
-        document, depth = layout(reduced, refs)
-    except LayoutCapacityError:
-        if reduced is circuit:
-            raise
-        document, depth = layout(circuit, outputs)
-        reduced, refs = circuit, outputs
+    variants = [(reduced, refs)] if reduced is circuit else [(reduced, refs), (circuit, outputs)]
+    for variant, variant_outputs in variants:
+        try:
+            document, depth = layout(variant, variant_outputs)
+        except LayoutCapacityError as error:
+            last_error = error
+        else:
+            reduced, refs = variant, variant_outputs
+            break
+    else:
+        try:
+            document, depth = layout_two_platforms(reduced, refs)
+        except LayoutCapacityError as error:
+            raise LayoutCapacityError(f"{last_error}。{error}") from error
 
-    entries = document["BP"]["Entries"][0]["B"]["Entries"]
+    platforms = document["BP"]["Entries"]
+    entries = [entry for platform in platforms for entry in platform["B"]["Entries"]]
     counts = Counter(e["T"].removesuffix("InternalVariant") for e in entries)
     hold_ticks = 64 * (depth + 2)
     report = {
@@ -99,8 +108,8 @@ def compile_fields(programs: Mapping[str, Program], *, input_channels: Mapping[s
             "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。",
         },
         "platform_type": "Foundation_3x3",
-        "platforms": 1,
-        "island_footprint_chunks": [3, 3],
+        "platforms": len(platforms),
+        "island_footprint_chunks": [3 * len(platforms), 3],
         "buildings_by_layer": [sum(e["L"] == z for e in entries) for z in range(3)],
         "logic_gates": logic_gates(reduced, refs),
         "logic_gates_before_reuse": logic_gates(circuit, outputs),
@@ -109,6 +118,8 @@ def compile_fields(programs: Mapping[str, Program], *, input_channels: Mapping[s
         "global_transmitters": counts["ControlledSignalTransmitter"],
         "internal_global_devices": 0,
     }
+    if len(platforms) > 1:
+        report["short_range_links"] = counts["WireTransmitterSender"]
     if conditions:
         report["publish_when"] = {field: program.entry for field, program in conditions.items()}
     return document, report
