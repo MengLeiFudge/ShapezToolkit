@@ -900,6 +900,47 @@
         ]
       }
     ],
+    "recipe": {
+      "controller_outputs": {
+        "target": 1600000,
+        "length": 1640043,
+        "replay_result": 1640044,
+        "accepted": 1640045,
+        "payload": {
+          "opcode": 1640002,
+          "a": 1640003,
+          "b": 1640004,
+          "destination": 1640005,
+          "base": 1640006,
+          "color": 1640007
+        },
+        "packet_tag": 1640046
+      },
+      "operator_outputs": {
+        "run": 1640030,
+        "clean_confirmed": 1640060,
+        "enable_feed": 1640059
+      },
+      "factory_outputs": {
+        "address": 1640000,
+        "phase": 1640001,
+        "ready": 1640014,
+        "request": 1640011,
+        "ack": 1640013,
+        "loaded": 1640057,
+        "reset": 1640012,
+        "readback": {
+          "operands": 1640008,
+          "materials": 1640009
+        }
+      },
+      "length": {
+        "min": 1,
+        "max": 48
+      },
+      "address_base": 0,
+      "reset_phase": 3
+    },
     "output": {
       "platform": [
         852,
@@ -920,6 +961,10 @@
     },
     "write": {
       "address": 1640000,
+      "phase": 1640001,
+      "ready": 1640014,
+      "request": 1640011,
+      "ack": 1640013,
       "payload": {
         "opcode": 1640002,
         "a": 1640003,
@@ -928,19 +973,15 @@
         "base": 1640006,
         "color": 1640007
       },
-      "packet_tag": 1640046,
-      "phase": 1640001,
-      "ready": 1640014,
-      "request": 1640011,
-      "ack": 1640013
+      "packet_tag": 1640046
     },
     "control": {
       "run": 1640030,
       "clean_confirmed": 1640060,
       "enable_feed": 1640059,
       "loaded": 1640057,
-      "length": 1640043,
       "target": 1600000,
+      "length": 1640043,
       "replay_result": 1640044,
       "accepted": 1640045
     }

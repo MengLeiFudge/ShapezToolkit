@@ -27,9 +27,10 @@ def advance(packet_tag, length=PROGRAM_LENGTH):
     m.gate('LogicGateAnd', ('writing', 'next_address'), ('committing',))
     m.gate('LogicGateAnd', ('committing', 'ack'), ('stored',))
     m.gate('LogicGateOr', ('begin', 'stored'), ('step',))
+    m.gate('LogicGateAnd', ('step', 1), ('take_step',))
     m.gate('LogicGateNot', ('step',), ('wait',))
     m.gate('LogicGateIf', ('state', 'wait'), ('next',))
-    m.gate('LogicGateIf', ('successor', 'step'), ('next',))
+    m.gate('LogicGateIf', ('successor', 'take_step'), ('next',))
     m.outputs = {'next': STREAM_NEXT}
     return m
 
@@ -47,9 +48,10 @@ def release(run, target, produce):
     m.gate('LogicGateAnd', ('replayed', 'success'), ('verified',))
     m.gate('LogicGateAnd', ('verified', 'size_ok'), ('admitted',))
     m.gate('LogicGateAnd', ('run', 'admitted'), ('active',))
+    m.gate('LogicGateAnd', ('active', 1), ('take_next',))
     m.gate('LogicGateNot', ('active',), ('reset',))
     m.gate('LogicGateIf', (0, 'reset'), ('state',))
-    m.gate('LogicGateIf', ('next', 'active'), ('state',))
+    m.gate('LogicGateIf', ('next', 'take_next'), ('state',))
     m.gate('LogicGateCompare', ('state', 0), ('request',), 'BA==')
     m.gate('LogicGateCompare', ('state', 'length'), ('at_end',), 'AQ==')
     m.gate('LogicGateAnd', ('at_end', 'active'), ('produce',))
