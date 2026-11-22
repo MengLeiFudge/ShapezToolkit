@@ -18,6 +18,7 @@ _FALSE = Literal(0)
 _TRUE = Literal(1)
 _MAX_EXPANDED_BLOCKS = 4096
 _MAX_TRUTH_ATOMS = 12
+_MAX_INT_PAIRS = 256
 _TRUTH_MASK = (1 << (1 << _MAX_TRUTH_ATOMS)) - 1
 _COMPARE = {"eq": ("AQ==", eq), "ne": ("Bg==", ne), "lt": ("BA==", lt), "le": ("BQ==", le)}
 _NATIVE = {
@@ -33,6 +34,12 @@ _NATIVE = {
 class _Value:
     type: ValueType
     signal: Signal
+    integers: tuple[tuple[int, Signal], ...] = ()
+
+    def int_choices(self) -> tuple[tuple[int, Signal], ...]:
+        if self.type is INT and isinstance(self.signal, Literal) and isinstance(self.signal.value, int):
+            return ((self.signal.value, _TRUE),)
+        return self.integers
 
 
 @dataclass(frozen=True)
@@ -198,6 +205,43 @@ class Lowering:
             self.circuit.aliases.append(tuple(driven))
         return driven[0] if driven else Literal(None)
 
+    def _int_value(self, choices: dict[int, Signal]) -> _Value:
+        if any(not -(1 << 31) <= value < 1 << 31 for value in choices):
+            raise ValueError("加法结果超出有符号 32 位整数范围")
+        if len(choices) == 1:
+            return _Value(INT, Literal(next(iter(choices))))
+        signal = self._merge([(guard, Literal(value)) for value, guard in choices.items()]) if choices else Literal(0)
+        return _Value(INT, signal, tuple(choices.items()))
+
+    def _merge_values(self, selected: list[tuple[Signal, _Value]]) -> _Value:
+        first = selected[0][1]
+        if all(value == first for _, value in selected):
+            return first
+        if first.type is INT and all(value.int_choices() for _, value in selected):
+            choices: dict[int, Signal] = {}
+            for active, value in selected:
+                for number, guard in value.int_choices():
+                    guard = self._bool_pair("LogicGateAnd", active, guard)
+                    if guard != _FALSE:
+                        choices[number] = self._bool_pair("LogicGateOr", choices.get(number, _FALSE), guard)
+            if len(choices) <= _MAX_INT_PAIRS:
+                return self._int_value(choices)
+        signal = self._merge([(active, value.signal) for active, value in selected], boolean=first.type is BOOL)
+        return _Value(first.type, signal)
+
+    def _int_pairs(self, args: tuple[_Value, ...], active: Signal) -> list[tuple[int, int, Signal]] | None:
+        a, b = (arg.int_choices() for arg in args)
+        if not a or not b or len(a) * len(b) > _MAX_INT_PAIRS:
+            return None
+        pairs = []
+        for left, left_guard in a:
+            selected = self._bool_pair("LogicGateAnd", active, left_guard)
+            for right, right_guard in b:
+                guard = self._bool_pair("LogicGateAnd", selected, right_guard)
+                if guard != _FALSE:
+                    pairs.append((left, right, guard))
+        return pairs
+
     def _join(self, arrivals: list[_Arrival]) -> _Arrival:
         if len(arrivals) == 1:
             return arrivals[0]
@@ -205,14 +249,12 @@ class Lowering:
         values = {}
         for arrival in arrivals:
             active = self._bool_pair("LogicGateOr", active, arrival.active)
-        for name, value in arrivals[0].values.items():
+        for name in arrivals[0].values:
             if all(name in arrival.values for arrival in arrivals):
-                values[name] = _Value(value.type, self._merge([
-                    (arrival.active, arrival.values[name].signal) for arrival in arrivals
-                ], boolean=value.type is BOOL))
+                values[name] = self._merge_values([(arrival.active, arrival.values[name]) for arrival in arrivals])
         return _Arrival(active, values)
 
-    def _apply(self, operation: str, args: tuple[_Value, ...]) -> _Value:
+    def _apply(self, operation: str, args: tuple[_Value, ...], active: Signal) -> _Value:
         types = tuple(arg.type for arg in args)
         if operation in ("eq", "ne"):
             if len(types) != 2 or types[0] is not types[1]:
@@ -230,17 +272,26 @@ class Lowering:
             if isinstance(a, Literal) and isinstance(b, Literal):
                 result = Literal(int(compare(a.value, b.value)))
             else:
-                result = self._predicate("LogicGateCompare", a, b, config=config)
+                pairs = self._int_pairs(args, active) if types == (INT, INT) else None
+                if pairs is None:
+                    result = self._predicate("LogicGateCompare", a, b, config=config)
+                else:
+                    result = _FALSE
+                    for left, right, guard in pairs:
+                        if compare(left, right):
+                            result = self._bool_pair("LogicGateOr", result, guard)
         elif operation == "add":
             a, b = signals
-            if isinstance(a, Literal) and isinstance(b, Literal):
-                assert isinstance(a.value, int) and isinstance(b.value, int)
-                total = a.value + b.value
-                result = self._read(Constant(INT, total), {}).signal
-            elif Literal(0) in signals:
-                result = b if a == Literal(0) else a
-            else:
-                raise ValueError("add 需要编译时已知的整数，或一个操作数恒为 0")
+            if Literal(0) in signals:
+                return args[1] if a == Literal(0) else args[0]
+            pairs = self._int_pairs(args, active)
+            if pairs is None:
+                raise ValueError(f"add 需要能在编译期枚举的整数，最多 {_MAX_INT_PAIRS} 组操作数")
+            choices = {}
+            for left, right, guard in pairs:
+                value = left + right
+                choices[value] = self._bool_pair("LogicGateOr", choices.get(value, _FALSE), guard)
+            return self._int_value(choices)
         elif operation == "not":
             result = self._not(signals[0])
         elif operation in ("and", "or"):
@@ -279,7 +330,7 @@ class Lowering:
         function = frame.function
         pending: dict[str, list[_Arrival]] = defaultdict(list)
         pending[function.blocks[0].name].append(_Arrival(_TRUE, inputs))
-        returned: list[tuple[Signal, Signal]] = []
+        returned: list[tuple[Signal, _Value]] = []
 
         def emit(name: str, arrivals: list[_Arrival], following: dict[str, list[_Arrival]]) -> None:
             if sum(self.expanded_blocks.values()) >= _MAX_EXPANDED_BLOCKS:
@@ -310,11 +361,12 @@ class Lowering:
             raise ValueError(f"{function.name}：给定访问上界内没有可返回的路径")
         # 有未静态排除的超界路径时，只有已返回路径可以驱动结果。
         if pending:
-            returned.append((_FALSE, Literal(None)))
-        return _Value(function.result, self._merge(returned, boolean=function.result is BOOL and not pending))
+            selected = [(active, value.signal) for active, value in returned]
+            return _Value(function.result, self._merge([*selected, (_FALSE, Literal(None))]))
+        return self._merge_values(returned)
 
     def _visit(self, frame: _Frame, name: str, arrival: _Arrival,
-               following: dict[str, list[_Arrival]], returned: list[tuple[Signal, Signal]]) -> None:
+               following: dict[str, list[_Arrival]], returned: list[tuple[Signal, _Value]]) -> None:
         block = frame.blocks.get(name)
         if block is None:
             raise ValueError(f"跳转到未声明的块 {name!r}")
@@ -325,7 +377,7 @@ class Lowering:
                 value = self._read(instruction.value, values)
             elif isinstance(instruction, (Apply, Call)):
                 args = tuple(self._read(source, values) for source in instruction.args)
-                value = (self._apply(instruction.operation, args) if isinstance(instruction, Apply)
+                value = (self._apply(instruction.operation, args, active) if isinstance(instruction, Apply)
                          else self.invoke(instruction.function, args))
             else:
                 raise ValueError(f"未知指令 {instruction!r}")
@@ -337,7 +389,7 @@ class Lowering:
             value = self._read(end.value, values)
             if value.type is not frame.function.result:
                 raise ValueError("返回值的类型与声明不符")
-            returned.append((active, value.signal))
+            returned.append((active, value))
         elif isinstance(end, Branch):
             condition = self._read(end.condition, values)
             if condition.type is not BOOL:
