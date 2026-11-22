@@ -407,31 +407,46 @@ class _Lowering:
             return items[low]
 
         candidates = [items[i] for i in range(low, high + 1)]
+        runs = [(low, candidates[0].operand)]
+        for i, candidate in enumerate(candidates[1:], low + 1):
+            if candidate.operand != runs[-1][1]:
+                runs.append((i, candidate.operand))
         kind = items[0].type
-        result = self.temp(kind)
-        done = self.block()
-        self.table_selection(candidates, low, operand, result, done)
-        self.current = done
         bounds = [value.bounds for value in candidates if value.bounds is not None]
         result_bounds = ((min(lo for lo, _ in bounds), max(hi for _, hi in bounds))
                          if len(bounds) == len(candidates) else None)
+        if len(runs) == 1:
+            return _Value(runs[0][1], kind, result_bounds)
+
+        result = self.temp(kind)
+        done = self.block()
+        self.table_selection(runs, operand, result, done)
+        self.current = done
         return _Value(Reference(result), kind, result_bounds)
 
-    def table_selection(self, items: list[_Value], first: int, index: Operand, result: str, done: _Block) -> None:
-        assert self.current is not None
-        if len(items) == 1:
-            self.emit(Bind(result, items[0].operand))
-            self.current.end = Jump(done.name)
-            return
-        middle = len(items) // 2
-        before, after = self.block(), self.block()
-        condition = self.apply("lt", BOOL, index, Constant(INT, first + middle))
-        self.current.end = Branch(condition.operand, before.name, after.name)
-        self.table_edges[self.current.name] = set()
-        self.current = before
-        self.table_selection(items[:middle], first, index, result, done)
-        self.current = after
-        self.table_selection(items[middle:], first + middle, index, result, done)
+    def table_selection(self, runs: list[tuple[int, Operand]], index: Operand, result: str, done: _Block) -> None:
+        leaves: dict[Operand, _Block] = {}
+
+        def build(low: int, high: int, block: _Block | None = None) -> _Block:
+            if high - low == 1:
+                value = runs[low][1]
+                if value not in leaves:
+                    leaf = self.block()
+                    leaf.instructions.append(Bind(result, value))
+                    leaf.end = Jump(done.name)
+                    leaves[value] = leaf
+                return leaves[value]
+            entry = block if block is not None else self.block()
+            middle = (low + high) // 2
+            before = build(low, middle)
+            after = build(middle, high)
+            self.current = entry
+            condition = self.apply("lt", BOOL, index, Constant(INT, runs[middle][0]))
+            entry.end = Branch(condition.operand, before.name, after.name)
+            self.table_edges[entry.name] = set()
+            return entry
+
+        build(0, len(runs), self.current)
 
     def range_bounds(self, node: ast.expr) -> tuple[int, int]:
         if (not isinstance(node, ast.Call) or not isinstance(node.func, ast.Name)

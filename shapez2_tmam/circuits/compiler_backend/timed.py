@@ -6,9 +6,10 @@ from dataclasses import dataclass
 from ...mari.blueprint import Wiring
 from ...mari.signals import decode_constant
 from ..circuit import Circuit, Literal, Ref
+from ..circuit_packing import stack_platforms
 from ..compiler_contract import BOOL, INT, Function, Program, ValueType
 from ..sequential_circuit import select
-from ._layout import _RADIO_ROWS, layout
+from ._layout import _RADIO_ROWS, LayoutCapacityError, layout
 from ._lower import Lowering, _Value
 
 
@@ -63,8 +64,8 @@ def _state(ports: _Ports, steps: int) -> dict:
     return document["BP"]["Entries"][0]
 
 
-def _worker(lowerings: tuple[Lowering, ...], methods: tuple[Function, ...],
-            ports: _Ports, signature: tuple[ValueType, ...]) -> dict:
+def _worker(lowerings: tuple[Lowering, ...], methods: tuple[Function, ...], ports: _Ports,
+            signature: tuple[ValueType, ...], round_values: tuple[int, ...] | None) -> tuple[Circuit, dict[int, Ref]]:
     circuit = lowerings[0].circuit
     index, *signals = (circuit.add("ControlledSignalReceiver", Literal(channel)) for channel in
                        (ports.index, *ports.value.values(), *ports.items.values()))
@@ -74,30 +75,49 @@ def _worker(lowerings: tuple[Lowering, ...], methods: tuple[Function, ...],
     active = [circuit.add("LogicGateCompare", index, Literal(i), config="AQ==") for i in range(limit + 1)]
     item = lowerings[0]._merge(list(zip(active, items)))
     old = tuple(_Value(type_, signal) for type_, signal in zip(signature, (*values, item)))
+    if round_values is not None:
+        value = lowerings[0]._merge([(guard, Literal(number)) for guard, number in zip(active, round_values)])
+        old += (_Value(INT, value),)
     # 各更新方法只接收这同一份旧状态。下一值只送到状态模块。
     computed = (lowering.invoke(method.name, old) for lowering, method in zip(lowerings, methods))
     next_values = tuple(select(circuit, active[-1], old_value, update.signal)
                         for old_value, update in zip(values, computed))
     next_index = lowerings[0]._merge([(guard, Literal(min(i + 1, limit))) for i, guard in enumerate(active)])
-    assert isinstance(next_index, Ref)
-    document, _ = layout(circuit, {ports.next_index: next_index,
-                                   **dict(zip(ports.next_value.values(), next_values))})
-    return document["BP"]["Entries"][0]
+    if isinstance(next_index, Literal):
+        next_index = circuit.add("LogicGateIf", next_index, Literal(1))
+    return circuit, {ports.next_index: next_index, **dict(zip(ports.next_value.values(), next_values))}
+
+
+def _place_workers(circuit: Circuit, outputs: dict[int, Ref], failures: list[dict]) -> list[tuple[dict, set[int]]]:
+    try:
+        document, _ = layout(circuit, outputs)
+    except LayoutCapacityError as error:
+        if len(outputs) == 1:
+            channel, = outputs
+            raise ValueError(f"计算频道 {channel} 无法单独布置，{error}") from error
+        failures.append({"outputs": list(outputs), "reason": str(error)})
+        midpoint = (len(outputs) + 1) // 2
+        entries = tuple(outputs.items())
+        return (_place_workers(circuit, dict(entries[:midpoint]), failures)
++                _place_workers(circuit, dict(entries[midpoint:]), failures))
+    return [(document["BP"]["Entries"][0], set(outputs))]
 
 
 def compile_fold(program: Program, steps: int, channel_base: int) -> tuple[dict, dict]:
     """复用一个 (累积值, 本轮输入) → 累积值方法，依次折叠固定数量的公开输入。"""
-    return _compile_fold({"": program}, steps, channel_base)
+    return _compile_fold({"": program}, steps, channel_base, None)
 
 
-def compile_state_fold(programs: Mapping[str, Program], steps: int, channel_base: int) -> tuple[dict, dict]:
-    """每个方法接收依声明顺序排列的旧字段和本轮输入，返回同名字段的下一值。"""
+def compile_state_fold(programs: Mapping[str, Program], steps: int, channel_base: int, *,
+                       round_values: tuple[int, ...] | None = None) -> tuple[dict, dict]:
+    """更新方法接收旧字段、本轮输入及可选整数轮值，返回同名字段的下一值。"""
     if any(not isinstance(name, str) or not name.isidentifier() for name in programs):
         raise ValueError("状态字段名须为有效标识符")
-    return _compile_fold(programs, steps, channel_base)
+    return _compile_fold(programs, steps, channel_base, round_values)
 
 
-def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int) -> tuple[dict, dict]:
+def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int,
+                  round_values: tuple[int, ...] | None) -> tuple[dict, dict]:
     count = len(programs)
     side = len(_RADIO_ROWS)
     fields_max = (side - 2) // 2
@@ -115,8 +135,14 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
     methods = tuple(lowering.functions[program.entry] for lowering, program in zip(lowerings, programs.values()))
     field_types = tuple(method.result for method in methods)
     signature = tuple(arg.type for arg in methods[0].inputs)
-    if len(signature) != count + 1 or signature[:-1] != field_types:
-        raise ValueError("更新方法须按字段顺序接收同类型旧值，并在最后接收本轮输入")
+    if round_values is not None and (len(round_values) != steps or any(
+            type(value) is not int or not -(1 << 31) <= value < 1 << 31 for value in round_values)):
+        raise ValueError("每轮需要一个有符号 32 位整数轮值")
+    update_inputs = 1 if round_values is None else 2
+    if (len(signature) != count + update_inputs or signature[:count] != field_types
+            or round_values is not None and signature[-1] is not INT):
+        tail = "本轮输入" if round_values is None else "本轮输入和整数轮值"
+        raise ValueError(f"更新方法须按字段顺序接收同类型旧值，末尾接收{tail}")
     for name, method, lowering in zip(programs, methods, lowerings):
         if tuple(arg.type for arg in method.inputs) != signature:
             raise ValueError(f"字段 {name!r} 的更新方法 {method.name} 参数类型与本轮参数不一致")
@@ -131,14 +157,21 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
                    {f"item{i}": next(channels) for i in range(steps)}, next(channels), field_ports("value"),
                    next(channels), field_ports("next_value"))
     state = _state(ports, steps)
-    worker = _worker(lowerings, methods, ports, signature)
-    worker["X"] = 3
-    document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": [state, worker]}}
+    circuit, updates = _worker(lowerings, methods, ports, signature, round_values)
+    failures: list[dict] = []
+    workers = _place_workers(circuit, updates, failures)
+    platforms = [state, *(platform for platform, _ in workers)]
+    if len(platforms) == 2:
+        platforms[1]["X"] = 3
+    else:
+        stack_platforms(platforms)
+    document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}}
     state_link = {ports.index, *ports.value.values()}
     worker_link = {ports.next_index, *ports.next_value.values()}
+    worker_inputs = {*ports.items.values(), *state_link}
     _verify_radios(document, (({ports.run, *ports.initial.values(), *worker_link},
                               {ports.done, *ports.result.values(), *state_link}),
-                              ({*ports.items.values(), *state_link}, worker_link)))
+                              *((worker_inputs, outputs) for _, outputs in workers)))
 
     def typed(named: dict[str, int], types: tuple[ValueType, ...]) -> dict:
         return {name: {"channel": channel, "type": type_.value}
@@ -146,7 +179,9 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
 
     inputs = {"run": ports.run, **ports.initial, **ports.items}
     outputs = {"done": ports.done, **ports.result}
-    entries = [entry for platform in (state, worker) for entry in platform["B"]["Entries"]]
+    entries = [entry for platform in platforms for entry in platform["B"]["Entries"]]
+    bounds = [3 + max(p.get(axis, 0) for p in platforms) - min(p.get(axis, 0) for p in platforms)
+              for axis in ("X", "Y")]
     round_ticks = 2 * _CHANNEL_TICKS
     names = {"method": methods[0].name} if "" in programs else {
         "methods": {name: method.name for name, method in zip(programs, methods)}
@@ -157,7 +192,7 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
         "quadrants": 4,
         "height": 5,
         "steps": steps,
-        "inputs": typed(inputs, (BOOL, *field_types) + (signature[-1],) * steps),
+        "inputs": typed(inputs, (BOOL, *field_types) + (signature[count],) * steps),
         "outputs": typed(outputs, (BOOL, *field_types)),
         "module_links": {
             "state_to_step": typed({"index": ports.index, **ports.value}, (INT, *field_types)),
@@ -173,12 +208,17 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
             "protocol": "从 run=0 复位开始，保持本次所有初值和 item，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。",
         },
         "platform_type": "Foundation_3x3",
-        "platforms": 2,
-        "island_footprint_chunks": [6, 3],
+        "platforms": len(platforms),
+        "island_footprint_chunks": bounds,
         "buildings_by_layer": [sum(e["L"] == z for e in entries) for z in range(3)],
         "building_entries": len(entries),
         "global_receivers": sum(e["T"] == "ControlledSignalReceiverInternalVariant" for e in entries),
         "global_transmitters": sum(e["T"] == "ControlledSignalTransmitterInternalVariant" for e in entries),
         "internal_global_devices_per_module": 0,
     }
+    if round_values is not None:
+        report["round_values"] = list(round_values)
+    if failures:
+        report["worker_partitions"] = [sorted(outputs) for _, outputs in workers]
+        report["worker_layout_failures"] = failures
     return document, report

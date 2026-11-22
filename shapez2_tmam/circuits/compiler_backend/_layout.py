@@ -58,7 +58,8 @@ def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
     gates = sorted(live - set(radios))
     capacity = len(_GATE_ROWS) * len(_GATE_COLUMNS) * 3
     if max(len(radios), len(outputs)) > len(_RADIO_ROWS) or len(gates) > capacity:
-        raise ValueError("本地门网超过单块三层 3×3 平台容量")
+        raise LayoutCapacityError(f"三层平台容量不足，{len(gates)}/{capacity} 个门，"
+                                  f"接收 {len(radios)}、发射 {len(outputs)}，每侧最多 {len(_RADIO_ROWS)} 个")
     # 保留规则门位，改变门的空间分布以绕开高扇出的布线拥塞。
     rows = (tuple(_GATE_ROWS), tuple(reversed(_GATE_ROWS)))
     columns = (tuple(_GATE_COLUMNS), tuple(reversed(_GATE_COLUMNS)))
@@ -79,7 +80,11 @@ def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
             return _place(circuit, channels, (radios, gates), used, sites, outputs)
         except _RoutingError as error:
             last_error = error
-    raise ValueError(f"三层平台布线未找到可用布局：{last_error}") from last_error
+    raise LayoutCapacityError(f"三层平台未布通 {len(gates)} 个门，{last_error}") from last_error
+
+
+class LayoutCapacityError(ValueError):
+    pass
 
 
 class _RoutingError(ValueError):

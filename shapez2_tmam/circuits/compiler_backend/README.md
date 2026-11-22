@@ -28,14 +28,16 @@ python -m shapez2_tmam.circuits.compiler_backend append_five_timed --channel-bas
 
 ### 同步更新多个状态字段
 
-`timed.compile_state_fold(programs, steps, channel_base)` 按 `programs` 的映射顺序定义状态字段。映射的每个值是一个 `Program`，其入口按该顺序接收所有旧字段，并以本轮 `item` 为最后一个参数。它返回映射键所指字段的下一值。各入口的参数类型须一致，每个字段的初值、旧值、下一值和结果使用同一类型。
+`timed.compile_state_fold(programs, steps, channel_base)` 按 `programs` 的映射顺序定义状态字段。映射的每个值是一个 `Program`，其入口按该顺序接收所有旧字段，再接收本轮 `item`。传入 `round_values` 时，各入口多接一个 `int` 参数，时序电路把相应轮的值传给它。它返回映射键所指字段的下一值。各入口的参数类型须一致，每个字段的初值、旧值、下一值和结果使用同一类型。
 
 同一轮的各个入口共用同一份旧状态和当前 `item`。所有下一值都有相同的 12 tick 回程延迟，由状态平台同时发布到下一轮。复位、每轮 24 tick 的往返和 `done` 采样协议与单字段一致。向 `initial_<字段>` 提供初值，完成后从 `result_<字段>` 读取结果。频道表的 `module_links` 按两个方向列出索引以及各字段的类型和频道。
 
-状态平台每侧占用 `2N+2` 个无线口，计算平台占用 `N+1+steps` 个接收口，其中 `N` 是字段数。每个平台每侧可放 10 个无线口，因此最多支持四个字段，四字段最多折叠五轮。每个模块的门网还须能在对应平台上完成布线。
+状态平台每侧占用 `2N+2` 个无线口，计算平台占用 `N+1+steps` 个接收口，其中 `N` 是字段数。每个平台每侧可放 10 个无线口，因此最多支持四个字段，四字段最多折叠五轮。计算门网超出单板容量或走线失败时，后端按下一状态输出分到并行计算平台。每个平台从相同频道接收旧状态和各轮 `item`，对自己的输出就地计算。每个下一状态频道由一个平台发布，往返仍为 24 tick。`worker_partitions` 列出各计算平台的输出频道，`worker_layout_failures` 记录拆分前尝试的门数和走线问题。
 
 ```bash
 python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-base 1700060 --output scalar_ring_timed.spz2bp
 ```
 
 这个例子有两个整数状态 `a`、`b` 和三个布尔 `item`。每轮输入为 1 时，两字段各取对方的旧值。给定初值 `a=3`、`b=7`，依次输入 `1, 0, 0`，预期结果是 `a=7`、`b=3`。
+
+堆叠前缀用 `synthesis/row_support.py` 的 `stack_scan_q0` 至 `stack_scan_q3` 作为四个更新入口，并传入 `round_values=(5, 4, 3, 2, 1)`。`initial_q0` 至 `initial_q3` 接四列初值，`item0` 至 `item4` 接从顶到底排列的单层支撑代码，`synthesis/prefix_closure.py` 的 `stack_scan_rows` 可生成这五份输入。若更新入口需要零起算的轮序号，传入 `round_values=tuple(range(steps))`。轮值列表必须与轮数相等。

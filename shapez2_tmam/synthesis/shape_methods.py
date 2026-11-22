@@ -1,5 +1,6 @@
 """读取原生四象限五层目标的层高、层和材料。"""
 
+from .layer_methods import stack
 from .physics import EMPTY, PIN, Rules, Shape
 
 
@@ -13,6 +14,10 @@ def shape_literal(code: str) -> Shape:
 
 def crystal(target: Shape | None, color: Color) -> Shape | None:
     return _RULES.crystal(target, color) if target is not None else None
+
+
+def rotate_cw(target: Shape | None) -> Shape | None:
+    return _RULES.rotate(target, 1) if target is not None else None
 
 
 def rotate_ccw(target: Shape | None) -> Shape | None:
@@ -71,3 +76,39 @@ def bottom_material(target: Shape | None) -> int:
     if part == shape_literal("cu------"):
         return 3
     return 1
+
+
+def _pack_stack_corner(row: Shape | None, below: Shape | None, ground: bool) -> Shape | None:
+    part = analyze_part(row)
+    if part is None or part == shape_literal("cu------"):
+        return None
+    supported = ground or analyze_part(below) is not None
+    if part == shape_literal("P-------"):
+        if supported:
+            return shape_literal("Wu------")
+        return shape_literal("Su------")
+    if supported:
+        return shape_literal("Ru------")
+    return shape_literal("Cu------")
+
+
+def _merge_stack_corners(a: Shape | None, b: Shape | None) -> Shape | None:
+    if a is None:
+        return b
+    if b is None:
+        return a
+    return stack(a, b)
+
+
+def pack_stack_half(row: Shape | None, below: Shape | None, ground: bool) -> Shape | None:
+    """编码输入的 q0 和 q1，保留在这两个象限。"""
+    left = _pack_stack_corner(row, below, ground)
+    right = _pack_stack_corner(rotate_ccw(row), rotate_ccw(below), ground)
+    return _merge_stack_corners(left, rotate_cw(right))
+
+
+def pack_stack_row(row: Shape | None, below: Shape | None, ground: bool) -> Shape | None:
+    """一层原图及其直接下方的一层转为前缀扫描信号。"""
+    front = pack_stack_half(row, below, ground)
+    back = pack_stack_half(rotate_ccw(rotate_ccw(row)), rotate_ccw(rotate_ccw(below)), ground)
+    return _merge_stack_corners(front, rotate_ccw(rotate_ccw(back)))
