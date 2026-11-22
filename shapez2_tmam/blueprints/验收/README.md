@@ -13,7 +13,7 @@
 | 电路 | 四列逐层堆叠前缀扫描 | [复位、行输入和采样时序](电路/堆叠前缀/stack-prefix-scan.json) |
 | 电路 | 筛选覆盖必要晶体分量的顶盖 | [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
-| 电路 | 纯堆叠配方的工序、槽号和基础料 | [接线和生成命令](电路/纯堆叠/README.md) |
+| 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [落点参数](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 | 电路 | 从原图检查两列半形的支撑 | [虚拟半切稳定性判定](电路/双半形/half-stability.json) |

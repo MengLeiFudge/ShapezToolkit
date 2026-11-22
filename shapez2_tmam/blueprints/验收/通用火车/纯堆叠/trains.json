@@ -1,0 +1,20 @@
+{
+  "single_cargo": {
+    "shape-depot": "Shapes",
+    "shape-loading": "Shapes",
+    "shape-unloading": "Shapes",
+    "fluid-depot": "Fluids",
+    "fluid-loading": "Fluids",
+    "fluid-unloading": "Fluids"
+  },
+  "train_direction": "north",
+  "cargo": {
+    "C": "shape",
+    "R": "shape",
+    "S": "shape",
+    "W": "shape",
+    "r": "fluid",
+    "g": "fluid",
+    "b": "fluid"
+  }
+}

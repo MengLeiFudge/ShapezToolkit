@@ -1,0 +1,331 @@
+{
+  "base_load": [
+    "base-load-shape-C",
+    "base-load-shape-R",
+    "base-load-shape-S",
+    "base-load-shape-W",
+    "base-load-dye-r",
+    "base-load-dye-g",
+    "base-load-dye-b"
+  ],
+  "crystal_load": [],
+  "load": [
+    {
+      "station": "q2",
+      "wagon": 1,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "C",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 1,
+      "kind": "Shapes",
+      "layer": 1,
+      "cargo": "R",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 1,
+      "kind": "Shapes",
+      "layer": 2,
+      "cargo": "S",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 2,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "W",
+      "rows": [
+        8
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 3,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 3,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 3,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 4,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "C",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 4,
+      "kind": "Shapes",
+      "layer": 1,
+      "cargo": "R",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 4,
+      "kind": "Shapes",
+      "layer": 2,
+      "cargo": "S",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 5,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "W",
+      "rows": [
+        8
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 6,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 6,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 6,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 7,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "C",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 7,
+      "kind": "Shapes",
+      "layer": 1,
+      "cargo": "R",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 7,
+      "kind": "Shapes",
+      "layer": 2,
+      "cargo": "S",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 8,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "W",
+      "rows": [
+        8
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 9,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 9,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 9,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 10,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "C",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 10,
+      "kind": "Shapes",
+      "layer": 1,
+      "cargo": "R",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 10,
+      "kind": "Shapes",
+      "layer": 2,
+      "cargo": "S",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 11,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "W",
+      "rows": [
+        8
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 12,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 12,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 12,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    }
+  ],
+  "train_direction": "north"
+}
