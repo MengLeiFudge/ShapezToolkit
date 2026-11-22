@@ -16,6 +16,12 @@ python -m shapez2_tmam.circuits.compiler_backend append_five --channel-base 1700
 
 导出前按实际建筑端口逐一核对来源。任一局部路径只经过一段连续导线网络，采样保持期按实际依赖深度保守计算，适用条件遵循[信号传播说明](../../docs/proofs/08-circuits.md#s08-34)。接口表也列出公开频道、建筑层用量和全局收发器数量。
 
+## 共享输入的多字段组合导出
+
+`fields.compile_fields(programs, input_channels=..., output_channels=...)` 把多个字段编译到同一块平台。`programs` 的键是输出字段，值是返回该字段的 `Program`。各方法的输入顺序、名称和类型须一致，生成的电路共用这些接收器。两张频道表须覆盖全部输入和输出，频道由调用方独占且互不重复。`fields.export_fields` 可写出原生 `.spz2bp` 和同名接口表。
+
+例如，`synthesis/direct_recipe.py` 中的工序、下料槽、上料槽和目标槽方法都接收 `address`、`length`，可按 `opcode`、`a`、`b`、`destination` 组合导出。`address` 和四个输出用 `stage_memory.WRITE_BUS` 的频道，`length` 用 `stream_controller.PROGRAM_LENGTH`。接口表的 `reserved_channels` 列出实际占用的每个频道，按 `settling.hold_signal_ticks` 保持整组输入后采样。
+
 ## 固定次数的时序复用
 
 `timed.compile_fold(program, steps, channel_base)` 编译一个 `(累积值, 本轮输入) → 累积值` 方法。从 `initial` 开始依次折叠 `item0` 至 `item{steps-1}`，支持 1～8 轮。状态和单步计算各占一块平台，四条公开频道传递当前索引、当前累计值、下一索引和下一累计值。
