@@ -17,6 +17,7 @@
 | 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [落点参数](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 | 电路 | 从原图检查两列半形的支撑 | [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
+| 电路 | 从已取出的原单层读取 q0 格及原色 | [原单格读取](电路/双半形/read-labeled-corner.json) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
 
@@ -48,4 +49,6 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_sca
   --field helper=corner_helper_column --input-channel crystal=1700577 \
   --input-channel landing=1700578 --input-channel suspended=1700579 \
   --output-channel helper=1700587 --output corner-helper.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_methods.py \
+  read_labeled_corner --channel-base 1700620 --output read-labeled-corner.spz2bp
 ```

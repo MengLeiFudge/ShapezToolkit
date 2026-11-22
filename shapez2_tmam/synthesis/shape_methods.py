@@ -24,6 +24,10 @@ def rotate_ccw(target: Shape | None) -> Shape | None:
     return _RULES.rotate(target, -1) if target is not None else None
 
 
+def cut_front(target: Shape | None) -> Shape | None:
+    return _RULES.cut(target)[0] if target is not None else None
+
+
 def unstack_lower(target: Shape | None) -> Shape | None:
     if target is None:
         return None
@@ -47,6 +51,22 @@ def analyze_color(target: Shape | None) -> Color | None:
     if target is None or target.layers[0][0] in (EMPTY, PIN):
         return None
     return target.layers[0][0][1]
+
+
+def _cut_ground_corner(row: Shape | None) -> Shape | None:
+    return rotate_ccw(cut_front(rotate_cw(cut_front(row))))
+
+
+def read_labeled_corner(row: Shape | None) -> Shape | None:
+    """读取原单层 q0 的一格，保留形状和颜色。"""
+    if unstack_lower(row) is not None:
+        return None
+    if analyze_part(row) == shape_literal("cu------"):
+        color = analyze_color(row)
+        if color is None or color == "u":
+            return shape_literal("cu------")
+        row = crystal(shape_literal("--CuCuCu"), color)
+    return _cut_ground_corner(row)
 
 
 def target_height(target: Shape | None) -> int:

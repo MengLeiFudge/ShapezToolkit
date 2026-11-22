@@ -1,9 +1,7 @@
 """两列半形按层检查针支撑与普通块、晶体组的支撑。"""
 
-from .physics import Rules, Shape
-
-
-_RULES = Rules(4, 5)
+from .physics import Shape
+from .shape_methods import cut_front
 
 
 def half_support_row(lower0: int, lower1: int, upper0: int, upper1: int,
@@ -22,10 +20,6 @@ def half_support_row(lower0: int, lower1: int, upper0: int, upper1: int,
     if (attached0 | attached1) & (not continues):
         return -1
     return 0
-
-
-def cut_front(target: Shape | None) -> Shape | None:
-    return _RULES.cut(target)[0] if target is not None else None
 
 
 def half_is_stable(target: Shape | None) -> bool:
