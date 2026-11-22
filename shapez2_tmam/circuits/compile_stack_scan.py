@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from ..synthesis import column_scan, direct_stack, row_support, shape_methods
+from ..synthesis import column_scan, direct_stack, half_support, row_support, shape_methods
 from .compiler_backend import _write_blueprint
 from .compiler_backend.fields import compile_fields
 from .compiler_backend.timed import compile_state_fold, compile_state_steps
@@ -18,6 +18,7 @@ def main() -> int:
     modes.add_argument("--read-rows", action="store_true", help="生成从原始图形读取所选两层的电路")
     modes.add_argument("--check-direct", action="store_true", help="生成纯堆叠的相邻层检查和回放电路")
     modes.add_argument("--read-column", action="store_true", help="生成 q0 列材料读取与列 A 判定电路")
+    modes.add_argument("--check-half", action="store_true", help="生成从原始两列检查半形支撑的电路")
     args = parser.parse_args()
     if args.read_rows:
         path = Path(shape_methods.__file__)
@@ -28,14 +29,17 @@ def main() -> int:
     elif args.read_column:
         path = Path(column_scan.__file__)
         entries = {field: f"column_scan_{field}" for field in ("remaining", "word", "height")}
+    elif args.check_half:
+        path = Path(half_support.__file__)
+        entries = {field: f"half_scan_{field}" for field in ("remaining", "upper", "status", "height")}
     else:
         path = Path(row_support.__file__)
         entries = {f"h{q}": f"stack_scan_q{q}" for q in range(4)}
     try:
         source = path.read_text(encoding="utf-8")
         methods = {field: compile_method(source, method, filename=str(path)) for field, method in entries.items()}
-        if args.check_direct or args.read_column:
-            document, report = compile_state_steps(methods, 5, args.channel_base)
+        if args.check_direct or args.read_column or args.check_half:
+            document, report = compile_state_steps(methods, 6 if args.check_half else 5, args.channel_base)
         else:
             document, report = compile_state_fold(methods, 5, args.channel_base, round_values=(5, 4, 3, 2, 1))
         if args.read_column:
