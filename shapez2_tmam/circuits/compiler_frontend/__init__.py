@@ -259,12 +259,15 @@ class _Lowering:
             if analysis.failure is not None:
                 slot, bounds = analysis.failure
                 node, allowed = self.range_checks[slot]
-                subject = "加法" if allowed == _INT_BOUNDS else "索引"
+                if allowed == _INT_BOUNDS:
+                    subject = "减法" if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Sub) else "加法"
+                else:
+                    subject = "索引"
                 if bounds is None:
                     message = f"{subject}的范围分析超过块状态预算，请缩小循环范围或拆分方法"
                 elif allowed == _INT_BOUNDS:
                     lo, hi = bounds
-                    message = (f"无法证明加法结果在有符号 32 位范围内（推导范围 {lo}～{hi}），"
+                    message = (f"无法证明{subject}结果在有符号 32 位范围内（推导范围 {lo}～{hi}），"
                                "请限定操作数的范围")
                 else:
                     message = self.index_message(allowed, bounds)
@@ -801,7 +804,18 @@ class _Lowering:
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
             left, right = self.expression(node.left, INT), self.expression(node.right, INT)
             return self.add(node, left, right)
-        raise self.module.error(node, f"不支持表达式 {type(node).__name__}，请使用标量、比较、加法或直接调用")
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Sub):
+            amount = _integer(node.right)
+            if amount is None:
+                raise self.module.error(node.right, "减法右侧需要有符号 32 位整数字面值")
+            self.checked_int(node.right, amount)
+            left = self.expression(node.left, INT)
+            if amount == _INT_BOUNDS[0]:
+                # 最小整数取负超出单个常量的范围，拆成两次可检查的加法。
+                left = self.add(node, left, self.checked_int(node.right, _INT_BOUNDS[1]))
+                amount = -1
+            return self.add(node, left, self.checked_int(node.right, -amount))
+        raise self.module.error(node, f"不支持表达式 {type(node).__name__}，请使用标量、比较、加法、减字面值或直接调用")
 
     def literal(self, node: ast.expr, expected: ValueType | None) -> _Value | None:
         if isinstance(node, ast.Constant):
