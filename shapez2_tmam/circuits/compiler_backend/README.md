@@ -20,6 +20,8 @@ python -m shapez2_tmam.circuits.compiler_backend append_five --channel-base 1700
 
 `fields.compile_fields(programs, input_channels=..., output_channels=...)` 把多个字段编译到同一块平台。`programs` 的键是输出字段，值是返回该字段的 `Program`。各方法的输入顺序、名称和类型须一致，生成的电路共用这些接收器。两张频道表须覆盖全部输入和输出，频道由调用方独占且互不重复。`fields.export_fields` 可写出原生 `.spz2bp` 和同名接口表。
 
+`compile_fields` 和 `export_fields` 都接受可选的 `publish_when`。它的键是需要控制发布的输出字段，值是接收同一组参数且返回 `BOOL` 的 `Program`。条件为假时，字段发空信号。条件为真时，字段发方法返回的原值，包括整数槽号 `0`。接口表的 `publish_when` 列出配置的条件方法。读端按 `settling.hold_signal_ticks` 等待输入和条件稳定后采样。
+
 例如，`synthesis/direct_recipe.py` 中的工序、下料槽、上料槽和目标槽方法都接收 `address`、`length`，可按 `opcode`、`a`、`b`、`destination` 组合导出。`address` 和四个输出用 `stage_memory.WRITE_BUS` 的频道，`length` 用 `stream_controller.PROGRAM_LENGTH`。接口表的 `reserved_channels` 列出实际占用的每个频道，按 `settling.hold_signal_ticks` 保持整组输入后采样。
 
 ## 固定次数的时序复用
