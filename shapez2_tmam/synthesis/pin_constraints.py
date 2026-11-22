@@ -5,15 +5,18 @@ from .physics import EMPTY, PIN, Position, Rules, Shape
 
 
 def pin_base_possible(target: Shape) -> bool:
-    """列A来源的Pin/S尾部必要条件：低层保留C下方有新增针及不动格。"""
-    for z, row in enumerate(target.layers[:3]):
-        for q, cell in enumerate(row):
-            if cell[0] != "c":
-                continue
-            if z == 0 or target.layers[0][q] != PIN:
-                return False
-            if z == 2 and target.layers[1][q] == EMPTY:
-                return False
+    """检查每列最低保留晶体下方的支撑与可用来源层数。"""
+    for q, ground in enumerate(target.layers[0]):
+        height = next((z for z, row in enumerate(target.layers) if row[q][0] == "c"), None)
+        if height is None:
+            continue
+        if height == 0:
+            return False
+        if height <= 2 and (ground != PIN or (height == 2 and target.layers[1][q] == EMPTY)):
+            return False
+        # 无地面针时，最低保留C下方的旧格都来自抬升后的第2层及以上。
+        if ground != PIN and sum(row[q] == EMPTY for row in target.layers[:height]) < 2:
+            return False
     return True
 
 
