@@ -9,7 +9,7 @@ from ..circuit import Circuit, Literal, Ref
 from ..circuit_packing import stack_platforms
 from ..compiler_contract import BOOL, INT, Function, Program, ValueType
 from ..sequential_circuit import select
-from ._layout import _RADIO_ROWS, LayoutCapacityError, layout, logic_gates
+from ._layout import _RADIO_ROWS, LayoutCapacityError, layout, logic_gates, used_input_channels
 from ._lower import Lowering, _Value
 from ._optimize import compact
 
@@ -84,7 +84,7 @@ def _worker(lowerings: tuple[Lowering, ...], methods: tuple[Function, ...], port
         old += (_Value(INT, value),)
     # 各更新方法只接收这同一份旧状态。下一值只送到状态模块。
     computed = (lowering.invoke(method.name, old) for lowering, method in zip(lowerings, methods))
-    next_values = tuple(select(circuit, active[-1], old_value, update.signal)
+    next_values = tuple(old_value if update.signal == old_value else select(circuit, active[-1], old_value, update.signal)
                         for old_value, update in zip(values, computed))
     next_index = lowerings[0]._merge([(guard, Literal(min(i + 1, steps))) for i, guard in enumerate(active)])
     if isinstance(next_index, Literal):
@@ -92,9 +92,17 @@ def _worker(lowerings: tuple[Lowering, ...], methods: tuple[Function, ...], port
     return circuit, {ports.next_index: next_index, **dict(zip(ports.next_value.values(), next_values))}
 
 
-def _place_workers(circuit: Circuit, outputs: dict[int, Ref], failures: list[dict]) -> list[tuple[dict, set[int], int]]:
+@dataclass(frozen=True)
+class _Worker:
+    platform: dict
+    inputs: set[int]
+    outputs: set[int]
+    gates: int
+
+
+def _place_workers(circuit: Circuit, outputs: dict[int, Ref], failures: list[dict]) -> list[_Worker]:
     try:
-        document, _ = layout(circuit, outputs)
+        document, _ = layout(circuit, outputs, retain_inputs=False)
     except LayoutCapacityError as error:
         if len(outputs) == 1:
             channel, = outputs
@@ -104,7 +112,8 @@ def _place_workers(circuit: Circuit, outputs: dict[int, Ref], failures: list[dic
         entries = tuple(outputs.items())
         return (_place_workers(circuit, dict(entries[:midpoint]), failures)
                 + _place_workers(circuit, dict(entries[midpoint:]), failures))
-    return [(document["BP"]["Entries"][0], set(outputs), logic_gates(circuit, outputs))]
+    return [_Worker(document["BP"]["Entries"][0], used_input_channels(circuit, outputs),
+                    set(outputs), logic_gates(circuit, outputs))]
 
 
 def compile_fold(program: Program, steps: int, channel_base: int) -> tuple[dict, dict]:
@@ -185,7 +194,7 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
             raise
         failures.append({"reason": str(error), "unreduced_fallback": True})
         workers = _place_workers(circuit, updates, failures)
-    platforms = [state, *(platform for platform, _, _ in workers)]
+    platforms = [state, *(worker.platform for worker in workers)]
     if len(platforms) == 2:
         platforms[1]["X"] = 3
     else:
@@ -196,7 +205,7 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
     worker_inputs = {*ports.items.values(), *state_link}
     _verify_radios(document, (({ports.run, *ports.initial.values(), *worker_link},
                               {ports.done, *ports.result.values(), *state_link}),
-                              *((worker_inputs, outputs) for _, outputs, _ in workers)))
+                              *((worker.inputs, worker.outputs) for worker in workers)))
 
     def typed(named: dict[str, int], types: tuple[ValueType, ...]) -> dict:
         return {name: {"channel": channel, "type": type_.value}
@@ -247,9 +256,12 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
     if round_values is not None:
         report["round_values"] = list(round_values)
     if failures:
-        report["worker_partitions"] = [sorted(outputs) for _, outputs, _ in workers]
+        report["worker_partitions"] = [sorted(worker.outputs) for worker in workers]
         report["worker_layout_failures"] = failures
-    report["worker_logic_gates"] = sum(gates for _, _, gates in workers)
+    if len(workers) > 1 or any(worker.inputs != worker_inputs for worker in workers):
+        report["worker_ports"] = [{"inputs": sorted(worker.inputs), "outputs": sorted(worker.outputs)}
+                                  for worker in workers]
+    report["worker_logic_gates"] = sum(worker.gates for worker in workers)
     report["worker_logic_gates_before_reuse"] = logic_gates(circuit, updates)
     report["worker_logic_gates_after_reuse"] = logic_gates(reduced, reduced_outputs)
     return document, report

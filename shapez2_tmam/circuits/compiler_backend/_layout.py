@@ -45,11 +45,14 @@ def _route(board: _Board, *, short_first: bool = False):
     raise ValueError(f"三层平台内无法完成本地信号 {order[0][0]} 的布线")
 
 
-def _live_nodes(circuit: Circuit, channels: dict[Ref, int], outputs: dict[int, Ref]) -> set[int]:
+def _live_nodes(circuit: Circuit, channels: dict[Ref, int], outputs: dict[int, Ref], *,
+                retain_inputs: bool = True) -> set[int]:
     providers = defaultdict(set)
     for ref, net in channels.items():
         providers[net].add(ref.node)
-    live = {node for node, gate in enumerate(circuit.gates) if gate.kind == "ControlledSignalReceiver"}
+    live = set()
+    if retain_inputs:
+        live.update(node for node, gate in enumerate(circuit.gates) if gate.kind == "ControlledSignalReceiver")
     pending = [node for ref in outputs.values() for node in providers[channels[ref]]]
     while pending:
         node = pending.pop()
@@ -114,10 +117,21 @@ def _spread_sites(circuit: Circuit, channels: dict[Ref, int], radios: list[int],
     return placed, sites
 
 
-def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
+def used_input_channels(circuit: Circuit, outputs: dict[int, Ref]) -> set[int]:
+    channels = set()
+    for node in _live_nodes(circuit, circuit.channel_map(), outputs, retain_inputs=False):
+        gate = circuit.gates[node]
+        if gate.kind == "ControlledSignalReceiver":
+            channel, = gate.inputs
+            assert isinstance(channel, Literal) and type(channel.value) is int
+            channels.add(channel.value)
+    return channels
+
+
+def layout(circuit: Circuit, outputs: dict[int, Ref], *, retain_inputs: bool = True) -> tuple[dict, int]:
     """公开接口使用无线。网表内部按真实端口路由，包括双格交换门。"""
     channels = circuit.channel_map()
-    live = _live_nodes(circuit, channels, outputs)
+    live = _live_nodes(circuit, channels, outputs, retain_inputs=retain_inputs)
     used = {channels[arg] for node in live for arg in circuit.gates[node].inputs if isinstance(arg, Ref)}
     used.update(channels[ref] for ref in outputs.values())
 

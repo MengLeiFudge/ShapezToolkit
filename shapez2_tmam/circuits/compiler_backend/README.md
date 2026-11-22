@@ -44,9 +44,9 @@ python -m shapez2_tmam.circuits.compiler_backend append_five_timed --channel-bas
 
 同一轮的各个入口共用同一份旧状态和当前 `item`。所有下一值都有相同的 12 tick 回程延迟，由状态平台同时发布到下一轮。复位、每轮 24 tick 的往返和 `done` 采样协议与单字段一致。向 `initial_<字段>` 提供初值，完成后从 `result_<字段>` 读取结果。频道表的 `module_links` 按两个方向列出索引以及各字段的类型和频道。
 
-状态平台每侧占用 `2N+2` 个无线口，计算平台占用 `N+1+steps` 个接收口，其中 `N` 是字段数。每个平台每侧可放 10 个无线口，因此最多支持四个字段，四字段最多折叠五轮。后端在计算平台内共用行解码、旋转及等价谓词，再尝试布线。计算门网超出单板容量或走线失败时，后端按下一状态输出分到并行计算平台。每个平台从相同频道接收旧状态和各轮 `item`，对自己的输出就地计算。每个下一状态频道由一个平台发布，往返仍为 24 tick。
+状态平台每侧占用 `2N+2` 个无线口，`N` 为字段数。计算平台最多接收 `N+1+steps` 个频道。逐轮输入模式按每侧最多 10 个无线口分配频道，最多支持四个字段，四字段最多折叠五轮。计算门网超出单板容量或走线失败时，后端按下一状态输出拆到并行计算平台，每块只接收各自输出依赖的旧状态、索引或 `item`。每个下一状态频道由一个平台发布，往返为 24 tick。
 
-`worker_logic_gates_before_reuse` 和 `worker_logic_gates_after_reuse` 统计拆板前的计算门网。`worker_logic_gates` 是各计算平台实际布置的门数总和，各板重复计算也计入。`worker_partitions` 列出各计算平台的输出频道，`worker_layout_failures` 记录导致拆板或退回原门网的走线问题。
+`worker_logic_gates_before_reuse` 和 `worker_logic_gates_after_reuse` 统计拆板前的计算门网。`worker_logic_gates` 是各计算平台实际布置的门数总和，各板重复计算也计入。`worker_partitions` 列出各计算平台的输出频道，`worker_layout_failures` 记录导致拆板或退回原门网的走线问题。拆板或有接收口裁剪时，`worker_ports` 列出各计算平台实际接收和发布的频道。
 
 ```bash
 python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-base 1700060 --output scalar_ring_timed.spz2bp
@@ -58,6 +58,6 @@ python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-bas
 
 ### 只更新旧状态
 
-`timed.compile_state_steps(programs, steps, channel_base)` 用于每轮只读取旧状态的更新方法。各入口按映射顺序接收全部旧字段，下一轮同时使用各入口的返回值。支持 1～4 个字段，轮数可设为 1～32，庞大的计算仍受平台布线容量限制。对于 `N` 个字段，计算平台接收索引和 `N` 个旧字段，公开频道只有 `run`、各字段的初值、`done` 和各字段的结果。
+`timed.compile_state_steps(programs, steps, channel_base)` 用于每轮只读取旧状态的更新方法。各入口按映射顺序声明全部旧字段，下一轮同时使用各入口的返回值。支持 1～4 个字段，轮数可设为 1～32，庞大的计算仍受平台布线容量限制。索引用于推进轮数。需要在末轮切换到保留旧值的计算板也接收索引。公开频道为 `run`、各字段的初值、`done` 和各字段的结果。
 
 把 `synthesis/direct_stack.py` 的 `direct_scan_remaining`、`direct_scan_upper`、`direct_scan_valid` 分别编译为 `remaining`、`upper`、`valid`，按这个顺序传入并设 `steps=5`。`initial_remaining` 接待拆层的图形，`initial_upper` 接空图形，`initial_valid` 接上游的有效性标志。复位时保持三个初值，按接口表启动并在 `done=1` 后读取三个结果。
