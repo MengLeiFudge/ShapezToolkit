@@ -10,6 +10,7 @@ from ..compiler_contract import (
     Return, ValueType, Variable,
 )
 from ._ranges import _Bounds, _INT_BOUNDS, _add_bounds, _fits_int, _range_failure, _within
+from ._sources import FrontendError, _Method, _Source, _Sources
 
 
 __all__ = ["FrontendError", "compile_method"]
@@ -22,10 +23,6 @@ _COMPARISONS = {ast.Eq: "eq", ast.NotEq: "ne", ast.Is: "eq", ast.IsNot: "ne",
                 ast.Lt: "lt", ast.LtE: "le", ast.Gt: "lt", ast.GtE: "le"}
 
 _Assigned = dict[str, _Bounds | None]
-
-
-class FrontendError(SyntaxError):
-    """带文件、行列和源码的前端诊断。"""
 
 
 @dataclass(frozen=True)
@@ -44,8 +41,8 @@ class _Block:
 
 
 def compile_method(source: str, entry: str, *, filename: str = "<source>") -> Program:
-    """读取同一文件中的入口与被调用方法，生成 IR，无需导入或执行源码。"""
-    return _Module(source, filename).compile(entry)
+    """从指定源码与显式相对导入的方法生成 IR。"""
+    return _Compilation(_Sources(source, filename)).compile(entry)
 
 
 def _is_empty(node: ast.AST) -> bool:
@@ -70,71 +67,74 @@ def _join(left: _Assigned, right: _Assigned) -> _Assigned:
     return joined
 
 
-class _Module:
-    def __init__(self, source: str, filename: str):
-        self.filename = filename
-        self.lines = source.splitlines()
-        try:
-            tree = ast.parse(source, filename)
-        except SyntaxError as error:
-            raise FrontendError(error.msg, (filename, error.lineno, error.offset, error.text)) from error
-        self.methods: dict[str, list[ast.FunctionDef]] = {}
-        for node in tree.body:
-            if isinstance(node, ast.FunctionDef):
-                self.methods.setdefault(node.name, []).append(node)
+def _annotation(source: _Source, node: ast.expr | None, location: ast.AST) -> ValueType:
+    if isinstance(node, ast.Name) and node.id in _TYPES:
+        return _TYPES[node.id]
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+        other = node.right if _is_empty(node.left) else node.left if _is_empty(node.right) else None
+        if isinstance(other, ast.Name) and other.id in ("Shape", "Color"):
+            return _TYPES[other.id]
+    raise source.error(node or location, "请用 bool、int、Shape 或 Color 标注类型，图形和颜色可联合 None")
+
+
+class _Compilation:
+    def __init__(self, sources: _Sources):
+        self.sources = sources
         self.functions: dict[str, Function] = {}
         self.active: list[str] = []
 
-    def error(self, node: ast.AST | None, message: str) -> FrontendError:
-        line = getattr(node, "lineno", 1)
-        text = self.lines[line - 1] if line <= len(self.lines) else ""
-        offset = len(text.encode()[:getattr(node, "col_offset", 0)].decode()) + 1
-        return FrontendError(message, (self.filename, line, offset, text))
-
-    def annotation(self, node: ast.expr | None, location: ast.AST) -> ValueType:
-        if isinstance(node, ast.Name) and node.id in _TYPES:
-            return _TYPES[node.id]
-        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
-            other = node.right if _is_empty(node.left) else node.left if _is_empty(node.right) else None
-            if isinstance(other, ast.Name) and other.id in ("Shape", "Color"):
-                return _TYPES[other.id]
-        raise self.error(node or location, "请用 bool、int、Shape 或 Color 标注类型，图形和颜色可联合 None")
-
     def compile(self, entry: str) -> Program:
+        source = self.sources.root
         if entry in BUILTINS or entry == _SHAPE_LITERAL:
-            raise self.error(None, f"“{entry}”是保留名称，请选择一个 Python 方法作为入口")
-        function = self.method(entry, None)
+            raise source.error(None, f"“{entry}”是保留名称，请选择一个 Python 方法作为入口")
+        binding = source.binding(entry)
+        if binding is None or not isinstance(binding.node, ast.FunctionDef):
+            raise source.error(None if binding is None else binding.node, f"请在入口源码中定义顶层方法“{entry}”")
+        function = self.lower(_Method(source, binding.node))
         return Program(entry, (function, *(f for name, f in self.functions.items() if name != entry)))
 
-    def method(self, name: str, location: ast.AST | None) -> Function:
+    def callable(self, source: _Source, name: str, location: ast.AST) -> str | Function:
+        if name in BUILTINS or name == _SHAPE_LITERAL:
+            binding = source.binding(name)
+            if binding is not None and binding.alias is not None and binding.alias.name != name:
+                raise source.error(binding.alias, f"导入别名“{name}”与保留操作名称重名")
+            return name
+        method = self.sources.method(source, name, location)
+        resolved = method.node.name
+        if resolved in BUILTINS or resolved == _SHAPE_LITERAL:
+            return resolved
+        name = self.sources.name(method)
         if name in self.active:
-            cycle = " → ".join((*self.active, name))
-            raise self.error(location, f"不支持递归调用（{cycle}），请改为固定次数的循环")
+            start = self.active.index(name)
+            cycle = " → ".join((*self.active[start:], name))
+            raise source.error(location, f"不支持递归调用（{cycle}），请改为固定次数的循环")
+        return self.lower(method)
+
+    def lower(self, method: _Method) -> Function:
+        name = self.sources.name(method)
         if name not in self.functions:
-            definitions = self.methods.get(name, [])
-            if not definitions:
-                raise self.error(location, f"找不到方法“{name}”，请在同一文件内定义它")
-            if len(definitions) > 1:
-                raise self.error(definitions[1], f"方法“{name}”有多个顶层定义，请保留一个")
             self.active.append(name)
-            self.functions[name] = _Lowering(self, definitions[0]).lower()
+            self.functions[name] = _Lowering(self, name, method).lower()
             self.active.pop()
         return self.functions[name]
 
 
 class _Lowering:
-    def __init__(self, module: _Module, method: ast.FunctionDef):
+    def __init__(self, compilation: _Compilation, name: str, definition: _Method):
+        module, method = definition.source, definition.node
+        self.compilation = compilation
+        self.name = name
         self.module = module
         self.method = method
         args = method.args
         if (method.decorator_list or args.defaults or args.kwonlyargs or args.vararg or args.kwarg
                 or getattr(method, "type_params", ())):
             raise module.error(method, "请使用无装饰器、类型参数或默认值的固定位置参数")
-        self.inputs = tuple(Variable(arg.arg, module.annotation(arg.annotation, arg))
+        self.inputs = tuple(Variable(arg.arg, _annotation(module, arg.annotation, arg))
                             for arg in (*args.posonlyargs, *args.args))
         if len({arg.name for arg in self.inputs}) != len(self.inputs):
             raise module.error(method, "方法参数名不能重复")
-        self.result = module.annotation(method.returns, method)
+        self.result = _annotation(module, method.returns, method)
         nodes = [node for statement in method.body for node in ast.walk(statement)]
         for node in nodes:
             if isinstance(node, ast.stmt) and not isinstance(node, _STATEMENTS):
@@ -189,7 +189,7 @@ class _Lowering:
         for block in self.blocks:
             assert block.end is not None
             blocks.append(Block(block.name, tuple(block.instructions), block.end))
-        return Function(self.method.name, self.inputs, self.result, tuple(self.locals), tuple(blocks),
+        return Function(self.name, self.inputs, self.result, tuple(self.locals), tuple(blocks),
                         sum(block.visits for block in self.blocks))
 
     def prune_table_branches(self) -> bool:
@@ -284,7 +284,7 @@ class _Lowering:
             target = node.target
             if not isinstance(target, ast.Name) or not node.simple:
                 raise self.module.error(target, "类型标注需要一个局部变量名")
-            self.declare(target, self.module.annotation(node.annotation, node))
+            self.declare(target, _annotation(self.module, node.annotation, node))
         else:
             if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
                 raise self.module.error(node, "每条赋值需要一个局部变量名")
@@ -450,7 +450,7 @@ class _Lowering:
 
     def range_bounds(self, node: ast.expr) -> tuple[int, int]:
         if (not isinstance(node, ast.Call) or not isinstance(node.func, ast.Name)
-                or node.func.id != "range" or "range" in self.names or "range" in self.module.methods
+                or node.func.id != "range" or "range" in self.names or "range" in self.module.bindings
                 or node.keywords or len(node.args) not in (1, 2)):
             raise self.module.error(node, "循环需要固定元组、range(stop) 或 range(start, stop)")
         bounds = []
@@ -627,23 +627,23 @@ class _Lowering:
         name = node.func.id
         if name in self.names:
             raise self.module.error(node.func, f"“{name}”是局部变量，不能作为方法调用")
-        if name == _SHAPE_LITERAL:
-            return self.shape_literal(node)
-        if name in BUILTINS:
-            types, result = BUILTINS[name]
+        target = self.compilation.callable(self.module, name, node.func)
+        if isinstance(target, str):
+            if target == _SHAPE_LITERAL:
+                return self.shape_literal(node)
+            types, result = BUILTINS[target]
         else:
-            method = self.module.method(name, node.func)
-            types, result = tuple(arg.type for arg in method.inputs), method.result
+            types, result = tuple(arg.type for arg in target.inputs), target.result
         if len(types) != len(node.args):
             raise self.module.error(node, f"“{name}”需要 {len(types)} 个参数，收到 {len(node.args)} 个")
         values = tuple(self.expression(arg, kind) for arg, kind in zip(node.args, types))
-        if name == "add":
+        if target == "add":
             return self.add(node, values[0], values[1])
         args = tuple(value.operand for value in values)
-        if name in BUILTINS:
-            return self.apply(name, result, *args)
+        if isinstance(target, str):
+            return self.apply(target, result, *args)
         slot = self.temp(result)
-        self.emit(Call(slot, name, args))
+        self.emit(Call(slot, target.name, args))
         return _Value(Reference(slot), result)
 
     def shape_literal(self, node: ast.Call) -> _Value:

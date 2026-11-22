@@ -2,14 +2,16 @@
 
 from dataclasses import asdict, dataclass
 
-from ..freight_stage import CARS, freight_stage
+from ..freight_stage import CARS, add_machine_dyes, freight_stage
 from ..layer_factory import slot_bridge
 from ..production_line import check_jump, product_exit
+from ..production_stage import build_stage
 from ..quarter_gather import QUADRANTS
 from ..slot_streams import SLOT_ROWS, SlotStreams
 from ..stock_selector import SOURCES
+from ..work_lane import A_X
 from .changeover import controls
-from .recipe import MAX_STAGES
+from .recipe import BASE, CRYSTAL, MAX_STAGES, Production
 
 STAGE_PITCH = 18
 SHAPE_ROWS = {cargo: y for cargo, (y, _) in zip('CRSW', SOURCES)}
@@ -77,16 +79,34 @@ def crystal_loading(cargo: str) -> dict:
     return {'V': 1137, 'BP': {'$type': 'Island', 'BinaryVersion': 1137, 'Entries': islands}}
 
 
-def assemble(count: int, *, packet_tag: int) -> tuple[dict, dict]:
+def assemble(count: int, *, packet_tag: int,
+             fixed_orders: tuple[Production, ...] | None = None) -> tuple[dict, dict]:
     if type(count) is not int or not 1 <= count <= MAX_STAGES:
         raise ValueError(f'工段数须在 1 至 {MAX_STAGES} 之间')
+    base_stages = crystal_stages = range(count)
+    if fixed_orders is not None:
+        if not fixed_orders or any(len(order.stages) > count for order in fixed_orders):
+            raise ValueError('精简工道需要至少一份已回放且不超过工段容量的固定配方')
+        base_stages = {s.index for order in fixed_orders for s in order.stages if s.opcode == BASE}
+        crystal_stages = {s.index for order in fixed_orders for s in order.stages if s.opcode == CRYSTAL}
     islands = []
     stations = []
     bridge = slot_bridge()
     previous = None
     for index in range(count):
         x = STAGE_PITCH * index
-        stage = freight_stage(index, stream=True)['BP']['Entries']
+        base, crystal = index in base_stages, index in crystal_stages
+        if base:
+            stage = freight_stage(index, machine_dyes=crystal, stream=True)['BP']['Entries']
+        else:
+            stage = build_stage(index, stream=True)['BP']['Entries']
+            take, receive, work = stage[:3]
+            for row in SLOT_ROWS:
+                check_jump(take, receive, row, 0)
+            for level in (0, 1):
+                check_jump(take, work, A_X, 1, level)
+            if crystal:
+                add_machine_dyes(stage)
         for obj in stage:
             obj['X'] = obj.get('X', 0) + x
         take, receive = stage[:2]
@@ -101,7 +121,12 @@ def assemble(count: int, *, packet_tag: int) -> tuple[dict, dict]:
                 check_jump(previous, take, row, 0)
         islands.extend(stage)
         previous = receive
-        stations.append({'stage': index, 'base_head': (x - 12, -17), 'crystal_head': (x - 9, 3)})
+        station = {'stage': index}
+        if base:
+            station['base_head'] = x - 12, -17
+        if crystal:
+            station['crystal_head'] = x - 9, 3
+        stations.append(station)
     assert previous is not None
     outlet = product_exit()
     outlet['X'] = previous['X'] + 3

@@ -1,0 +1,4415 @@
+{
+  "packet_tag": 1640046,
+  "write_bus": {
+    "address": 1640000,
+    "phase": 1640001,
+    "opcode": 1640002,
+    "a": 1640003,
+    "b": 1640004,
+    "destination": 1640005,
+    "base": 1640006,
+    "color": 1640007
+  },
+  "stage_capacity": 48,
+  "islands": 1806,
+  "interfaces": {
+    "stations": [
+      {
+        "stage": 0,
+        "base_head": [
+          -12,
+          -17
+        ]
+      },
+      {
+        "stage": 1,
+        "base_head": [
+          6,
+          -17
+        ]
+      },
+      {
+        "stage": 2
+      },
+      {
+        "stage": 3,
+        "base_head": [
+          42,
+          -17
+        ],
+        "crystal_head": [
+          45,
+          3
+        ]
+      },
+      {
+        "stage": 4
+      },
+      {
+        "stage": 5,
+        "base_head": [
+          78,
+          -17
+        ]
+      },
+      {
+        "stage": 6
+      },
+      {
+        "stage": 7,
+        "base_head": [
+          114,
+          -17
+        ]
+      },
+      {
+        "stage": 8
+      },
+      {
+        "stage": 9,
+        "base_head": [
+          150,
+          -17
+        ]
+      },
+      {
+        "stage": 10
+      },
+      {
+        "stage": 11,
+        "base_head": [
+          186,
+          -17
+        ]
+      },
+      {
+        "stage": 12,
+        "base_head": [
+          204,
+          -17
+        ]
+      },
+      {
+        "stage": 13
+      },
+      {
+        "stage": 14,
+        "base_head": [
+          240,
+          -17
+        ]
+      },
+      {
+        "stage": 15
+      },
+      {
+        "stage": 16,
+        "base_head": [
+          276,
+          -17
+        ]
+      },
+      {
+        "stage": 17
+      },
+      {
+        "stage": 18,
+        "base_head": [
+          312,
+          -17
+        ]
+      },
+      {
+        "stage": 19
+      },
+      {
+        "stage": 20
+      },
+      {
+        "stage": 21
+      },
+      {
+        "stage": 22
+      },
+      {
+        "stage": 23,
+        "base_head": [
+          402,
+          -17
+        ]
+      },
+      {
+        "stage": 24,
+        "base_head": [
+          420,
+          -17
+        ]
+      },
+      {
+        "stage": 25
+      },
+      {
+        "stage": 26,
+        "base_head": [
+          456,
+          -17
+        ]
+      },
+      {
+        "stage": 27
+      },
+      {
+        "stage": 28,
+        "base_head": [
+          492,
+          -17
+        ]
+      },
+      {
+        "stage": 29
+      },
+      {
+        "stage": 30,
+        "base_head": [
+          528,
+          -17
+        ]
+      },
+      {
+        "stage": 31
+      },
+      {
+        "stage": 32,
+        "crystal_head": [
+          567,
+          3
+        ]
+      },
+      {
+        "stage": 33
+      },
+      {
+        "stage": 34,
+        "base_head": [
+          600,
+          -17
+        ]
+      },
+      {
+        "stage": 35,
+        "base_head": [
+          618,
+          -17
+        ]
+      },
+      {
+        "stage": 36
+      },
+      {
+        "stage": 37,
+        "base_head": [
+          654,
+          -17
+        ]
+      },
+      {
+        "stage": 38
+      },
+      {
+        "stage": 39,
+        "base_head": [
+          690,
+          -17
+        ]
+      },
+      {
+        "stage": 40
+      },
+      {
+        "stage": 41,
+        "base_head": [
+          726,
+          -17
+        ]
+      },
+      {
+        "stage": 42
+      },
+      {
+        "stage": 43
+      },
+      {
+        "stage": 44
+      },
+      {
+        "stage": 45
+      },
+      {
+        "stage": 46
+      },
+      {
+        "stage": 47
+      }
+    ],
+    "load": [
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 2,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 5,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 8,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 11,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      }
+    ],
+    "output": {
+      "platform": [
+        852,
+        0,
+        0
+      ],
+      "east_y": 31,
+      "level": 0
+    }
+  },
+  "sender": {
+    "select": {
+      "channel": 1640047,
+      "orders": {
+        "stack": 1,
+        "pin-crystal": 2
+      }
+    },
+    "write": {
+      "address": 1640000,
+      "payload": {
+        "opcode": 1640002,
+        "a": 1640003,
+        "b": 1640004,
+        "destination": 1640005,
+        "base": 1640006,
+        "color": 1640007
+      },
+      "packet_tag": 1640046,
+      "phase": 1640001,
+      "ready": 1640014,
+      "request": 1640011,
+      "ack": 1640013
+    },
+    "control": {
+      "run": 1640030,
+      "clean_confirmed": 1640060,
+      "enable_feed": 1640059,
+      "loaded": 1640057,
+      "length": 1640043,
+      "target": 1600000,
+      "replay_result": 1640044,
+      "accepted": 1640045
+    }
+  },
+  "orders": {
+    "stack": {
+      "target": "CuCuCuCu:RuRuRuRu:SuSuSuSu:WuWuWuWu:CuCuCuCu",
+      "instructions": [
+        {
+          "id": 0,
+          "opcode": 14,
+          "destination": 0,
+          "a": 0,
+          "b": 0,
+          "base": "CuCuCuCu",
+          "color": null,
+          "request": 1,
+          "result": "CuCuCuCu"
+        },
+        {
+          "id": 1,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "RuRuRuRu",
+          "color": null,
+          "request": 0,
+          "result": "RuRuRuRu"
+        },
+        {
+          "id": 2,
+          "opcode": 7,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCuCuCu:RuRuRuRu"
+        },
+        {
+          "id": 3,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "SuSuSuSu",
+          "color": null,
+          "request": 0,
+          "result": "SuSuSuSu"
+        },
+        {
+          "id": 4,
+          "opcode": 7,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCuCuCu:RuRuRuRu:SuSuSuSu"
+        },
+        {
+          "id": 5,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "WuWuWuWu",
+          "color": null,
+          "request": 0,
+          "result": "WuWuWuWu"
+        },
+        {
+          "id": 6,
+          "opcode": 7,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCuCuCu:RuRuRuRu:SuSuSuSu:WuWuWuWu"
+        },
+        {
+          "id": 7,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "CuCuCuCu",
+          "color": null,
+          "request": 0,
+          "result": "CuCuCuCu"
+        },
+        {
+          "id": 8,
+          "opcode": 7,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCuCuCu:RuRuRuRu:SuSuSuSu:WuWuWuWu:CuCuCuCu"
+        }
+      ],
+      "product_slot": 0,
+      "cargo_per_product": {
+        "C_item": "2",
+        "R_item": "1",
+        "S_item": "1",
+        "W_item": "1"
+      },
+      "paths": [
+        {
+          "stage": 0,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 0,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 1,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q0",
+          "resource": "R",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 1,
+          "row": -12
+        },
+        {
+          "stage": 2,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 2,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 3,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 3,
+          "path": "q0",
+          "resource": "S",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 2,
+          "row": -12
+        },
+        {
+          "stage": 4,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 4,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "q0",
+          "resource": "W",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 11,
+          "layer": 0,
+          "row": 8
+        },
+        {
+          "stage": 6,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 6,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 8,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 8,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        }
+      ]
+    },
+    "pin-crystal": {
+      "target": "P---P---:Cu------:crCu--Cu",
+      "instructions": [
+        {
+          "id": 0,
+          "opcode": 14,
+          "destination": 0,
+          "a": 0,
+          "b": 0,
+          "base": "CuCuCuCu",
+          "color": null,
+          "request": 1,
+          "result": "CuCuCuCu"
+        },
+        {
+          "id": 1,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "CuP-CuCu",
+          "color": null,
+          "request": 0,
+          "result": "CuP-CuCu"
+        },
+        {
+          "id": 2,
+          "opcode": 7,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCuCuCu:CuP-CuCu"
+        },
+        {
+          "id": 3,
+          "opcode": 10,
+          "destination": 0,
+          "a": 0,
+          "b": 0,
+          "base": null,
+          "color": "color:r",
+          "request": 0,
+          "result": "CuCuCuCu:CucrCuCu"
+        },
+        {
+          "id": 4,
+          "opcode": 4,
+          "destination": 0,
+          "a": 0,
+          "b": 0,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCu----:Cucr----"
+        },
+        {
+          "id": 5,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "Cu------",
+          "color": null,
+          "request": 0,
+          "result": "Cu------"
+        },
+        {
+          "id": 6,
+          "opcode": 7,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCu----:Cucr----:Cu------"
+        },
+        {
+          "id": 7,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "Cu------",
+          "color": null,
+          "request": 0,
+          "result": "Cu------"
+        },
+        {
+          "id": 8,
+          "opcode": 7,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCu----:Cucr----:Cu------:Cu------"
+        },
+        {
+          "id": 9,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "Cu------",
+          "color": null,
+          "request": 0,
+          "result": "Cu------"
+        },
+        {
+          "id": 10,
+          "opcode": 7,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCu----:Cucr----:Cu------:Cu------:Cu------"
+        },
+        {
+          "id": 11,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "------Cu",
+          "color": null,
+          "request": 0,
+          "result": "------Cu"
+        },
+        {
+          "id": 12,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "----CuCu",
+          "color": null,
+          "request": 1,
+          "result": "----CuCu"
+        },
+        {
+          "id": 13,
+          "opcode": 7,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "------Cu:----CuCu"
+        },
+        {
+          "id": 14,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "------Cu",
+          "color": null,
+          "request": 1,
+          "result": "------Cu"
+        },
+        {
+          "id": 15,
+          "opcode": 7,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "------Cu:----CuCu:------Cu"
+        },
+        {
+          "id": 16,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "------Cu",
+          "color": null,
+          "request": 1,
+          "result": "------Cu"
+        },
+        {
+          "id": 17,
+          "opcode": 7,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "------Cu:----CuCu:------Cu:------Cu"
+        },
+        {
+          "id": 18,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "------Cu",
+          "color": null,
+          "request": 1,
+          "result": "------Cu"
+        },
+        {
+          "id": 19,
+          "opcode": 7,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "------Cu:----CuCu:------Cu:------Cu:------Cu"
+        },
+        {
+          "id": 20,
+          "opcode": 8,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCu--Cu:CucrCuCu:Cu----Cu:Cu----Cu:Cu----Cu"
+        },
+        {
+          "id": 21,
+          "opcode": 2,
+          "destination": 0,
+          "a": 0,
+          "b": 0,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "Cu--CuCu:crCuCuCu:----CuCu:----CuCu:----CuCu"
+        },
+        {
+          "id": 22,
+          "opcode": 4,
+          "destination": 0,
+          "a": 0,
+          "b": 0,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "Cu------:crCu----"
+        },
+        {
+          "id": 23,
+          "opcode": 14,
+          "destination": 1,
+          "a": 0,
+          "b": 0,
+          "base": "CuP-CuCu",
+          "color": null,
+          "request": 0,
+          "result": "CuP-CuCu"
+        },
+        {
+          "id": 24,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "CuP-CuCu",
+          "color": null,
+          "request": 1,
+          "result": "CuP-CuCu"
+        },
+        {
+          "id": 25,
+          "opcode": 7,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "CuP-CuCu:CuP-CuCu"
+        },
+        {
+          "id": 26,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "CuP-CuCu",
+          "color": null,
+          "request": 1,
+          "result": "CuP-CuCu"
+        },
+        {
+          "id": 27,
+          "opcode": 7,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "CuP-CuCu:CuP-CuCu:CuP-CuCu"
+        },
+        {
+          "id": 28,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "CuP-CuCu",
+          "color": null,
+          "request": 1,
+          "result": "CuP-CuCu"
+        },
+        {
+          "id": 29,
+          "opcode": 7,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "CuP-CuCu:CuP-CuCu:CuP-CuCu:CuP-CuCu"
+        },
+        {
+          "id": 30,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "CuP-CuCu",
+          "color": null,
+          "request": 1,
+          "result": "CuP-CuCu"
+        },
+        {
+          "id": 31,
+          "opcode": 7,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "CuP-CuCu:CuP-CuCu:CuP-CuCu:CuP-CuCu:CuP-CuCu"
+        },
+        {
+          "id": 32,
+          "opcode": 10,
+          "destination": 1,
+          "a": 1,
+          "b": 0,
+          "base": null,
+          "color": "color:r",
+          "request": 1,
+          "result": "CucrCuCu:CucrCuCu:CucrCuCu:CucrCuCu:CucrCuCu"
+        },
+        {
+          "id": 33,
+          "opcode": 4,
+          "destination": 1,
+          "a": 1,
+          "b": 0,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "Cucr----:Cucr----:Cucr----:Cucr----:Cucr----"
+        },
+        {
+          "id": 34,
+          "opcode": 14,
+          "destination": 2,
+          "a": 0,
+          "b": 0,
+          "base": "------Cu",
+          "color": null,
+          "request": 1,
+          "result": "------Cu"
+        },
+        {
+          "id": 35,
+          "opcode": 14,
+          "destination": 3,
+          "a": 0,
+          "b": 0,
+          "base": "----CuCu",
+          "color": null,
+          "request": 0,
+          "result": "----CuCu"
+        },
+        {
+          "id": 36,
+          "opcode": 7,
+          "destination": 2,
+          "a": 2,
+          "b": 3,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "------Cu:----CuCu"
+        },
+        {
+          "id": 37,
+          "opcode": 14,
+          "destination": 3,
+          "a": 0,
+          "b": 0,
+          "base": "------Cu",
+          "color": null,
+          "request": 0,
+          "result": "------Cu"
+        },
+        {
+          "id": 38,
+          "opcode": 7,
+          "destination": 2,
+          "a": 2,
+          "b": 3,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "------Cu:----CuCu:------Cu"
+        },
+        {
+          "id": 39,
+          "opcode": 14,
+          "destination": 3,
+          "a": 0,
+          "b": 0,
+          "base": "------Cu",
+          "color": null,
+          "request": 0,
+          "result": "------Cu"
+        },
+        {
+          "id": 40,
+          "opcode": 7,
+          "destination": 2,
+          "a": 2,
+          "b": 3,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "------Cu:----CuCu:------Cu:------Cu"
+        },
+        {
+          "id": 41,
+          "opcode": 14,
+          "destination": 3,
+          "a": 0,
+          "b": 0,
+          "base": "------Cu",
+          "color": null,
+          "request": 0,
+          "result": "------Cu"
+        },
+        {
+          "id": 42,
+          "opcode": 7,
+          "destination": 2,
+          "a": 2,
+          "b": 3,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "------Cu:----CuCu:------Cu:------Cu:------Cu"
+        },
+        {
+          "id": 43,
+          "opcode": 8,
+          "destination": 1,
+          "a": 1,
+          "b": 2,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "Cucr--Cu:CucrCuCu:Cucr--Cu:Cucr--Cu:Cucr--Cu"
+        },
+        {
+          "id": 44,
+          "opcode": 1,
+          "destination": 1,
+          "a": 1,
+          "b": 0,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "CuCucr--:CuCucrCu:CuCucr--:CuCucr--:CuCucr--"
+        },
+        {
+          "id": 45,
+          "opcode": 5,
+          "destination": 1,
+          "a": 1,
+          "b": 0,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "----cr--:----crCu:----cr--:----cr--:----cr--"
+        },
+        {
+          "id": 46,
+          "opcode": 8,
+          "destination": 0,
+          "a": 0,
+          "b": 1,
+          "base": null,
+          "color": null,
+          "request": 1,
+          "result": "Cu--cr--:crCucrCu:----cr--:----cr--:----cr--"
+        },
+        {
+          "id": 47,
+          "opcode": 6,
+          "destination": 0,
+          "a": 0,
+          "b": 0,
+          "base": null,
+          "color": null,
+          "request": 0,
+          "result": "P---P---:Cu------:crCu--Cu"
+        }
+      ],
+      "product_slot": 0,
+      "cargo_per_product": {
+        "C_item": "77",
+        "r_liter": "160"
+      },
+      "paths": [
+        {
+          "stage": 0,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 0,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 1,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 1,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 1,
+          "path": "q1/pin/1",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q1/pin/2",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q1/pin/3",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q1/pin/4",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q1/pin/5",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q1/pin/6",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q1/pin",
+          "resource": "CrystalGeneratorDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "q1",
+          "resource": "r",
+          "amount_per_product": "20",
+          "unit": "liter",
+          "station": "base",
+          "wagon": 9,
+          "layer": 0,
+          "row": 28
+        },
+        {
+          "stage": 1,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 1,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 1,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 2,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 2,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 3,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 3,
+          "path": "work/1",
+          "resource": "CrystalGeneratorDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 3,
+          "path": "crystal",
+          "resource": "r",
+          "amount_per_product": "20",
+          "unit": "liter",
+          "station": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "row": 28
+        },
+        {
+          "stage": 4,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 4,
+          "path": "work/1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 5,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 5,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 5,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 5,
+          "path": "q3",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "q3",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 5,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 6,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 6,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 7,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 7,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 7,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 7,
+          "path": "q3",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "q3",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 7,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 8,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 8,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 9,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 9,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 9,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 9,
+          "path": "q3",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "q3",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 9,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 10,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 10,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 11,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 11,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 11,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 11,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 11,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 12,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 12,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 12,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 12,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 12,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 13,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 13,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 14,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 14,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 14,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 14,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 14,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 15,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 15,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 16,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 16,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 16,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 16,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 16,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 17,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 17,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 18,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 18,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 18,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 18,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 18,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 19,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 19,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 20,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 20,
+          "path": "work/1",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 21,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 21,
+          "path": "work/1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 22,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 22,
+          "path": "work/1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 23,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 23,
+          "path": "q1/pin/1",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "q1/pin/2",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "q1/pin/3",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "q1/pin/4",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "q1/pin/5",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "q1/pin/6",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "q1/pin",
+          "resource": "CrystalGeneratorDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "q1",
+          "resource": "r",
+          "amount_per_product": "20",
+          "unit": "liter",
+          "station": "base",
+          "wagon": 9,
+          "layer": 0,
+          "row": 28
+        },
+        {
+          "stage": 23,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 23,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 23,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 23,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 24,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 24,
+          "path": "q1/pin/1",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "q1/pin/2",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "q1/pin/3",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "q1/pin/4",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "q1/pin/5",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "q1/pin/6",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "q1/pin",
+          "resource": "CrystalGeneratorDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "q1",
+          "resource": "r",
+          "amount_per_product": "20",
+          "unit": "liter",
+          "station": "base",
+          "wagon": 9,
+          "layer": 0,
+          "row": 28
+        },
+        {
+          "stage": 24,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 24,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 24,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 24,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 25,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 25,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 26,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 26,
+          "path": "q1/pin/1",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "q1/pin/2",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "q1/pin/3",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "q1/pin/4",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "q1/pin/5",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "q1/pin/6",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "q1/pin",
+          "resource": "CrystalGeneratorDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "q1",
+          "resource": "r",
+          "amount_per_product": "20",
+          "unit": "liter",
+          "station": "base",
+          "wagon": 9,
+          "layer": 0,
+          "row": 28
+        },
+        {
+          "stage": 26,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 26,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 26,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 26,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 27,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 27,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 28,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 28,
+          "path": "q1/pin/1",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "q1/pin/2",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "q1/pin/3",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "q1/pin/4",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "q1/pin/5",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "q1/pin/6",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "q1/pin",
+          "resource": "CrystalGeneratorDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "q1",
+          "resource": "r",
+          "amount_per_product": "20",
+          "unit": "liter",
+          "station": "base",
+          "wagon": 9,
+          "layer": 0,
+          "row": 28
+        },
+        {
+          "stage": 28,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 28,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 28,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 28,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 29,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 29,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 30,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 30,
+          "path": "q1/pin/1",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "q1/pin/2",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "q1/pin/3",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "q1/pin/4",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "q1/pin/5",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "q1/pin/6",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "q1/pin",
+          "resource": "CrystalGeneratorDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "q1",
+          "resource": "r",
+          "amount_per_product": "20",
+          "unit": "liter",
+          "station": "base",
+          "wagon": 9,
+          "layer": 0,
+          "row": 28
+        },
+        {
+          "stage": 30,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 30,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 30,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 30,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 31,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 31,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 32,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 32,
+          "path": "work/1",
+          "resource": "CrystalGeneratorDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 32,
+          "path": "crystal",
+          "resource": "r",
+          "amount_per_product": "20",
+          "unit": "liter",
+          "station": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "row": 28
+        },
+        {
+          "stage": 33,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 33,
+          "path": "work/1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 34,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 34,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 34,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 34,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 34,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 35,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 35,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 35,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 35,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 35,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 36,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 36,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 37,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 37,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 37,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 37,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 37,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 38,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 38,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 39,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 39,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 39,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 39,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 39,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 40,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 40,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "q0",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 41,
+          "path": "q0",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "q0",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "q1",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 41,
+          "path": "q1",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "q1",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "q2",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 1,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 41,
+          "path": "q2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "q2",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "q3",
+          "resource": "C",
+          "amount_per_product": "1",
+          "unit": "item",
+          "station": "base",
+          "wagon": 4,
+          "layer": 0,
+          "row": -12
+        },
+        {
+          "stage": 41,
+          "path": "join/first",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "join/second",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "join/final",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "join/first",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 41,
+          "path": "join/second",
+          "resource": "RotatorOneQuadCCW",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 42,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 42,
+          "path": "work/1",
+          "resource": "StackerStraight",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 43,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 43,
+          "path": "work/1",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 44,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 44,
+          "path": "work/1",
+          "resource": "RotatorOneQuad",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 45,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 45,
+          "path": "work/1",
+          "resource": "RotatorHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 45,
+          "path": "work/2",
+          "resource": "CutterHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 45,
+          "path": "work/3",
+          "resource": "RotatorHalf",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 46,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 46,
+          "path": "work/1",
+          "resource": "HalvesSwapperDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 47,
+          "path": "slot_stream",
+          "resource": "belt",
+          "amount_per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 47,
+          "path": "work/1",
+          "resource": "PinPusherDefault",
+          "amount_per_product": "1",
+          "unit": "item"
+        }
+      ]
+    }
+  }
+}

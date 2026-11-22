@@ -52,9 +52,13 @@ def _require_port(board, kind, x, row, level):
 def _check_intakes(islands, stations, ports):
     for station in stations:
         for key in ('base_head', 'crystal_head'):
-            _require_station(islands, 'WaitStation', *station[key])
+            if key in station:
+                _require_station(islands, 'WaitStation', *station[key])
         for port in ports:
-            x, start = station['crystal_head' if port.station == 'crystal' else 'base_head']
+            key = 'crystal_head' if port.station == 'crystal' else 'base_head'
+            if key not in station:
+                continue
+            x, start = station[key]
             wagon_y = start + port.wagon
             _require_station(islands, 'Unloader_' + port.kind + '_Flipped', x, wagon_y)
             connector = 'FluidPortReceiver' if port.kind == 'Fluids' else 'BeltPortReceiver'
@@ -105,11 +109,12 @@ def _requirements(production):
             'paths': paths}
 
 
-def build(packet_tag: int) -> tuple[str, dict]:
+def build(packet_tag: int, *, compact: bool = False) -> tuple[str, dict]:
     orders = _orders()
     programs = {name: replay(order['target'], order['instructions']) for name, order in orders.items()}
     count = max(len(program.stages) for program in programs.values())
-    document, interfaces = assemble(count, packet_tag=packet_tag)
+    fixed = tuple(programs.values()) if compact else None
+    document, interfaces = assemble(count, packet_tag=packet_tag, fixed_orders=fixed)
     ports = cargo_ports()
     islands = _islands(document)
     _check_intakes(islands, interfaces['stations'], ports)
@@ -132,10 +137,11 @@ def main() -> int:
     parser.add_argument('--packet-tag', type=int, default=sender.PACKET_TAG,
                         help=f'配方地址回读的独占频道，默认 {sender.PACKET_TAG}')
     parser.add_argument('--output', type=Path, help='原生蓝图输出，邻接 JSON 包含两份配方和供货需求')
+    parser.add_argument('--compact', action='store_true', help='仅保留这两份固定订单所需的供料站')
     args = parser.parse_args()
     if args.output is not None and args.output.suffix != '.spz2bp':
         parser.error('--output 需要 .spz2bp 文件路径')
-    blueprint, report = build(args.packet_tag)
+    blueprint, report = build(args.packet_tag, compact=args.compact)
     if args.output is not None:
         args.output.write_text(blueprint + '\n', encoding='utf-8')
         args.output.with_suffix('.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
