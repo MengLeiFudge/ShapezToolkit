@@ -5,7 +5,7 @@ from typing import Iterator
 
 from .construct import Constructor, Result
 from .inverse import PinFamily, pin_families
-from .physics import Rules, Shape
+from .physics import PIN, Rules, Shape
 from .pin_constraints import pin_base_possible
 from .prefix_closure import minimal_start
 from .recipe import Recipe
@@ -26,13 +26,20 @@ class Solver4:
 
     def predecessors(self, target: Shape, *, grounded: bool = False) -> Iterator[Shape]:
         """按非空格前缀生成K中的S前态，保留原层号与全部晶体。"""
+        return self._predecessors(target, grounded=grounded, after_pin=False)
+
+    def _predecessors(self, target: Shape, *, grounded: bool, after_pin: bool) -> Iterator[Shape]:
         desired = self.rules.cells(target)
         columns = [sorted((z, cell) for (z, column), cell in desired.items() if column == q)
                    for q in range(4)]
         ranges = []
         for column in columns:
             required = max((i + 1 for i, (_, cell) in enumerate(column) if cell[0] == "c"), default=0)
-            ranges.append(range(required, len(column) + 1))
+            limit = len(column)
+            if after_pin and column and column[0] != (0, PIN):
+                # 没有新增地面针时，来源地面为空，只有第1至3层可能供给保留格。
+                limit = min(limit, self.rules.height - 2)
+            ranges.append(range(required, limit + 1))
         for counts in product(*ranges):
             original = {(z, q): cell for q, count in enumerate(counts) for z, cell in columns[q][:count]}
             source = self.rules.fold(original)
@@ -79,7 +86,7 @@ class Solver4:
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
         if not pin_base_possible(target) or not in_support_class(self.rules, target, grounded=True):
             return None
-        for pushed in self.predecessors(target, grounded=True):
+        for pushed in self._predecessors(target, grounded=True, after_pin=True):
             # 逐列前缀保持A，grounded筛选已强于K；制造凭据仍由下面的逆推取得。
             for family in pin_families(self.rules, pushed, check_output=not self.certificate_first):
                 previous = self._family_recipe(family, lowest, remaining_pins - 1)
