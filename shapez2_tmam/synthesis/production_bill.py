@@ -25,17 +25,8 @@ def production_bill(recipe: Recipe) -> dict:
     paint = Counter()
     work = Counter()
     layers = []
-    labels = [step["result"][p:p+2] for step in steps if step["operation"] == "base" for p in range(0, 8, 2)]
-    blanks = Counter(label[0] for label in labels if label not in (PIN, EMPTY))
-    blank = max(sorted(blanks), key=blanks.get) if blanks else "C"
-    pigments = Counter(step["parameter"] for step in steps if step["operation"] == "crystal")
-    pigments.update(label[1] for label in labels if label not in (PIN, EMPTY) and label[1] != 'u')
-    # 优先用配方本来就需要的单色做牺牲塔；其余颜色按相同混合比例出料。
-    used = Counter()
-    for color, count in pigments.items():
-        for source in PRIMARY[color]:
-            used[source] += count
-    pin_color = max("rgb", key=lambda source: used[source])
+    # 配料站的占位整片来自第一节车底层，制针支管与红色直通管相连。
+    blank, pin_color = SHAPE_LOADS[0][0], FLUID_LOADS[0][0]
     for step in steps:
         op = step["operation"]
         if op != "base":

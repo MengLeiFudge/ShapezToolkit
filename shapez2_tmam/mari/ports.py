@@ -13,6 +13,7 @@ EAST_NORTH = ((0, 0, 0, 0), (3, 0, 0, 0))
 
 # 规范化建筑类型 -> (输出端口, 输入端口, 导线接点)。
 PORTS = {
+    "BeltFilter": ((), ((1, 0, 0, 0),), ()),
     "Button": (OUT, (), ()),
     "ConstantSignal": (OUT, (), ()),
     "ControlledSignalReceiver": (((0, 1, 0, 0),), ((3, 0, -1, 0),), ()),
