@@ -66,8 +66,14 @@ python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-bas
 
 堆叠前缀用 `synthesis/row_support.py` 的 `stack_scan_q0` 至 `stack_scan_q3` 作为四个更新入口，并传入 `round_values=(5, 4, 3, 2, 1)`。`initial_q0` 至 `initial_q3` 接四列初值，`item0` 至 `item4` 接从顶到底排列的单层支撑代码，`synthesis/prefix_closure.py` 的 `stack_scan_rows` 可生成这五份输入。若更新入口需要零起算的轮序号，传入 `round_values=tuple(range(steps))`。轮值列表必须与轮数相等。
 
-### 只更新旧状态
+### 固定轮数、常驻输入与轮值
 
-`timed.compile_state_steps(programs, steps, channel_base)` 用于每轮只读取旧状态的更新方法。各入口按映射顺序声明全部旧字段，下一轮同时使用各入口的返回值。支持 1～4 个字段，轮数可设为 1～32，庞大的计算仍受平台布线容量限制。索引用于推进轮数。需要在末轮切换到保留旧值的计算板也接收索引。公开频道为 `run`、各字段的初值、`done` 和各字段的结果。
+`timed.compile_state_steps(programs, steps, channel_base)` 执行 1～32 轮，支持 1～4 个状态字段。各入口按映射顺序接收全部旧字段，下一轮同时使用各入口的返回值。公开频道为 `run`、各字段的初值、`done` 和各字段的结果。
+
+用 `held_inputs=("material", "direction")` 增加具名公开输入。各入口在旧字段后按该顺序声明同名、同类型的参数。常驻输入频道排在原有保留范围之后，由需要它们的计算板直接接收。调用方从复位开始保持同一组常驻输入，直到采样结束。
+
+用 `round_values=(5, 4, 3, 2, 1)` 为五轮提供整数轮值。各入口追加一个 `int` 参数，当前轮值由计算板从内部索引生成。
+
+四状态的状态板每侧用满 10 个无线口。当一块计算板需要四个旧值和索引时，可再接 5 个常驻输入。输出拆到多块计算板时，每块只接所需的输入，容量按每块实际接收端口计算。
 
 把 `synthesis/direct_stack.py` 的 `direct_scan_remaining`、`direct_scan_valid`、`direct_scan_replay` 按 `remaining`、`valid`、`replay` 的顺序编译并传入，设置 `steps=5`。`initial_remaining` 接原图，`initial_valid` 接稳定性判定，`initial_replay` 留空。按接口表复位和启动，待 `done=1` 后读取材料检查和回放。
