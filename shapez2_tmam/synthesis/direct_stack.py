@@ -18,6 +18,15 @@ def base_order(row: Shape | None) -> Shape | None:
     return row
 
 
+def direct_base_at_depth(target: Shape | None, depth: int) -> Shape | None:
+    """读出已通过纯堆叠判定的目标所需的单层基础料。"""
+    for index in (0, 1, 2, 3, 4):
+        if depth == index:
+            return unstack_upper(target)
+        target = unstack_lower(target)
+    return None
+
+
 def verify_direct_stack(target: Shape | None, row0: Shape | None, row1: Shape | None,
                         row2: Shape | None, row3: Shape | None, row4: Shape | None) -> bool:
     """从最低层开始回放通过 base_order 的订单，与完整目标比较。"""
