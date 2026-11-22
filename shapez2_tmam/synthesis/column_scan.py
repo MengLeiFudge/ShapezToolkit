@@ -92,3 +92,20 @@ def column_gap_needs_pin(word: Shape | None) -> bool:
     empty = shape_literal("Cu------")
     return ((landing == 1) & (unstack_lower(first_two) == empty)
             | (landing == 2) & (unstack_upper(first_two) == empty))
+
+
+def corner_helper_column(crystal: int, landing: int, suspended: bool) -> Shape:
+    """由晶下间隙生成五层助手的原料信号，格位统一在 q0。"""
+    if suspended:
+        if crystal == 3:
+            return shape_literal("P-------:Cu------:P-------:Cu------:Cu------")
+        if landing == 1:
+            return shape_literal("P-------:Cu------:P-------:P-------:Cu------")
+        return shape_literal("P-------:Cu------:Cu------:P-------:Cu------")
+    if crystal == 4:
+        return shape_literal("Cu------:Cu------:Cu------:P-------:Cu------")
+    if crystal == 3:
+        return shape_literal("Cu------:Cu------:P-------:Cu------:Cu------")
+    if crystal == 2:
+        return shape_literal("Cu------:P-------:Cu------:Cu------:Cu------")
+    return shape_literal("Cu------:Cu------:Cu------:Cu------:Cu------")

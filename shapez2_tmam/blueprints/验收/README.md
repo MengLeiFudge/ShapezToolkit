@@ -15,7 +15,7 @@
 | 电路 | 无晶体路线的原层位及相邻层检查 | [空隙判定](电路/纯堆叠/direct-no-gaps.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 电路 | 纯堆叠配方的工序、槽号和基础料 | [接线和生成命令](电路/纯堆叠/README.md) |
 | 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) |
-| 电路 | 生成角的晶下落点参数 | [晶体层、落点及顶破选择](电路/双半形/corner-gap.json) |
+| 电路 | 生成角的晶下落点参数和助手柱 | [落点参数](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
 
@@ -39,4 +39,8 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_sca
   --field needs_pin=column_gap_needs_pin --input-channel word=1700566 \
   --output-channel crystal=1700577 --output-channel landing=1700578 \
   --output-channel needs_pin=1700579 --output corner-gap.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_scan.py \
+  --field helper=corner_helper_column --input-channel crystal=1700577 \
+  --input-channel landing=1700578 --input-channel suspended=1700579 \
+  --output-channel helper=1700587 --output corner-helper.spz2bp
 ```
