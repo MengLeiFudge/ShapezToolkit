@@ -1,0 +1,52 @@
+{
+  "methods": {
+    "complement": "pin_corner_complement"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "trigger": {
+      "channel": 1700635,
+      "type": "shape"
+    }
+  },
+  "outputs": {
+    "complement": {
+      "channel": 1700676,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1700635,
+    1700676
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "complement": {
+      "pin_corner_complement": 1
+    }
+  },
+  "settling": {
+    "max_gate_depth": 7,
+    "hold_signal_ticks": 576,
+    "hold_simulation_seconds": 48.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    75,
+    10,
+    16
+  ],
+  "logic_gates": 4,
+  "logic_gates_before_reuse": 4,
+  "building_entries": 101,
+  "global_receivers": 1,
+  "global_transmitters": 1,
+  "internal_global_devices": 0
+}

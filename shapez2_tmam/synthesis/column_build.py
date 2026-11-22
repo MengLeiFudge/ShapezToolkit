@@ -1,6 +1,6 @@
 """用连续的原色格逐层回放一根无针的紧柱。"""
 
-from .layer_methods import append_layer, stack
+from .layer_methods import append_five, append_layer, stack
 from .physics import Shape
 from .shape_methods import (Color, analyze_color, analyze_part, crystal, cut_front, pin, rotate_ccw,
                             rotate_cw, shape_literal, swap_front_a)
@@ -64,3 +64,37 @@ def pin_corner_release(initial: Shape | None, anchor: Shape | None,
     transferred = swap_front_a(away, near_anchor)
     retained = cut_front(rotate_ccw(transferred))
     return pin(swap_front_a(retained, complement))
+
+
+def pin_corner_complement(trigger: Shape | None) -> Shape | None:
+    """把位于 q0 的顶针柱接到 q3，保留 q2 的触顶晶体柱。"""
+    spine = shape_literal("--cr----:--cr----:--cr----:--cr----:--cr----")
+    return rotate_cw(swap_front_a(spine, rotate_ccw(rotate_ccw(trigger))))
+
+
+def pin_corner_upper_layer(original: Shape | None, level: int, highest: int,
+                           crystal_level: int, landing: int) -> Shape | None:
+    """供给顶破后的指定原层。original 在 q0，助手料放 q1。"""
+    if level <= landing or level > 4:
+        return None
+    helper = shape_literal("--Cu----")
+    if level < crystal_level:
+        helper = shape_literal("--P-----")
+    if level > highest and original is not None:
+        return stack(original, helper)
+    return helper
+
+
+def pin_corner_finish(source: Shape | None, row0: Shape | None, row1: Shape | None,
+                      row2: Shape | None, row3: Shape | None, row4: Shape | None) -> Shape | None:
+    return cut_front(append_five(source, row0, row1, row2, row3, row4))
+
+
+def join_corner_half(left: Shape | None, right: Shape | None) -> Shape | None:
+    """左角主列 q0、助手 q3；右角主列 q1、助手 q2。"""
+    if left is None:
+        return cut_front(right)
+    if right is None:
+        return cut_front(left)
+    joined = swap_front_a(rotate_cw(left), rotate_cw(right))
+    return cut_front(rotate_ccw(joined))
