@@ -5,7 +5,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from .circuit import Circuit, Literal, Ref
+from .circuit import Circuit, Literal, Ref, encode_document
+from .wired_module import wired_module
 from .decoder_circuit import height_flags
 
 
@@ -69,7 +70,10 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     circuit, report = build_scan(args.channel_base)
-    encoded = circuit.encode()
+    document = wired_module(circuit, report["outputs"])
+    report.update(gate_platforms=1, platform_type="Foundation_3x3", global_receivers=2,
+                  global_transmitters=4, internal_wireless_channels=0)
+    encoded = encode_document(document)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(encoded + "\n", encoding="utf-8")
     args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

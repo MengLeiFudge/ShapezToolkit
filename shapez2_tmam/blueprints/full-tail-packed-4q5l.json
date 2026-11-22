@@ -979,8 +979,9 @@
   ],
   "occupied_chunks": 5067,
   "platform_grid": [
-    72,
-    72
+    51,
+    51
   ],
-  "platform_grid_unit": "20×20建筑格的区块；包含方阵末行空位"
+  "platform_layers": [0, 1],
+  "platform_grid_unit": "20×20建筑格的区块，两层平台的共同投影，包含末行空位"
 }

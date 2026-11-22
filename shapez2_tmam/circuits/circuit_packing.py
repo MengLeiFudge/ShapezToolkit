@@ -118,7 +118,16 @@ def pack_components(platforms: list[dict]) -> tuple[list[dict], dict[int, tuple[
                               | (mask >> _SIZE) | ((mask << _SIZE) & full))
         free = area - blocked[platform].bit_count()
         spaces.setdefault(free, {})[platform] = None
-    width = max(1, math.isqrt(max(0, len(packed) - 1)) + 1)
-    for index, platform in enumerate(packed):
-        platform.update(X=3 * (index % width) + 1, Y=3 * (index // width) + 1)
+    stack_platforms(packed)
     return packed, mapping
+
+
+def stack_platforms(platforms: list[dict]) -> None:
+    """3×3平台上下成对，保持岛内布局、平台次序和独立网络。"""
+    columns = (len(platforms) + 1) // 2
+    width = math.isqrt(max(0, columns - 1)) + 1
+    for index, platform in enumerate(platforms):
+        if platform["T"] != "Foundation_3x3":
+            raise ValueError("双层装箱需要3×3平台")
+        column, level = divmod(index, 2)
+        platform.update(X=3 * (column % width) + 1, Y=3 * (column // width) + 1, Z=level)

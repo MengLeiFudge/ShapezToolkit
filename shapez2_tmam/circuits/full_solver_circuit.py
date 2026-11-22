@@ -501,7 +501,8 @@ def main() -> int:
                        "occupied_chunks": 9 * len(platforms),
                        "platform_grid": [max(platform["X"] for platform in platforms) + 2,
                                          max(platform["Y"] for platform in platforms) + 2],
-                       "platform_grid_unit": "20×20建筑格的区块；包含方阵末行空位"})
+                       "platform_layers": sorted({platform.get("Z", 0) for platform in platforms}),
+                       "platform_grid_unit": "20×20建筑格的区块，两层平台的共同投影，包含末行空位"})
     args.output.write_text(encode_document(document) + "\n", encoding="utf-8")
     args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"完整四象限尾部电路已编译：{args.output}；{report['gate_platforms']} 块平台。")
