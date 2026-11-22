@@ -1,4 +1,4 @@
-"""两份整厂验收订单的固定配方发送器。"""
+"""实体工道验收用的固定配方发送器。"""
 
 from ...synthesis.physics import Rules
 from ..circuit import Literal
@@ -12,16 +12,15 @@ from .changeover import CLEAN_CONFIRMED, ENABLE_FEED, LOADED, LOAD_PERMIT, TARGE
 
 PACKET_TAG = 1_640_046
 ORDER_SELECT = 1_640_047
-ORDER_IDS = {'stack': 1, 'pin-crystal': 2}
 PAYLOAD = tuple(name for name in WRITE_BUS if name not in ('address', 'phase'))
 FIELDS = {name: WRITE_BUS[name] for name in PAYLOAD}
 ROWS_PER_BOARD = 2
 
 
-def _order_metadata(orders):
+def _order_metadata(orders, order_ids):
     module = Module({'order': ORDER_SELECT})
     rules = Rules(4, 5)
-    for name, choice in ORDER_IDS.items():
+    for name, choice in order_ids.items():
         order = orders[name]
         selected = f'order{choice}'
         module.gate('LogicGateCompare', ('order', choice), (selected,), 'AQ==')
@@ -77,8 +76,9 @@ def build(orders, packet_tag: int) -> tuple[list[dict], dict]:
     if type(packet_tag) is not int or not 1 <= packet_tag < 1 << 24 or packet_tag in reserved:
         raise ValueError(f'配方地址回读需要独占频道，收到 {packet_tag!r}')
     rules = Rules(4, 5)
-    modules = [_order_metadata(orders), _replay_result()]
-    for name, choice in ORDER_IDS.items():
+    order_ids = {name: choice for choice, name in enumerate(orders, 1)}
+    modules = [_order_metadata(orders, order_ids), _replay_result()]
+    for name, choice in order_ids.items():
         rows = []
         for address, packet in enumerate(orders[name]['instructions']):
             values = tuple(rules.parse(packet[field]) if field == 'base' and packet[field] is not None
@@ -93,7 +93,7 @@ def build(orders, packet_tag: int) -> tuple[list[dict], dict]:
         column, row = divmod(index, 4)
         island.update(X=3 * column, Y=18 + 3 * row)
         islands.append(island)
-    interface = {'select': {'channel': ORDER_SELECT, 'orders': ORDER_IDS},
+    interface = {'select': {'channel': ORDER_SELECT, 'orders': order_ids},
                  'write': {'address': WRITE_BUS['address'], 'payload': FIELDS, 'packet_tag': packet_tag,
                            'phase': WRITE_BUS['phase'], 'ready': WRITE_READY, 'request': WRITE_REQUEST, 'ack': WRITE_ACK},
                  'control': {'run': RUN, 'clean_confirmed': CLEAN_CONFIRMED, 'enable_feed': ENABLE_FEED,

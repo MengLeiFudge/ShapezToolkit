@@ -73,6 +73,25 @@ def advance_target_rows(target: Shape | None, height: int) -> Shape | None:
     return target
 
 
+def row_scan_remaining(remaining: Shape | None, top: Shape | None, below: Shape | None,
+                       select: int, height: int) -> Shape | None:
+    return advance_target_rows(remaining, height)
+
+
+def row_scan_top(remaining: Shape | None, top: Shape | None, below: Shape | None,
+                 select: int, height: int) -> Shape | None:
+    if select == 1:
+        return read_top_row_at(remaining, height)
+    return top
+
+
+def row_scan_below(remaining: Shape | None, top: Shape | None, below: Shape | None,
+                   select: int, height: int) -> Shape | None:
+    if select == 2:
+        return read_top_row_at(remaining, height)
+    return below
+
+
 def record_crystal_height(previous: int, row: Shape | None, height: int) -> int:
     """自顶向下扫描时，只记录 q0 中遇到的第一颗晶体。"""
     if previous == 0 and analyze_part(row) == shape_literal("cu------"):

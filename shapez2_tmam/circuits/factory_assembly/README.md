@@ -59,6 +59,19 @@ python -m shapez2_tmam.circuits.factory_assembly.books trains --output-dir 验�
 
 固定发送器按当前地址发布六字段，再读取同一写入总线。所有字段和地址与订单匹配后，才在 `sender.write.packet_tag` 回送地址。工道保持当前地址到 `sender.write.ack` 应答。最后一笔确认后，`sender.control.loaded` 表示整份配方已经写入。两份固定配方在导出前由 Python 完整回放，实机测试可直接使用该发送器。
 
+## 接入 Solver4 的成功配方
+
+在仓库根目录生成指令 JSON，再用同一个验收入口编译实体工道和固定发送器。
+
+```bash
+python -m shapez2_tmam.synthesis --complete --instructions 'CucrCuCu' > solver4-order.json
+python -m shapez2_tmam.circuits.factory_assembly.acceptance --recipe solver4-order.json --compact --output solver4-acceptance.spz2bp
+```
+
+`--recipe` 读取带 `status: solved` 的四象限五层指令 JSON。导出先按六槽消费语义回放，再按指令数生成实体工段。每条指令的六个字段原样进入发送器。邻接 JSON 中的 `stage_capacity` 给出容量，`interfaces.stations` 给出停靠点，`interfaces.load` 给出车厢层位，`orders.solver4.paths` 给出每件所需的供料路径。`--compact` 仅安装该订单用到的供料站。
+
+实机按下节先清空工道，在 `sender.select.channel` 发布整数 `1` 选择这份配方。地址回读、写入应答、装方结束和领料放行沿用同一组信号。
+
 ## 实机接入与验收
 
 1. 导入验收工道。按 `interfaces.stations` 对接基础料车和结晶车。单料车先卸入配料端，再按 `interfaces.load` 装混合车。逐个核对使用的车厢、层位和行的货种、流向与制作端接收到的实物。

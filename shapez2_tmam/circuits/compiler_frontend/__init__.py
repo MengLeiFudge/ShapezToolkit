@@ -18,7 +18,8 @@ __all__ = ["FrontendError", "compile_method"]
 _SHAPE_LITERAL = "shape_literal"
 _RULES = Rules()
 _TYPES = {"bool": BOOL, "int": INT, "Shape": SHAPE, "Color": COLOR}
-_STATEMENTS = (ast.AnnAssign, ast.Assign, ast.Expr, ast.For, ast.If, ast.Pass, ast.Return)
+_LOOP_TRANSFERS = (ast.Break, ast.Continue)
+_STATEMENTS = (ast.AnnAssign, ast.Assign, ast.Expr, ast.For, ast.If, ast.Pass, ast.Return, *_LOOP_TRANSFERS)
 _COMPARISONS = {ast.Eq: "eq", ast.NotEq: "ne", ast.Is: "eq", ast.IsNot: "ne",
                 ast.Lt: "lt", ast.LtE: "le", ast.Gt: "lt", ast.GtE: "le"}
 
@@ -38,6 +39,15 @@ class _Block:
     visits: int
     instructions: list[Instruction] = field(default_factory=list)
     end: Jump | Branch | Return | None = None
+
+
+@dataclass
+class _Loop:
+    exit_visits: int
+    done: _Block | None = None
+    step: _Block | None = None
+    broken: _Assigned | None = None
+    continuing: _Assigned | None = None
 
 
 def compile_method(source: str, entry: str, *, filename: str = "<source>") -> Program:
@@ -135,11 +145,18 @@ class _Lowering:
         if len({arg.name for arg in self.inputs}) != len(self.inputs):
             raise module.error(method, "方法参数名不能重复")
         self.result = _annotation(module, method.returns, method)
-        nodes = [node for statement in method.body for node in ast.walk(statement)]
-        for node in nodes:
+        pending: list[tuple[ast.AST, bool]] = [(stmt, False) for stmt in reversed(method.body)]
+        written = set()
+        while pending:
+            node, in_loop = pending.pop()
             if isinstance(node, ast.stmt) and not isinstance(node, _STATEMENTS):
                 raise module.error(node, f"不支持语句 {type(node).__name__}，请使用赋值、if、定长 for 或 return")
-        written = {node.id for node in nodes if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)}
+            if isinstance(node, _LOOP_TRANSFERS) and not in_loop:
+                raise module.error(node, "break 和 continue 只能用在定长 for 循环体内")
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+                written.add(node.id)
+            enters_loop = in_loop or isinstance(node, ast.For)
+            pending.extend((child, enters_loop) for child in reversed(list(ast.iter_child_nodes(node))))
         self.names = written | {arg.name for arg in self.inputs}
         self.types = {arg.name: arg.type for arg in self.inputs}
         self.slots = {arg.name: arg.name for arg in self.inputs}
@@ -150,6 +167,7 @@ class _Lowering:
         self.range_checks: dict[str, tuple[ast.AST, _Bounds]] = {}
         self.table_edges: dict[str, set[str]] = {}
         self.loop_visits = 1
+        self.loop_flow: _Loop | None = None
         self.temp_number = 0
         self.current: _Block | None = self.block()
         for arg in self.inputs:
@@ -274,6 +292,8 @@ class _Lowering:
                 self.branch(node)
             elif isinstance(node, ast.For):
                 self.loop(node)
+            elif isinstance(node, _LOOP_TRANSFERS):
+                self.loop_transfer(node)
             elif isinstance(node, (ast.Assign, ast.AnnAssign)):
                 self.assignment(node)
             elif not isinstance(node, ast.Pass):
@@ -492,15 +512,49 @@ class _Lowering:
             self.bind(target, _Value(Reference(index), INT, (start, stop - 1)))
         else:
             self.select_item(items, index, target, outer_visits)
+        previous, flow = self.loop_flow, _Loop(outer_visits)
+        self.loop_flow = flow
         self.statements(node.body)
-        self.loop_visits = outer_visits
+        self.loop_flow, self.loop_visits = previous, outer_visits
+
+        continuing = flow.continuing
+        if self.current is not None:
+            continuing = self.assigned if continuing is None else _join(continuing, self.assigned)
+            if flow.step is not None:
+                self.current.end = Jump(flow.step.name)
+        if flow.step is not None:
+            self.current = flow.step
         if self.current is not None:
             # index 最大为 stop - 1，末次递增到 stop 即退出。
             self.emit(Apply(index, "add", (Reference(index), Constant(INT, 1))))
             again = self.apply("lt", BOOL, Reference(index), Constant(INT, stop))
-            done = self.block()
-            self.current.end = Branch(again.operand, head.name, done.name)
-            self.current = done
+            if flow.done is None:
+                flow.done = self.block()
+            self.current.end = Branch(again.operand, head.name, flow.done.name)
+
+        self.current = flow.done
+        if continuing is None:
+            if flow.broken is not None:
+                self.assigned = flow.broken
+        else:
+            self.assigned = continuing if flow.broken is None else _join(continuing, flow.broken)
+
+    def loop_transfer(self, node: ast.Break | ast.Continue) -> None:
+        flow = self.loop_flow
+        assert flow is not None and self.current is not None
+        if isinstance(node, ast.Break):
+            if flow.done is None:
+                flow.done = self.block(flow.exit_visits)
+            flow.broken = self.assigned.copy() if flow.broken is None else _join(flow.broken, self.assigned)
+            target = flow.done
+        else:
+            if flow.step is None:
+                flow.step = self.block()
+            flow.continuing = (self.assigned.copy() if flow.continuing is None
+                               else _join(flow.continuing, self.assigned))
+            target = flow.step
+        self.current.end = Jump(target.name)
+        self.current = None
 
     def select_item(self, items: list[_Value], index: str, target: ast.Name, outer_visits: int) -> None:
         if len(items) == 1:

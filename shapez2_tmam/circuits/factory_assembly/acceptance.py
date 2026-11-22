@@ -1,4 +1,4 @@
-"""生成同一条六槽工道的两份验收配方、装配和供给记录。"""
+"""为固定订单生成六槽验收工道、发送器和供料记录。"""
 
 import argparse
 import json
@@ -9,11 +9,12 @@ from ...synthesis.physics import Rules
 from ...synthesis.recipe import Builder
 from ..circuit import encode_document
 from ..freight_loader import loading
+from ..slot_streams import SLOT_ROWS
 from ..stage_memory import WRITE_BUS
 from . import sender
 from .capacity import demands
 from .layout import _check_footprints, assemble, cargo_ports, crystal_loading
-from .recipe import replay
+from .recipe import BASE, CRYSTAL, MAX_STAGES, replay
 
 
 STACK_TARGET = 'CuCuCuCu:RuRuRuRu:SuSuSuSu:WuWuWuWu:CuCuCuCu'
@@ -30,6 +31,28 @@ def _orders():
         'stack': {'target': STACK_TARGET, 'instructions': list(stack.instructions())},
         'pin-crystal': {'target': pin['target'], 'instructions': pin['instructions']},
     }
+
+
+def _solver_order(path: Path) -> dict:
+    order = json.loads(path.read_text(encoding='utf-8-sig'))
+    if not isinstance(order, dict) or order.get('status') != 'solved':
+        raise ValueError('需要 Solver4 的 solved 指令 JSON')
+    if (order.get('quadrants'), order.get('height')) != (4, 5):
+        raise ValueError('配方必须是四象限五层')
+    target, packets = order.get('target'), order.get('instructions')
+    if not isinstance(target, str) or not isinstance(packets, list) or not 1 <= len(packets) <= MAX_STAGES:
+        raise ValueError(f'配方须包含目标短代码和 1 至 {MAX_STAGES} 条加工指令')
+    for address, packet in enumerate(packets):
+        if not isinstance(packet, dict) or not sender.FIELDS.keys() <= packet.keys():
+            raise ValueError(f'工段 {address} 须包含 {"、".join(sender.FIELDS)} 六字段')
+        for field in ('a', 'b'):
+            value = packet[field]
+            if type(value) is not int or not 0 <= value < len(SLOT_ROWS):
+                raise ValueError(f'工段 {address} 的 {field} 须为 0 至 {len(SLOT_ROWS) - 1} 的整数槽号')
+        for field, opcode in (('base', BASE), ('color', CRYSTAL)):
+            if packet['opcode'] != opcode and packet[field] is not None:
+                raise ValueError(f'工段 {address} 的 {field} 仅在操作 {opcode} 使用')
+    return {'target': target, 'instructions': packets}
 
 
 def _islands(document):
@@ -109,8 +132,8 @@ def _requirements(production):
             'paths': paths}
 
 
-def build(packet_tag: int, *, compact: bool = False) -> tuple[str, dict]:
-    orders = _orders()
+def build(packet_tag: int, *, compact: bool = False, recipe_path: Path | None = None) -> tuple[str, dict]:
+    orders = _orders() if recipe_path is None else {'solver4': _solver_order(recipe_path)}
     programs = {name: replay(order['target'], order['instructions']) for name, order in orders.items()}
     count = max(len(program.stages) for program in programs.values())
     fixed = tuple(programs.values()) if compact else None
@@ -133,15 +156,19 @@ def build(packet_tag: int, *, compact: bool = False) -> tuple[str, dict]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description='生成纯堆叠和顶针结晶共用的六槽验收工道')
+    parser = argparse.ArgumentParser(description='生成固定配方的六槽验收工道')
     parser.add_argument('--packet-tag', type=int, default=sender.PACKET_TAG,
                         help=f'配方地址回读的独占频道，默认 {sender.PACKET_TAG}')
-    parser.add_argument('--output', type=Path, help='原生蓝图输出，邻接 JSON 包含两份配方和供货需求')
-    parser.add_argument('--compact', action='store_true', help='仅保留这两份固定订单所需的供料站')
+    parser.add_argument('--recipe', type=Path, help='Solver4 生成的 solved 指令 JSON，默认使用两份内置订单')
+    parser.add_argument('--output', type=Path, help='原生蓝图输出，邻接 JSON 包含订单和供货需求')
+    parser.add_argument('--compact', action='store_true', help='仅保留所选固定订单需要的供料站')
     args = parser.parse_args()
     if args.output is not None and args.output.suffix != '.spz2bp':
         parser.error('--output 需要 .spz2bp 文件路径')
-    blueprint, report = build(args.packet_tag, compact=args.compact)
+    try:
+        blueprint, report = build(args.packet_tag, compact=args.compact, recipe_path=args.recipe)
+    except (OSError, ValueError) as error:
+        parser.error(f'{args.recipe}: {error}' if args.recipe is not None else str(error))
     if args.output is not None:
         args.output.write_text(blueprint + '\n', encoding='utf-8')
         args.output.with_suffix('.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
