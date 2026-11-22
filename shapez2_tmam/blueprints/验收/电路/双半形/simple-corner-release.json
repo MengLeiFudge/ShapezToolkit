@@ -1,5 +1,7 @@
 {
-  "method": "simple_corner_release",
+  "methods": {
+    "result": "simple_corner_release"
+  },
   "quadrants": 4,
   "height": 5,
   "inputs": {
@@ -10,6 +12,10 @@
     "far": {
       "channel": 1700671,
       "type": "shape"
+    },
+    "counterclockwise": {
+      "channel": 1700678,
+      "type": "bool"
     }
   },
   "outputs": {
@@ -20,17 +26,24 @@
   },
   "reserved_channels": [
     1700670,
-    1700672
+    1700671,
+    1700672,
+    1700678
   ],
   "schedule": "combination",
   "expanded_blocks": {
-    "simple_corner_release": 3
+    "result": {
+      "simple_corner_release": 3,
+      "_orient_neighbor": 3,
+      "_swap_corner_sides": 3,
+      "_cut_corner_side": 3
+    }
   },
   "settling": {
-    "max_gate_depth": 7,
-    "hold_signal_ticks": 576,
-    "hold_simulation_seconds": 48.0,
-    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取频道结果。"
+    "max_gate_depth": 14,
+    "hold_signal_ticks": 1024,
+    "hold_simulation_seconds": 85.33333333333333,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
   },
   "platform_type": "Foundation_3x3",
   "platforms": 1,
@@ -39,14 +52,14 @@
     3
   ],
   "buildings_by_layer": [
-    113,
-    31,
-    43
+    224,
+    170,
+    159
   ],
-  "logic_gates": 7,
-  "logic_gates_before_reuse": 7,
-  "building_entries": 187,
-  "global_receivers": 2,
+  "logic_gates": 22,
+  "logic_gates_before_reuse": 22,
+  "building_entries": 553,
+  "global_receivers": 3,
   "global_transmitters": 1,
   "internal_global_devices": 0
 }

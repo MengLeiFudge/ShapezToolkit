@@ -46,48 +46,72 @@ def dense_column_finish(source: Shape | None, pending: Color | None) -> Shape | 
     return rotate_ccw(cut_front(rotate_cw(cut_front(source))))
 
 
-def simple_corner_release(retained: Shape | None, far: Shape | None) -> Shape | None:
-    """远锚统一在 q0，转到 q3 后带走主列填充晶体。"""
+def _orient_neighbor(source: Shape | None, counterclockwise: bool) -> Shape | None:
+    if counterclockwise:
+        return rotate_ccw(source)
+    return rotate_cw(source)
+
+
+def _cut_corner_side(source: Shape | None, counterclockwise: bool) -> Shape | None:
+    if counterclockwise:
+        return rotate_ccw(cut_front(rotate_cw(source)))
+    return cut_front(source)
+
+
+def _swap_corner_sides(front: Shape | None, back: Shape | None, counterclockwise: bool) -> Shape | None:
+    if counterclockwise:
+        return rotate_ccw(swap_front_a(rotate_cw(front), rotate_cw(back)))
+    return swap_front_a(front, back)
+
+
+def simple_corner_release(retained: Shape | None, far: Shape | None, counterclockwise: bool) -> Shape | None:
+    """把位于 q0 的远锚转到助手对侧，带走主列填充晶体。"""
     if far is None:
         return retained
-    return cut_front(swap_front_a(retained, rotate_ccw(far)))
+    supported = _swap_corner_sides(retained, _orient_neighbor(far, not counterclockwise), counterclockwise)
+    return _cut_corner_side(supported, counterclockwise)
 
 
 def pin_corner_release(initial: Shape | None, anchor: Shape | None,
-                       complement: Shape | None) -> Shape | None:
+                       complement: Shape | None, counterclockwise: bool) -> Shape | None:
     """重放底部碎晶、两次支撑交接和顶破。输入近锚在 q0。"""
-    near_supported = cut_front(initial)
-    far = shape_literal("------Cu:------Cu:------Cu:------Cu:------Cu")
-    both = swap_front_a(near_supported, far)
-    away = cut_front(rotate_cw(both))
-    near_anchor = rotate_cw(rotate_cw(anchor))
-    transferred = swap_front_a(away, near_anchor)
-    retained = cut_front(rotate_ccw(transferred))
-    return pin(swap_front_a(retained, complement))
+    near_supported = _cut_corner_side(initial, counterclockwise)
+    full_post = shape_literal("Cu------:Cu------:Cu------:Cu------:Cu------")
+    far = _orient_neighbor(full_post, not counterclockwise)
+    both = _swap_corner_sides(near_supported, far, counterclockwise)
+    away = _cut_corner_side(both, not counterclockwise)
+    near_anchor = _orient_neighbor(anchor, counterclockwise)
+    transferred = _swap_corner_sides(away, near_anchor, not counterclockwise)
+    retained = _cut_corner_side(transferred, counterclockwise)
+    return pin(_swap_corner_sides(retained, complement, counterclockwise))
 
 
-def pin_corner_complement(trigger: Shape | None) -> Shape | None:
-    """把位于 q0 的顶针柱接到 q3，保留 q2 的触顶晶体柱。"""
-    spine = shape_literal("--cr----:--cr----:--cr----:--cr----:--cr----")
-    return rotate_cw(swap_front_a(spine, rotate_ccw(rotate_ccw(trigger))))
+def pin_corner_complement(trigger: Shape | None, counterclockwise: bool) -> Shape | None:
+    """把位于 q0 的顶针柱接到助手对侧，触顶晶体柱置于 q2。"""
+    spine = shape_literal("----cr--:----cr--:----cr--:----cr--:----cr--")
+    if counterclockwise:
+        return swap_front_a(rotate_cw(trigger), spine)
+    paired = swap_front_a(rotate_ccw(spine), rotate_ccw(rotate_ccw(trigger)))
+    return rotate_cw(paired)
 
 
 def pin_corner_upper_layer(original: Shape | None, level: int, highest: int,
-                           crystal_level: int, landing: int) -> Shape | None:
-    """供给顶破后的指定原层。original 在 q0，助手料放 q1。"""
+                           crystal_level: int, landing: int, counterclockwise: bool) -> Shape | None:
+    """供给顶破后的指定原层。原格在 q0，助手料放在所选邻列。"""
     if level <= landing or level > 4:
         return None
-    helper = shape_literal("--Cu----")
+    helper = shape_literal("Cu------")
     if level < crystal_level:
-        helper = shape_literal("--P-----")
+        helper = shape_literal("P-------")
+    helper = _orient_neighbor(helper, counterclockwise)
     if level > highest and original is not None:
         return stack(original, helper)
     return helper
 
 
-def pin_corner_finish(source: Shape | None, row0: Shape | None, row1: Shape | None,
-                      row2: Shape | None, row3: Shape | None, row4: Shape | None) -> Shape | None:
-    return cut_front(append_five(source, row0, row1, row2, row3, row4))
+def pin_corner_finish(source: Shape | None, row0: Shape | None, row1: Shape | None, row2: Shape | None,
+                      row3: Shape | None, row4: Shape | None, counterclockwise: bool) -> Shape | None:
+    return _cut_corner_side(append_five(source, row0, row1, row2, row3, row4), counterclockwise)
 
 
 def join_corner_half(left: Shape | None, right: Shape | None) -> Shape | None:
