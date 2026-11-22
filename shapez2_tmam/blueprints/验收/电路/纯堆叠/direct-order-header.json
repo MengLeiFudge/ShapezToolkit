@@ -1,0 +1,91 @@
+{
+  "methods": {
+    "accepted": "direct_order_accepted",
+    "length": "direct_order_length",
+    "replay": "direct_order_replay"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "target": {
+      "channel": 1600000,
+      "type": "shape"
+    },
+    "replay": {
+      "channel": 1700459,
+      "type": "shape"
+    },
+    "valid": {
+      "channel": 1700458,
+      "type": "bool"
+    },
+    "done": {
+      "channel": 1700455,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "accepted": {
+      "channel": 1640045,
+      "type": "bool"
+    },
+    "length": {
+      "channel": 1640043,
+      "type": "int"
+    },
+    "replay": {
+      "channel": 1640044,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1600000,
+    1640043,
+    1640044,
+    1640045,
+    1700455,
+    1700458,
+    1700459
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "accepted": {
+      "direct_order_accepted": 1
+    },
+    "length": {
+      "direct_order_length": 1,
+      "shape_methods.target_height": 36,
+      "direct_recipe.direct_recipe_length": 15
+    },
+    "replay": {
+      "direct_order_replay": 1
+    }
+  },
+  "settling": {
+    "max_gate_depth": 13,
+    "hold_signal_ticks": 960,
+    "hold_simulation_seconds": 80.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    447,
+    355,
+    303
+  ],
+  "logic_gates": 36,
+  "logic_gates_before_reuse": 46,
+  "building_entries": 1105,
+  "global_receivers": 4,
+  "global_transmitters": 3,
+  "internal_global_devices": 0,
+  "publish_when": {
+    "length": "direct_order_accepted",
+    "replay": "direct_order_accepted"
+  }
+}

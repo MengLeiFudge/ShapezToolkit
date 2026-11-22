@@ -2,7 +2,8 @@
   "methods": {
     "remaining": "direct_scan_remaining",
     "upper": "direct_scan_upper",
-    "valid": "direct_scan_valid"
+    "valid": "direct_scan_valid",
+    "replay": "direct_scan_replay"
   },
   "schedule": "bounded_fold",
   "quadrants": 4,
@@ -24,67 +25,83 @@
     "initial_valid": {
       "channel": 1700453,
       "type": "bool"
+    },
+    "initial_replay": {
+      "channel": 1700454,
+      "type": "shape"
     }
   },
   "outputs": {
     "done": {
-      "channel": 1700454,
+      "channel": 1700455,
       "type": "bool"
     },
     "result_remaining": {
-      "channel": 1700455,
-      "type": "shape"
-    },
-    "result_upper": {
       "channel": 1700456,
       "type": "shape"
     },
-    "result_valid": {
+    "result_upper": {
       "channel": 1700457,
+      "type": "shape"
+    },
+    "result_valid": {
+      "channel": 1700458,
       "type": "bool"
+    },
+    "result_replay": {
+      "channel": 1700459,
+      "type": "shape"
     }
   },
   "module_links": {
     "state_to_step": {
       "index": {
-        "channel": 1700458,
+        "channel": 1700460,
         "type": "int"
       },
       "value_remaining": {
-        "channel": 1700459,
+        "channel": 1700461,
         "type": "shape"
       },
       "value_upper": {
-        "channel": 1700460,
+        "channel": 1700462,
         "type": "shape"
       },
       "value_valid": {
-        "channel": 1700461,
+        "channel": 1700463,
         "type": "bool"
+      },
+      "value_replay": {
+        "channel": 1700464,
+        "type": "shape"
       }
     },
     "step_to_state": {
       "next_index": {
-        "channel": 1700462,
+        "channel": 1700465,
         "type": "int"
       },
       "next_value_remaining": {
-        "channel": 1700463,
+        "channel": 1700466,
         "type": "shape"
       },
       "next_value_upper": {
-        "channel": 1700464,
+        "channel": 1700467,
         "type": "shape"
       },
       "next_value_valid": {
-        "channel": 1700465,
+        "channel": 1700468,
         "type": "bool"
+      },
+      "next_value_replay": {
+        "channel": 1700469,
+        "type": "shape"
       }
     }
   },
   "reserved_channels": [
     1700450,
-    1700465
+    1700469
   ],
   "timing": {
     "channel_signal_ticks": 12,
@@ -95,21 +112,71 @@
     "protocol": "从 run=0 复位开始，保持本次所有初值，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。"
   },
   "platform_type": "Foundation_3x3",
-  "platforms": 2,
+  "platforms": 3,
   "island_footprint_chunks": [
     6,
     3
   ],
   "buildings_by_layer": [
-    1192,
-    1076,
-    807
+    2129,
+    706,
+    718
   ],
-  "building_entries": 3075,
-  "global_receivers": 12,
-  "global_transmitters": 12,
+  "building_entries": 3553,
+  "global_receivers": 18,
+  "global_transmitters": 15,
   "internal_global_devices_per_module": 0,
-  "worker_logic_gates": 61,
-  "worker_logic_gates_before_reuse": 68,
-  "worker_logic_gates_after_reuse": 61
+  "worker_partitions": [
+    [
+      1700465,
+      1700466,
+      1700467
+    ],
+    [
+      1700468,
+      1700469
+    ]
+  ],
+  "worker_layout_failures": [
+    {
+      "outputs": [
+        1700465,
+        1700466,
+        1700467,
+        1700468,
+        1700469
+      ],
+      "reason": "三层平台未布通 73 个门，三层平台内无法完成本地信号 1000062 的布线"
+    }
+  ],
+  "worker_ports": [
+    {
+      "inputs": [
+        1700460,
+        1700461,
+        1700462
+      ],
+      "outputs": [
+        1700465,
+        1700466,
+        1700467
+      ]
+    },
+    {
+      "inputs": [
+        1700460,
+        1700461,
+        1700462,
+        1700463,
+        1700464
+      ],
+      "outputs": [
+        1700468,
+        1700469
+      ]
+    }
+  ],
+  "worker_logic_gates": 77,
+  "worker_logic_gates_before_reuse": 83,
+  "worker_logic_gates_after_reuse": 73
 }

@@ -101,12 +101,12 @@
     3
   ],
   "buildings_by_layer": [
-    2030,
-    1253,
-    1459
+    2027,
+    1254,
+    1384
   ],
-  "building_entries": 4742,
-  "global_receivers": 16,
+  "building_entries": 4665,
+  "global_receivers": 15,
   "global_transmitters": 12,
   "internal_global_devices_per_module": 0,
   "worker_partitions": [
@@ -128,6 +128,31 @@
         1700575
       ],
       "reason": "三层平台未布通 104 个门，三层平台内无法完成本地信号 1000100 的布线"
+    }
+  ],
+  "worker_ports": [
+    {
+      "inputs": [
+        1700568,
+        1700569,
+        1700571
+      ],
+      "outputs": [
+        1700572,
+        1700573
+      ]
+    },
+    {
+      "inputs": [
+        1700568,
+        1700569,
+        1700570,
+        1700571
+      ],
+      "outputs": [
+        1700574,
+        1700575
+      ]
     }
   ],
   "worker_logic_gates": 138,
