@@ -5,8 +5,8 @@ from typing import Iterator
 
 from .construct import Constructor, Result
 from .inverse import PinFamily, pin_families
-from .physics import PIN, Rules, Shape
-from .pin_constraints import pin_base_possible
+from .physics import Rules, Shape
+from .pin_constraints import pin_base_possible, pin_prefix_limits
 from .prefix_closure import minimal_start
 from .recipe import Recipe
 from .support import in_support_class
@@ -26,20 +26,16 @@ class Solver4:
 
     def predecessors(self, target: Shape, *, grounded: bool = False) -> Iterator[Shape]:
         """按非空格前缀生成K中的S前态，保留原层号与全部晶体。"""
-        return self._predecessors(target, grounded=grounded, after_pin=False)
+        return self._predecessors(target, grounded=grounded, limits=(self.rules.height,) * self.rules.quadrants)
 
-    def _predecessors(self, target: Shape, *, grounded: bool, after_pin: bool) -> Iterator[Shape]:
+    def _predecessors(self, target: Shape, *, grounded: bool, limits: tuple[int, ...]) -> Iterator[Shape]:
         desired = self.rules.cells(target)
         columns = [sorted((z, cell) for (z, column), cell in desired.items() if column == q)
                    for q in range(4)]
         ranges = []
-        for column in columns:
+        for column, limit in zip(columns, limits):
             required = max((i + 1 for i, (_, cell) in enumerate(column) if cell[0] == "c"), default=0)
-            limit = len(column)
-            if after_pin and column and column[0] != (0, PIN):
-                # 没有新增地面针时，来源地面为空，只有第1至3层可能供给保留格。
-                limit = min(limit, self.rules.height - 2)
-            ranges.append(range(required, limit + 1))
+            ranges.append(range(required, min(len(column), limit) + 1))
         for counts in product(*ranges):
             original = {(z, q): cell for q, count in enumerate(counts) for z, cell in columns[q][:count]}
             source = self.rules.fold(original)
@@ -84,9 +80,10 @@ class Solver4:
         if remaining_pins == 0:
             return None
         lowest = min(z for z, row in enumerate(target.layers) if any(cell[0] == "c" for cell in row))
-        if not pin_base_possible(target) or not in_support_class(self.rules, target, grounded=True):
+        limits = pin_prefix_limits(target)
+        if min(limits) < 0 or not in_support_class(self.rules, target, grounded=True):
             return None
-        for pushed in self._predecessors(target, grounded=True, after_pin=True):
+        for pushed in self._predecessors(target, grounded=True, limits=limits):
             # 逐列前缀保持A，grounded筛选已强于K；制造凭据仍由下面的逆推取得。
             for family in pin_families(self.rules, pushed, check_output=not self.certificate_first):
                 previous = self._family_recipe(family, lowest, remaining_pins - 1)

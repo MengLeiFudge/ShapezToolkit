@@ -2,22 +2,19 @@
 
 from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
+from .pin_prefix import pin_prefix_limit
+
+
+def pin_prefix_limits(target: Shape) -> tuple[int, ...]:
+    """按原层位编码材料，求四象限五层目标的各列顶针前缀上界。"""
+    layers = target.layers + ((EMPTY,) * 4,) * (5 - len(target.layers))
+    return tuple(pin_prefix_limit(*(0 if cell == EMPTY else 2 if cell == PIN else 3 if cell[0] == "c" else 1
+                                    for cell in column)) for column in zip(*layers))
 
 
 def pin_base_possible(target: Shape) -> bool:
-    """检查每列最低保留晶体下方的支撑与可用来源层数。"""
-    for q, ground in enumerate(target.layers[0]):
-        height = next((z for z, row in enumerate(target.layers) if row[q][0] == "c"), None)
-        if height is None:
-            continue
-        if height == 0:
-            return False
-        if height <= 2 and (ground != PIN or (height == 2 and target.layers[1][q] == EMPTY)):
-            return False
-        # 无地面针时，最低保留C下方的旧格都来自抬升后的第2层及以上。
-        if ground != PIN and sum(row[q] == EMPTY for row in target.layers[:height]) < 2:
-            return False
-    return True
+    """所有列均有通过最低晶体支撑与来源容量检查的可能。"""
+    return min(pin_prefix_limits(target)) >= 0
 
 
 def pin_image_matches(rules: Rules, lower: tuple[tuple[str, ...], ...],
