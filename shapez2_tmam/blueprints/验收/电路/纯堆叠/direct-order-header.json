@@ -12,15 +12,15 @@
       "type": "shape"
     },
     "replay": {
-      "channel": 1700459,
+      "channel": 1700457,
       "type": "shape"
     },
     "valid": {
-      "channel": 1700458,
+      "channel": 1700456,
       "type": "bool"
     },
     "done": {
-      "channel": 1700455,
+      "channel": 1700454,
       "type": "bool"
     }
   },
@@ -43,9 +43,9 @@
     1640043,
     1640044,
     1640045,
-    1700455,
-    1700458,
-    1700459
+    1700454,
+    1700456,
+    1700457
   ],
   "schedule": "combination",
   "expanded_blocks": {

@@ -1,11 +1,11 @@
 # 纯堆叠配方电路
 
-目标通过本册的空隙判定和五轮扫描后，电路按工段地址输出动态配方。提交桥向六槽工道提交配方。已离线核对蓝图频道及两层订单，游戏内锁存与持续出货仍待验收。
+目标通过本册的稳定性判定和五轮扫描后，电路按工段地址输出动态配方。提交桥向六槽工道提交配方。已离线核对配方接口和两层订单，游戏内锁存与持续出货仍待验收。
 
 | 蓝图 | 输入 | 输出 |
 |---|---|---|
-| [空隙判定](direct-no-gaps.json) | 原目标 | 原目标、初始通过位 |
-| [五轮扫描](direct-stack-scan.json) | 初始值和运行位 | 完成位、相邻层检查结果、实际回放 |
+| [稳定性判定](direct-stability.json) | 原目标 | 原目标、初始通过位 |
+| [五轮扫描](direct-stack-scan.json) | 初始值和运行位 | 完成位、材料检查结果、实际回放 |
 | [装方信息](direct-order-header.json) | 原目标及扫描结果 | 通过位、配方长度、回放图形 |
 | [工序和槽号](direct-recipe-fields.json) | 工段地址、配方长度 | `opcode`、`a`、`b`、`destination` |
 | [基础料深度](direct-base-depth.json) | 同一工段地址和配方长度 | 从目标顶层往下数的距离，顶层为 0 |
@@ -22,9 +22,9 @@
 
 ```bash
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/direct_stack.py \
-  --field target=direct_scan_target --field valid=has_contiguous_rows \
+  --field target=direct_scan_target --field valid=direct_replay_ready \
   --input-channel target=1600000 --output-channel target=1700451 \
-  --output-channel valid=1700453 --output direct-no-gaps.spz2bp
+  --output-channel valid=1700452 --output direct-stability.spz2bp
 
 python -m shapez2_tmam.circuits.compile_stack_scan \
   --check-direct --channel-base 1700450 --output direct-stack-scan.spz2bp
@@ -32,7 +32,7 @@ python -m shapez2_tmam.circuits.compile_stack_scan \
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/direct_stack.py \
   --field accepted=direct_order_accepted --field length=direct_order_length \
   --field replay=direct_order_replay --input-channel target=1600000 \
-  --input-channel replay=1700459 --input-channel valid=1700458 --input-channel done=1700455 \
+  --input-channel replay=1700457 --input-channel valid=1700456 --input-channel done=1700454 \
   --output-channel accepted=1640045 --output-channel length=1640043 \
   --output-channel replay=1640044 --publish-when length=direct_order_accepted \
   --publish-when replay=direct_order_accepted --output direct-order-header.spz2bp

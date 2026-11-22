@@ -60,4 +60,4 @@ python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-bas
 
 `timed.compile_state_steps(programs, steps, channel_base)` 用于每轮只读取旧状态的更新方法。各入口按映射顺序声明全部旧字段，下一轮同时使用各入口的返回值。支持 1～4 个字段，轮数可设为 1～32，庞大的计算仍受平台布线容量限制。索引用于推进轮数。需要在末轮切换到保留旧值的计算板也接收索引。公开频道为 `run`、各字段的初值、`done` 和各字段的结果。
 
-把 `synthesis/direct_stack.py` 的 `direct_scan_remaining`、`direct_scan_upper`、`direct_scan_valid` 分别编译为 `remaining`、`upper`、`valid`，按这个顺序传入并设 `steps=5`。`initial_remaining` 接待拆层的图形，`initial_upper` 接空图形，`initial_valid` 接上游的有效性标志。复位时保持三个初值，按接口表启动并在 `done=1` 后读取三个结果。
+把 `synthesis/direct_stack.py` 的 `direct_scan_remaining`、`direct_scan_valid`、`direct_scan_replay` 按 `remaining`、`valid`、`replay` 的顺序编译并传入，设置 `steps=5`。`initial_remaining` 接原图，`initial_valid` 接稳定性判定，`initial_replay` 留空。按接口表复位和启动，待 `done=1` 后读取材料检查和回放。

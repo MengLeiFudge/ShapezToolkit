@@ -16,7 +16,7 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path, help="原生 .spz2bp 输出路径")
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--read-rows", action="store_true", help="生成从原始图形读取所选两层的电路")
-    modes.add_argument("--check-direct", action="store_true", help="生成纯堆叠的相邻层检查和回放电路")
+    modes.add_argument("--check-direct", action="store_true", help="生成纯堆叠的层材料检查和回放电路")
     modes.add_argument("--read-column", action="store_true", help="生成 q0 列材料读取与列 A 判定电路")
     args = parser.parse_args()
     if args.read_rows:
@@ -24,7 +24,7 @@ def main() -> int:
         entries = {field: f"row_scan_{field}" for field in ("remaining", "top", "below")}
     elif args.check_direct:
         path = Path(direct_stack.__file__)
-        entries = {field: f"direct_scan_{field}" for field in ("remaining", "upper", "valid", "replay")}
+        entries = {field: f"direct_scan_{field}" for field in ("remaining", "valid", "replay")}
     elif args.read_column:
         path = Path(column_scan.__file__)
         entries = {field: f"column_scan_{field}" for field in ("remaining", "word", "height")}

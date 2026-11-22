@@ -3,8 +3,7 @@
 from .direct_recipe import direct_recipe_length
 from .layer_methods import append_five, append_layer, stack
 from .physics import Shape
-from .shape_methods import (analyze_part, crystal, rotate_ccw, shape_literal, target_height,
-                            unstack_lower, unstack_upper)
+from .shape_methods import analyze_part, rotate_ccw, shape_literal, target_height, unstack_lower, unstack_upper
 
 
 def base_order(row: Shape | None) -> Shape | None:
@@ -37,53 +36,24 @@ def verify_direct_stack(target: Shape | None, row0: Shape | None, row1: Shape | 
     return append_five(None, row0, row1, row2, row3, row4) == target
 
 
-def check_stack_pair(lower: Shape | None, upper: Shape | None) -> bool:
-    """检查上一层的所有新增块是否保持在第二层。"""
-    if upper is None:
-        return True
-    joined = stack(lower, upper)
-    return unstack_lower(joined) == lower and unstack_upper(joined) == upper
-
-
-def has_contiguous_rows(target: Shape | None) -> bool:
-    """非空目标的每个原层位都有材料时，原图和填满副本同时拆空。"""
-    if target is None:
-        return False
-    dense = crystal(target, "r")
-    for _ in (0, 1, 2, 3, 4):
-        target = unstack_lower(target)
-        dense = unstack_lower(dense)
-        if target is None:
-            return dense is None
-    return False
+def direct_replay_ready(target: Shape | None) -> bool:
+    """叠上隔空的整圈晶体以重新结算原图，并检查原图稳定。"""
+    return (target is not None) & (stack(target, shape_literal("crcrcrcr")) == target)
 
 
 def direct_scan_target(target: Shape | None) -> Shape | None:
     return target
 
 
-def direct_scan_remaining(remaining: Shape | None, upper: Shape | None, valid: bool,
-                          replay: Shape | None) -> Shape | None:
+def direct_scan_remaining(remaining: Shape | None, valid: bool, replay: Shape | None) -> Shape | None:
     return unstack_lower(remaining)
 
 
-def direct_scan_upper(remaining: Shape | None, upper: Shape | None, valid: bool,
-                      replay: Shape | None) -> Shape | None:
-    return unstack_upper(remaining)
+def direct_scan_valid(remaining: Shape | None, valid: bool, replay: Shape | None) -> bool:
+    return valid & ((remaining is None) | (base_order(unstack_upper(remaining)) is not None))
 
 
-def direct_scan_valid(remaining: Shape | None, upper: Shape | None, valid: bool,
-                      replay: Shape | None) -> bool:
-    if not valid:
-        return False
-    if remaining is None:
-        return True
-    row = unstack_upper(remaining)
-    return base_order(row) is not None and check_stack_pair(row, upper)
-
-
-def direct_scan_replay(remaining: Shape | None, upper: Shape | None, valid: bool,
-                       replay: Shape | None) -> Shape | None:
+def direct_scan_replay(remaining: Shape | None, valid: bool, replay: Shape | None) -> Shape | None:
     """将新读出的下料层加到已回放的上部下方。"""
     return append_layer(unstack_upper(remaining), replay)
 
