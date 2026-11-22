@@ -150,9 +150,14 @@ def bottom_material(target: Shape | None) -> int:
     return 1
 
 
-def _pack_stack_corner(row: Shape | None, below: Shape | None, ground: bool) -> Shape | None:
+def _pack_support_corner(row: Shape | None, below: Shape | None, ground: bool,
+                         keep_crystal: bool) -> Shape | None:
     part = analyze_part(row)
-    if part is None or part == shape_literal("cu------"):
+    if part is None:
+        return None
+    if part == shape_literal("cu------"):
+        if keep_crystal:
+            return shape_literal("P-------")
         return None
     supported = ground or analyze_part(below) is not None
     if part == shape_literal("P-------"):
@@ -172,18 +177,37 @@ def _merge_stack_corners(a: Shape | None, b: Shape | None) -> Shape | None:
     return stack(a, b)
 
 
+def _pack_support_half(row: Shape | None, below: Shape | None, ground: bool,
+                       keep_crystal: bool) -> Shape | None:
+    left = _pack_support_corner(row, below, ground, keep_crystal)
+    right = _pack_support_corner(rotate_ccw(row), rotate_ccw(below), ground, keep_crystal)
+    return _merge_stack_corners(left, rotate_cw(right))
+
+
 def pack_stack_half(row: Shape | None, below: Shape | None, ground: bool) -> Shape | None:
     """编码输入的 q0 和 q1，保留在这两个象限。"""
-    left = _pack_stack_corner(row, below, ground)
-    right = _pack_stack_corner(rotate_ccw(row), rotate_ccw(below), ground)
-    return _merge_stack_corners(left, rotate_cw(right))
+    return _pack_support_half(row, below, ground, False)
+
+
+def _pack_support_row(row: Shape | None, below: Shape | None, ground: bool,
+                      keep_crystal: bool) -> Shape | None:
+    front = _pack_support_half(row, below, ground, keep_crystal)
+    back = _pack_support_half(rotate_ccw(rotate_ccw(row)), rotate_ccw(rotate_ccw(below)), ground, keep_crystal)
+    return _merge_stack_corners(front, rotate_ccw(rotate_ccw(back)))
 
 
 def pack_stack_row(row: Shape | None, below: Shape | None, ground: bool) -> Shape | None:
     """一层原图及其直接下方的一层转为前缀扫描信号。"""
-    front = pack_stack_half(row, below, ground)
-    back = pack_stack_half(rotate_ccw(rotate_ccw(row)), rotate_ccw(rotate_ccw(below)), ground)
-    return _merge_stack_corners(front, rotate_ccw(rotate_ccw(back)))
+    return _pack_support_row(row, below, ground, False)
+
+
+def pack_prefix_half(row: Shape | None, below: Shape | None, ground: bool) -> Shape | None:
+    return _pack_support_half(row, below, ground, True)
+
+
+def pack_prefix_row(row: Shape | None, below: Shape | None, ground: bool) -> Shape | None:
+    """沿用堆叠支撑编码，另用单针记录前缀中已保留的晶体。"""
+    return _pack_support_row(row, below, ground, True)
 
 
 def _tail_stack_corner(row: Shape | None, level: int, prefix: int) -> Shape | None:

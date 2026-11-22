@@ -19,8 +19,12 @@ def main() -> int:
     modes.add_argument("--check-direct", action="store_true", help="生成纯堆叠的层材料检查和回放电路")
     modes.add_argument("--read-column", action="store_true", help="生成 q0 列材料读取与列 A 判定电路")
     modes.add_argument("--build-dense-column", action="store_true", help="生成紧柱逐层回放与完工电路")
+    modes.add_argument("--close-prefix", action="store_true", help="生成双半形前缀的五轮逐层闭包")
     args = parser.parse_args()
-    if args.read_rows:
+    if args.close_prefix:
+        path = Path(row_support.__file__)
+        entries = {f"h{q}": f"prefix_scan_q{q}" for q in range(4)}
+    elif args.read_rows:
         path = Path(shape_methods.__file__)
         entries = {field: f"row_scan_{field}" for field in ("remaining", "top", "below")}
     elif args.check_direct:

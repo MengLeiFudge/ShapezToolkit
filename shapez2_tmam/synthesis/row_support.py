@@ -5,7 +5,7 @@ from .shape_methods import analyze_part, rotate_ccw, shape_literal
 
 
 def _unsupported(pin: bool, ordinary: bool, near_anchor: bool, far_anchor: bool, bridge: bool) -> bool:
-    return pin or (ordinary and not near_anchor and not (far_anchor and bridge))
+    return pin | (ordinary & (not near_anchor) & (not (far_anchor & bridge)))
 
 
 def addition_needs_lower(cell: int, left: int, right: int, opposite: int) -> bool:
@@ -54,3 +54,72 @@ def stack_scan_q2(h0: int, h1: int, h2: int, h3: int, row: Shape | None, row_hei
 
 def stack_scan_q3(h0: int, h1: int, h2: int, h3: int, row: Shape | None, row_height: int) -> int:
     return stack_scan_q0(h3, h0, h1, h2, rotate_ccw(rotate_ccw(rotate_ccw(row))), row_height)
+
+
+def plain_anchor_height(height: int, partner_height: int, row_height: int, cell: int, partner: int) -> int:
+    if (height >= 0) & (height < row_height) & (cell == 2) & (partner == 1) & (partner_height >= row_height):
+        return row_height
+    return height
+
+
+def plain_support_missing(height: int, row_height: int, cell: int, partner: int) -> bool:
+    return (height >= row_height) & (cell == 1) & (partner != 2) & (partner != 5)
+
+
+def _keep_plain(keep: bool, part: Shape | None, partner_keep: bool, partner: Shape | None) -> bool:
+    return keep | ((part == shape_literal("Ru------")) & partner_keep & (partner == shape_literal("Cu------")))
+
+
+def _close_prefix_row(h0: int, h1: int, h2: int, h3: int, row: Shape | None,
+                      row_height: int, partner_ccw: bool) -> int:
+    row1 = rotate_ccw(row)
+    row2 = rotate_ccw(row1)
+    row3 = rotate_ccw(row2)
+    s0 = analyze_part(row)
+    s1 = analyze_part(row1)
+    s2 = analyze_part(row2)
+    s3 = analyze_part(row3)
+    k0 = h0 >= row_height
+    k1 = h1 >= row_height
+    k2 = h2 >= row_height
+    k3 = h3 >= row_height
+    if partner_ccw:
+        own = _keep_plain(k0, s0, k1, s1)
+        near = _keep_plain(k1, s1, k0, s0)
+        far = _keep_plain(k2, s2, k3, s3)
+        other = _keep_plain(k3, s3, k2, s2)
+        partner = s1
+    else:
+        own = _keep_plain(k0, s0, k3, s3)
+        near = _keep_plain(k1, s1, k2, s2)
+        far = _keep_plain(k2, s2, k1, s1)
+        other = _keep_plain(k3, s3, k0, s0)
+        partner = s3
+    loose = shape_literal("Cu------")
+    anchored = shape_literal("Ru------")
+    near_anchor = ((not near) & (s1 == anchored)) | ((not other) & (s3 == anchored))
+    far_anchor = (not far) & (s2 == anchored)
+    bridge = ((not near) & (s1 == loose)) | ((not other) & (s3 == loose))
+    required = own | _unsupported(s0 == shape_literal("Su------"), s0 == loose, near_anchor, far_anchor, bridge)
+    missing = required & (s0 == loose) & (partner != anchored) & (partner != shape_literal("P-------"))
+    if (h0 < 0) | missing:
+        return -1
+    if required & (h0 < row_height):
+        return row_height
+    return h0
+
+
+def prefix_scan_q0(h0: int, h1: int, h2: int, h3: int, row: Shape | None, row_height: int) -> int:
+    return _close_prefix_row(h0, h1, h2, h3, row, row_height, True)
+
+
+def prefix_scan_q1(h0: int, h1: int, h2: int, h3: int, row: Shape | None, row_height: int) -> int:
+    return _close_prefix_row(h1, h2, h3, h0, rotate_ccw(row), row_height, False)
+
+
+def prefix_scan_q2(h0: int, h1: int, h2: int, h3: int, row: Shape | None, row_height: int) -> int:
+    return prefix_scan_q0(h2, h3, h0, h1, rotate_ccw(rotate_ccw(row)), row_height)
+
+
+def prefix_scan_q3(h0: int, h1: int, h2: int, h3: int, row: Shape | None, row_height: int) -> int:
+    return prefix_scan_q1(h2, h3, h0, h1, rotate_ccw(rotate_ccw(row)), row_height)

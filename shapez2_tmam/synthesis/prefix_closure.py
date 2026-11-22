@@ -2,7 +2,7 @@
 
 from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
-from .row_support import addition_needs_lower, advance_stack_height
+from .row_support import addition_needs_lower, advance_stack_height, plain_anchor_height, plain_support_missing
 from .shape_methods import original_rows, pack_stack_row
 from .support import in_support_class
 
@@ -54,6 +54,30 @@ def unanchored_additions(rules: Rules, desired: dict[Position, str], lower: dict
     return forced
 
 
+def _crystal_witnesses(left: tuple[str, ...], right: tuple[str, ...]) -> list[tuple[int, int]]:
+    """记录每个含晶区间内两列的最低支撑见证。"""
+    witness = [6, 6]
+    thresholds = []
+    linked = False
+    has_crystal = False
+    for z, (a, b) in enumerate(zip(left, right, strict=True)):
+        has_crystal |= a[0] == "c" or b[0] == "c"
+        for i, (cell, column) in enumerate(((a, left), (b, right))):
+            if cell in (EMPTY, PIN):
+                continue
+            if z == 0 or column[z - 1] == PIN or (not linked and column[z - 1] != EMPTY):
+                witness[i] = min(witness[i], z + 1)
+        linked = (z + 1 < len(left)
+                  and ((a[0] == "c" and left[z + 1][0] == "c")
+                       or (b[0] == "c" and right[z + 1][0] == "c")))
+        if not linked:
+            if has_crystal:
+                thresholds.append((witness[0], witness[1]))
+            witness = [6, 6]
+            has_crystal = False
+    return thresholds
+
+
 def minimal_start(rules: Rules, target: Shape, start: int, *, optional_top: bool = False) -> Shape | None:
     """求最小A→S前态；可将第4层普通格作为只在A中保留的可选助手。"""
     if rules.quadrants != 4 or rules.height != 5 or start not in (0, 1):
@@ -68,35 +92,31 @@ def minimal_start(rules: Rules, target: Shape, start: int, *, optional_top: bool
         if not in_support_class(rules, target):
             return None
         return rules.fold({pos: cell for pos, cell in desired.items() if pos[0] == 0})
-    while True:
-        original = {pos: cell for pos, cell in desired.items() if pos[0] < heights[pos[1]]}
-        forced: set[tuple[int, int]] = set()
-        for side in (0, 2):
-            pair = tuple((start + side + q) % 4 for q in (0, 1))
-            links = [False] + [any(columns[q][z][0] == "c" and columns[q][z - 1][0] == "c"
-                                   for q in pair) for z in range(1, len(target.layers))]
-            lower = 0
-            for upper in range(len(target.layers)):
-                if upper + 1 < len(target.layers) and links[upper + 1]:
-                    continue
-                interval = tuple((z, q) for z in range(lower, upper + 1) for q in pair)
-                nonpins = tuple(pos for pos in interval if original.get(pos, EMPTY) not in (EMPTY, PIN))
-                witnesses = tuple((z, q) for z, q in interval
-                                  if desired.get((z, q), EMPTY) not in (EMPTY, PIN)
-                                  and (z == 0 or (not links[z] and (z - 1, q) in desired)
-                                       or desired.get((z - 1, q)) == PIN))
-                if nonpins and not any(pos in original for pos in witnesses):
-                    candidates = tuple(pos for pos in witnesses if desired[pos][0] != "c")
-                    if not candidates:
-                        return None
-                    # 两列最高C屏障保证坏组的候选最多位于一列；取该列最低见证。
-                    for q in pair:
-                        lowest = next((pos for pos in candidates if pos[1] == q), None)
-                        if lowest is not None:
-                            forced.add(lowest)
-                lower = upper + 1
-        forced.update(unanchored_additions(rules, desired, original, optional_top=optional_top))
-        if not forced:
-            return rules.fold(original)
-        for z, q in forced:
-            heights[q] = max(heights[q], z + 1)
+    pairs = tuple(((start + side) % 4, (start + side + 1) % 4) for side in (0, 2))
+    for q, r in pairs:
+        for witness_q, witness_r in _crystal_witnesses(columns[q], columns[r]):
+            if heights[q] >= witness_q or heights[r] >= witness_r:
+                continue
+            if witness_q == witness_r == 6:
+                return None
+            if witness_q <= 5:
+                heights[q] = max(heights[q], witness_q)
+            if witness_r <= 5:
+                heights[r] = max(heights[r], witness_r)
+
+    for z in range(len(target.layers) - 1, -1, -1):
+        added = {q: column[z] for q, column in enumerate(columns) if column[z] != EMPTY and column[z][0] != "c"}
+        row = _row_states(desired, z, added)
+        plain_pairs = [(q, r) for q, r in pairs if columns[q][z][0] != "c" and columns[r][z][0] != "c"]
+        for q, r in plain_pairs:
+            for own, neighbor in ((q, r), (r, q)):
+                heights[own] = plain_anchor_height(heights[own], heights[neighbor], z + 1, row[own], row[neighbor])
+        if not (optional_top and z == rules.height - 1):
+            delta = tuple(state if heights[q] <= z else 0 for q, state in enumerate(row))
+            heights = [advance_stack_height(heights[q], z + 1, delta[q], delta[q - 1],
+                                            delta[(q + 1) % 4], delta[(q + 2) % 4]) for q in range(4)]
+        for q, r in plain_pairs:
+            if (plain_support_missing(heights[q], z + 1, row[q], row[r])
+                    or plain_support_missing(heights[r], z + 1, row[r], row[q])):
+                return None
+    return rules.fold({pos: cell for pos, cell in desired.items() if pos[0] < heights[pos[1]]})
