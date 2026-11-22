@@ -7,6 +7,7 @@ from ..stream_controller import PROGRAM_ACCEPTED, PROGRAM_LENGTH, REPLAY_RESULT
 from .changeover import CLEAN_CONFIRMED, ENABLE_FEED, LOADED, TARGET_INPUT
 
 
+PACKET_TAG = 1_640_046
 FIELDS = {name: channel for name, channel in WRITE_BUS.items() if name not in ('address', 'phase')}
 ORDER_INPUTS = {'target': TARGET_INPUT, 'length': PROGRAM_LENGTH,
                 'replay_result': REPLAY_RESULT, 'accepted': PROGRAM_ACCEPTED}

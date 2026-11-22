@@ -2,6 +2,16 @@
 
 `layout.assemble(count, packet_tag=...)` 生成原生岛蓝图和可序列化的站场接口表。一个地址对应一个实体工段。每段保留六槽直通带、两个操作数入口、加工回带、四角基础料和独立结晶供料。`recipe.replay(target, packets)` 用同一组六字段回放物品，保留两个操作数的顺序、目的槽和被舍弃的半形。回放结束时，唯一活槽须等于目标形状。
 
+## 外置主控生产线
+
+在仓库根目录按所需工段数导出。每个工段包含六槽加工、基础料与结晶收料，配方由外置主控发送。
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.production --stages 2 --output six-slot-production.spz2bp
+```
+
+导入 `.spz2bp` 后，按同名 JSON 的 `interfaces.recipe` 接主控与换单开关，按 `interfaces.stations` 和 `interfaces.load` 接供料，按 `interfaces.output` 接成品带。`--stages` 须在 1 至 971 之间，并覆盖主控会发送的最长配方。Python 可调用 `production.build(count)` 取得同一份原生蓝图文本和接口表。
+
 ## 写入与换单
 
 `assemble` 的接口表包含 `recipe`，验收与实体册 JSON 在 `interfaces.recipe` 导出同一张接线表。每项信号的值是原生频道编号，`length` 给出这张蓝图的可装配长度。精简工道还需按 `stations` 核对每个地址的基础料和结晶停靠点。

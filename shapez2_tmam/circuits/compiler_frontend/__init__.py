@@ -404,7 +404,8 @@ class _Lowering:
             raise self.module.error(node, "整数字面值超出有符号 32 位范围")
         return _Value(Constant(INT, value), INT, bounds)
 
-    def tuple_items(self, node: ast.Tuple, kind: ValueType | None, written: set[str]) -> list[_Value]:
+    def tuple_items(self, node: ast.Tuple, kind: ValueType | None, written: set[str],
+                    *, literal_only: bool = False) -> list[_Value]:
         values: list[_Value | None] = []
         first_empty = None
         for item in node.elts:
@@ -413,7 +414,18 @@ class _Lowering:
                     first_empty = item
                 values.append(None)
                 continue
-            value = self.expression(item, kind)
+            if literal_only:
+                value = self.literal(item, kind)
+                if (value is None and isinstance(item, ast.Call) and isinstance(item.func, ast.Name)
+                        and item.func.id == _SHAPE_LITERAL and not item.keywords):
+                    self.compilation.callable(self.module, _SHAPE_LITERAL, item.func)
+                    value = self.shape_literal(item)
+                if value is None:
+                    raise self.module.error(item, "顶层只读表的元素须使用显式字面量")
+                if kind is not None:
+                    self.require(item, value.type, kind)
+            else:
+                value = self.expression(item, kind)
             kind = value.type
             if isinstance(item, ast.Name) and item.id in written:
                 slot = self.temp(kind)
@@ -446,8 +458,13 @@ class _Lowering:
             if table.id not in self.assigned:
                 raise self.module.error(table, f"只读表“{table.id}”可能未定义，请在每条读取路径先定义它")
             items = self.tables[table.id]
+        elif isinstance(table, ast.Name) and table.id not in self.names:
+            definition = self.module.literal_table(table)
+            if not definition.elts:
+                raise self.module.error(definition, "只读表需要至少一个元素")
+            items = self.tuple_items(definition, None, set(), literal_only=True)
         else:
-            raise self.module.error(table, "请索引固定元组或在方法内定义的只读表")
+            raise self.module.error(table, "请索引固定元组或同文件定义的只读表")
         index = self.expression(node.slice, INT)
         allowed = (-len(items), len(items) - 1)
         operand = index.operand
@@ -729,6 +746,24 @@ class _Lowering:
             return _Value(Reference(self.slots[node.id]), self.types[node.id], self.assigned[node.id])
         if isinstance(node, ast.Subscript):
             return self.subscript(node, expected)
+        literal = self.literal(node, expected)
+        if literal is not None:
+            return literal
+        if isinstance(node, ast.Call):
+            return self.call(node)
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            inner = self.expression(node.operand, BOOL)
+            return self.apply("not", BOOL, inner.operand)
+        if isinstance(node, ast.BoolOp):
+            return self.short_circuit(node)
+        if isinstance(node, ast.Compare):
+            return self.compare(node)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            left, right = self.expression(node.left, INT), self.expression(node.right, INT)
+            return self.add(node, left, right)
+        raise self.module.error(node, f"不支持表达式 {type(node).__name__}，请使用标量、比较、加法或直接调用")
+
+    def literal(self, node: ast.expr, expected: ValueType | None) -> _Value | None:
         if isinstance(node, ast.Constant):
             if type(node.value) is bool:
                 return _Value(Constant(BOOL, node.value), BOOL)
@@ -743,21 +778,7 @@ class _Lowering:
                 raise self.module.error(node, "None 需要明确的 Shape 或 Color 类型")
             return _Value(Constant(expected, None), expected)
         number = _integer(node)
-        if number is not None:
-            return self.checked_int(node, number)
-        if isinstance(node, ast.Call):
-            return self.call(node)
-        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
-            inner = self.expression(node.operand, BOOL)
-            return self.apply("not", BOOL, inner.operand)
-        if isinstance(node, ast.BoolOp):
-            return self.short_circuit(node)
-        if isinstance(node, ast.Compare):
-            return self.compare(node)
-        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-            left, right = self.expression(node.left, INT), self.expression(node.right, INT)
-            return self.add(node, left, right)
-        raise self.module.error(node, f"不支持表达式 {type(node).__name__}，请使用标量、比较、加法或直接调用")
+        return self.checked_int(node, number) if number is not None else None
 
     def add(self, node: ast.expr, left: _Value, right: _Value) -> _Value:
         bounds = _add_bounds(left.bounds or _INT_BOUNDS, right.bounds or _INT_BOUNDS)

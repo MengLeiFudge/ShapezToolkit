@@ -26,7 +26,8 @@ class _Source:
         except SyntaxError as error:
             raise FrontendError(error.msg, (filename, error.lineno, error.offset, error.text)) from error
         self.bindings: dict[str, list[_Binding]] = {}
-        for node in tree.body:
+        self.body = tree.body
+        for node in self.body:
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 self.bindings.setdefault(node.name, []).append(_Binding(node))
             elif isinstance(node, (ast.Import, ast.ImportFrom)):
@@ -51,6 +52,43 @@ class _Source:
         if len(found) > 1:
             raise self.error(found[1].node, f"“{name}”有同名的顶层定义或导入，请保留一个或为导入指定别名")
         return found[0] if found else None
+
+    def literal_table(self, use: ast.Name) -> ast.Tuple:
+        name = use.id
+        binding = self.binding(name)
+        if binding is None:
+            raise self.error(use, f"找不到只读表“{name}”，请在同文件顶层定义字面量元组")
+        node = binding.node
+        if (not isinstance(node, ast.Assign) or len(node.targets) != 1
+                or not isinstance(node.targets[0], ast.Name) or not isinstance(node.value, ast.Tuple)):
+            raise self.error(node, f"只读表“{name}”须用一个顶层赋值直接绑定字面量元组")
+
+        pending: list[ast.AST] = [stmt for stmt in self.body if stmt is not node]
+        while pending:
+            child = pending.pop()
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                rebinds = child.name == name
+                pending.extend(part for part in ast.iter_child_nodes(child) if not isinstance(part, ast.stmt))
+            elif isinstance(child, (ast.Import, ast.ImportFrom)):
+                rebinds = any((alias.asname or alias.name.split(".")[0]) == name for alias in child.names)
+            elif isinstance(child, ast.Lambda):
+                rebinds = False
+                pending.append(child.args)
+            elif isinstance(child, ast.comprehension):
+                rebinds = False
+                pending.extend((child.iter, *child.ifs))
+            else:
+                if isinstance(child, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)):
+                    rebinds = child.name == name
+                elif isinstance(child, ast.MatchMapping):
+                    rebinds = child.rest == name
+                else:
+                    rebinds = (isinstance(child, ast.Name) and child.id == name
+                               and isinstance(child.ctx, (ast.Store, ast.Del)))
+                pending.extend(ast.iter_child_nodes(child))
+            if rebinds:
+                raise self.error(child, f"顶层只读表“{name}”只允许定义一次")
+        return node.value
 
 
 @dataclass(frozen=True)

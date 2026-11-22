@@ -1,0 +1,52 @@
+{
+  "method": "direct_recipe_opcode",
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "address": {
+      "channel": 1700480,
+      "type": "int"
+    },
+    "length": {
+      "channel": 1700481,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "result": {
+      "channel": 1700482,
+      "type": "int"
+    }
+  },
+  "reserved_channels": [
+    1700480,
+    1700482
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "direct_recipe_opcode": 22
+  },
+  "settling": {
+    "max_gate_depth": 16,
+    "hold_signal_ticks": 1152,
+    "hold_simulation_seconds": 96.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取频道结果。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    380,
+    267,
+    268
+  ],
+  "logic_gates": 42,
+  "logic_gates_before_reuse": 42,
+  "building_entries": 915,
+  "global_receivers": 2,
+  "global_transmitters": 1,
+  "internal_global_devices": 0
+}
