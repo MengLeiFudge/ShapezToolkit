@@ -3,6 +3,7 @@
 import ast
 from dataclasses import dataclass, field
 
+from ...synthesis.physics import COLORS, Rules
 from ..compiler_contract import (
     BOOL, BUILTINS, COLOR, INT, SHAPE, Apply, Bind, Block, Branch, Call,
     Constant, Function, Instruction, Jump, Operand, Program, Reference,
@@ -13,6 +14,8 @@ from ._ranges import _Bounds, _INT_BOUNDS, _add_bounds, _add_failure, _fits_int
 
 __all__ = ["FrontendError", "compile_method"]
 
+_SHAPE_LITERAL = "shape_literal"
+_RULES = Rules()
 _TYPES = {"bool": BOOL, "int": INT, "Shape": SHAPE, "Color": COLOR}
 _STATEMENTS = (ast.AnnAssign, ast.Assign, ast.Expr, ast.For, ast.If, ast.Pass, ast.Return)
 _COMPARISONS = {ast.Eq: "eq", ast.NotEq: "ne", ast.Is: "eq", ast.IsNot: "ne",
@@ -98,8 +101,8 @@ class _Module:
         raise self.error(node or location, "请用 bool、int、Shape 或 Color 标注类型，图形和颜色可联合 None")
 
     def compile(self, entry: str) -> Program:
-        if entry in BUILTINS:
-            raise self.error(None, f"“{entry}”是内建操作名，请选择一个 Python 方法作为入口")
+        if entry in BUILTINS or entry == _SHAPE_LITERAL:
+            raise self.error(None, f"“{entry}”是保留名称，请选择一个 Python 方法作为入口")
         function = self.method(entry, None)
         return Program(entry, (function, *(f for name, f in self.functions.items() if name != entry)))
 
@@ -394,8 +397,15 @@ class _Lowering:
             if node.id not in self.assigned:
                 raise self.module.error(node, f"变量“{node.id}”可能未赋值，请在读取前为每条路径赋值")
             return _Value(Reference(self.slots[node.id]), self.types[node.id], self.assigned[node.id])
-        if isinstance(node, ast.Constant) and type(node.value) is bool:
-            return _Value(Constant(BOOL, node.value), BOOL)
+        if isinstance(node, ast.Constant):
+            if type(node.value) is bool:
+                return _Value(Constant(BOOL, node.value), BOOL)
+            if isinstance(node.value, str):
+                if expected is SHAPE:
+                    raise self.module.error(node, f"图形短代码请写成 {_SHAPE_LITERAL}({node.value!r})")
+                if len(node.value) != 1 or node.value not in COLORS:
+                    raise self.module.error(node, f"颜色须使用单字符代码，可用字符为 {COLORS}")
+                return _Value(Constant(COLOR, node.value), COLOR)
         if _is_empty(node):
             if expected != SHAPE and expected != COLOR:
                 raise self.module.error(node, "None 需要明确的 Shape 或 Color 类型")
@@ -472,6 +482,8 @@ class _Lowering:
         name = node.func.id
         if name in self.names:
             raise self.module.error(node.func, f"“{name}”是局部变量，不能作为方法调用")
+        if name == _SHAPE_LITERAL:
+            return self.shape_literal(node)
         if name in BUILTINS:
             types, result = BUILTINS[name]
         else:
@@ -488,3 +500,15 @@ class _Lowering:
         slot = self.temp(result)
         self.emit(Call(slot, name, args))
         return _Value(Reference(slot), result)
+
+    def shape_literal(self, node: ast.Call) -> _Value:
+        if len(node.args) != 1:
+            raise self.module.error(node, f"{_SHAPE_LITERAL} 需要一个图形短代码")
+        arg = node.args[0]
+        if not isinstance(arg, ast.Constant) or not isinstance(arg.value, str):
+            raise self.module.error(arg, "请直接写图形短代码字符串")
+        try:
+            _RULES.parse(arg.value)
+        except ValueError as error:
+            raise self.module.error(arg, str(error)) from error
+        return _Value(Constant(SHAPE, arg.value), SHAPE)

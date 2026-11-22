@@ -2,6 +2,7 @@
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from graphlib import CycleError, TopologicalSorter
 from operator import eq, le, lt, ne
 
 from ...synthesis.physics import COLORS, Rules
@@ -16,6 +17,8 @@ Signal = Ref | Literal
 _FALSE = Literal(0)
 _TRUE = Literal(1)
 _MAX_EXPANDED_BLOCKS = 4096
+_MAX_TRUTH_ATOMS = 12
+_TRUTH_MASK = (1 << (1 << _MAX_TRUTH_ATOMS)) - 1
 _COMPARE = {"eq": ("AQ==", eq), "ne": ("Bg==", ne), "lt": ("BA==", lt), "le": ("BQ==", le)}
 _NATIVE = {
     "not": "LogicGateNot", "and": "LogicGateAnd", "or": "LogicGateOr",
@@ -60,6 +63,33 @@ class _Frame:
         return cls(function, blocks, types)
 
 
+def _ordered_blocks(frame: _Frame) -> tuple[str, ...] | None:
+    entry = frame.function.blocks[0].name
+    graph: dict[str, list[str]] = {entry: []}
+    pending = [entry]
+    while pending:
+        name = pending.pop()
+        block = frame.blocks.get(name)
+        if block is None:
+            return None
+        end = block.end
+        targets = ((end.if_true, end.if_false) if isinstance(end, Branch) else
+                   (end.target,) if isinstance(end, Jump) else ())
+        for target in dict.fromkeys(targets):
+            if target not in graph:
+                graph[target] = []
+                pending.append(target)
+            graph[target].append(name)
+    try:
+        order = tuple(TopologicalSorter(graph).static_order())
+    except CycleError:
+        return None
+    depths: dict[str, int] = {}
+    for name in order:
+        depths[name] = 1 + max((depths[source] for source in graph[name]), default=0)
+    return order if max(depths.values()) <= frame.function.max_block_visits else None
+
+
 class Lowering:
     def __init__(self, program: Program):
         self.circuit = Circuit()
@@ -69,6 +99,44 @@ class Lowering:
             raise ValueError("Program 需要唯一的函数名和已声明的入口函数")
         self.stack: list[str] = []
         self.expanded_blocks: Counter[str] = Counter()
+        self.predicates: dict[tuple[str, tuple[Signal, ...], str | None], Ref] = {}
+        self.truth: dict[Signal, int] = {_FALSE: 0, _TRUE: _TRUTH_MASK}
+        self.truth_nets: dict[int, Signal] = {0: _FALSE, _TRUTH_MASK: _TRUE}
+        self.truth_atoms = 0
+
+    def _truth(self, signal: Signal) -> int | None:
+        if signal not in self.truth:
+            if self.truth_atoms == _MAX_TRUTH_ATOMS:
+                return None
+            # 比较结果及布尔入参按独立变量处理，掩码覆盖全部真值组合。
+            stride = 1 << self.truth_atoms
+            mask = (_TRUTH_MASK // ((1 << stride) + 1)) << stride
+            self.truth[signal] = mask
+            self.truth_nets[mask] = signal
+            self.truth_atoms += 1
+        return self.truth[signal]
+
+    def _predicate(self, kind: str, *args: Signal, config: str | None = None) -> Signal:
+        key = kind, args, config
+        if key in self.predicates:
+            return self.predicates[key]
+        table = None
+        if kind == "LogicGateNot":
+            a = self._truth(args[0])
+            if a is not None:
+                table = _TRUTH_MASK ^ a
+        elif kind in ("LogicGateAnd", "LogicGateOr"):
+            a, b = map(self._truth, args)
+            if a is not None and b is not None:
+                table = (a & b) if kind == "LogicGateAnd" else (a | b)
+        if table is not None and table in self.truth_nets:
+            return self.truth_nets[table]
+        ref = self.circuit.add(kind, *args, config=config)
+        self.predicates[key] = ref
+        if table is not None:
+            self.truth[ref] = table
+            self.truth_nets[table] = ref
+        return ref
 
     def _read(self, source: Operand, values: dict[str, _Value]) -> _Value:
         if isinstance(source, Reference):
@@ -91,7 +159,10 @@ class Lowering:
     def _not(self, value: Signal) -> Signal:
         if isinstance(value, Literal):
             return _FALSE if value == _TRUE else _TRUE
-        return self.circuit.add("LogicGateNot", value)
+        gate = self.circuit.gates[value.node]
+        if gate.kind == "LogicGateNot":
+            return gate.inputs[0]
+        return self._predicate("LogicGateNot", value)
 
     def _bool_pair(self, kind: str, a: Signal, b: Signal) -> Signal:
         identity, absorbing = (_TRUE, _FALSE) if kind == "LogicGateAnd" else (_FALSE, _TRUE)
@@ -101,13 +172,28 @@ class Lowering:
             return b
         if b == identity or a == b:
             return a
-        return self.circuit.add(kind, a, b)
+        assert isinstance(a, Ref) and isinstance(b, Ref)
+        if (self.predicates.get(("LogicGateNot", (a,), None)) == b
+                or self.predicates.get(("LogicGateNot", (b,), None)) == a):
+            return absorbing
+        if b.node < a.node:
+            a, b = b, a
+        return self._predicate(kind, a, b)
 
-    def _merge(self, selected: list[tuple[Signal, Signal]]) -> Signal:
+    def _merge(self, selected: list[tuple[Signal, Signal]], *, boolean: bool = False) -> Signal:
         if len({value for _, value in selected}) == 1:
             return selected[0][1]
-        driven = [self.circuit.add("LogicGateIf", value, active) for active, value in selected
-                  if value != Literal(None)]
+        conditions: dict[Signal, Signal] = {}
+        for active, value in selected:
+            if value != Literal(None) and active != _FALSE:
+                conditions[value] = self._bool_pair("LogicGateOr", conditions.get(value, _FALSE), active)
+        if boolean:
+            result: Signal = _FALSE
+            for value, active in conditions.items():
+                truth = self._bool_pair("LogicGateAnd", value, active)
+                result = self._bool_pair("LogicGateOr", result, truth)
+            return result
+        driven = [self.circuit.add("LogicGateIf", value, active) for value, active in conditions.items()]
         if len(driven) > 1:
             self.circuit.aliases.append(tuple(driven))
         return driven[0] if driven else Literal(None)
@@ -123,7 +209,7 @@ class Lowering:
             if all(name in arrival.values for arrival in arrivals):
                 values[name] = _Value(value.type, self._merge([
                     (arrival.active, arrival.values[name].signal) for arrival in arrivals
-                ]))
+                ], boolean=value.type is BOOL))
         return _Arrival(active, values)
 
     def _apply(self, operation: str, args: tuple[_Value, ...]) -> _Value:
@@ -144,7 +230,7 @@ class Lowering:
             if isinstance(a, Literal) and isinstance(b, Literal):
                 result = Literal(int(compare(a.value, b.value)))
             else:
-                result = self.circuit.add("LogicGateCompare", a, b, config=config)
+                result = self._predicate("LogicGateCompare", a, b, config=config)
         elif operation == "add":
             a, b = signals
             if isinstance(a, Literal) and isinstance(b, Literal):
@@ -191,33 +277,41 @@ class Lowering:
 
     def _expand(self, frame: _Frame, inputs: dict[str, _Value]) -> _Value:
         function = frame.function
-        pending = {function.blocks[0].name: [_Arrival(_TRUE, inputs)]}
-        returned = []
-        for _ in range(function.max_block_visits):
-            # 同一步到达同一块时合并互斥状态，避免按路径复制共同后续代码。
-            following = defaultdict(list)
-            for name, arrivals in pending.items():
-                if sum(self.expanded_blocks.values()) >= _MAX_EXPANDED_BLOCKS:
-                    raise ValueError(f"{function.name}：展开块数超过 {_MAX_EXPANDED_BLOCKS}")
-                self.expanded_blocks[function.name] += 1
-                try:
-                    self._visit(frame, name, self._join(arrivals), following, returned)
-                except ValueError as error:
-                    raise ValueError(f"{function.name}/{name}：{error}") from error
-            if not following:
-                break
-            pending = following
+        pending: dict[str, list[_Arrival]] = defaultdict(list)
+        pending[function.blocks[0].name].append(_Arrival(_TRUE, inputs))
+        returned: list[tuple[Signal, Signal]] = []
+
+        def emit(name: str, arrivals: list[_Arrival], following: dict[str, list[_Arrival]]) -> None:
+            if sum(self.expanded_blocks.values()) >= _MAX_EXPANDED_BLOCKS:
+                raise ValueError(f"{function.name}：展开块数超过 {_MAX_EXPANDED_BLOCKS}")
+            self.expanded_blocks[function.name] += 1
+            try:
+                self._visit(frame, name, self._join(arrivals), following, returned)
+            except ValueError as error:
+                raise ValueError(f"{function.name}/{name}：{error}") from error
+
+        order = _ordered_blocks(frame)
+        if order is not None:
+            # 无环块等所有前驱发出状态才编译，与各路径的访问次数无关。
+            for name in order:
+                if name in pending:
+                    emit(name, pending.pop(name), pending)
         else:
+            for _ in range(function.max_block_visits):
+                if not pending:
+                    break
+                following = defaultdict(list)
+                for name, arrivals in pending.items():
+                    emit(name, arrivals, following)
+                pending = following
             if any(arrival.active == _TRUE for arrivals in pending.values() for arrival in arrivals):
                 raise ValueError(f"{function.name}：访问次数超过 max_block_visits")
         if not returned:
             raise ValueError(f"{function.name}：给定访问上界内没有可返回的路径")
         # 有未静态排除的超界路径时，只有已返回路径可以驱动结果。
-        if following:
-            result = self._merge([*returned, (_FALSE, Literal(None))])
-        else:
-            result = self._merge(returned)
-        return _Value(function.result, result)
+        if pending:
+            returned.append((_FALSE, Literal(None)))
+        return _Value(function.result, self._merge(returned, boolean=function.result is BOOL and not pending))
 
     def _visit(self, frame: _Frame, name: str, arrival: _Arrival,
                following: dict[str, list[_Arrival]], returned: list[tuple[Signal, Signal]]) -> None:

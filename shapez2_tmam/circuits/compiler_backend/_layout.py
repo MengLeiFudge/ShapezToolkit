@@ -22,7 +22,7 @@ def _route(board: _Board):
     pads = board.traces
     order = sorted(board.terminals, key=lambda key: (-len(board.terminals[key]), key))
     tried = set()
-    while tuple(order) not in tried:
+    while len(tried) < 6 and tuple(order) not in tried:
         tried.add(tuple(order))
         board.traces = defaultdict(dict, {p: {net: set(ports) for net, ports in dots.items()}
                                           for p, dots in pads.items()})
@@ -59,10 +59,36 @@ def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
     capacity = len(_GATE_ROWS) * len(_GATE_COLUMNS) * 3
     if max(len(radios), len(outputs)) > len(_RADIO_ROWS) or len(gates) > capacity:
         raise ValueError("本地门网超过单块三层 3×3 平台容量")
-    # 紧邻行之间每隔一层换层，给各层保留可供换层线使用的纵向通道。
+    # 保留规则门位，改变门的空间分布以绕开高扇出的布线拥塞。
     rows = (tuple(_GATE_ROWS), tuple(reversed(_GATE_ROWS)))
-    sites = ((x, y, level) for i, x in enumerate(_GATE_COLUMNS) for y in rows[i % 2]
-             for level in range(3))
+    columns = (tuple(_GATE_COLUMNS), tuple(reversed(_GATE_COLUMNS)))
+    levels = range(3)
+    row_sites = [(x, y) for i, y in enumerate(rows[0]) for x in columns[i % 2]]
+    col_sites = [(x, y) for i, x in enumerate(columns[0]) for y in rows[i % 2]]
+    shapes = (
+        [(x, y, z) for x, y in row_sites for z in levels],
+        [(x, y, z) for x, y in col_sites for z in levels],
+        [(x, y, z) for z in levels for x, y in row_sites],
+        [(x, y, z) for z in levels for x, y in col_sites],
+        [(x, y, (i + z) % 3) for z in levels for i, (x, y) in enumerate(row_sites)],
+        [(x, y, (i + z) % 3) for z in levels for i, (x, y) in enumerate(col_sites)],
+    )
+    last_error = None
+    for sites in shapes:
+        try:
+            return _place(circuit, channels, (radios, gates), used, sites, outputs)
+        except _RoutingError as error:
+            last_error = error
+    raise ValueError(f"三层平台布线未找到可用布局：{last_error}") from last_error
+
+
+class _RoutingError(ValueError):
+    pass
+
+
+def _place(circuit: Circuit, channels: dict[Ref, int], groups: tuple[list[int], list[int]], used: set[int],
+           sites: list[tuple[int, int, int]], outputs: dict[int, Ref]) -> tuple[dict, int]:
+    radios, gates = groups
     board = _Board()
     drivers = defaultdict(list)
     sinks = {}
@@ -115,7 +141,10 @@ def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
         sinks[out, 1] = net
         transmitters.append(out)
 
-    blueprint = _route(board)
+    try:
+        blueprint = _route(board)
+    except ValueError as error:
+        raise _RoutingError(str(error)) from error
     wiring = Wiring(blueprint)
     dependencies = defaultdict(set)
     expected = {**fixed, **{pin: tuple(sorted(drivers[net])) for pin, net in sinks.items()}}
