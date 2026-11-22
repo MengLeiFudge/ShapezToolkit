@@ -98,6 +98,26 @@ def pin_column_at(target: tuple[str, ...], slot: int) -> tuple[str, ...] | None:
     return pin_column(target, keep, extra)
 
 
+def _required_cap_contacts(rules: Rules, fixed: dict[Position, str], allowed: int) -> tuple[int, ...]:
+    if not allowed:
+        return ()
+    deleted = []
+    for group in rules.groups(fixed, fused=True):
+        contacts = allowed & sum(1 << q for z, q in group if z == rules.height - 2)
+        if contacts:
+            deleted.append((group, contacts))
+    if not deleted:
+        return ()
+    removed = set().union(*(group for group, _ in deleted))
+    live = {(z + 1, q): cell for (z, q), cell in fixed.items() if (z, q) not in removed}
+    live.update({(0, q): PIN for z, q in fixed if z == 0})
+    stationary = rules.stationary(live)
+    horizontal = {pos for pos in stationary if live[pos] != PIN}
+    return tuple(contacts for group, contacts in deleted if any(
+        (z, q) in stationary or (z + 1, (q - 1) % rules.quadrants) in horizontal
+        or (z + 1, (q + 1) % rules.quadrants) in horizontal for z, q in group))
+
+
 def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> Iterator[PinFamily]:
     """生成覆盖全部可制作顶针前态结构的候选族，默认每族先检查一次正向 Π。
 
@@ -143,21 +163,19 @@ def pin_families(rules: Rules, target: Shape, *, check_output: bool = True) -> I
         capped = [not (forced_masks[q] & 8) and CornerBuilder.admissible((*column, "cr"))
                   for q, column in enumerate(selected)]
         allowed_mask = sum(1 << q for q, allowed in enumerate(capped) if allowed)
+        cells = dict(fixed)
+        cells.update({(height, q): "cr" for q in range(rules.quadrants) if allowed_mask & (1 << q)})
+        representative = rules.fold(cells)
+        if representative is None:
+            continue
+        possible = (rules.pin(representative) == target if check_output
+                    else pin_image_matches(rules, lower, allowed_mask, target))
+        if not possible:
+            continue
+        required = _required_cap_contacts(rules, fixed, allowed_mask)
         for mask in range(allowed_mask, -1, -1):
-            if mask & ~allowed_mask:
-                continue
-            cells = dict(fixed)
-            cells.update({(height, q): "cr" for q in range(rules.quadrants) if mask & (1 << q)})
-            representative = rules.fold(cells)
-            if representative is None:
-                continue
-            possible = (rules.pin(representative) == target if check_output
-                        else pin_image_matches(rules, lower, mask, target))
-            if possible:
+            if not mask & ~allowed_mask and all(mask & contacts for contacts in required):
                 yield PinFamily(lower, mask)
-            elif mask == allowed_mask:
-                # 最大允许顶盖失配时，同一前四层的所有顶盖均无精确Pin像。
-                break
 
 
 @dataclass(frozen=True)
