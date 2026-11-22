@@ -15,7 +15,7 @@ program = compile_method(path.read_text(encoding="utf-8"), "append_five", filena
 |---|---|
 | 类型 | 参数和返回值标注 `bool`、`int`、`Shape` 或 `Color`。图形与颜色可写 `\| None`，空值从赋值、返回、参数或比较的类型推断 |
 | 局部状态 | 单变量赋值和带类型的局部变量。读取前必须在所有到达路径上赋值，一个变量始终保持相同类型 |
-| 控制流 | `if`、`elif`、`else`，提前 `return`，短路 `and`、`or`，以及遍历同类型固定元组或字面量边界的 `range(stop)`、`range(start, stop)`。循环体可用 `break`、`continue` |
+| 控制流 | `if`、`elif`、`else`，提前 `return`，短路 `and`、`or`，定长 `for` 和定步长 `while`。循环体可用 `break`、`continue` |
 | 只读表 | 可用整数索引读取非空的同类型固定元组。给元组命名时，在方法内定义一次。所有到达读取位置的路径都必须保证索引合法 |
 | 字面量 | `True`、`False`，有符号 32 位整数，颜色单字符如 `"r"`，以及图形短代码如 `shape_literal("Cu------")` |
 | 标量操作 | `not`，同类型 `==`、`!=`，对 `None` 的 `is`、`is not`，整数单次比较及可证明不溢出的加法 |
@@ -45,7 +45,20 @@ def material_order() -> bool:
     return is_order(shape_literal("Cu------"), "r")
 ```
 
-循环用计数与回跳复用同一个循环体。固定元组在进入循环前取值，循环变量可赋值且不会改变迭代顺序。`break` 退出最内层循环，`continue` 推进最内层循环的计数。循环后读取的局部变量须在自然结束和所有 `break` 路径上已经赋值。`max_block_visits` 按各基本块的访问预算求和，包含退出块，子调用的块访问单独计数。
+循环用计数与回跳复用同一个循环体。`for` 可遍历同类型固定元组或字面量边界的 `range(stop)`、`range(start, stop)`。固定元组在进入循环前取值。`break` 退出最内层循环，`continue` 进入最内层循环的下一轮检查。循环后读取的局部变量须在自然结束和所有 `break` 路径上已经赋值。`max_block_visits` 按各基本块的访问预算求和，包含退出块，子调用的块访问单独计数。
+
+`while` 将编译期已知的整数游标与字面量用 `<`、`<=`、`>` 或 `>=` 比较。循环体顶层有一个固定步长更新，可用 `slot += 1`、`slot -= 1` 或 `slot = slot + 1`。步长须朝着结束边界推进，包含最后一次更新在内的游标值都须在有符号 32 位范围内。`continue` 须在游标更新之后执行。
+
+```python
+def first_slot(wanted: int) -> int:
+    masks = (1, 4, 2, 8)
+    slot = 0
+    while slot < 4:
+        if masks[slot] == wanted:
+            break
+        slot += 1
+    return slot
+```
 
 编译器先用当前表达式和局部变量的已知区间检查加法与索引。需要进一步证明时，会沿基本块分析，把计数、赋值和分支约束带到下一轮。同一步汇合的路径合并区间。整数输入按完整的 32 位范围处理，直接比较可进一步缩小范围。
 

@@ -5,10 +5,11 @@ from collections import Counter
 from pathlib import Path
 
 from ..circuit import Literal, constant, encode_document
-from ..compiler_contract import Program
+from ..compiler_contract import INT, Program
 from ._layout import LayoutCapacityError, layout, logic_gates
 from ._lower import Lowering, _Value
 from ._optimize import compact
+from ._table import interval_table
 
 
 __all__ = ["compile_program", "export_program"]
@@ -31,17 +32,29 @@ def compile_program(program: Program, channel_base: int) -> tuple[dict, dict]:
     value = lowering.invoke(entry.name, args).signal
     result = circuit.add("ConstantSignal", config=constant(value.value)) if isinstance(value, Literal) else value
     outputs = {output_channel: result}
-    reduced, reduced_outputs = compact(circuit, outputs)
-    try:
-        document, depth = layout(reduced, reduced_outputs)
-    except LayoutCapacityError as error:
-        if reduced is circuit:
-            raise
+    variants = [compact(circuit, outputs)]
+    if variants[0][0] is not circuit:
+        variants.append((circuit, outputs))
+    failures = []
+    for reduced, reduced_outputs in variants:
         try:
-            document, depth = layout(circuit, outputs)
-        except LayoutCapacityError as original_error:
-            raise LayoutCapacityError(f"复用后 {error}。未复用的网表也无法布置，{original_error}") from original_error
-        reduced, reduced_outputs = circuit, outputs
+            document, depth = layout(reduced, reduced_outputs)
+        except LayoutCapacityError as error:
+            failures.append(error)
+        else:
+            break
+    else:
+        integer_table = len(entry.inputs) == 1 and entry.inputs[0].type is INT and entry.result is INT
+        table = interval_table(circuit, result) if integer_table else None
+        if table is not None:
+            reduced, table_output = table
+            reduced_outputs = {output_channel: table_output}
+            document, depth = layout(reduced, reduced_outputs)
+        elif len(failures) == 1:
+            raise failures[0]
+        else:
+            first, last = failures
+            raise LayoutCapacityError(f"复用后 {first}。未复用的网表也无法布置，{last}") from last
     entries = document["BP"]["Entries"][0]["B"]["Entries"]
     counts = Counter(e["T"].removesuffix("InternalVariant") for e in entries)
     hold_ticks = 64 * (depth + 2)

@@ -19,7 +19,8 @@ _SHAPE_LITERAL = "shape_literal"
 _RULES = Rules()
 _TYPES = {"bool": BOOL, "int": INT, "Shape": SHAPE, "Color": COLOR}
 _LOOP_TRANSFERS = (ast.Break, ast.Continue)
-_STATEMENTS = (ast.AnnAssign, ast.Assign, ast.Expr, ast.For, ast.If, ast.Pass, ast.Return, *_LOOP_TRANSFERS)
+_STATEMENTS = (ast.AnnAssign, ast.Assign, ast.AugAssign, ast.Expr, ast.For, ast.If, ast.Pass, ast.Return,
+               ast.While, *_LOOP_TRANSFERS)
 _COMPARISONS = {ast.Eq: "eq", ast.NotEq: "ne", ast.Is: "eq", ast.IsNot: "ne",
                 ast.Lt: "lt", ast.LtE: "le", ast.Gt: "lt", ast.GtE: "le"}
 
@@ -48,6 +49,16 @@ class _Loop:
     step: _Block | None = None
     broken: _Assigned | None = None
     continuing: _Assigned | None = None
+    can_continue: bool = True
+
+
+@dataclass(frozen=True)
+class _WhileCursor:
+    name: str
+    start: int
+    step: int
+    iterations: int
+    advance_at: int
 
 
 def compile_method(source: str, entry: str, *, filename: str = "<source>") -> Program:
@@ -57,6 +68,24 @@ def compile_method(source: str, entry: str, *, filename: str = "<source>") -> Pr
 
 def _is_empty(node: ast.AST) -> bool:
     return isinstance(node, ast.Constant) and node.value is None
+
+
+def _cursor_step(node: ast.stmt, cursor: str) -> int | None:
+    if isinstance(node, ast.AugAssign):
+        target, op, value = node.target, node.op, node.value
+    elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.value, ast.BinOp):
+        update = node.value
+        if not isinstance(update.left, ast.Name) or update.left.id != cursor:
+            return None
+        target, op, value = node.targets[0], update.op, update.right
+    else:
+        return None
+    if not isinstance(target, ast.Name) or target.id != cursor or not isinstance(op, (ast.Add, ast.Sub)):
+        return None
+    amount = _integer(value)
+    if amount is None or not _fits_int((amount, amount)):
+        return None
+    return -amount if isinstance(op, ast.Sub) else amount
 
 
 def _integer(node: ast.AST) -> int | None:
@@ -154,12 +183,12 @@ class _Lowering:
         while pending:
             node, in_loop = pending.pop()
             if isinstance(node, ast.stmt) and not isinstance(node, _STATEMENTS):
-                raise module.error(node, f"不支持语句 {type(node).__name__}，请使用赋值、if、定长 for 或 return")
+                raise module.error(node, f"不支持语句 {type(node).__name__}，请使用赋值、分支、有界循环或 return")
             if isinstance(node, _LOOP_TRANSFERS) and not in_loop:
-                raise module.error(node, "break 和 continue 只能用在定长 for 循环体内")
+                raise module.error(node, "break 和 continue 只能用在有界循环体内")
             if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
                 written.add(node.id)
-            enters_loop = in_loop or isinstance(node, ast.For)
+            enters_loop = in_loop or isinstance(node, (ast.For, ast.While))
             pending.extend((child, enters_loop) for child in reversed(list(ast.iter_child_nodes(node))))
         self.names = written | {arg.name for arg in self.inputs}
         self.types = {arg.name: arg.type for arg in self.inputs}
@@ -299,10 +328,14 @@ class _Lowering:
                 self.branch(node)
             elif isinstance(node, ast.For):
                 self.loop(node)
+            elif isinstance(node, ast.While):
+                self.while_loop(node)
             elif isinstance(node, _LOOP_TRANSFERS):
                 self.loop_transfer(node)
             elif isinstance(node, (ast.Assign, ast.AnnAssign)):
                 self.assignment(node)
+            elif isinstance(node, ast.AugAssign):
+                raise self.module.error(node, "请直接赋值。+= 和 -= 用于有界 while 的游标更新")
             elif not isinstance(node, ast.Pass):
                 raise self.module.error(node, "表达式的结果需要赋给局部变量或直接返回")
 
@@ -524,13 +557,7 @@ class _Lowering:
         self.statements(node.body)
         self.loop_flow, self.loop_visits = previous, outer_visits
 
-        continuing = flow.continuing
-        if self.current is not None:
-            continuing = self.assigned if continuing is None else _join(continuing, self.assigned)
-            if flow.step is not None:
-                self.current.end = Jump(flow.step.name)
-        if flow.step is not None:
-            self.current = flow.step
+        continuing = self.loop_step(flow)
         if self.current is not None:
             # index 最大为 stop - 1，末次递增到 stop 即退出。
             self.emit(Apply(index, "add", (Reference(index), Constant(INT, 1))))
@@ -539,6 +566,103 @@ class _Lowering:
                 flow.done = self.block()
             self.current.end = Branch(again.operand, head.name, flow.done.name)
 
+        self.loop_exit(flow, continuing)
+
+    def while_cursor(self, node: ast.While) -> _WhileCursor:
+        test = node.test
+        if node.orelse or not isinstance(test, ast.Compare) or len(test.ops) != 1:
+            raise self.module.error(test, "while 需要用一个整数游标和字面量作大小比较，循环后直接写后续语句")
+        op = test.ops[0]
+        if not isinstance(op, (ast.Lt, ast.LtE, ast.Gt, ast.GtE)):
+            raise self.module.error(test, "while 游标边界请使用 <、<=、> 或 >=")
+        cursor, bound = test.left, test.comparators[0]
+        direction = 1 if isinstance(op, (ast.Lt, ast.LtE)) else -1
+        if not isinstance(cursor, ast.Name):
+            cursor, bound = bound, cursor
+            direction = -direction
+        limit = _integer(bound)
+        if not isinstance(cursor, ast.Name) or limit is None:
+            raise self.module.error(test, "while 需要用一个整数游标和字面量作大小比较")
+        self.checked_int(bound, limit)
+        name = cursor.id
+        entry = self.assigned.get(name)
+        if self.types.get(name) is not INT or entry is None or entry[0] != entry[1]:
+            raise self.module.error(cursor, "请先把 while 游标初始化为编译期已知的整数")
+
+        advance_at = None
+        step = None
+        for i, stmt in enumerate(node.body):
+            if not any(isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store) and child.id == name
+                       for child in ast.walk(stmt)):
+                continue
+            update = _cursor_step(stmt, name)
+            if advance_at is not None or update is None:
+                raise self.module.error(stmt, "while 游标须在循环体顶层用一个固定步长更新一次")
+            advance_at, step = i, update
+        if advance_at is None or step is None:
+            raise self.module.error(test, "while 游标须在循环体顶层用一个固定步长更新一次")
+        if not _fits_int((step, step)) or step * direction <= 0:
+            raise self.module.error(node.body[advance_at], "while 步长必须是朝结束边界推进的非零 32 位整数")
+
+        start = entry[0]
+        distance = (limit - start) * direction + int(isinstance(op, (ast.LtE, ast.GtE)))
+        magnitude = abs(step)
+        iterations = max(0, (distance + magnitude - 1) // magnitude)
+        last = start + iterations * step
+        if not _fits_int((last, last)):
+            raise self.module.error(node.body[advance_at], "while 游标更新可能超出有符号 32 位范围")
+        return _WhileCursor(name, start, step, iterations, advance_at)
+
+    def while_loop(self, node: ast.While) -> None:
+        cursor = self.while_cursor(node)
+        if cursor.iterations == 0:
+            return
+        name, start, step = cursor.name, cursor.start, cursor.step
+        end = start + cursor.iterations * step
+        last = end - step
+        outer_visits = self.loop_visits
+        self.loop_visits *= cursor.iterations
+        assert self.current is not None
+        head = self.block()
+        # 初值已通过条件，后续每次在游标更新后检查同一个边界。
+        self.current.end = Jump(head.name)
+        self.current = head
+        for statement in node.body:
+            for child in ast.walk(statement):
+                if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store) and child.id in self.assigned:
+                    self.assigned[child.id] = None
+        self.assigned[name] = (min(start, last), max(start, last))
+        previous, flow = self.loop_flow, _Loop(outer_visits, can_continue=False)
+        self.loop_flow = flow
+        self.statements(node.body[:cursor.advance_at])
+        if self.current is not None:
+            slot = self.slots[name]
+            self.emit(Apply(slot, "add", (Reference(slot), Constant(INT, step))))
+            self.assigned[name] = (min(start + step, end), max(start + step, end))
+            flow.can_continue = True
+            self.statements(node.body[cursor.advance_at + 1:])
+        self.loop_flow, self.loop_visits = previous, outer_visits
+
+        continuing = self.loop_step(flow)
+        if self.current is not None:
+            if flow.done is None:
+                flow.done = self.block()
+            self.condition(node.test, head, flow.done)
+            assert continuing is not None
+            continuing[name] = (end, end)
+        self.loop_exit(flow, continuing)
+
+    def loop_step(self, flow: _Loop) -> _Assigned | None:
+        continuing = flow.continuing
+        if self.current is not None:
+            continuing = self.assigned if continuing is None else _join(continuing, self.assigned)
+            if flow.step is not None:
+                self.current.end = Jump(flow.step.name)
+        if flow.step is not None:
+            self.current = flow.step
+        return continuing
+
+    def loop_exit(self, flow: _Loop, continuing: _Assigned | None) -> None:
         self.current = flow.done
         if continuing is None:
             if flow.broken is not None:
@@ -555,6 +679,8 @@ class _Lowering:
             flow.broken = self.assigned.copy() if flow.broken is None else _join(flow.broken, self.assigned)
             target = flow.done
         else:
+            if not flow.can_continue:
+                raise self.module.error(node, "continue 前须先更新 while 游标")
             if flow.step is None:
                 flow.step = self.block()
             flow.continuing = (self.assigned.copy() if flow.continuing is None

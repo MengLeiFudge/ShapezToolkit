@@ -11,6 +11,7 @@ from ..slot_streams import SLOT_ROWS, SlotStreams
 from ..stock_selector import SOURCES
 from ..work_lane import A_X
 from .changeover import controls
+from .interface import recipe_interface
 from .recipe import BASE, CRYSTAL, MAX_STAGES, Production
 
 STAGE_PITCH = 18
@@ -137,4 +138,5 @@ def assemble(count: int, *, packet_tag: int,
     _check_footprints(islands)
     document = {'V': 1137, 'BP': {'$type': 'Island', 'BinaryVersion': 1137, 'Entries': islands}}
     return document, {'stations': stations, 'load': [asdict(port) for port in cargo_ports()],
+                      'recipe': recipe_interface(count, packet_tag),
                       'output': {'platform': (outlet['X'], 0, 0), 'east_y': SLOT_ROWS[-1], 'level': 0}}

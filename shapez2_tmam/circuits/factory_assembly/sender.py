@@ -9,11 +9,11 @@ from ..stage_memory import READBACK, STREAM_STATE, STREAM_SUCCESSOR, WRITE_BUS
 from ..stage_writer import WRITE_ACK, WRITE_READY, WRITE_REQUEST, WRITE_RESET
 from ..stream_controller import PROGRAM_ACCEPTED, PROGRAM_LENGTH, REPLAY_RESULT, STREAM_NEXT
 from .changeover import CLEAN_CONFIRMED, ENABLE_FEED, LOADED, LOAD_PERMIT, TARGET_INPUT
+from .interface import FIELDS, OPERATOR_INPUTS, ORDER_INPUTS, WRITE_STATUS
 
 PACKET_TAG = 1_640_046
 ORDER_SELECT = 1_640_047
-PAYLOAD = tuple(name for name in WRITE_BUS if name not in ('address', 'phase'))
-FIELDS = {name: WRITE_BUS[name] for name in PAYLOAD}
+PAYLOAD = tuple(FIELDS)
 ROWS_PER_BOARD = 2
 
 
@@ -94,9 +94,6 @@ def build(orders, packet_tag: int) -> tuple[list[dict], dict]:
         island.update(X=3 * column, Y=18 + 3 * row)
         islands.append(island)
     interface = {'select': {'channel': ORDER_SELECT, 'orders': order_ids},
-                 'write': {'address': WRITE_BUS['address'], 'payload': FIELDS, 'packet_tag': packet_tag,
-                           'phase': WRITE_BUS['phase'], 'ready': WRITE_READY, 'request': WRITE_REQUEST, 'ack': WRITE_ACK},
-                 'control': {'run': RUN, 'clean_confirmed': CLEAN_CONFIRMED, 'enable_feed': ENABLE_FEED,
-                             'loaded': LOADED, 'length': PROGRAM_LENGTH, 'target': TARGET_INPUT,
-                             'replay_result': REPLAY_RESULT, 'accepted': PROGRAM_ACCEPTED}}
+                 'write': {**WRITE_STATUS, 'payload': dict(FIELDS), 'packet_tag': packet_tag},
+                 'control': {**OPERATOR_INPUTS, 'loaded': LOADED, **ORDER_INPUTS}}
     return islands, interface

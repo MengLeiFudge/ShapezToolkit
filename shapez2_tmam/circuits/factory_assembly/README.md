@@ -4,7 +4,18 @@
 
 ## 写入与换单
 
-接口用 `changeover`、`stage_memory`、`stage_writer` 和 `stream_controller` 中的频道常量。上游在虚拟回放成功后发布目标、回放结果、成功信号和长度。实体按 `WRITE_BUS['address']` 收取每个地址的六字段和 `packet_tag`，直到两组回读完成。`LOADED` 表示整份配方写入完成。实体交货以东侧成品带实际经过的图形和数量为准。
+`assemble` 的接口表包含 `recipe`，验收与实体册 JSON 在 `interfaces.recipe` 导出同一张接线表。每项信号的值是原生频道编号，`length` 给出这张蓝图的可装配长度。精简工道还需按 `stations` 核对每个地址的基础料和结晶停靠点。
+
+| 字段 | 信号方向与用法 |
+|---|---|
+| `controller_outputs.target`、`replay_result`、`accepted`、`length` | 主控发布目标形状、回放得到的形状、成功整数 `1` 和指令总数。回放结果必须等于目标。长度须在 `length.min..length.max` 内 |
+| `controller_outputs.payload`、`packet_tag` | 主控按地址发 `opcode/a/b/destination/base/color` 六字段。前四项为整数，`base` 和 `color` 分别为原生图形和颜色信号，未使用的图形或颜色字段留空。读回总线并确认六字段与当前地址匹配后，才回送该地址为 `packet_tag` |
+| `factory_outputs.address`、`ready`、`request`、`ack` | 工道发布从 0 起的地址。`ready=1` 且标签匹配后，工道置 `request=1` 并开始写入。发送器保持地址对应的六字段和标签，直到 `ack=1`，再随工道地址更新。只响应 `0` 到 `length-1` 的整数地址。整数 `0`（包括首地址的标签）与空信号含义不同 |
+| `factory_outputs.loaded` | 最后一笔确认且整单回放、长度和放行条件仍满足时，工道发布 `loaded=1`。此时可打开领料，实体交货以东侧成品带实际经过的图形和数量为准 |
+| `factory_outputs.reset`、`phase`、`readback` | 工道输出复位、写入相位和两个存储组的回读。一次写入需两个回读都依次通过 `2 → 3 → 1`，工道才发出 `ack=1`。复位时保持 `phase=3`，等待两组回读均为空并让清空相位传遍工段 |
+| `operator_outputs` | 换单外控提供下表三个开关。排空时保持旧目标、回放结果、成功位和长度，让旧配方继续处理在途品 |
+
+固定发送器在导出前已由 Python 回放，所以把预验证的目标作为 `replay_result` 回送。动态主控须发布本次配方的实际回放结果。接入动态主控前，移除固定发送器的岛，确保这组频道只由一个发送器发布。
 
 | 阶段 | `RUN` | `CLEAN_CONFIRMED` | `ENABLE_FEED` | 操作 |
 |---|---:|---:|---:|---|
