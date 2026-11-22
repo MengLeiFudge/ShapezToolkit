@@ -36,7 +36,8 @@
   ],
   "schedule": "combination",
   "expanded_blocks": {
-    "column_admissible": 1
+    "column_admissible": 1,
+    "_check_column_flags": 1
   },
   "settling": {
     "max_gate_depth": 14,
@@ -52,12 +53,12 @@
   ],
   "buildings_by_layer": [
     1113,
-    200,
-    1010
+    201,
+    996
   ],
   "logic_gates": 80,
   "logic_gates_before_reuse": 80,
-  "building_entries": 2323,
+  "building_entries": 2310,
   "global_receivers": 5,
   "global_transmitters": 1,
   "internal_global_devices": 0

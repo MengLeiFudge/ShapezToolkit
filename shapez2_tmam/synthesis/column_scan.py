@@ -1,0 +1,57 @@
+"""把目标的 q0 列转成保留五个原层位的材料信号。"""
+
+from .column_rules import _check_column_flags
+from .layer_methods import stack
+from .physics import Shape
+from .shape_methods import (advance_target_rows, analyze_part, read_top_row_at, shape_literal,
+                            unstack_lower, unstack_upper)
+
+
+def _material_marker(row: Shape | None) -> Shape:
+    part = analyze_part(row)
+    if part is None:
+        return shape_literal("Cu------")
+    if part == shape_literal("P-------"):
+        return shape_literal("Su------")
+    if part == shape_literal("cu------"):
+        return shape_literal("Wu------")
+    return shape_literal("Ru------")
+
+
+def column_scan_remaining(remaining: Shape | None, word: Shape | None, height: int) -> Shape | None:
+    return advance_target_rows(remaining, height)
+
+
+def column_scan_word(remaining: Shape | None, word: Shape | None, height: int) -> Shape | None:
+    marker = _material_marker(read_top_row_at(remaining, height))
+    if word is None:
+        return marker
+    return stack(marker, word)
+
+
+def column_scan_height(remaining: Shape | None, word: Shape | None, height: int) -> int:
+    if height < 1 or height > 5:
+        return 0
+    return (0, 0, 1, 2, 3, 4)[height]
+
+
+def column_word_admissible(word: Shape | None) -> bool:
+    """检查扫描完成后的五层材料字。"""
+    z4 = unstack_upper(word)
+    word = unstack_lower(word)
+    z3 = unstack_upper(word)
+    word = unstack_lower(word)
+    z2 = unstack_upper(word)
+    word = unstack_lower(word)
+    z1 = unstack_upper(word)
+    z0 = unstack_lower(word)
+    empty = shape_literal("Cu------")
+    pin = shape_literal("Su------")
+    crystal = shape_literal("Wu------")
+    ordinary = shape_literal("Ru------")
+    return _check_column_flags(
+        z0 == empty, z1 == empty, z2 == empty, z3 == empty,
+        z0 == pin, z1 == pin, z2 == pin, z3 == pin, z4 == pin,
+        z0 == crystal, z1 == crystal, z2 == crystal, z3 == crystal, z4 == crystal,
+        z0 == ordinary, z1 == ordinary, z2 == ordinary, z3 == ordinary,
+    )

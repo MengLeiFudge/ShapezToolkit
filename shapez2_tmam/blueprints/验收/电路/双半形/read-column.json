@@ -1,0 +1,136 @@
+{
+  "methods": {
+    "remaining": "column_scan_remaining",
+    "word": "column_scan_word",
+    "height": "column_scan_height"
+  },
+  "schedule": "bounded_fold",
+  "quadrants": 4,
+  "height": 5,
+  "steps": 5,
+  "inputs": {
+    "run": {
+      "channel": 1700560,
+      "type": "bool"
+    },
+    "initial_remaining": {
+      "channel": 1700561,
+      "type": "shape"
+    },
+    "initial_word": {
+      "channel": 1700562,
+      "type": "shape"
+    },
+    "initial_height": {
+      "channel": 1700563,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "done": {
+      "channel": 1700564,
+      "type": "bool"
+    },
+    "result_remaining": {
+      "channel": 1700565,
+      "type": "shape"
+    },
+    "result_word": {
+      "channel": 1700566,
+      "type": "shape"
+    },
+    "result_height": {
+      "channel": 1700567,
+      "type": "int"
+    }
+  },
+  "module_links": {
+    "state_to_step": {
+      "index": {
+        "channel": 1700568,
+        "type": "int"
+      },
+      "value_remaining": {
+        "channel": 1700569,
+        "type": "shape"
+      },
+      "value_word": {
+        "channel": 1700570,
+        "type": "shape"
+      },
+      "value_height": {
+        "channel": 1700571,
+        "type": "int"
+      }
+    },
+    "step_to_state": {
+      "next_index": {
+        "channel": 1700572,
+        "type": "int"
+      },
+      "next_value_remaining": {
+        "channel": 1700573,
+        "type": "shape"
+      },
+      "next_value_word": {
+        "channel": 1700574,
+        "type": "shape"
+      },
+      "next_value_height": {
+        "channel": 1700575,
+        "type": "int"
+      }
+    }
+  },
+  "reserved_channels": [
+    1700560,
+    1700575
+  ],
+  "timing": {
+    "channel_signal_ticks": 12,
+    "round_signal_ticks": 24,
+    "reset_hold_signal_ticks": 256,
+    "start_to_sample_signal_ticks": 160,
+    "conditions": "整件批量导入或完整重载。常速 Hybrid 或 AlwaysHighUPS，固定接线与配置，每批最多 4 信号 tick，保留频道由本实例独占。",
+    "protocol": "从 run=0 复位开始，保持本次所有初值，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 3,
+  "island_footprint_chunks": [
+    6,
+    3
+  ],
+  "buildings_by_layer": [
+    2030,
+    1253,
+    1459
+  ],
+  "building_entries": 4742,
+  "global_receivers": 16,
+  "global_transmitters": 12,
+  "internal_global_devices_per_module": 0,
+  "worker_partitions": [
+    [
+      1700572,
+      1700573
+    ],
+    [
+      1700574,
+      1700575
+    ]
+  ],
+  "worker_layout_failures": [
+    {
+      "outputs": [
+        1700572,
+        1700573,
+        1700574,
+        1700575
+      ],
+      "reason": "三层平台未布通 104 个门，三层平台内无法完成本地信号 1000100 的布线"
+    }
+  ],
+  "worker_logic_gates": 138,
+  "worker_logic_gates_before_reuse": 139,
+  "worker_logic_gates_after_reuse": 104
+}
