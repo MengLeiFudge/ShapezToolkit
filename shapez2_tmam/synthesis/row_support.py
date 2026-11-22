@@ -8,3 +8,11 @@ def addition_needs_lower(cell: int, left: int, right: int, opposite: int) -> boo
     if cell != 1 or left == 2 or right == 2:
         return False
     return opposite != 2 or (left != 1 and right != 1)
+
+
+def advance_stack_height(height: int, row_height: int, cell: int,
+                         left: int, right: int, opposite: int) -> int:
+    """更新本列前缀；row_height 是当前层号加一，四格状态用更新前的高度。"""
+    if addition_needs_lower(cell, left, right, opposite):
+        return row_height
+    return height
