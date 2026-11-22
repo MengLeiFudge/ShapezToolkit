@@ -47,3 +47,9 @@ python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-bas
 这个例子有两个整数状态 `a`、`b` 和三个布尔 `item`。每轮输入为 1 时，两字段各取对方的旧值。给定初值 `a=3`、`b=7`，依次输入 `1, 0, 0`，预期结果是 `a=7`、`b=3`。
 
 堆叠前缀用 `synthesis/row_support.py` 的 `stack_scan_q0` 至 `stack_scan_q3` 作为四个更新入口，并传入 `round_values=(5, 4, 3, 2, 1)`。`initial_q0` 至 `initial_q3` 接四列初值，`item0` 至 `item4` 接从顶到底排列的单层支撑代码，`synthesis/prefix_closure.py` 的 `stack_scan_rows` 可生成这五份输入。若更新入口需要零起算的轮序号，传入 `round_values=tuple(range(steps))`。轮值列表必须与轮数相等。
+
+### 只更新旧状态
+
+`timed.compile_state_steps(programs, steps, channel_base)` 用于每轮只读取旧状态的更新方法。各入口按映射顺序接收全部旧字段，下一轮同时使用各入口的返回值。支持 1～4 个字段，轮数可设为 1～32，庞大的计算仍受平台布线容量限制。对于 `N` 个字段，计算平台接收索引和 `N` 个旧字段，公开频道只有 `run`、各字段的初值、`done` 和各字段的结果。
+
+把 `synthesis/direct_stack.py` 的 `direct_scan_remaining`、`direct_scan_upper`、`direct_scan_valid` 分别编译为 `remaining`、`upper`、`valid`，按这个顺序传入并设 `steps=5`。`initial_remaining` 接待拆层的图形，`initial_upper` 接空图形，`initial_valid` 接上游的有效性标志。复位时保持三个初值，按接口表启动并在 `done=1` 后读取三个结果。

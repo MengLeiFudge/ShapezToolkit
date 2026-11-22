@@ -11,6 +11,7 @@
 | 电路 | 按原层号读取目标的两层 | [复位、选择与采样](电路/原层读取/read-target-rows.json) |
 | 电路 | 四列逐层堆叠前缀扫描 | [复位、行输入和采样时序](电路/堆叠前缀/stack-prefix-scan.json) |
 | 电路 | 筛选覆盖必要晶体分量的顶盖 | [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) |
+| 电路 | 无晶体路线的原层位及相邻层检查 | [空隙判定](电路/纯堆叠/direct-no-gaps.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
 
@@ -20,7 +21,10 @@
 
 前缀扫描电路接受四列初始前缀高度和五份已编码的行。每轮从同一份旧高度计算四列，依次处理第五层到第一层。电路与实体订单分别验收，实体册当前由固定发送器供给配方。
 
+纯堆叠检查把原图接入空隙判定，同时送进五轮扫描的 `initial_remaining`。空隙判定结果接 `initial_valid`，`initial_upper` 为空。按接口表复位、运行，采样时 `result_valid=1` 表示该目标可直接按层取无晶体订单和堆叠。
+
 ```bash
 python -m shapez2_tmam.circuits.compile_stack_scan --read-rows --channel-base 1700300 --output read-target-rows.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --channel-base 1700200 --output stack-prefix-scan.spz2bp
+python -m shapez2_tmam.circuits.compile_stack_scan --check-direct --channel-base 1700450 --output direct-stack-scan.spz2bp
 ```

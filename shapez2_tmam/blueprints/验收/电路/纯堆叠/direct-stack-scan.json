@@ -1,0 +1,115 @@
+{
+  "methods": {
+    "remaining": "direct_scan_remaining",
+    "upper": "direct_scan_upper",
+    "valid": "direct_scan_valid"
+  },
+  "schedule": "bounded_fold",
+  "quadrants": 4,
+  "height": 5,
+  "steps": 5,
+  "inputs": {
+    "run": {
+      "channel": 1700450,
+      "type": "bool"
+    },
+    "initial_remaining": {
+      "channel": 1700451,
+      "type": "shape"
+    },
+    "initial_upper": {
+      "channel": 1700452,
+      "type": "shape"
+    },
+    "initial_valid": {
+      "channel": 1700453,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "done": {
+      "channel": 1700454,
+      "type": "bool"
+    },
+    "result_remaining": {
+      "channel": 1700455,
+      "type": "shape"
+    },
+    "result_upper": {
+      "channel": 1700456,
+      "type": "shape"
+    },
+    "result_valid": {
+      "channel": 1700457,
+      "type": "bool"
+    }
+  },
+  "module_links": {
+    "state_to_step": {
+      "index": {
+        "channel": 1700458,
+        "type": "int"
+      },
+      "value_remaining": {
+        "channel": 1700459,
+        "type": "shape"
+      },
+      "value_upper": {
+        "channel": 1700460,
+        "type": "shape"
+      },
+      "value_valid": {
+        "channel": 1700461,
+        "type": "bool"
+      }
+    },
+    "step_to_state": {
+      "next_index": {
+        "channel": 1700462,
+        "type": "int"
+      },
+      "next_value_remaining": {
+        "channel": 1700463,
+        "type": "shape"
+      },
+      "next_value_upper": {
+        "channel": 1700464,
+        "type": "shape"
+      },
+      "next_value_valid": {
+        "channel": 1700465,
+        "type": "bool"
+      }
+    }
+  },
+  "reserved_channels": [
+    1700450,
+    1700465
+  ],
+  "timing": {
+    "channel_signal_ticks": 12,
+    "round_signal_ticks": 24,
+    "reset_hold_signal_ticks": 256,
+    "start_to_sample_signal_ticks": 160,
+    "conditions": "整件批量导入或完整重载。常速 Hybrid 或 AlwaysHighUPS，固定接线与配置，每批最多 4 信号 tick，保留频道由本实例独占。",
+    "protocol": "从 run=0 复位开始，保持本次所有初值，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 2,
+  "island_footprint_chunks": [
+    6,
+    3
+  ],
+  "buildings_by_layer": [
+    1192,
+    1076,
+    807
+  ],
+  "building_entries": 3075,
+  "global_receivers": 12,
+  "global_transmitters": 12,
+  "internal_global_devices_per_module": 0,
+  "worker_logic_gates": 61,
+  "worker_logic_gates_before_reuse": 68,
+  "worker_logic_gates_after_reuse": 61
+}
