@@ -24,7 +24,25 @@ python -m shapez2_tmam.circuits.factory_assembly.sender_sample --output two-step
 
 向 `sample.start` 指定的频道发布整数 `0` 并停料，持续观察 `phase=3` 至少 128 信号 tick。样件每隔 12 tick 取一次清空相位，12 个样本通过才在 `sample.reset_ready` 指定的频道发布整数 `1`。两个条件满足后，向启动频道发布整数 `1` 并保持。样件发布 `RUN` 和 `CLEAN_CONFIRMED`，供料开关仍由操作方控制。待 `loaded=1` 后开料，换单先按下文排空再重新清空。
 
-编译后的动态字段先接私有频道。保持地址和其他输入满编译报告给出的采样时间，再确认六字段和候选地址。发布条件为假时输出空信号，合法的槽号 `0` 仍作为整数传输。
+## 动态提交桥
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.submit_bridge --settling-report fields.json --output submit-bridge.spz2bp
+```
+
+将提交桥与外置主控工道合装，保留接口表的 `reserved_internal_channels` 范围。编译器的六个输出接 `1680001–1680006`，本组使用的工段地址接 `1680007`。桥从工道读取当前地址、长度和复位信号，是公开六字段及 `packet_tag` 的唯一发送器。目标、配方长度、实际回放结果和操作开关由主控发布。按本次配方留空未使用字段，整数槽号 `0` 保持原值。
+
+单块计算板用编译报告的 `settling.hold_signal_ticks`。多块板串接时，用 `--hold-signal-ticks` 传最长路径上各板等待时间的合计。当前纯堆叠编译的四个整数值并行需要 1,344 tick，基础图形要先取深度再取层，合计 1,664 tick。
+
+接验收册的纯堆叠电路时，用 `--direct-stack` 随桥导出候选地址板。装方信息板发布 `accepted=1` 后，候选地址板转发有效的工道地址到 `1680007`，桥照常等待并核对字段。纯堆叠不使用结晶颜色，`1680006` 留空。
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.submit_bridge --direct-stack --hold-signal-ticks 1664 --output direct-submit-bridge.spz2bp
+```
+
+主控在发出候选地址后，保持计算所用的目标、长度及其他输入，并保持当前候选直到工道确认。桥比较每个私有字段与 12 tick 之前的值，为每个地址累计等待时间。等待向上取整为完整无线跳数。比较采用固定无线相位，前提是编译板在整组输入保持时按报告收敛，或外置来源按同样的固定相位提交。候选地址不符、字段变化或工道复位会清空相应等待记录。复位仍须执行下文连续 128 tick 的清空流程。
+
+等待到期后，两块板一起发布暂存的六字段。提交地址到公开数据为 12 tick，公开数据到回读标签为 24 tick。两组回读确认属于当前地址且六字段吻合，工道才收到标签。桥原样转发图形与颜色信号。
 
 ## 写入与换单
 
