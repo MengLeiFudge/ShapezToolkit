@@ -1,8 +1,13 @@
 """角与脚手架半形：任意层释放及四象限五层顶破，共用稳定半形拼装。"""
 
 from .column_rules import column_admissible
+from .half_support import half_support_row
 from .physics import EMPTY, PIN, Shape
 from .recipe import Builder, Recipe
+
+
+def _material(cell: str) -> int:
+    return 0 if cell == EMPTY else 2 if cell == PIN else 3 if cell[0] == "c" else 1
 
 
 class CornerBuilder:
@@ -20,8 +25,7 @@ class CornerBuilder:
     def admissible(cells: tuple[str, ...]) -> bool:
         """检查针前缀、晶体间隙及独立针的直接支撑这些列内必要条件。"""
         if len(cells) <= 5:
-            materials = tuple(0 if cell == EMPTY else 2 if cell == PIN else 3 if cell[0] == "c" else 1
-                              for cell in cells)
+            materials = tuple(_material(cell) for cell in cells)
             return column_admissible(*(materials + (0,) * (5 - len(cells))))
         prefix = True
         outside_pin = False
@@ -67,20 +71,18 @@ class CornerBuilder:
             raise ValueError("半形稳定性需要非空的两列原层位网格")
         if supported_column not in (None, 0, 1):
             raise ValueError("外侧N柱只能支撑两列中的0或1")
-        links = [False] + [any(rows[z][q][0] == "c" and rows[z - 1][q][0] == "c"
-                               for q in (0, 1)) for z in range(1, len(rows))]
+        encoded = tuple((_material(a), _material(b)) for a, b in rows)
+        lower = (0, 0)
         supported = False
-        for z, row in enumerate(rows):
-            nonpins = [q for q in (0, 1) if row[q] not in (EMPTY, PIN)]
-            if z and any(row[q] == PIN and rows[z - 1][q] == EMPTY for q in (0, 1)):
+        for z, row in enumerate(encoded):
+            continues = z + 1 < len(encoded) and any(
+                cell == 3 and upper == 3 for cell, upper in zip(row, encoded[z + 1]))
+            side = supported_column is not None and row[supported_column] in (1, 3)
+            status = half_support_row(*lower, *row, supported, z == 0, continues, side)
+            if status < 0:
                 return False
-            if not links[z]:
-                supported = z == 0 or any(rows[z - 1][q] != EMPTY for q in nonpins)
-            else:
-                supported |= any(rows[z - 1][q] == PIN for q in nonpins)
-            supported |= supported_column in nonpins
-            if nonpins and not supported and (z + 1 == len(rows) or not links[z + 1]):
-                return False
+            supported = status == 1
+            lower = row
         return True
 
     @staticmethod
