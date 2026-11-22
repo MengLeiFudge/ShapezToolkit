@@ -6,8 +6,9 @@ from pathlib import Path
 
 from ..circuit import Literal, constant, encode_document
 from ..compiler_contract import Program
-from ._layout import layout
+from ._layout import LayoutCapacityError, layout, logic_gates
 from ._lower import Lowering, _Value
+from ._optimize import compact
 
 
 __all__ = ["compile_program", "export_program"]
@@ -29,7 +30,18 @@ def compile_program(program: Program, channel_base: int) -> tuple[dict, dict]:
                  for i, arg in enumerate(entry.inputs))
     value = lowering.invoke(entry.name, args).signal
     result = circuit.add("ConstantSignal", config=constant(value.value)) if isinstance(value, Literal) else value
-    document, depth = layout(circuit, {output_channel: result})
+    outputs = {output_channel: result}
+    reduced, reduced_outputs = compact(circuit, outputs)
+    try:
+        document, depth = layout(reduced, reduced_outputs)
+    except LayoutCapacityError as error:
+        if reduced is circuit:
+            raise
+        try:
+            document, depth = layout(circuit, outputs)
+        except LayoutCapacityError as original_error:
+            raise LayoutCapacityError(f"复用后 {error}。未复用的网表也无法布置，{original_error}") from original_error
+        reduced, reduced_outputs = circuit, outputs
     entries = document["BP"]["Entries"][0]["B"]["Entries"]
     counts = Counter(e["T"].removesuffix("InternalVariant") for e in entries)
     hold_ticks = 64 * (depth + 2)
@@ -52,6 +64,8 @@ def compile_program(program: Program, channel_base: int) -> tuple[dict, dict]:
         "platforms": 1,
         "island_footprint_chunks": [3, 3],
         "buildings_by_layer": [sum(e["L"] == z for e in entries) for z in range(3)],
+        "logic_gates": logic_gates(reduced, reduced_outputs),
+        "logic_gates_before_reuse": logic_gates(circuit, outputs),
         "building_entries": len(entries),
         "global_receivers": counts["ControlledSignalReceiver"],
         "global_transmitters": counts["ControlledSignalTransmitter"],

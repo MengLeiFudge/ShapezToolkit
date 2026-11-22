@@ -12,7 +12,7 @@ from ..factory_book import TRAIN_BOOK, _station
 from ..freight_loader import loading
 from ..freight_stage import depot
 from . import acceptance, sender
-from .capacity import TrainDelivery, check_capacity, parallel_lines
+from .capacity import TrainDelivery, check_capacity, demands, parallel_lines
 from .layout import cargo_ports, crystal_loading
 from .recipe import replay
 
@@ -40,8 +40,7 @@ def _measurements(data):
     return rates, deliveries
 
 
-def _order_capacity(order, belt_rate, rates, deliveries):
-    plan = replay(order['target'], order['instructions'])
+def _order_capacity(plan, belt_rate, rates, deliveries):
     checks = check_capacity(plan, belt_rate, rates, deliveries)
     paths = []
     layers = defaultdict(Fraction)
@@ -84,27 +83,59 @@ def _order_capacity(order, belt_rate, rates, deliveries):
             'parallel_lines': parallel_lines(checks)}
 
 
-def build(book: str, belt_rate: Fraction, measurements: dict) -> tuple[dict[str, str], dict]:
+def _recipe_load(plan):
+    used = {d.port for d in demands(plan) if d.port is not None}
+    return tuple(port for port in cargo_ports() if port in used)
+
+
+def _proportioning(ports):
+    base = {port.cargo for port in ports if port.station != 'crystal'}
+    crystal = {port.cargo for port in ports if port.station == 'crystal'}
+    base_load = {f'base-load-{kind}-{cargo}': loading(cargo)
+                 for kind, cargoes in (('shape', 'CRSW'), ('dye', 'rgb')) for cargo in cargoes if cargo in base}
+    crystal_load = {f'crystal-load-{cargo}': crystal_loading(cargo) for cargo in 'rgb' if cargo in crystal}
+    documents = {**base_load, **crystal_load}
+    if base:
+        documents['base-mixed-depot'] = depot()
+    if crystal:
+        documents['crystal-mixed-depot'] = _island_blueprint(_station('fluid-depot'))
+    report = {'base_load': list(base_load), 'crystal_load': list(crystal_load),
+              'load': [asdict(port) for port in ports], 'train_direction': 'north'}
+    return documents, report
+
+
+def _trains(ports):
+    cargo = {port.cargo: 'fluid' if port.kind == 'Fluids' else 'shape' for port in ports}
+    needed = set(cargo.values())
+    documents = {name: _island_blueprint(_station(name)) for name in TRAIN_BOOK if name.split('-', 1)[0] in needed}
+    report = {'single_cargo': {name: ('Fluids' if name.startswith('fluid') else 'Shapes') for name in documents},
+              'train_direction': 'north'}
+    return documents, report, cargo
+
+
+def build(book: str, belt_rate: Fraction, measurements: dict, *,
+          recipe_path: Path | None = None) -> tuple[dict[str, str], dict]:
     if belt_rate <= 0:
         raise ValueError('成品带速须为正数')
     if book == 'physical':
         rates, deliveries = _measurements(measurements)
-        blueprint, report = acceptance.build(sender.PACKET_TAG)
-        report['capacity'] = {name: _order_capacity(order, belt_rate, rates, deliveries)
-                              for name, order in report['orders'].items()}
+        blueprint, report = acceptance.build(sender.PACKET_TAG, compact=recipe_path is not None, recipe_path=recipe_path)
+        plans = {name: replay(order['target'], order['instructions']) for name, order in report['orders'].items()}
+        report['capacity'] = {name: _order_capacity(plan, belt_rate, rates, deliveries) for name, plan in plans.items()}
+        if recipe_path is not None:
+            report['interfaces']['load'] = [asdict(port) for port in _recipe_load(plans['solver4'])]
+            return {'six-slot-solver4': blueprint}, report
         return {'six-slot-acceptance': blueprint}, report
+    ports = cargo_ports()
+    if recipe_path is not None:
+        order = acceptance._solver_order(recipe_path)
+        ports = _recipe_load(replay(order['target'], order['instructions']))
     if book == 'proportioning':
-        base_load = {f'base-load-{kind}-{cargo}': loading(cargo)
-                     for kind, cargoes in (('shape', 'CRSW'), ('dye', 'rgb')) for cargo in cargoes}
-        crystal_load = {f'crystal-load-{cargo}': crystal_loading(cargo) for cargo in 'rgb'}
-        documents = {**base_load, **crystal_load, 'base-mixed-depot': depot(),
-                     'crystal-mixed-depot': _island_blueprint(_station('fluid-depot'))}
-        report = {'base_load': list(base_load), 'crystal_load': list(crystal_load),
-                  'load': [asdict(port) for port in cargo_ports()], 'train_direction': 'north'}
+        documents, report = _proportioning(ports)
     elif book == 'trains':
-        documents = {name: _island_blueprint(_station(name)) for name in TRAIN_BOOK}
-        report = {'single_cargo': {name: ('Fluids' if name.startswith('fluid') else 'Shapes') for name in TRAIN_BOOK},
-                  'train_direction': 'north'}
+        documents, report, cargo = _trains(ports)
+        if recipe_path is not None:
+            report['cargo'] = cargo
     else:
         raise ValueError(f'未知分册 {book!r}')
     return {name: encode_document(document) for name, document in documents.items()}, report
@@ -114,12 +145,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description='分别生成六槽验收的实体、配料或通用火车分册')
     parser.add_argument('book', choices=BOOKS)
     parser.add_argument('--output-dir', type=Path, help='导出原生蓝图和分册 JSON 的目录')
+    parser.add_argument('--recipe', type=Path, help='Solver4 生成的 solved 指令 JSON')
     parser.add_argument('--belt-rate', type=Fraction, default=Fraction(1), help='实体册目标件数/秒，默认按每秒 1 件列需求')
     parser.add_argument('--measurements', type=Path, help='实体册的机器、管带和到货实测 JSON')
     args = parser.parse_args()
     try:
         measurements = json.loads(args.measurements.read_text(encoding='utf-8')) if args.measurements else {}
-        blueprints, report = build(args.book, args.belt_rate, measurements)
+        blueprints, report = build(args.book, args.belt_rate, measurements, recipe_path=args.recipe)
     except (ArithmeticError, KeyError, OSError, ValueError) as error:
         parser.error(str(error))
     if args.output_dir is not None:

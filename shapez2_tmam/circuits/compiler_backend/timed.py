@@ -9,8 +9,9 @@ from ..circuit import Circuit, Literal, Ref
 from ..circuit_packing import stack_platforms
 from ..compiler_contract import BOOL, INT, Function, Program, ValueType
 from ..sequential_circuit import select
-from ._layout import _RADIO_ROWS, LayoutCapacityError, layout
+from ._layout import _RADIO_ROWS, LayoutCapacityError, layout, logic_gates
 from ._lower import Lowering, _Value
+from ._optimize import compact
 
 
 _CHANNEL_TICKS = 12
@@ -88,19 +89,19 @@ def _worker(lowerings: tuple[Lowering, ...], methods: tuple[Function, ...], port
     return circuit, {ports.next_index: next_index, **dict(zip(ports.next_value.values(), next_values))}
 
 
-def _place_workers(circuit: Circuit, outputs: dict[int, Ref], failures: list[dict]) -> list[tuple[dict, set[int]]]:
+def _place_workers(circuit: Circuit, outputs: dict[int, Ref], failures: list[dict]) -> list[tuple[dict, set[int], int]]:
     try:
         document, _ = layout(circuit, outputs)
     except LayoutCapacityError as error:
         if len(outputs) == 1:
             channel, = outputs
-            raise ValueError(f"计算频道 {channel} 无法单独布置，{error}") from error
+            raise LayoutCapacityError(f"计算频道 {channel} 无法单独布置，{error}") from error
         failures.append({"outputs": list(outputs), "reason": str(error)})
         midpoint = (len(outputs) + 1) // 2
         entries = tuple(outputs.items())
         return (_place_workers(circuit, dict(entries[:midpoint]), failures)
-+                _place_workers(circuit, dict(entries[midpoint:]), failures))
-    return [(document["BP"]["Entries"][0], set(outputs))]
+                + _place_workers(circuit, dict(entries[midpoint:]), failures))
+    return [(document["BP"]["Entries"][0], set(outputs), logic_gates(circuit, outputs))]
 
 
 def compile_fold(program: Program, steps: int, channel_base: int) -> tuple[dict, dict]:
@@ -159,8 +160,15 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
     state = _state(ports, steps)
     circuit, updates = _worker(lowerings, methods, ports, signature, round_values)
     failures: list[dict] = []
-    workers = _place_workers(circuit, updates, failures)
-    platforms = [state, *(platform for platform, _ in workers)]
+    reduced, reduced_outputs = compact(circuit, updates)
+    try:
+        workers = _place_workers(reduced, reduced_outputs, failures)
+    except LayoutCapacityError as error:
+        if reduced is circuit:
+            raise
+        failures.append({"reason": str(error), "unreduced_fallback": True})
+        workers = _place_workers(circuit, updates, failures)
+    platforms = [state, *(platform for platform, _, _ in workers)]
     if len(platforms) == 2:
         platforms[1]["X"] = 3
     else:
@@ -171,7 +179,7 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
     worker_inputs = {*ports.items.values(), *state_link}
     _verify_radios(document, (({ports.run, *ports.initial.values(), *worker_link},
                               {ports.done, *ports.result.values(), *state_link}),
-                              *((worker_inputs, outputs) for _, outputs in workers)))
+                              *((worker_inputs, outputs) for _, outputs, _ in workers)))
 
     def typed(named: dict[str, int], types: tuple[ValueType, ...]) -> dict:
         return {name: {"channel": channel, "type": type_.value}
@@ -219,6 +227,9 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
     if round_values is not None:
         report["round_values"] = list(round_values)
     if failures:
-        report["worker_partitions"] = [sorted(outputs) for _, outputs in workers]
+        report["worker_partitions"] = [sorted(outputs) for _, outputs, _ in workers]
         report["worker_layout_failures"] = failures
+    report["worker_logic_gates"] = sum(gates for _, _, gates in workers)
+    report["worker_logic_gates_before_reuse"] = logic_gates(circuit, updates)
+    report["worker_logic_gates_after_reuse"] = logic_gates(reduced, reduced_outputs)
     return document, report

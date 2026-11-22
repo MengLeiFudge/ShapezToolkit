@@ -36,9 +36,7 @@ def _route(board: _Board):
     raise ValueError(f"三层平台内无法完成本地信号 {order[0][0]} 的布线")
 
 
-def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
-    """公开接口使用无线。网表内部按真实端口路由，包括双格交换门。"""
-    channels = circuit.channel_map()
+def _live_nodes(circuit: Circuit, channels: dict[Ref, int], outputs: dict[int, Ref]) -> set[int]:
     providers = defaultdict(set)
     for ref, net in channels.items():
         providers[net].add(ref.node)
@@ -51,6 +49,66 @@ def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
             for arg in circuit.gates[node].inputs:
                 if isinstance(arg, Ref):
                     pending.extend(providers[channels[arg]] - live)
+    return live
+
+
+def logic_gates(circuit: Circuit, outputs: dict[int, Ref]) -> int:
+    return sum(circuit.gates[node].kind != "ControlledSignalReceiver"
+               for node in _live_nodes(circuit, circuit.channel_map(), outputs))
+
+
+def _spread_sites(circuit: Circuit, channels: dict[Ref, int], radios: list[int], gates: list[int],
+                  outputs: dict[int, Ref]) -> tuple[list[int], list[tuple[int, int, int]]]:
+    # 同网节点向彼此靠拢，无线端点固定。每张网对同一节点的总权重为一。
+    live = set(radios) | set(gates)
+    nets = defaultdict(set)
+    for ref, net in channels.items():
+        if ref.node in live:
+            nets[net].add(ref.node)
+    for node in gates:
+        for source in circuit.gates[node].inputs:
+            if isinstance(source, Ref):
+                nets[channels[source]].add(node)
+    tx_rows = (25,) if len(outputs) == 1 else _RADIO_ROWS
+    points = {node: (2, y) for node, y in zip(radios, _RADIO_ROWS)}
+    for i, (ref, y) in enumerate(zip(outputs.values(), tx_rows)):
+        points[-1 - i] = 50, y
+        nets[channels[ref]].add(-1 - i)
+    neighbors = defaultdict(list)
+    for net in nets.values():
+        members = sorted(net)
+        if len(members) > 1:
+            weight = 1 / (len(members) - 1)
+            for node in members:
+                neighbors[node].extend((other, weight) for other in members if other != node)
+    for i, node in enumerate(gates):
+        points[node] = 8 + 30 * i / len(gates), 25
+    for _ in range(40):
+        moved = {}
+        for node in gates:
+            linked = neighbors[node]
+            total = sum(weight for _, weight in linked)
+            if total:
+                moved[node] = (sum(points[other][0] * weight for other, weight in linked) / total,
+                               sum(points[other][1] * weight for other, weight in linked) / total)
+        points.update(moved)
+
+    columns = len(_GATE_COLUMNS)
+    order = sorted(gates, key=points.__getitem__)
+    placed = []
+    sites = []
+    for i, x in enumerate(_GATE_COLUMNS):
+        chunk = order[len(order) * i // columns:len(order) * (i + 1) // columns]
+        placed.extend(sorted(chunk, key=lambda node: points[node][1]))
+        column = [(x + z, y + z, z) for y in _GATE_ROWS for z in range(3)]
+        sites.extend(column[round(i * (len(column) - 1) / max(1, len(chunk) - 1))] for i in range(len(chunk)))
+    return placed, sites
+
+
+def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
+    """公开接口使用无线。网表内部按真实端口路由，包括双格交换门。"""
+    channels = circuit.channel_map()
+    live = _live_nodes(circuit, channels, outputs)
     used = {channels[arg] for node in live for arg in circuit.gates[node].inputs if isinstance(arg, Ref)}
     used.update(channels[ref] for ref in outputs.values())
 
@@ -74,10 +132,20 @@ def layout(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
         [(x, y, (i + z) % 3) for z in levels for i, (x, y) in enumerate(row_sites)],
         [(x, y, (i + z) % 3) for z in levels for i, (x, y) in enumerate(col_sites)],
     )
+    arrangements = []
+    if len(gates) > 50:
+        arrangements.append(_spread_sites(circuit, channels, radios, gates, outputs))
+        # 错开各层门位，让高扇出网络在门阵列之间有换层空间。
+        shifts = (
+            [(x + z, y + (2 * z) % 3, z) for x, y in row_sites for z in levels],
+            [(x + z, y + (2 * z) % 3, z) for x, y in col_sites for z in levels],
+        )
+        shapes = (*shifts, *shapes)
     last_error = None
-    for sites in shapes:
+    arrangements.extend((gates, sites) for sites in shapes)
+    for order, sites in arrangements:
         try:
-            return _place(circuit, channels, (radios, gates), used, sites, outputs)
+            return _place(circuit, channels, (radios, order), used, sites, outputs)
         except _RoutingError as error:
             last_error = error
     raise LayoutCapacityError(f"三层平台未布通 {len(gates)} 个门，{last_error}") from last_error

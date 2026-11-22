@@ -9,7 +9,7 @@ from ..compiler_contract import (
     Constant, Function, Instruction, Jump, Operand, Program, Reference,
     Return, ValueType, Variable,
 )
-from ._ranges import _Bounds, _INT_BOUNDS, _add_bounds, _fits_int, _range_failure, _within
+from ._ranges import _Bounds, _INT_BOUNDS, _add_bounds, _analyze_ranges, _fits_int, _within
 from ._sources import FrontendError, _Method, _Source, _Sources
 
 
@@ -91,6 +91,7 @@ class _Compilation:
     def __init__(self, sources: _Sources):
         self.sources = sources
         self.functions: dict[str, Function] = {}
+        self.return_bounds: dict[str, _Bounds] = {}
         self.active: list[str] = []
 
     def compile(self, entry: str) -> Program:
@@ -124,7 +125,10 @@ class _Compilation:
         name = self.sources.name(method)
         if name not in self.functions:
             self.active.append(name)
-            self.functions[name] = _Lowering(self, name, method).lower()
+            function, bounds = _Lowering(self, name, method).lower()
+            self.functions[name] = function
+            if bounds is not None:
+                self.return_bounds[name] = bounds
             self.active.pop()
         return self.functions[name]
 
@@ -176,17 +180,19 @@ class _Lowering:
                 self.slots[arg.name] = slot
                 self.emit(Bind(slot, Reference(arg.name)))
 
-    def lower(self) -> Function:
+    def lower(self) -> tuple[Function, _Bounds | None]:
         body = self.method.body[1:] if ast.get_docstring(self.method) is not None else self.method.body
         self.statements(body)
         if self.current is not None:
             raise self.module.error(self.method, "方法存在未返回值的路径，请在每条路径返回标注的类型")
         function = self.function()
-        if self.range_checks:
+        if self.range_checks or self.result is INT:
             required = {slot: allowed for slot, (_, allowed) in self.range_checks.items()}
-            failure = _range_failure(function, required, self.table_edges)
-            if failure is not None:
-                slot, bounds = failure
+            analysis = _analyze_ranges(function, required, self.compilation.return_bounds, self.table_edges)
+            if analysis is None:
+                return function, None
+            if analysis.failure is not None:
+                slot, bounds = analysis.failure
                 node, allowed = self.range_checks[slot]
                 subject = "加法" if allowed == _INT_BOUNDS else "索引"
                 if bounds is None:
@@ -198,9 +204,10 @@ class _Lowering:
                 else:
                     message = self.index_message(allowed, bounds)
                 raise self.module.error(node, message)
-            if self.prune_table_branches():
-                return self.function()
-        return function
+            if required and self.prune_table_branches():
+                function = self.function()
+            return function, analysis.result
+        return function, None
 
     def function(self) -> Function:
         blocks = []
@@ -698,7 +705,7 @@ class _Lowering:
             return self.apply(target, result, *args)
         slot = self.temp(result)
         self.emit(Call(slot, target.name, args))
-        return _Value(Reference(slot), result)
+        return _Value(Reference(slot), result, self.compilation.return_bounds.get(target.name))
 
     def shape_literal(self, node: ast.Call) -> _Value:
         if len(node.args) != 1:

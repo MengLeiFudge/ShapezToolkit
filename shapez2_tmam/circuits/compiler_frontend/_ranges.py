@@ -1,8 +1,9 @@
-"""按基本块访问上界验证整数加法及查表索引。"""
+"""按基本块访问上界检查整数运算并推导返回范围。"""
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 
-from ..compiler_contract import INT, Apply, Bind, Block, Branch, Constant, Function, Jump, Operand, Reference
+from ..compiler_contract import INT, Apply, Bind, Block, Branch, Call, Constant, Function, Jump, Operand, Reference, Return
 
 
 _INT_MIN = -(1 << 31)
@@ -12,6 +13,12 @@ _ANALYSIS_BLOCK_LIMIT = 16_384
 
 _Bounds = tuple[int, int]
 _Ranges = dict[str, _Bounds]
+
+
+@dataclass(frozen=True)
+class _RangeAnalysis:
+    result: _Bounds | None = None
+    failure: tuple[str, _Bounds | None] | None = None
 
 
 def _add_bounds(left: _Bounds, right: _Bounds) -> _Bounds:
@@ -89,12 +96,13 @@ def _branch_ranges(block: Block, end: Branch, ranges: _Ranges,
     return yes, no
 
 
-def _range_failure(function: Function, required: Mapping[str, _Bounds],
-                   table_edges: dict[str, set[str]]) -> tuple[str, _Bounds | None] | None:
+def _analyze_ranges(function: Function, required: Mapping[str, _Bounds], call_bounds: Mapping[str, _Bounds],
+                    table_edges: dict[str, set[str]]) -> _RangeAnalysis | None:
     blocks = {block.name: block for block in function.blocks}
     integers = {var.name for var in (*function.inputs, *function.locals) if var.type is INT}
     current: dict[str, _Ranges] = {function.blocks[0].name: {}}
     budget = _ANALYSIS_BLOCK_LIMIT
+    result = None
     # 每一层的状态来自恰好访问了同样多块的路径。循环次数上界独立于区间分析。
     for _ in range(function.max_block_visits):
         if not current:
@@ -102,7 +110,7 @@ def _range_failure(function: Function, required: Mapping[str, _Bounds],
         following: dict[str, _Ranges] = {}
         for name, incoming in current.items():
             if budget == 0:
-                return next(iter(required)), None
+                return _RangeAnalysis(failure=(next(iter(required)), None)) if required else None
             budget -= 1
             block = blocks[name]
             ranges = incoming.copy()
@@ -115,11 +123,13 @@ def _range_failure(function: Function, required: Mapping[str, _Bounds],
                 elif isinstance(instruction, Apply) and instruction.operation == "add":
                     left, right = instruction.args
                     bounds = _add_bounds(_bounds(left, ranges), _bounds(right, ranges))
+                elif isinstance(instruction, Call):
+                    bounds = call_bounds.get(instruction.function, _INT_BOUNDS)
                 else:
                     bounds = _INT_BOUNDS
                 allowed = required.get(target)
                 if allowed is not None and not _within(bounds, allowed):
-                    return target, bounds
+                    return _RangeAnalysis(failure=(target, bounds))
                 if _fits_int(bounds):
                     ranges[target] = bounds
                 else:
@@ -132,6 +142,10 @@ def _range_failure(function: Function, required: Mapping[str, _Bounds],
                 yes, no = _branch_ranges(block, end, ranges, integers)
                 edges = ((end.if_true, yes), (end.if_false, no))
             else:
+                assert isinstance(end, Return)
+                if function.result is INT:
+                    lo, hi = _bounds(end.value, ranges)
+                    result = (lo, hi) if result is None else (min(lo, result[0]), max(hi, result[1]))
                 continue
             for successor, state in edges:
                 if state is not None:
@@ -140,4 +154,4 @@ def _range_failure(function: Function, required: Mapping[str, _Bounds],
                     previous = following.get(successor)
                     following[successor] = state if previous is None else _join_ranges(previous, state)
         current = following
-    return None
+    return _RangeAnalysis(result)

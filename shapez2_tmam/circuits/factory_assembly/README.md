@@ -70,6 +70,16 @@ python -m shapez2_tmam.circuits.factory_assembly.acceptance --recipe solver4-ord
 
 `--recipe` 读取带 `status: solved` 的四象限五层指令 JSON。导出先按六槽消费语义回放，再按指令数生成实体工段。每条指令的六个字段原样进入发送器。邻接 JSON 中的 `stage_capacity` 给出容量，`interfaces.stations` 给出停靠点，`interfaces.load` 给出车厢层位，`orders.solver4.paths` 给出每件所需的供料路径。`--compact` 仅安装该订单用到的供料站。
 
+也可把同一份 JSON 分别交给三个分册命令。实体册使用精简站场，并保留单带运力表。
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.books physical --recipe solver4-order.json --output-dir 验收-订单/实体
+python -m shapez2_tmam.circuits.factory_assembly.books proportioning --recipe solver4-order.json --output-dir 验收-订单/配料
+python -m shapez2_tmam.circuits.factory_assembly.books trains --recipe solver4-order.json --output-dir 验收-订单/通用火车
+```
+
+实体册的 `interfaces.load` 与配料册的 `load` 使用同一张装载表，车厢和层位保持原有编号。配料册为实际用到的货种生成对应换装站，区分四角备料和工道结晶。通用火车册按需生成图形或流体车站，`cargo` 将各货种映射到 `shape` 或 `fluid` 的车库、装货站及卸货站模板。在单料环线上为每种货各用一套模板。省略 `--recipe` 时，三个命令生成前一节的双订单验收分册。
+
 实机按下节先清空工道，在 `sender.select.channel` 发布整数 `1` 选择这份配方。地址回读、写入应答、装方结束和领料放行沿用同一组信号。
 
 ## 实机接入与验收
