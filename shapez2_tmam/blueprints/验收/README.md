@@ -20,7 +20,7 @@
 | 电路 | 从已取出的原单层读取 q0 格及原色 | [原单格读取](电路/双半形/read-labeled-corner.json) |
 | 电路 | 直接释放角的前态与外侧锚料 | [最高晶体层](电路/双半形/corner-highest-crystal.json) · [逐层原料](电路/双半形/simple-corner-source.json) |
 | 电路 | 顶破角的前态与辅助锚柱 | [逐层原料](电路/双半形/pin-corner-source.json) · [近锚和远侧顶针柱](电路/双半形/pin-corner-anchors.json) |
-| 电路 | 带原色的紧柱拼装回放 | [逐层工序](电路/双半形/dense-column.json) · [完工取柱](电路/双半形/dense-column-finish.json) |
+| 电路 | 带原色的紧柱备料与回放 | [单步备料](电路/双半形/dense-column-actions.json) · [五轮回放](电路/双半形/dense-column.json) · [完工取柱](电路/双半形/dense-column-finish.json) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
 

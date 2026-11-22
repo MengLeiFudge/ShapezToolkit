@@ -104,15 +104,15 @@
     3
   ],
   "buildings_by_layer": [
-    1040,
-    992,
-    815
+    1050,
+    594,
+    686
   ],
-  "building_entries": 2847,
+  "building_entries": 2330,
   "global_receivers": 14,
   "global_transmitters": 9,
   "internal_global_devices_per_module": 0,
-  "worker_logic_gates": 60,
-  "worker_logic_gates_before_reuse": 67,
-  "worker_logic_gates_after_reuse": 60
+  "worker_logic_gates": 53,
+  "worker_logic_gates_before_reuse": 62,
+  "worker_logic_gates_after_reuse": 53
 }

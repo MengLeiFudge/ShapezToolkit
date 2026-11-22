@@ -6,16 +6,31 @@ from .shape_methods import (Color, analyze_color, analyze_part, crystal, cut_fro
                             rotate_cw, shape_literal)
 
 
-def dense_column_source(source: Shape | None, pending: Color | None, row: Shape | None) -> Shape | None:
-    """追加 q0 单格。连续同色的晶体先以针保留，再统一结晶。"""
+def dense_column_base(source: Shape | None, pending: Color | None, row: Shape | None) -> Shape | None:
+    """填实另外三格，使结晶只作用于 q0 的针。"""
     if row is None:
-        return source
+        return None
     if analyze_part(row) == shape_literal("cu------"):
-        color = analyze_color(row)
-        if (pending is not None) & (pending != color):
-            source = crystal(source, pending)
-        return append_layer(source, shape_literal("P-CuCuCu"))
-    return append_layer(source, stack(shape_literal("--CuCuCu"), row))
+        return shape_literal("P-CuCuCu")
+    return stack(shape_literal("--CuCuCu"), row)
+
+
+def dense_column_flush(source: Shape | None, pending: Color | None, row: Shape | None) -> Color | None:
+    if analyze_part(row) == shape_literal("cu------") and pending != analyze_color(row):
+        return pending
+    return None
+
+
+def dense_column_needs_stack(source: Shape | None, pending: Color | None, row: Shape | None) -> bool:
+    return (source is not None) & (row is not None)
+
+
+def dense_column_source(source: Shape | None, pending: Color | None, row: Shape | None) -> Shape | None:
+    """回放实际基础料、换色时的结晶，以及逐层堆叠。"""
+    dye = dense_column_flush(source, pending, row)
+    if dye is not None:
+        source = crystal(source, dye)
+    return append_layer(source, dense_column_base(source, pending, row))
 
 
 def dense_column_pending(source: Shape | None, pending: Color | None, row: Shape | None) -> Color | None:
