@@ -122,3 +122,17 @@ def join_corner_half(left: Shape | None, right: Shape | None) -> Shape | None:
         return cut_front(left)
     joined = swap_front_a(rotate_cw(left), rotate_cw(right))
     return cut_front(rotate_ccw(joined))
+
+
+def join_built_halves(front: Shape | None, back: Shape | None, alternate: bool) -> Shape | None:
+    """合并两个标准半形，按切向恢复目标的原方向。"""
+    back = rotate_cw(rotate_cw(back))
+    if front is None:
+        joined = back
+    elif back is None:
+        joined = front
+    else:
+        joined = swap_front_a(front, back)
+    if alternate:
+        return rotate_cw(joined)
+    return joined
