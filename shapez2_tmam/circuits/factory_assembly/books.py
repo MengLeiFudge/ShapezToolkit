@@ -114,7 +114,11 @@ def _trains(ports):
 
 
 def build(book: str, belt_rate: Fraction, measurements: dict, *,
-          recipe_path: Path | None = None) -> tuple[dict[str, str], dict]:
+          recipe_path: Path | None = None, direct_stack: bool = False) -> tuple[dict[str, str], dict]:
+    if direct_stack and recipe_path is not None:
+        raise ValueError('--direct-stack 与 --recipe 只能选一个')
+    if direct_stack and book == 'physical':
+        raise ValueError('纯堆叠实体请使用 production --direct-stack 导出')
     if belt_rate <= 0:
         raise ValueError('成品带速须为正数')
     if book == 'physical':
@@ -126,7 +130,7 @@ def build(book: str, belt_rate: Fraction, measurements: dict, *,
             report['interfaces']['load'] = [asdict(port) for port in _recipe_load(plans['solver4'])]
             return {'six-slot-solver4': blueprint}, report
         return {'six-slot-acceptance': blueprint}, report
-    ports = cargo_ports()
+    ports = cargo_ports(machine_dyes=not direct_stack)
     if recipe_path is not None:
         order = acceptance._solver_order(recipe_path)
         ports = _recipe_load(replay(order['target'], order['instructions']))
@@ -134,7 +138,7 @@ def build(book: str, belt_rate: Fraction, measurements: dict, *,
         documents, report = _proportioning(ports)
     elif book == 'trains':
         documents, report, cargo = _trains(ports)
-        if recipe_path is not None:
+        if recipe_path is not None or direct_stack:
             report['cargo'] = cargo
     else:
         raise ValueError(f'未知分册 {book!r}')
@@ -145,13 +149,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description='分别生成六槽验收的实体、配料或通用火车分册')
     parser.add_argument('book', choices=BOOKS)
     parser.add_argument('--output-dir', type=Path, help='导出原生蓝图和分册 JSON 的目录')
-    parser.add_argument('--recipe', type=Path, help='Solver4 生成的 solved 指令 JSON')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--recipe', type=Path, help='Solver4 生成的 solved 指令 JSON')
+    mode.add_argument('--direct-stack', action='store_true', help='生成纯堆叠工道的配料或通用火车册')
     parser.add_argument('--belt-rate', type=Fraction, default=Fraction(1), help='实体册目标件数/秒，默认按每秒 1 件列需求')
     parser.add_argument('--measurements', type=Path, help='实体册的机器、管带和到货实测 JSON')
     args = parser.parse_args()
     try:
         measurements = json.loads(args.measurements.read_text(encoding='utf-8')) if args.measurements else {}
-        blueprints, report = build(args.book, args.belt_rate, measurements, recipe_path=args.recipe)
+        blueprints, report = build(args.book, args.belt_rate, measurements, recipe_path=args.recipe,
+                                   direct_stack=args.direct_stack)
     except (ArithmeticError, KeyError, OSError, ValueError) as error:
         parser.error(str(error))
     if args.output_dir is not None:

@@ -1,6 +1,6 @@
 # 六槽实体装配
 
-`layout.assemble(count, packet_tag=...)` 生成原生岛蓝图和可序列化的站场接口表。一个地址对应一个实体工段。每段保留六槽直通带、两个操作数入口、加工回带、四角基础料和独立结晶供料。`recipe.replay(target, packets)` 用同一组六字段回放物品，保留两个操作数的顺序、目的槽和被舍弃的半形。回放结束时，唯一活槽须等于目标形状。
+`layout.assemble(count, packet_tag=...)` 生成原生岛蓝图和可序列化的站场接口表。每个地址对应一个工段，通用工段带六槽直通带、两个操作数入口、加工回带、四角基础料和独立结晶供料。`recipe.replay(target, packets)` 用同一组六字段回放物品，保留两个操作数的顺序、目的槽和被舍弃的半形。回放结束时，唯一活槽须等于目标形状。
 
 ## 外置主控生产线
 
@@ -11,6 +11,20 @@ python -m shapez2_tmam.circuits.factory_assembly.production --stages 2 --output 
 ```
 
 导入 `.spz2bp` 后，按同名 JSON 的 `interfaces.recipe` 接主控与换单开关，按 `interfaces.stations` 和 `interfaces.load` 接供料，按 `interfaces.output` 接成品带。`--stages` 须在 1 至 971 之间，并覆盖主控会发送的最长配方。Python 可调用 `production.build(count)` 取得同一份原生蓝图文本和接口表。
+
+### 纯堆叠三册
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.production --direct-stack --output 纯堆叠/实体/direct-stack-production.spz2bp
+python -m shapez2_tmam.circuits.factory_assembly.books proportioning --direct-stack --output-dir 纯堆叠/配料
+python -m shapez2_tmam.circuits.factory_assembly.books trains --direct-stack --output-dir 纯堆叠/通用火车
+```
+
+使用通过纯堆叠判定且回放吻合的目标。地址 0、1、3、5、7 各接一处四角混装站，可领取任意基础单层。地址 2、4、6、8 各有一台堆叠机，槽 0 从下层进、槽 1 从上层进，成品写回槽 0。配方长度为 1、3、5、7 或 9，后续已清空的工段通过六槽直通带。
+
+按实体册 `interfaces.stations` 中的 `base_head` 接朝北的混合列车。沿用 12 节车厢、28 项角位货种对应的车厢编号和层位。基础备料内部的顶针支路由混合车供应红染料，整线省去独立结晶站。配料册提供七种基础料的换装站和混编车库，通用火车册提供图形与流体单料模板。成品由最后一台平台的东口输出一条带。一满带的供货余量按实际目标和到货量核算。
+
+使用下文 `--direct-stack` 的动态提交桥和装方信息板。工道沿用六字段总线、整单放行和 128 tick 清空流程。同名 JSON 额外列出各工段 `opcode` 及合法的 `supported_lengths`。Python 可调用 `production.build_direct_stack()` 取得蓝图文本和接口表。
 
 ## 两步配方提交样件
 
