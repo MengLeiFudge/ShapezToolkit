@@ -66,6 +66,29 @@ def read_top_row_at(target: Shape | None, height: int) -> Shape | None:
     return None
 
 
+def advance_target_rows(target: Shape | None, height: int) -> Shape | None:
+    """扫描到当前顶层时移除它，跨过空层时保留剩余图形。"""
+    if target_height(target) == height:
+        return unstack_lower(target)
+    return target
+
+
+def record_crystal_height(previous: int, row: Shape | None, height: int) -> int:
+    """自顶向下扫描时，只记录 q0 中遇到的第一颗晶体。"""
+    if previous == 0 and analyze_part(row) == shape_literal("cu------"):
+        return height
+    return previous
+
+
+def original_rows(target: Shape | None) -> tuple[Shape | None, ...]:
+    """按原层号从底到顶返回五层，空层保留为 None。"""
+    rows = []
+    for height in (5, 4, 3, 2, 1):
+        rows.append(read_top_row_at(target, height))
+        target = advance_target_rows(target, height)
+    return tuple(reversed(rows))
+
+
 def bottom_material(target: Shape | None) -> int:
     """底层 q0 按空、普通格、针、晶体分别返回 0、1、2、3。"""
     part = analyze_part(target)

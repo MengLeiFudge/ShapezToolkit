@@ -3,6 +3,7 @@
 from .corners import CornerBuilder
 from .physics import EMPTY, PIN, Position, Rules, Shape
 from .row_support import addition_needs_lower, advance_stack_height
+from .shape_methods import original_rows, pack_stack_row
 from .support import in_support_class
 
 
@@ -16,14 +17,9 @@ def _row_states(desired: dict[Position, str], z: int, added: dict[int, str]) -> 
 
 def stack_scan_rows(target: Shape) -> tuple[Shape | None, ...]:
     """将支持判定的五行按扫描顺序编码为单层信号。"""
-    desired = Rules(4, 5).cells(target)
-    codes = (EMPTY, "Cu", "Ru", "Su", "Wu")
-    rows = []
-    for z in range(4, -1, -1):
-        cells = {q: cell for q in range(4) if (cell := desired.get((z, q), EMPTY)) != EMPTY and cell[0] != "c"}
-        states = _row_states(desired, z, cells)
-        rows.append(Shape((tuple(codes[state] for state in states),)) if any(states) else None)
-    return tuple(rows)
+    rows = original_rows(target)
+    return tuple(pack_stack_row(rows[z], rows[z - 1] if z > 0 else None, z == 0)
+                 for z in range(4, -1, -1))
 
 
 def close_stack_prefix(desired: dict[Position, str], heights: list[int], layers: int) -> None:
