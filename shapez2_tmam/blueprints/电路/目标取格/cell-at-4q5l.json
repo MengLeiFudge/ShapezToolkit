@@ -1,0 +1,23 @@
+{
+  "component": "cell_at",
+  "inputs": {
+    "target": 1600044,
+    "z": 1600041,
+    "q": 1600045,
+    "run": 1600046
+  },
+  "outputs": {
+    "part": 1600047,
+    "color": 1600048
+  },
+  "call_channels": {
+    "remaining": 1600040,
+    "next": 1600042,
+    "answer": 1600043
+  },
+  "protocol": "z=0…4，q=0…3。目标和坐标固定，run=0 保持128信号tick，再令run=1并保持160tick。空格返回两个空信号，非空格返回去色的q0单格和原颜色。",
+  "timing_conditions": "整件批量导入或重载，固定接线、独占频道、Hybrid/AlwaysHighUPS常速连续推进。",
+  "platforms": 2,
+  "island_layers": 2,
+  "internal_global_devices_per_method": 0
+}

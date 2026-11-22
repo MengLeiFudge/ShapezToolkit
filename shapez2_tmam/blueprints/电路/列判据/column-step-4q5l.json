@@ -1,0 +1,25 @@
+{
+  "component": "column_step",
+  "inputs": {
+    "state": 1600020,
+    "material": 1600021
+  },
+  "outputs": {
+    "next": 1600022
+  },
+  "initial": "--Wu----",
+  "accept": "--Cr----",
+  "reject": "--Cu----",
+  "material": {
+    "empty": 0,
+    "ordinary": 1,
+    "pin": 2,
+    "crystal": 3
+  },
+  "order": "从地面至第五层调用五次，包含原层号上的空格。每次等待稳定再锁存 next。",
+  "rom_rows": 25,
+  "native_gates_per_rom_row": 2,
+  "platforms": 1,
+  "building_entries": 993,
+  "internal_global_devices": 0
+}

@@ -16,6 +16,11 @@ REPORT_DIR = PACKAGE_ROOT / "reports"
 
 # 名称 -> (模块名, 默认参数列表)
 BLUEPRINT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "cell-at-4q5l": ("cell_at", ()),
+    "column-scan-4q5l": ("column_step", ("--scan",)),
+    "column-step-4q5l": ("column_step", ()),
+    "quarter-order-4q5l": ("quarter_order", ()),
+    "layer-recipe-4q5l": ("layer_recipe", ()),
     "operation-core-4q5l": ("operation_core", ("--quadrants", "4", "--channel-base", "1000000")),
     "operation-core-6q5l": ("operation_core", ("--quadrants", "6", "--channel-base", "1001000")),
     "noncrystal-4q5l": ("noncrystal_circuit", ("--quadrants", "4", "--channel-base", "1002000")),
@@ -45,6 +50,10 @@ BLUEPRINT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
 
 # 按游戏蓝图库的目录分册。同一模块的四、六象限版本放在一起。
 CIRCUIT_BOOKS = {
+    "目标取格": ("cell_at",),
+    "列判据": ("column_step",),
+    "基础料订单": ("quarter_order",),
+    "逐层配方": ("layer_recipe",),
     "完整主控": ("full_solver_circuit",),
     "扫描与时序": ("scan_circuit", "iterative_scanner", "register_circuit", "sequential_circuit", "decoder_circuit"),
     "起点与半形": ("half_circuit", "material_half_circuit", "half_synthesizer", "startpoint_circuit", "noncrystal_circuit"),
@@ -58,6 +67,17 @@ for section, books in (("实体", WORKSHOP_BOOK), ("火车", TRAIN_BOOK)):
     for name, book in books.items():
         BLUEPRINT_TARGETS[name] = ("factory_book", (name,))
         BOOK_BY_TARGET[name] = Path(section, book)
+
+for cargo, book in (("shapes", "图形"), ("fluids", "染料")):
+    for role in ("depot", "load", "unload"):
+        name = f"mixed-{cargo}-{role}"
+        BLUEPRINT_TARGETS[name] = ("proportioning", (cargo, role))
+        BOOK_BY_TARGET[name] = Path("配料", book)
+
+for section in ("stock", "quarters", "paint", "palette"):
+    name = f"base-{section}-4q5l"
+    BLUEPRINT_TARGETS[name] = ("base_workshop", (section,))
+    BOOK_BY_TARGET[name] = Path("实体", "基础单层")
 
 REPORT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
     "full-tail-4q5l": ("full_solver_circuit", ("--report-only",)),

@@ -16,7 +16,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--height", type=int, default=5, help="整个制造过程的层数上限，至少2")
     parser.add_argument("--complete", action="store_true", help="完整四象限逆推，最坏搜索时间很大")
     parser.add_argument("--instructions", action="store_true", help="另导出四/六象限五层、六寄存器的消费式加工指令")
+    parser.add_argument("--production", action="store_true", help="四象限五层整厂用料和基础单层订单")
     args = parser.parse_args(argv)
+    if args.production and (args.quadrants, args.height) != (4, 5):
+        parser.error("--production 需要 --quadrants 4 --height 5")
     if args.complete and (args.quadrants != 4 or args.height != 5):
         parser.error("--complete 当前只支持 --quadrants 4 --height 5")
     if args.instructions and (args.quadrants not in (4, 6) or args.height != 5):
@@ -35,6 +38,9 @@ def main(argv: list[str] | None = None) -> int:
     document = {"status": result.status, "reason": result.reason, "target": target.to_key(),
                 "quadrants": rules.quadrants, "height": rules.height,
                 "steps": list(recipe.steps()) if recipe is not None else []}
+    if args.production:
+        from .production_bill import production_bill
+        document["production"] = production_bill(recipe) if recipe is not None else None
     if args.instructions:
         document["instructions"] = list(recipe.instructions()) if recipe is not None else []
         document["register_count"] = 6

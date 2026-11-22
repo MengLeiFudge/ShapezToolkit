@@ -1,0 +1,29 @@
+{
+  "component": "layer_recipe",
+  "inputs": {
+    "target": 1600000
+  },
+  "outputs": {
+    "crystal_free": 1600001,
+    "matches": 1600002,
+    "base_top_to_bottom": [
+      1600003,
+      1600004,
+      1600005,
+      1600006,
+      1600007
+    ]
+  },
+  "input_contract": "非空四象限图形，高度上限5。保持输入至组合电路稳定。",
+  "return_contract": "crystal_free与matches均为真时，从最下方非空base开始逆序取料、堆叠。crystal_free真且matches假表示不可制作。crystal_free假交由含晶体求解。",
+  "building_entries": 3109,
+  "platforms": 1,
+  "building_layers": [
+    0,
+    1,
+    2
+  ],
+  "global_receivers": 1,
+  "global_transmitters": 7,
+  "internal_global_devices": 0
+}

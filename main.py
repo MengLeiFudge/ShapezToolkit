@@ -60,6 +60,7 @@ def build_parser() -> argparse.ArgumentParser:
     synth2.add_argument("--height", type=int, default=5, help="整个制造过程的层数上限，至少 2，默认 5")
     synth2.add_argument("--complete", action="store_true", help="启用完整四象限五层尾部搜索")
     synth2.add_argument("--instructions", action="store_true", help="另导出四/六象限五层的六寄存器消费式指令")
+    synth2.add_argument("--production", action="store_true", help="另导出四象限五层制作厂的用料和基础单层订单")
     mari2 = tmam2_commands.add_parser("mari", aliases=["solve"], help="按 Mari 六候选逻辑计算虚拟重建和工厂指令（兼容旧名 solve）")
     mari2.add_argument("shape", help="四象限、最多五层的完整图形短代码")
     mari2.add_argument("--iteration", type=int, choices=range(1, 7), help="只计算指定候选；默认依次选择最小匹配编号")
@@ -88,6 +89,8 @@ def main() -> int:
                     argv.append("--complete")
                 if args.instructions:
                     argv.append("--instructions")
+                if args.production:
+                    argv.append("--production")
                 argv.extend(["--", args.target])
                 return synth_main(argv)
             if args.command == "blueprint":
