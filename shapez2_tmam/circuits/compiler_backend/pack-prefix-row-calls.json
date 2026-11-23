@@ -1,0 +1,7 @@
+[
+  {"row": {"literal": "RuCuSuWu"}, "below": {"literal": "P-cgRu--"}, "ground": {"literal": false}},
+  {"row": {"literal": "P-cgRu--"}, "below": {"literal": "--crcgCu"}, "ground": {"literal": false}},
+  {"row": {"literal": "--crcgCu"}, "below": {"literal": "P---Cu--"}, "ground": {"literal": false}},
+  {"row": {"literal": "P---Cu--"}, "below": {"literal": null}, "ground": {"literal": false}},
+  {"row": {"literal": null}, "below": {"literal": null}, "ground": {"literal": true}}
+]

@@ -155,3 +155,46 @@ py -m shapez2_tmam.circuits.compiler_frontend.pin_column_source --mode materials
 | `masks` | `keep`、`crystals` | 保留格及晶体的四位掩码，最低位对应底层。`crystals` 包含目标材料字已确定的晶体格。 |
 
 两种模式都生成 `valid`。无效槽的 `valid` 返回 `False`，该槽的所有整数输出返回 `-1`。有效候选可返回 `0`。用 `generate_pin_column_source(mode)` 可在内存生成同一份源码，再交给前端的单方法或批量入口。
+
+### 分段导出顶针单列校验
+
+分段版先解码目标的五格材料，按槽号取出保留格和晶体格模式，再用同一套检查恢复并校验候选。各槽复用这些模块。
+
+```powershell
+py -m shapez2_tmam.circuits.compiler_frontend.pin_column_stages --output pin_column_stages.py
+```
+
+用 `pin_column_stage_plan` 的频道表逐模块导出。将示例首频道换成现场连续空闲的 23 条频道的起点。每件蓝图导入时留出自己的平台位置。
+
+```python
+from pathlib import Path
+
+from shapez2_tmam.circuits.compiler_backend.fields import export_fields
+from shapez2_tmam.circuits.compiler_frontend import compile_field_methods
+from shapez2_tmam.circuits.compiler_frontend.pin_column_stages import pin_column_stage_plan
+
+source = Path("pin_column_stages.py")
+for name, methods, inputs, outputs in pin_column_stage_plan(1701000):
+    programs, _ = compile_field_methods(source, methods)
+    export_fields(programs, Path("pin-column") / f"{name}.spz2bp",
+                  input_channels=inputs, output_channels=outputs)
+```
+
+| 相对首频道 | 信号 |
+| --- | --- |
+| `+0`、`+1` | 五层材料字 `word`、槽号 `slot` |
+| `+2` 至 `+17` | 模块间的五格材料、桶号、三份查表载荷、候选模式、两份落点检查结果与四格待发布材料 |
+| `+18` | `valid` |
+| `+19` 至 `+22` | 从底到顶的四格材料，沿用上表的 0～3 和 `-1` 编码 |
+
+| 模块 | 门数 | 平台数 | 稳定输入后的保持期（信号刻） |
+| --- | ---: | ---: | ---: |
+| `read` | 75 | 1 | 960 |
+| `bucket` | 74 | 2 | 1536 |
+| `pack_0`、`pack_1`、`pack_2` | 56 / 96 / 2 | 1 / 2 / 1 | 1216 / 1856 / 448 |
+| `pattern` | 88 | 2 | 1088 |
+| `fit_low`、`fit_high` | 115 / 112 | 2 / 2 | 1728 / 1536 |
+| `restore_lower`、`restore_upper` | 114 / 103 | 2 / 1 | 1600 / 1536 |
+| `materials` | 88 | 2 | 1600 |
+
+这套布局共 923 门、18 块平台、28,173 个建筑和 29 对模块内短距口。按接口表保持期及每次模块间无线传输另计 12 刻计算，同时更新 `word` 和 `slot` 后等 6960 信号刻。目标材料字和桶号已经稳定时，每次换槽等 6308 刻。期间保持整组输入，采样时同时读取有效位和四格材料。这是离线计算的保守等待值，游戏内联动尚待验收。

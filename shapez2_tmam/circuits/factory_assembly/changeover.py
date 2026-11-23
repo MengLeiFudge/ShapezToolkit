@@ -13,7 +13,7 @@ ENABLE_FEED = 1_640_059
 CLEAN_CONFIRMED = 1_640_060
 
 
-def controls(count: int, packet_tag: int) -> list[dict]:
+def controls(count: int, packet_tag: int, *, handoff: bool = False) -> list[dict]:
     permit = Module({'run': RUN, 'clean': CLEAN_CONFIRMED, 'length': PROGRAM_LENGTH})
     permit.gate('LogicGateCompare', ('run', 1), ('requested',), 'AQ==')
     permit.gate('LogicGateCompare', ('clean', 1), ('cleared',), 'AQ==')
@@ -30,7 +30,18 @@ def controls(count: int, packet_tag: int) -> list[dict]:
     outlet.gate('LogicGateIf', (0, 'discard'), ('filter',))
     outlet.outputs = {'produce': PRODUCE, 'filter': TARGET}
 
-    modules = (permit, advance(packet_tag), release(LOAD_PERMIT, TARGET_INPUT, LOADED), writer(), outlet)
+    if handoff:
+        from .writer_handoff import stream_advance, writer_modules
+
+        advance_board = stream_advance(packet_tag)
+        write_boards = writer_modules()
+        if any(packet_tag in board.outputs.values() for board in write_boards):
+            raise ValueError('配方地址回读频道与接管写入器冲突')
+    else:
+        advance_board = advance(packet_tag)
+        write_boards = (writer(),)
+    modules = (permit, advance_board, release(LOAD_PERMIT, TARGET_INPUT, LOADED),
+               write_boards[0], outlet, *write_boards[1:])
     islands = []
     for i, module in enumerate(modules):
         island = module.layout()['BP']['Entries'][0]

@@ -143,7 +143,7 @@ def build(packet_tag: int, *, compact: bool = False, recipe_path: Path | None = 
     programs = {name: replay(order['target'], order['instructions']) for name, order in orders.items()}
     count = max(len(program.stages) for program in programs.values())
     fixed = tuple(programs.values()) if compact else None
-    document, interfaces = assemble(count, packet_tag=packet_tag, fixed_orders=fixed)
+    document, interfaces = assemble(count, packet_tag=packet_tag, fixed_orders=fixed, handoff=four_color and compact)
     ports = cargo_ports()
     islands = _islands(document)
     _check_intakes(islands, interfaces['stations'], ports)

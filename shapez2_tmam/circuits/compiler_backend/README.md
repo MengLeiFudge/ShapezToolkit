@@ -129,3 +129,18 @@ python -m shapez2_tmam.circuits.compiler_backend.module_caller \
   --callee shapez2_tmam/blueprints/验收/电路/双半形/seed-crystal-half.spz2bp \
   --output seed-half-caller.spz2bp
 ```
+
+### 连续调用组合模块
+
+组合接口支持 1～5 组调用。每组按接口表提供全部输入，参数可来自字面量或频道。调用器从 `settling.hold_signal_ticks` 读取稳定时间，再为参数选通预留一次无线传递。组合模块本身没有 `run` 或 `done`，调用器等每组参数满时后锁存结果。批次 `done=1` 时读取各次结果。
+
+`pack-prefix-row` 的稳定时间是 1984 信号 tick，每组从选通阶段起等待 2004 tick。五组样件共用同一对计算平台，计算平台之间沿用原生短距接线。按从高到低的顺序，结果在 `1701133`～`1701137`，批次 `done` 在 `1701122`。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend.module_caller \
+  shapez2_tmam/blueprints/验收/电路/双半形/pack-prefix-row.json \
+  shapez2_tmam/circuits/compiler_backend/pack-prefix-row-calls.json \
+  --channel-base 1701120 \
+  --callee shapez2_tmam/blueprints/验收/电路/双半形/pack-prefix-row.spz2bp \
+  --output pack-prefix-row-caller.spz2bp
+```

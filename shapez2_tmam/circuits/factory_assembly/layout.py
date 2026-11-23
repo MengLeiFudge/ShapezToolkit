@@ -135,7 +135,7 @@ def _stack_lane() -> dict:
 
 
 def assemble(count: int, *, packet_tag: int,
-             fixed_orders: tuple[Production, ...] | None = None) -> tuple[dict, dict]:
+             fixed_orders: tuple[Production, ...] | None = None, handoff: bool = False) -> tuple[dict, dict]:
     if type(count) is not int or not 1 <= count <= MAX_STAGES:
         raise ValueError(f'工段数须在 1 至 {MAX_STAGES} 之间')
     base_stages = crystal_stages = range(count)
@@ -144,7 +144,7 @@ def assemble(count: int, *, packet_tag: int,
             raise ValueError('精简工道需要至少一份已回放且不超过工段容量的固定配方')
         base_stages = {s.index for order in fixed_orders for s in order.stages if s.opcode == BASE}
         crystal_stages = {s.index for order in fixed_orders for s in order.stages if s.opcode == CRYSTAL}
-    return _assemble(count, packet_tag, base_stages, crystal_stages)
+    return _assemble(count, packet_tag, base_stages, crystal_stages, handoff=handoff)
 
 
 def assemble_direct_stack(*, packet_tag: int) -> tuple[dict, dict]:
@@ -158,7 +158,7 @@ def assemble_direct_stack(*, packet_tag: int) -> tuple[dict, dict]:
     return document, interfaces
 
 
-def _assemble(count, packet_tag, base_stages, crystal_stages, *, direct_stack=False):
+def _assemble(count, packet_tag, base_stages, crystal_stages, *, direct_stack=False, handoff=False):
     islands = []
     stations = []
     bridge = slot_bridge()
@@ -208,7 +208,7 @@ def _assemble(count, packet_tag, base_stages, crystal_stages, *, direct_stack=Fa
     for row in SLOT_ROWS:
         check_jump(previous, outlet, row, 0)
     islands.append(outlet)
-    islands.extend(controls(count, packet_tag))
+    islands.extend(controls(count, packet_tag, handoff=handoff))
     _check_footprints(islands)
     document = {'V': 1137, 'BP': {'$type': 'Island', 'BinaryVersion': 1137, 'Entries': islands}}
     return document, {'stations': stations,
