@@ -84,7 +84,7 @@ python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-bas
 
 `module_caller` 从定步模块的 JSON 接口表读取参数和结果频道、复位等待和采样等待。每次调用在复位阶段先发布全部参数，再等被调用板的 `done` 清零和复位时间到期后启动。达到采样时间并读到新的 `done=1` 时，调用器锁存本次结果，再推进到下一次调用。批次 `done=1` 时，各次结果可从各自的频道读取，包括空图形和整数 `0`。
 
-调用清单包含 1～3 组参数。每组按接口表给全除 `run` 之外的输入，每个参数使用 `{"literal": 值}` 或 `{"channel": 频道}`。频道参数须从复位前保持到批次完成。按生成接口表把 `enable` 保持为 `0` 到复位时间，再置为 `1`。需要重跑时先完整复位。
+调用清单包含 1～4 组参数。每组按接口表给全除 `run` 之外的输入，每个参数使用 `{"literal": 值}` 或 `{"channel": 频道}`。频道参数须从复位前保持到批次完成。按生成接口表把 `enable` 保持为 `0` 到复位时间，再置为 `1`。需要重跑时先完整复位。
 
 前缀列读取样件使用同一个定步模块，先读第一列全高，再读第二列的两层前缀。下面的命令在仓库根目录执行，`--callee` 将被调用的原生蓝图一起布置。
 
@@ -95,4 +95,15 @@ python -m shapez2_tmam.circuits.compiler_backend.module_caller \
   --channel-base 1700900 \
   --callee shapez2_tmam/blueprints/验收/电路/双半形/read-prefix-column.spz2bp \
   --output column-caller.spz2bp
+```
+
+用 `--result 字段名` 只锁存指定的结果，可重复添加该选项。省略该选项时锁存全部结果。四列调用从 `1700898`～`1700901` 分别读取四份已转到 q0 的图形，只锁存四份 `result_word`。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend.module_caller \
+  shapez2_tmam/blueprints/验收/电路/双半形/read-prefix-column.json \
+  shapez2_tmam/blueprints/验收/电路/双半形/read-four-columns-calls.json \
+  --channel-base 1700930 --result result_word \
+  --callee shapez2_tmam/blueprints/验收/电路/双半形/read-prefix-column.spz2bp \
+  --output read-four-columns.spz2bp
 ```

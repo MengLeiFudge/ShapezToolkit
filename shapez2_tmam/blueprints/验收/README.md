@@ -7,6 +7,7 @@
 | 实体 | 48 工段、发送器与单带出口 | [完整站场及用料](实体/physical.json) |
 | 实体精简版 | 同一条工道，保留两份固定订单所需的 21 个基础料站和 2 个结晶站 | [精简站场及用料](实体/six-slot-acceptance-compact.json) |
 | 实体 | 固定两步订单，核对整组提交及复位 | [样件接口](实体/two-step-sender.json) |
+| 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) |
 | 配料 | 基础料与结晶染料的换装站、两种混合车库 | [货种、车厢、层位及接口](配料/proportioning.json) |
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
 | 电路 | 按原层号读取目标的两层 | [复位、选择与采样](电路/原层读取/read-target-rows.json) |
@@ -14,7 +15,7 @@
 | 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
-| 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [列选择](电路/双半形/select-column.json) · [前缀高度选择](电路/双半形/select-prefix-height.json) |
+| 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀高度选择](电路/双半形/select-prefix-height.json) |
 | 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [前缀角参数](电路/双半形/prefix-corner-parameters.json) · [独立落点样件](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 | 电路 | 从原图检查两列半形的支撑 | [按最高晶体排序](电路/双半形/order-crystal-half.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
@@ -42,7 +43,7 @@
 
 把同半边的两列完整材料字与最高晶体层高接到排序板。等排序输出稳定后启动含晶区间预处理。排序板把较低列接到 `low_word`，较高列接到 `high_word`。较低列高度置入 `initial_required`，较高列高度置入 `high_height`。无晶体列的高度为 `0`。`initial_candidate` 和 `initial_supported` 都置 `0`。五轮后只读取 `result_required`。该值是较低列的新前缀高度，`-1` 表示含晶区间无法由这个半边支撑。恢复列序板沿用较高列的输入高度，按原左右列输出两份前缀高度。普通层的支撑由逐层闭包继续判定。
 
-切向转换板用 `alternate` 将两个切向统一到 q0/q1 和 q2/q3。四列输入板同时输出四种旋转，每种都把对应列转到 q0。调用器按 q0 到 q3 的顺序复用一次列读取模块，四次均读全高。 [四次调用参数](电路/双半形/read-four-columns-calls.json)`select-column` 将 `column` 指定的一列转到 q0，把同一图形送给全列和前缀材料读取器。前缀高度选择板也使用这个列号。五轮闭包完成前，或任一列返回 `-1` 时，高度选择板给出 `-1`，不开始该列的实体配方。四列初值接两块半形预处理的结果，`item0` 至 `item4` 接从最高到最低的五份含晶支撑行。前缀结果出现 `-1` 时，该切向不能直接用双半形和堆叠制作。其他结果可送往前缀材料读取板。完成换向后，制造端将输出旋转回目标方位。
+切向转换板用 `alternate` 将两个切向统一到 q0/q1 和 q2/q3。四列输入板同时输出四种旋转，每种都把对应列转到 q0。调用器按 q0 到 q3 的顺序复用一套列读取模块，四次均读全高。批次 `done=1` 后从 `1700963–1700966` 读四份材料字。 [四次调用参数](电路/双半形/read-four-columns-calls.json)`select-column` 将 `column` 指定的一列转到 q0，把同一图形送给全列和前缀材料读取器。前缀高度选择板也使用这个列号。五轮闭包完成前，或任一列返回 `-1` 时，高度选择板给出 `-1`，不开始该列的实体配方。四列初值接两块半形预处理的结果，`item0` 至 `item4` 接从最高到最低的五份含晶支撑行。前缀结果出现 `-1` 时，该切向不能直接用双半形和堆叠制作。其他结果可送往前缀材料读取板。完成换向后，制造端将输出旋转回目标方位。
 
 读取整列可将 `read-prefix-column` 的 `prefix_height` 保持为 `5`。已选定前缀高度后，将同一高度送给 `read-prefix-column` 和 `read-prefix-corner`。材料字仍保留五个原层位，超出前缀的格记为空。把材料字接到落点判定，把原格接到备料板。原格输出保留普通图形和晶体的颜色。前缀高度为 `0` 时该列为空。
 
@@ -134,4 +135,10 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/prefix_rou
   --field q0=column_target_q0 --field q1=column_target_q1 --field q2=column_target_q2 --field q3=column_target_q3 \
   --input-channel target=1700872 --output-channel q0=1700898 --output-channel q1=1700899 \
   --output-channel q2=1700900 --output-channel q3=1700901 --output four-column-targets.spz2bp
+python -m shapez2_tmam.circuits.compiler_backend.module_caller \
+  shapez2_tmam/blueprints/验收/电路/双半形/read-prefix-column.json \
+  shapez2_tmam/blueprints/验收/电路/双半形/read-four-columns-calls.json \
+  --channel-base 1700930 --result result_word \
+  --callee shapez2_tmam/blueprints/验收/电路/双半形/read-prefix-column.spz2bp --output read-four-columns.spz2bp
+python -m shapez2_tmam.circuits.factory_assembly.acceptance --four-color --compact --output four-color.spz2bp
 ```

@@ -19,7 +19,7 @@ from . import _write_blueprint
 
 
 _RADIO_TICKS = 12
-_MAX_CALLS = 3
+_MAX_CALLS = 4
 _MAX_DELAY_STEPS = 128
 _RADIO_RECEIVER = "ControlledSignalReceiverInternalVariant"
 _RADIO_TRANSMITTER = "ControlledSignalTransmitterInternalVariant"
@@ -44,42 +44,45 @@ def _compare(module: Module, name: str, left, right, config: str = "AQ==") -> st
 def _advance(enable: int, phase: int, done: int, reset_tap: int, sample_tap: int, phases: tuple) -> Module:
     module = Module({"enable": enable, "phase": phase, "done": done, "reset_tap": reset_tap,
                      "sample_tap": sample_tap})
-    module.lookup("phase", "next", ((i, i + 1) for i in range(phases[-1][-1] + 1)))
+    last = phases[-1][-1] + 1
+    module.lookup("phase", "next", ((i, min(i + 1, last)) for i in range(last + 1)))
     modes = []
-    for index, name in enumerate(("reset", "running", "capture")):
+    for index, name in enumerate(("reset", "running")):
         matches = tuple(_compare(module, f"{name}_{i}", "phase", group[index]) for i, group in enumerate(phases))
         modes.append(_any(module, name, matches))
-    reset, running, capture = modes
+    reset, running = modes
     reset_ready = _gate(module, "And", "reset_ready", _compare(module, "reset_elapsed", "reset_tap", "phase"),
                         _compare(module, "done_cleared", "done", 0))
     sample_ready = _gate(module, "And", "sample_ready", _compare(module, "sample_elapsed", "sample_tap", "phase"),
                          _compare(module, "callee_done", "done", 1))
-    ready = _any(module, "ready", (_compare(module, "idle", "phase", 0), capture,
-                                   _gate(module, "And", "after_reset", reset, reset_ready),
-                                   _gate(module, "And", "after_run", running, sample_ready)))
+    wait_reset = _gate(module, "And", "wait_reset", reset, _gate(module, "Not", "reset_pending", reset_ready))
+    wait_sample = _gate(module, "And", "wait_sample", running,
+                        _gate(module, "Not", "sample_pending", sample_ready))
+    waiting = _gate(module, "Or", "waiting", wait_reset, wait_sample)
     enabled = _compare(module, "enabled", "enable", 1)
-    _gate(module, "If", "state", "next", _gate(module, "And", "advance", enabled, ready))
-    _gate(module, "If", "state", "phase", _gate(module, "And", "hold", enabled,
-                                                _gate(module, "Not", "waiting", ready)))
+    _gate(module, "If", "state", "next", _gate(module, "And", "advance", enabled,
+                                               _gate(module, "Not", "ready", waiting)))
+    _gate(module, "If", "state", "phase", _gate(module, "And", "hold", enabled, waiting))
     _gate(module, "If", "state", 0, _gate(module, "Not", "disabled", enabled))
     module.outputs = {"state": phase}
     return module
 
 
-def _control(phase: int, run: int, done: int, phases: tuple, active: tuple, captures: tuple) -> Module:
+def _control(phase: int, run: int, done: int, phases: tuple, active: tuple, captures: tuple) -> tuple[Module, ...]:
     module = Module({"phase": phase})
+    capture_board = module if len(phases) <= 3 else Module({"phase": phase})
     running = []
     for i, (reset, start, capture) in enumerate(phases):
         before_end = _compare(module, f"before_end_{i}", "phase", capture, "BQ==")
         _gate(module, "And", f"active_{i}", before_end, _compare(module, f"after_reset_{i}", "phase", reset, "Ag=="))
         running.append(_gate(module, "And", f"running_{i}", before_end,
                              _compare(module, f"after_start_{i}", "phase", start, "Ag==")))
-        _compare(module, f"capture_{i}", "phase", capture)
+        _compare(capture_board, f"capture_{i}", "phase", capture)
     _compare(module, "done", "phase", phases[-1][-1] + 1)
     module.outputs = {_any(module, "run", tuple(running)): run, "done": done,
-                      **{f"active_{i}": channel for i, channel in enumerate(active)},
-                      **{f"capture_{i}": channel for i, channel in enumerate(captures)}}
-    return module
+                      **{f"active_{i}": channel for i, channel in enumerate(active)}}
+    capture_board.outputs.update({f"capture_{i}": channel for i, channel in enumerate(captures)})
+    return (module,) if capture_board is module else (module, capture_board)
 
 
 def _arguments(active: tuple[int, ...], sources: tuple[int | Literal, ...], output: int) -> Module:
@@ -155,11 +158,19 @@ def _literal(value, type_name: str) -> Literal:
     raise ValueError(f"参数 {value!r} 与类型 {type_name} 不符")
 
 
-def build_calls(interface: dict, calls: list[dict], channel_base: int) -> tuple[dict, dict]:
+def build_calls(
+    interface: dict, calls: list[dict], channel_base: int, *, result_names: tuple[str, ...] | None = None,
+) -> tuple[dict, dict]:
     """编译按顺序执行的定步模块调用，各组参数可来自频道或字面量。"""
     inputs, outputs, callee_channels, waits = _interface(interface)
     parameters = {name: port for name, port in inputs.items() if name != "run"}
     results = {name: port for name, port in outputs.items() if name != "done"}
+    if result_names is not None:
+        selected = set(result_names)
+        if not selected or len(selected) != len(result_names) or selected - results.keys():
+            available = ", ".join(results) or "无"
+            raise ValueError(f"回读字段须为互不重复的结果名。可选字段为 {available}")
+        results = {name: port for name, port in results.items() if name in selected}
     if not isinstance(calls, list) or not 1 <= len(calls) <= _MAX_CALLS:
         raise ValueError(f"一次调度需要 1～{_MAX_CALLS} 组调用参数")
     arguments = []
@@ -200,7 +211,7 @@ def build_calls(interface: dict, calls: list[dict], channel_base: int) -> tuple[
                     for _ in calls]
     modules = [_advance(enable, phase, outputs["done"]["channel"], delays[reset_steps - 1],
                         delays[sample_steps - 1], phases),
-               _control(phase, inputs["run"]["channel"], done, phases, active, captures)]
+               *_control(phase, inputs["run"]["channel"], done, phases, active, captures)]
     modules.extend(_copy(source, target) for source, target in zip((phase, *delays), delays))
     modules.extend(_arguments(active, tuple(args[name] for args in arguments), port["channel"])
                    for name, port in parameters.items())
@@ -282,12 +293,14 @@ def main() -> int:
     parser.add_argument("calls", type=Path, help="按顺序列出每次调用的 JSON 参数")
     parser.add_argument("--channel-base", type=int, required=True, help="调用器的首个独占频道")
     parser.add_argument("--callee", type=Path, help="合装定步模块的原生蓝图")
+    parser.add_argument("--result", action="append", help="只锁存指定结果字段，可重复指定")
     parser.add_argument("--output", type=Path, required=True, help="原生 .spz2bp 输出路径")
     args = parser.parse_args()
     try:
         interface = json.loads(args.interface.read_text(encoding="utf-8"))
         calls = json.loads(args.calls.read_text(encoding="utf-8"))
-        document, report = build_calls(interface, calls, args.channel_base)
+        result_names = tuple(args.result) if args.result is not None else None
+        document, report = build_calls(interface, calls, args.channel_base, result_names=result_names)
         if args.callee:
             _attach_callee(document, report, args.callee)
         _write_blueprint(document, report, args.output)

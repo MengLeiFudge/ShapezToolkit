@@ -26,6 +26,26 @@ python -m shapez2_tmam.circuits.factory_assembly.books trains --direct-stack --o
 
 使用下文 `--direct-stack` 的动态提交桥和装方信息板。工道沿用六字段总线、整单放行和 128 tick 清空流程。同名 JSON 额外列出各工段 `opcode` 及合法的 `supported_lengths`。Python 可调用 `production.build_direct_stack()` 取得蓝图文本和接口表。
 
+## 四色含晶验收样件
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.acceptance --four-color --compact --output four-color.spz2bp
+```
+
+两种切向各保留四颗原晶和两层尾料。合并备角和合半之间的旋转，省去对已裁净紧柱的末次半切后，两单共用 41 工段精简线。备用切向先领取逆转后的尾料，最后转回整件，因此两单的领料地址相同。蓝图带固定发送器。向 `1640047` 发对应订单号，并按[写入与换单](#写入与换单)接入。同名 JSON 给出逐地址的六字段指令、成品槽及装卸表。
+
+| 订单号 | 目标短代码 | 指令数 | 成品槽 |
+|---:|---|---:|---:|
+| 1 | `CuRuSuWu:crcbcgcy:CuRuSuWu:CuRuSuWu` | 40 | 0 |
+| 2 | `WuCuRuSu:cycrcbcg:CuRuSuWu:CuRuSuWu` | 41 | 0 |
+
+| 站场 | 两单共用地址 | 原 48 段精简线需补建的地址 |
+|---|---|---|
+| 基础料，10 站 | `0、1、7、8、17、18、24、25、36、38` | `8、17、25、36、38` |
+| 结晶，4 站 | `3、10、20、27` | `10、20、27` |
+
+原 48 段完整线在上述地址已有对应站场。复用时按同名 JSON 选单供料，移除旧固定发送器，再接四色样件的发送器。未写入的末段复位后直通。原 48 段精简线要跑本样件，只需补齐表中的供料站，无需增加工段。两单每件成品各需 C 28 件、R/S/W 各 3 件、红 110 升、蓝 20 升、绿 30 升。列车车厢及层位按实际订单的 `paths` 接货。
+
 ## 两步配方提交样件
 
 ```bash

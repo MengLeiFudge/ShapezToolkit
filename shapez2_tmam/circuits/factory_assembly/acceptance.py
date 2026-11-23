@@ -11,7 +11,7 @@ from ..circuit import encode_document
 from ..freight_loader import loading
 from ..slot_streams import SLOT_ROWS
 from ..stage_memory import WRITE_BUS
-from . import sender
+from . import four_color_sample, sender
 from .capacity import demands
 from .layout import _check_footprints, assemble, cargo_ports, crystal_loading
 from .recipe import BASE, CRYSTAL, MAX_STAGES, replay
@@ -132,8 +132,14 @@ def _requirements(production):
             'paths': paths}
 
 
-def build(packet_tag: int, *, compact: bool = False, recipe_path: Path | None = None) -> tuple[str, dict]:
-    orders = _orders() if recipe_path is None else {'solver4': _solver_order(recipe_path)}
+def build(packet_tag: int, *, compact: bool = False, recipe_path: Path | None = None,
+          four_color: bool = False) -> tuple[str, dict]:
+    if recipe_path is not None:
+        if four_color:
+            raise ValueError('四色样件与外部配方只能选一个')
+        orders = {'solver4': _solver_order(recipe_path)}
+    else:
+        orders = four_color_sample.orders() if four_color else _orders()
     programs = {name: replay(order['target'], order['instructions']) for name, order in orders.items()}
     count = max(len(program.stages) for program in programs.values())
     fixed = tuple(programs.values()) if compact else None
@@ -159,14 +165,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description='生成固定配方的六槽验收工道')
     parser.add_argument('--packet-tag', type=int, default=sender.PACKET_TAG,
                         help=f'配方地址回读的独占频道，默认 {sender.PACKET_TAG}')
-    parser.add_argument('--recipe', type=Path, help='Solver4 生成的 solved 指令 JSON，默认使用两份内置订单')
+    sample = parser.add_mutually_exclusive_group()
+    sample.add_argument('--recipe', type=Path, help='Solver4 生成的 solved 指令 JSON，默认使用两份内置订单')
+    sample.add_argument('--four-color', action='store_true', help='使用两种切向的四色含晶验收订单')
     parser.add_argument('--output', type=Path, help='原生蓝图输出，邻接 JSON 包含订单和供货需求')
     parser.add_argument('--compact', action='store_true', help='仅保留所选固定订单需要的供料站')
     args = parser.parse_args()
     if args.output is not None and args.output.suffix != '.spz2bp':
         parser.error('--output 需要 .spz2bp 文件路径')
     try:
-        blueprint, report = build(args.packet_tag, compact=args.compact, recipe_path=args.recipe)
+        blueprint, report = build(args.packet_tag, compact=args.compact, recipe_path=args.recipe,
+                                  four_color=args.four_color)
     except (OSError, ValueError) as error:
         parser.error(f'{args.recipe}: {error}' if args.recipe is not None else str(error))
     if args.output is not None:

@@ -36,6 +36,24 @@ def publish_lower(address: int, length: int) -> bool:
     return 0 <= direct_recipe_lower(address, length)
 ```
 
+## 生成顶针单列候选方法
+
+```sh
+python -m shapez2_tmam.circuits.compiler_frontend.pin_column_source --output pin_column.py
+```
+
+也可调用 `pin_column_source.generate_pin_column_source()` 取得源码文本。各入口接收 `(word: Shape, slot: int)`。`word` 是 `column_scan` 的五层材料字，由底到顶用 `Cu------`、`Ru------`、`Su------`、`Wu------` 分别表示空、普通材料、针、晶体。`slot` 沿用 `SOURCE_PATTERNS` 的 0～19 槽序。见[固定模式表](../../synthesis/pin_patterns.py)。
+
+| 生成模式 | 入口 | 结果 |
+|---|---|---|
+| `materials`（默认） | `material_0` 到 `material_3` | 前态从底到顶四格，`0` 为空，`1` 为普通材料，`2` 为针，`3` 为晶体 |
+| `masks` | `keep`、`crystals` | 两个四位掩码，最低位对应前态底层。`keep` 标记普通材料或针，`crystals` 标记全部晶体 |
+| 两种模式 | `valid` | 该槽是否通过单列结构筛选 |
+
+空余、越界或结构不合的槽使各整数方法返回 `-1`，`valid` 返回 `False`。槽位为 0 或材料为 0 都可能合法。普通材料和晶体的具体标签由调用方从原行读取。
+
+把同一模式的字段一起传给 `compile_field_methods`，再做组合编译，可共享材料解析和候选判定。若总线要求无效槽发空信号，为各字段指定 `publish_when` 方法 `valid`。
+
 ## 支持的 Python 语法
 
 | 用途 | 源码写法 |
@@ -120,3 +138,20 @@ def advance_slots(advance: bool) -> int:
                 slot = 0
     return slot
 ```
+
+## 顶针单列定址
+
+在仓库根目录生成一份可供 Python 和编译器读取的源码。
+
+```powershell
+py -m shapez2_tmam.circuits.compiler_frontend.pin_column_source --mode materials --output pin_column.py
+```
+
+方法共用 `word: Shape` 和 `slot: int`。`word` 为 `column_scan` 的五层单列材料字，使用 q0 的 `Cu`、`Ru`、`Su`、`Wu` 分别标记空格、普通件、针和晶体。`slot` 使用 `SOURCE_PATTERNS` 桶内原序，从 0 到 19。
+
+| 生成模式 | 可编译方法 | 含义 |
+| --- | --- | --- |
+| `materials` | `material_0` 至 `material_3` | 自底向上的四层材料，`0` 为空、`1` 为普通件、`2` 为针、`3` 为晶体。保留格的具体标签从目标原行读取。 |
+| `masks` | `keep`、`crystals` | 保留格及晶体的四位掩码，最低位对应底层。`crystals` 包含目标材料字已确定的晶体格。 |
+
+两种模式都生成 `valid`。无效槽的 `valid` 返回 `False`，该槽的所有整数输出返回 `-1`。有效候选可返回 `0`。用 `generate_pin_column_source(mode)` 可在内存生成同一份源码，再交给前端的单方法或批量入口。
