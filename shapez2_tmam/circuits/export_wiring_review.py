@@ -13,6 +13,8 @@ from .compiler_backend.prefix_scan_wiring import _native_wiring
 
 
 _TILE_SIZE = 20
+_LEVELS = 3
+_FOUNDATION_WIDTH = {"Foundation_1x1": 1, "Foundation_3x3": 3}
 
 
 def _position(wiring, index):
@@ -36,9 +38,17 @@ def _wire_segments(entry, kind):
 
 def _diagram(path):
     wiring = _native_wiring(path)
-    platforms = [(i + 1, p.get("X", 0), p.get("Y", 0), p.get("Z", 0)) for i, p in enumerate(wiring.platforms)]
-    if not platforms or any(p["T"] != "Foundation_3x3" or p.get("R", 0) for p in wiring.platforms):
-        raise ValueError(f"{path.name} 需要未旋转的 3×3 电路平台")
+    if not wiring.platforms:
+        raise ValueError(f"{path.name} 没有电路平台")
+    platforms = []
+    for i, platform in enumerate(wiring.platforms, 1):
+        width = _FOUNDATION_WIDTH.get(platform["T"])
+        if width is None or platform.get("R", 0):
+            raise ValueError(f"{path.name} 的 P{i} 需要未旋转的 1×1 或 3×3 电路平台")
+        x = platform.get("X", 0) - width // 2
+        y = platform.get("Y", 0) - width // 2
+        count = len(platform["B"]["Entries"])
+        platforms.append((i, x, y, platform.get("Z", 0), width, count))
     entries = []
     radio = []
     for i, (board, entry) in enumerate(wiring.entries):
@@ -78,18 +88,35 @@ def _section(path, output_dir):
     wires = Counter(entry[3] for entry in entries if entry[6])
     counts = Counter(entry[3] for entry in entries)
     layers = "".join(f"<tr><td>L{level}</td><td>{counts[level] - wires[level]}</td><td>{wires[level]}</td></tr>"
-                     for level in range(3))
+                     for level in range(_LEVELS))
     receivers = sum(line[5] == "rx" for line in radio)
     transmitters = len(radio) - receivers
-    outer = (max(p[1] for p in platforms) - min(p[1] for p in platforms) + 3,
-             max(p[2] for p in platforms) - min(p[2] for p in platforms) + 3)
-    footprint = 9 * len({(x, y) for _, x, y, _ in platforms})
+    outer = tuple(max(p[i] + p[4] for p in platforms) - min(p[i] for p in platforms) for i in (1, 2))
+    footprint = len({(x + dx, y + dy) for _, x, y, _, size, _ in platforms
+                     for dx in range(size) for dy in range(size)})
+    sizes = Counter(size for _, _, _, _, size, _ in platforms)
+    summary = "、".join(f"{count} 块 {size}×{size}" for size, count in sorted(sizes.items()))
+    capacity = 0
+    passed = 0
+    board_rows = []
+    for board, _, _, island, size, count in platforms:
+        slots = (size * _TILE_SIZE) ** 2 * _LEVELS
+        meets_minimum = 2 * count >= slots
+        capacity += slots
+        passed += meets_minimum
+        result = "通过" if meets_minimum else "未通过"
+        board_rows.append(f"<tr><td>P{board}</td><td>Z{island}</td><td>{size}×{size}</td><td>{count:,}</td>"
+                          f"<td>{slots:,}</td><td>{count / slots:.1%}</td><td>{result}</td></tr>")
     data = json.dumps({"platforms": platforms, "entries": entries, "links": links}, ensure_ascii=True)
     table = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in (*row[:5], "接收" if row[5] == "rx" else "发射", row[6]))
                     + "</tr>" for row in radio)
     return (f'<section><h2>{escape(path.stem)}</h2><p>{files}</p>'
-            f'<p>{len(platforms)} 块 3×3 · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
+            f'<p>{summary} · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
             f'飞线 {len(links)} 对 · 全局接收 {receivers} · 全局发射 {transmitters}</p>'
+            f'<p>总建筑占比 {len(entries) / capacity:.1%} · {passed}/{len(platforms)} 块平台达到 50%</p>'
+            '<details open><summary>逐块平台建筑占比</summary><table><thead>'
+            '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>三层容量</th><th>占比</th><th>50% 验收</th></tr>'
+            f'</thead><tbody>{"".join(board_rows)}</tbody></table></details>'
             '<table><thead><tr><th>建筑层</th><th>器件</th><th>线缆件</th></tr></thead>'
             f'<tbody>{layers}</tbody></table>'
             f'<div class="drawings"></div><script type="application/json">{data}</script>'
@@ -123,10 +150,10 @@ for (const [key, name] of Object.entries(names)) {
   span.append(chip, name); document.querySelector('#legend').append(span);
 }
 function draw(container, platforms, entries, links, island, layer) {
-  const minX = Math.min(...platforms.map(p => p[1])) * chunk - 30;
-  const minY = Math.min(...platforms.map(p => p[2])) * chunk - 30;
-  const width = Math.max(...platforms.map(p => p[1])) * chunk + 30 - minX;
-  const height = Math.max(...platforms.map(p => p[2])) * chunk + 30 - minY;
+  const minX = Math.min(...platforms.map(p => p[1])) * chunk;
+  const minY = Math.min(...platforms.map(p => p[2])) * chunk;
+  const width = Math.max(...platforms.map(p => p[1] + p[4])) * chunk - minX;
+  const height = Math.max(...platforms.map(p => p[2] + p[4])) * chunk - minY;
   const scale = Math.min(7, 870 / width, 570 / height);
   const figure = document.createElement('figure');
   const canvas = document.createElement('canvas');
@@ -138,12 +165,12 @@ function draw(container, platforms, entries, links, island, layer) {
     ctx.beginPath(); ctx.moveTo(xAt(x1), yAt(y1)); ctx.lineTo(xAt(x2), yAt(y2)); ctx.stroke();
   };
   ctx.fillStyle = '#101a27'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  for (const [id, bx, by] of platforms) {
-    const x = bx * chunk - 30, y = by * chunk - 30;
-    ctx.fillStyle = '#1b2c3d'; ctx.fillRect(xAt(x), yAt(y), scale * 60, scale * 60);
+  for (const [id, bx, by, , size] of platforms) {
+    const x = bx * chunk, y = by * chunk, edge = size * chunk;
+    ctx.fillStyle = '#1b2c3d'; ctx.fillRect(xAt(x), yAt(y), scale * edge, scale * edge);
     ctx.strokeStyle = '#344d62'; ctx.lineWidth = 1;
-    for (const d of [20, 40]) { segment(x+d,y,x+d,y+60); segment(x,y+d,x+60,y+d); }
-    ctx.strokeStyle = '#839ab2'; ctx.strokeRect(xAt(x), yAt(y), scale * 60, scale * 60);
+    for (let d = chunk; d < edge; d += chunk) { segment(x+d,y,x+d,y+edge); segment(x,y+d,x+edge,y+d); }
+    ctx.strokeStyle = '#839ab2'; ctx.strokeRect(xAt(x), yAt(y), scale * edge, scale * edge);
     ctx.fillStyle = '#b8cadd'; ctx.font = '12px sans-serif'; ctx.fillText(`P${id}`, xAt(x)+4, yAt(y)+14);
   }
   const cells = new Map();
