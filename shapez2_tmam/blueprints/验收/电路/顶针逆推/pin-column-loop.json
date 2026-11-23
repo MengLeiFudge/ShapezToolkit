@@ -107,6 +107,6 @@
     "query_reset_wait_signal_ticks": 744,
     "transition_wait_signal_ticks": 1908
   },
-  "platforms": 35,
-  "building_entries": 39053
+  "platforms": 31,
+  "building_entries": 38777
 }

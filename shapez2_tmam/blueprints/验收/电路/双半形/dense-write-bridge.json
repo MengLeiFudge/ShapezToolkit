@@ -1,0 +1,38 @@
+{
+  "inputs": {
+    "run": 1640030,
+    "write_reset": 1640012,
+    "write_address": 1640000,
+    "write_request": 1640011,
+    "write_ack": 1640013,
+    "caller_request_address": 1701482,
+    "packet": {
+      "opcode": 1701406,
+      "a": 1701407,
+      "b": 1701408,
+      "destination": 1701409,
+      "base": 1701410,
+      "color": 1701411
+    }
+  },
+  "outputs": {
+    "caller_enable": 1701461,
+    "caller_address": 1701480,
+    "caller_ack_address": 1701481,
+    "candidate_address": 1680007,
+    "candidate_fields": {
+      "opcode": 1680001,
+      "a": 1680002,
+      "b": 1680003,
+      "destination": 1680004,
+      "base": 1680005,
+      "color": 1680006
+    }
+  },
+  "reserved_channels": [
+    1701500,
+    1701501
+  ],
+  "platforms": 6,
+  "building_entries": 3972
+}

@@ -16,6 +16,7 @@ _READY, _EXHAUSTED, _RESUME, _ADVANCE, _REARM = range(6, 11)
 _SYNC_CAPTURE, _SYNC_STORE = 11, 12
 _WAIT_PHASES = (_RESET, _RUN, _CALCULATE, _RESUME, _REARM, _READY, _EXHAUSTED)
 _FIELDS = ("slot", "next_slot", *(f"material_{i}" for i in range(4)))
+_STORE_MODES = (("load", 1), ("keep", 2), ("clear", 3))
 
 
 def _waiting(phase, reset_tap, result_tap, done, advance, output):
@@ -88,7 +89,7 @@ def _controls(reset, commit, selectors):
     return board
 
 
-def _lane_controls(lane, column, capture, valid, reset, selectors):
+def _lane_controls(lane, column, capture, valid, reset, mode):
     board = Module({"column": column, "capture": capture, "valid": valid, "reset": reset})
     active = _compare(board, "active", "reset", 0)
     capture_enabled = _gate(board, "And", "capture_enabled", active, "capture")
@@ -97,13 +98,18 @@ def _lane_controls(lane, column, capture, valid, reset, selectors):
     changed = _gate(board, "And", "changed", "capture", _compare(board, "affected", "column", lane, "BQ=="))
     _gate(board, "And", "keep", active, _gate(board, "Not", "unchanged", changed))
     _gate(board, "Or", "clear", "reset", _gate(board, "And", "drop", changed, _gate(board, "Not", "miss", hit)))
-    board.outputs = selectors
+    for name, value in _STORE_MODES:
+        _gate(board, "If", "mode", value, name)
+    board.outputs = {"mode": mode}
     return board
 
 
 def _store(selectors, inputs, outputs, defaults):
     board = Module({**selectors, **{f"new_{name}": channel for name, channel in inputs.items()},
                     **{f"old_{name}": channel for name, channel in outputs.items()}})
+    if "mode" in selectors:
+        for name, value in _STORE_MODES:
+            _compare(board, name, "mode", value)
     for name, value in defaults.items():
         _gate(board, "If", name, f"new_{name}", "load")
         _gate(board, "If", name, f"old_{name}", "keep")
@@ -171,10 +177,11 @@ def build(column_base: int, cursor_base: int, channel_base: int) -> tuple[dict, 
         *timers,
     ]
     for i, lane in enumerate(lanes):
-        modules.append(_lane_controls(i, ch["column"], ch["capture"], raw["valid"], ch["reset"], selectors[i]))
-        for pair in (_FIELDS[:2], _FIELDS[2:4], _FIELDS[4:]):
-            modules.append(_store(selectors[i], {k: raw[k] for k in pair}, {k: lane[k] for k in pair},
-                                  {k: 20 if k in _FIELDS[:2] else -1 for k in pair}))
+        mode = selectors[i]["load"]
+        modules.append(_lane_controls(i, ch["column"], ch["capture"], raw["valid"], ch["reset"], mode))
+        for fields in (_FIELDS[:3], _FIELDS[3:]):
+            modules.append(_store({"mode": mode}, {k: raw[k] for k in fields}, {k: lane[k] for k in fields},
+                                  {k: 20 if k in _FIELDS[:2] else -1 for k in fields}))
     offset = 3 + max(board["X"] for board in entries)
     entries.extend({**module.layout()["BP"]["Entries"][0], "X": offset + 3 * (i % 6), "Y": 3 * (i // 6)}
                    for i, module in enumerate(modules))

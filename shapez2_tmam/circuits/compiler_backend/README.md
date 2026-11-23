@@ -176,3 +176,26 @@ python -m shapez2_tmam.circuits.compiler_backend.confirmed_call \
   --address-channel 1701480 --ack-channel 1701481 --request-channel 1701482 \
   --channel-base 1701490 --output dense-confirmed-call.spz2bp
 ```
+
+### 紧柱接入六字段实体工道
+
+`dense_write_bridge` 将 `dense-confirmed-call` 接到 `mixed_sample` 的提交桥。公开地址与调用器请求相同时，适配板将六字段和地址送到私有频道 `1680001`–`1680007`。槽 `0` 传整数，未用字段传空信号。
+
+适配板在本笔写入请求有效时先观察 ACK 为 `0`，再用同一公开地址确认 ACK 为 `1`。确认地址保持在 `1701481`，直到调用器撤去请求。即使工道先切到下一地址，调用器仍能收到末笔确认。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend.dense_write_bridge \
+  --circuits shapez2_tmam/blueprints/验收/电路/双半形 \
+  --channel-base 1701500 --output dense-write-bridge.spz2bp
+```
+
+使用通用 `mixed-dynamic` 样件。移除其接口表 `fixture.platforms` 标出的固定订单头和候选字段板，保留提交桥、写入器和存储板。以工道原点计，将适配板、`dense-confirmed-call`、`dense-column-input`、`dense-column-packet`、`dense-column-advance-phase` 和 `dense-column-advance-level` 各自整体平移 `Y+60`，`X` 偏移依次取 `0/30/60/90/120/150`。
+
+将原色单格送入 `1701466`，其余四层为空，设置目的槽 `1701404=0`、暂存槽 `1701405=1`。订单头按工道接口表接入目标、长度、通过位和回放结果。停料令 `1640059=0`，复位时将 `1640030` 和 `1640060` 置 `0`，等写入相位 `1640001=3` 连续 128 tick。切换订单头和行输入后再置 RUN 和清空确认，并在装方期间保持输入。
+
+| 底层原色与目标 | 工道长度 | 指令顺序 |
+| --- | ---: | --- |
+| `cr------` | 6 | `14, 10, 4, 1, 4, 2` |
+| `Cg------` | 5 | `14, 4, 1, 4, 2` |
+
+离线回放核对了实际写入的六字段。六笔单在末笔确认后放行。第二笔进入相位 `2` 时中断，清空后五笔单从地址 `0` 重启。回放采用板内组合传播和 12 tick 无线延迟，游戏内存储接管见 #72。

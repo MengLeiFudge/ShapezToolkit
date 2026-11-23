@@ -8,7 +8,7 @@
 | 实体精简版 | 同一条工道，保留两份固定订单所需的 21 个基础料站和 2 个结晶站 | [精简站场及用料](实体/six-slot-acceptance-compact.json) |
 | 实体 | 固定两步订单，核对整组提交及复位 | [样件接口](实体/two-step-sender.json) |
 | 实体 | 两笔六字段写入与保持接管 | [原生样件](实体/writer-handoff.spz2bp) · [接线表](实体/writer-handoff.json) |
-| 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) · [接轨样件](实体/四色含晶/four-color-feed-ports.spz2bp) · [逐车层供货](../../circuits/factory_assembly/four_color_supply.md) |
+| 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) · [接轨样件](实体/四色含晶/four-color-feed-ports.spz2bp) · [2 件/秒待测清单](实体/四色含晶/four-color-capacity.json) · [逐车层供货](../../circuits/factory_assembly/four_color_supply.md) |
 | 实体 | 动态六字段含晶订单，六工段与合并结晶收料站 | [导入蓝图](实体/含晶写入/mixed-dynamic.spz2bp) · [站点接口](实体/含晶写入/mixed-dynamic.json) · [换单与供货](../../circuits/factory_assembly/mixed_sample.md) |
 | 配料 | 基础料与结晶染料的换装站、两种混合车库 | [货种、车厢、层位及接口](配料/proportioning.json) |
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
@@ -16,6 +16,7 @@
 | 电路 | 按原层号读取目标的两层 | [复位、选择与采样](电路/原层读取/read-target-rows.json) |
 | 电路 | 四列逐层堆叠前缀扫描 | [整行编码](电路/堆叠前缀/pack-stack-row.json) · [复位、行输入和采样时序](电路/堆叠前缀/stack-prefix-scan.json) |
 | 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) · [单列可用顶盖](电路/顶针逆推/pin-cap-column.json) |
+| 电路 | 枚举四列顶针前态并保持候选 | [控制与频道](电路/顶针逆推/README.md) · [原生蓝图](电路/顶针逆推/pin-column-sample.spz2bp) |
 | 电路 | 恢复顶针来源标签并回放 | [来源序号](电路/顶针逆推/pin-source-rank.json) · [五轮查标签](电路/顶针逆推/pin-retained-label.json) · [来源格](电路/顶针逆推/pin-source-label.json) · [整行拼合](电路/顶针逆推/pin-source-row.json) · [回放](电路/顶针逆推/pin-replay.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
@@ -24,13 +25,14 @@
 | 电路 | 五层取料、顺序编码、双完工启动闭包 | [原生蓝图](电路/双半形/prefix-scan-wiring.spz2bp) · [接口](电路/双半形/prefix-scan-wiring.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [前缀角参数](电路/双半形/prefix-corner-parameters.json) · [独立落点样件](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 | 电路 | 从原图检查两列半形的支撑 | [两半顺序预处理](电路/双半形/seed-two-halves.json) · [四列合成五层材料字](电路/双半形/join-material-words.json) · [前半输入](电路/双半形/seed-pair-0.json) · [后半输入](电路/双半形/seed-pair-1.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
-| 电路 | 从原图读取已选前缀的材料和原色 | [原单格读取](电路/双半形/read-labeled-corner.json) · [前缀材料字](电路/双半形/read-prefix-column.json) · [前缀原格](电路/双半形/read-prefix-corner.json) |
+| 电路 | 读取已选前缀的材料和原色 | [原单格读取](电路/双半形/read-labeled-corner.json) · [从整列剪取前缀](电路/双半形/clip-prefix-word.json) · [前缀原格](电路/双半形/read-prefix-corner.json) |
 | 电路 | 直接释放角的前态与外侧锚料 | [最高晶体层](电路/双半形/corner-highest-crystal.json) · [逐层原料](电路/双半形/simple-corner-source.json) |
 | 电路 | 顶破角的前态与辅助锚柱 | [逐层原料](电路/双半形/pin-corner-source.json) · [近锚和远侧顶针柱](电路/双半形/pin-corner-anchors.json) |
 | 电路 | 原料就位后的角级回放 | [直接释放](电路/双半形/simple-corner-release.json) · [支撑交接和顶破](电路/双半形/pin-corner-release.json) |
 | 电路 | 顶破支路的补料与半形拼接 | [触顶补形](电路/双半形/pin-corner-complement.json) · [上部单层](电路/双半形/pin-corner-upper-layer.json) · [收尾](电路/双半形/pin-corner-finish.json) · [相邻两角拼接](电路/双半形/join-corner-half.json) |
 | 电路 | 合并两个已制半形并复用五轮追加 | [标准切向拼接](电路/双半形/join-oriented-halves.json) · [尾料掩码](电路/双半形/mask-paired-tail.json) · [尾料回放](电路/双半形/replay-paired-tail.json) · [恢复原方向与验收](电路/双半形/finish-paired-tail.json) |
 | 电路 | 带原色的紧柱备料与回放 | [单步备料](电路/双半形/dense-column-actions.json) · [五轮回放](电路/双半形/dense-column.json) · [完工取柱](电路/双半形/dense-column-finish.json) |
+| 电路 | 紧柱配方接六槽工道，匹配同地址写入确认 | [接口](电路/双半形/dense-write-bridge.json) · [原生蓝图](电路/双半形/dense-write-bridge.spz2bp) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
 
@@ -54,7 +56,7 @@
 
 两切向选择器与 `prefix-scan-wiring` 合用，独占 `1700871` 和 `1700930`。目标保持不变，先将 `1701581` 保持为 0 至少 384 信号 tick 后置为 1。闭包完工后另等一轮再读取总校验。第一种切向成功时保留其结果。第一种失败时先换向并复位，再复用同一条闭包。`1701584` 表示当前切向找到可用前缀，`1701585` 表示两个切向均未找到前缀。后者可作为继续顶针逆推的条件。 不可制作须由完整搜索判定。
 
-读取整列可将 `read-prefix-column` 的 `prefix_height` 保持为 `5`。已选定前缀高度后，将同一高度送给 `read-prefix-column` 和 `read-prefix-corner`。材料字仍保留五个原层位，超出前缀的格记为空。把材料字接到落点判定，把原格接到备料板。原格输出保留普通图形和晶体的颜色。前缀高度为 `0` 时该列为空。
+前缀材料字直接从已锁存的四列里选一列。剪取板读 `1700873` 的列号和 `1700816` 的高度，向 `1700806` 发布五层材料字。超出前缀的格填空材料标记。合装时只装剪取板发布这个频道。原格读取使用同一高度，保留普通图形和晶体的颜色。前缀高度为 `0` 时，该列各层为空。
 
 半形支撑检查的图形只占 `q0/q1`。把它接入 `target`，等满接口表的保持时间后读 `result`。虚拟半切后图形与输入相等时输出 `1`。含晶体半形还要对每列分别检查列 A。
 
@@ -160,7 +162,10 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_sca
   --output-channel helper=1700587 --output corner-helper.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_methods.py \
   read_labeled_corner --channel-base 1700620 --output read-labeled-corner.spz2bp
-python -m shapez2_tmam.circuits.compile_stack_scan --read-prefix-column --channel-base 1700800 --output read-prefix-column.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/material_word.py \
+  --field word=prefix_material_word --input-channel q0=1700963 --input-channel q1=1700964 \
+  --input-channel q2=1700965 --input-channel q3=1700966 --input-channel column=1700873 \
+  --input-channel height=1700816 --output-channel word=1700806 --output clip-prefix-word.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_methods.py \
   read_prefix_corner --channel-base 1700790 --output read-prefix-corner.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_methods.py \
