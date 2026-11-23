@@ -1,0 +1,50 @@
+{
+  "inputs": {
+    "enable": 1701461,
+    "address": 1701480,
+    "ack_address": 1701481,
+    "done": 1701464,
+    "opcode": 1701406
+  },
+  "outputs": {
+    "settled": 1701462,
+    "has_packet": 1701463,
+    "confirmed": 1701471,
+    "request_address": 1701482
+  },
+  "states": {
+    "phase": {
+      "current": 1701400,
+      "next": 1701472,
+      "initial": 0
+    },
+    "level": {
+      "current": 1701465,
+      "next": 1701473,
+      "initial": 0
+    },
+    "dye": {
+      "current": 1701640,
+      "next": 1701641,
+      "initial": 0
+    },
+    "present": {
+      "current": 1701642,
+      "next": 1701643,
+      "initial": 0
+    }
+  },
+  "reserved_channels": [
+    1701490,
+    1701498
+  ],
+  "timing": {
+    "input_hold_signal_ticks": 7800,
+    "update_hold_signal_ticks": 2400,
+    "settle_phase_signal_ticks": 7824,
+    "update_phase_signal_ticks": 2412,
+    "reset_hold_signal_ticks": 48
+  },
+  "platforms": 11,
+  "building_entries": 10965
+}

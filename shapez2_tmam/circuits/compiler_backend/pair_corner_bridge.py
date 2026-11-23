@@ -13,12 +13,13 @@ from .prefix_scan_wiring import _report
 
 _CORNER_SELECTOR, _CORNER_RUN, _CORNER_DONE = 1701636, 1701637, 1701638
 _DENSE_RUN, _DENSE_DONE, _DENSE_PHASE, _DENSE_LEVEL = 1701461, 1701464, 1701400, 1701465
+_STREAM_STATES = {"dye": 1701640, "present": 1701642}
 _NORMAL_SOURCE, _NORMAL_RUN, _ARMED, _ATTEMPT, _STARTED, _ACTIVE, _ACK, _DENSE_STATUS, _READY = range(1702140, 1702149)
 _TIMERS = 1702149
 _LOW_TICKS = 8 * _RADIO_TICKS
 
 
-def _request() -> Module:
+def _request(append_corner: bool) -> Module:
     board = Module({"kind": _KIND, "enable": _ENABLE, "corner": _DEFAULT_METHODS[0][1],
                     "run": _CORNER_RUN, "source": _CORNER_SELECTOR, "armed": _ARMED})
     owned = _gate(board, "And", "owned", _compare(board, "corner_kind", "kind", 1), "corner")
@@ -28,19 +29,29 @@ def _request() -> Module:
     armed = _gate(board, "Or", "remember", low, "armed")
     source = _gate(board, "Or", "valid_source", _compare(board, "dense", "source", 1),
                    _compare(board, "release", "source", 2))
+    if append_corner:
+        source = _gate(board, "Or", "valid_with_append", source, _compare(board, "append", "source", 4))
     request = _gate(board, "And", "request", high, _gate(board, "And", "valid", source, "armed"))
     board.outputs = {_gate(board, "And", "armed_out", active, armed): _ARMED,
                      _gate(board, "If", "attempt", "source", _gate(board, "And", "issue", active, request)): _ATTEMPT}
     return board
 
 
-def _readiness() -> Module:
-    board = Module({"dense": _DENSE_STATUS, "packet": _SHARED_DONE, "source": _STARTED})
+def _readiness(stream_states: dict[str, int]) -> Module:
+    board = Module({"dense": _DENSE_STATUS, "packet": _SHARED_DONE, "source": _STARTED, **stream_states})
     clear = _gate(board, "And", "clear", _compare(board, "dense_clear", "dense", 0),
                   _compare(board, "packet_clear", "packet", 0))
+    if stream_states:
+        dye_clear = _compare(board, "dye_clear", "dye", 0)
+        present_clear = _compare(board, "present_clear", "present", 0)
+        stream_clear = _gate(board, "And", "stream_clear", dye_clear, present_clear)
+        clear = _gate(board, "And", "fully_clear", clear, stream_clear)
     _gate(board, "If", "status", 0, clear)
     for source, name in ((1, "dense"), (2, "packet")):
         selected = _compare(board, name + "_selected", "source", source)
+        if name == "packet" and stream_states:
+            selected = _gate(board, "Or", "packet_selected_with_append", selected,
+                             _compare(board, "append_selected", "source", 4))
         done = _compare(board, name + "_done", name, 1)
         _gate(board, "If", "status", 1, _gate(board, "And", name + "_accepted", selected, done))
     board.outputs = {"status": _READY}
@@ -69,13 +80,13 @@ def _route() -> Module:
     return board
 
 
-def _dispatch(runs: dict[int, int], reset_steps: int, sample_steps: int):
+def _dispatch(runs: dict[int, int], reset_steps: int, sample_steps: int, stream_states: dict[str, int]):
     reset_width = 4 if reset_steps <= _WAIT_RADIX else 5
     reset_boards, reset, _ = _wait_timer(_ATTEMPT, tuple(range(_TIMERS, _TIMERS + reset_width)), reset_steps, 1)
     sample_base = _TIMERS + reset_width
     sample_boards, sampled, _ = _wait_timer(_STARTED, tuple(range(sample_base, sample_base + 4)), sample_steps, 1)
-    return (_select(runs, _NORMAL_SOURCE, _NORMAL_RUN), _request(),
-            _completion(_DENSE_RUN, _DENSE_DONE, _DENSE_PHASE, _DENSE_LEVEL, _DENSE_STATUS), _readiness(),
+    return (_select(runs, _NORMAL_SOURCE, _NORMAL_RUN), _request(bool(stream_states)),
+            _completion(_DENSE_RUN, _DENSE_DONE, _DENSE_PHASE, _DENSE_LEVEL, _DENSE_STATUS), _readiness(stream_states),
             *reset_boards, *sample_boards, _method(_ATTEMPT, _STARTED, reset, sampled, _ACTIVE, _READY, _ACK),
             _reply(), _route())
 
@@ -83,27 +94,35 @@ def _dispatch(runs: dict[int, int], reset_steps: int, sample_steps: int):
 def build(writer: Path, dense: Path) -> tuple[dict, dict]:
     interface = _report(writer)
     dense_clock = _report(dense)
-    if (dense_clock["inputs"]["enable"], dense_clock["inputs"]["done"],
-            dense_clock["states"]["phase"]["current"], dense_clock["states"]["level"]["current"]) != (
-            _DENSE_RUN, _DENSE_DONE, _DENSE_PHASE, _DENSE_LEVEL):
-        raise ValueError("紧柱时钟的复位频道不匹配")
-    if (interface["selector_values"]["dense"], interface["selector_values"]["release"]) != (1, 2):
-        raise ValueError("pair-writer 的紧柱和释放来源编号不匹配")
+    expected_states = {"phase": _DENSE_PHASE, "level": _DENSE_LEVEL}
+    stream_states = _STREAM_STATES if "dense-stream-clock" in interface["parts"] else {}
+    expected_states.update(stream_states)
+    states = {name: (state["current"], state["initial"]) for name, state in dense_clock["states"].items()}
+    if ((dense_clock["inputs"]["enable"], dense_clock["inputs"]["done"]) != (_DENSE_RUN, _DENSE_DONE)
+            or states != {name: (ch, 0) for name, ch in expected_states.items()}):
+        raise ValueError("紧柱时钟的复位频道或初值不匹配")
+    selectors = {"dense": 1, "release": 2}
+    if stream_states:
+        selectors["append"] = 4
+    if any(interface["selector_values"][name] != value for name, value in selectors.items()):
+        raise ValueError("pair-writer 的制角来源编号不匹配")
     reset_ticks = max(256, dense_clock["timing"]["reset_hold_signal_ticks"] + 4 * _RADIO_TICKS,
                       interface["clock"]["timing"]["reset_hold_signal_ticks"] + 4 * _RADIO_TICKS)
     reset_steps = (reset_ticks + _RADIO_TICKS - 1) // _RADIO_TICKS + 2
     sample_steps = 16
     if reset_steps > _WAIT_RADIX ** 2:
         raise ValueError("制角子步骤的复位等待超出计数器范围")
-    document, report = _build(writer, lambda runs: _dispatch(runs, reset_steps, sample_steps),
-                              (_DENSE_RUN, _DENSE_DONE, _DENSE_PHASE, _DENSE_LEVEL))
+    document, report = _build(writer, lambda runs: _dispatch(runs, reset_steps, sample_steps, stream_states),
+                              (_DENSE_RUN, _DENSE_DONE, *expected_states.values()))
     report["corner"] = {
         "inputs": {"selector": _CORNER_SELECTOR, "run": _CORNER_RUN}, "outputs": {"done": _CORNER_DONE},
-        "selector_values": {"dense": 1, "release": 2}, "run_low_signal_ticks": _LOW_TICKS,
+        "selector_values": selectors, "run_low_signal_ticks": _LOW_TICKS,
         "reset_timer_signal_ticks": reset_steps * _RADIO_TICKS,
         "sample_timer_signal_ticks": sample_steps * _RADIO_TICKS,
         "reserved_channels": list(range(_NORMAL_SOURCE, _TIMERS + (4 if reset_steps <= _WAIT_RADIX else 5) + 4)),
     }
+    if stream_states:
+        report["corner"]["dense_reset_states"] = expected_states
     return document, report
 
 

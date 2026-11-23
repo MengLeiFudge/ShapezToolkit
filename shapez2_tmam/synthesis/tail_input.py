@@ -19,3 +19,9 @@ def tail_mask_at(mask: Shape | None, level: int) -> Shape | None:
     if level == 3:
         return unstack_upper(mask)
     return unstack_upper(unstack_lower(mask))
+
+
+def tail_source_row(row: Shape | None, level: int, optional_top: bool) -> Shape | None:
+    if optional_top and level == 4:
+        return None
+    return row
