@@ -11,6 +11,7 @@
 | 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) |
 | 配料 | 基础料与结晶染料的换装站、两种混合车库 | [货种、车厢、层位及接口](配料/proportioning.json) |
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
+| 电路 | 从原图一次读取五份原色单层 | [原生蓝图](电路/原层读取/read-five-rows.spz2bp) · [接口](电路/原层读取/read-five-rows.json) |
 | 电路 | 按原层号读取目标的两层 | [复位、选择与采样](电路/原层读取/read-target-rows.json) |
 | 电路 | 四列逐层堆叠前缀扫描 | [整行编码](电路/堆叠前缀/pack-stack-row.json) · [复位、行输入和采样时序](电路/堆叠前缀/stack-prefix-scan.json) |
 | 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) |
@@ -32,7 +33,9 @@
 
 生成命令、运行顺序和测量格式见[六槽实体装配](../../circuits/factory_assembly/README.md)。整厂接口见[蓝图约定](../整厂约定.md)。
 
-原层读取电路的 `initial_remaining` 接目标图形，`initial_top`、`initial_below` 为空。`item0` 至 `item4` 对应原第五层到第一层。填写 `1` 的层位写入 `result_top`，填写 `2` 的层位写入 `result_below`，其余填写 `0`。到采样时刻且 `done=1` 后读结果，所选层原本为空时输出空信号。
+五层原色读取板接已经统一切向的目标 `1700872`。经过 1920 信号 tick 后，从 `1701200` 到 `1701204` 依次读第一层到第五层。空层输出空信号，其他层保留原有材料和颜色。一块 3×3 平台使用三层电路空间，内部通过本地接线。
+
+可选两层的读取电路将目标接 `initial_remaining`，`initial_top`、`initial_below` 留空。`item0` 至 `item4` 对应原第五层到第一层。填写 `1` 的层位写入 `result_top`，填写 `2` 的层位写入 `result_below`，其余填写 `0`。到采样时刻且 `done=1` 后读结果，所选层原本为空时输出空信号。
 
 整行编码板从当前层与正下方一层读取堆叠支撑，`ground=1` 对应第一层。两块平台间用五对飞线。含晶编码用针标出已经保留的晶体，供双半形闭包使用。半行板只保留 q0/q1。整行板两块相邻平台通过七对原生飞线传递内部数据。
 
@@ -63,6 +66,11 @@
 紧柱回放的 `item0` 至 `item4` 顺序为从底到顶，每次送入已在 q0 上的普通格或有色晶体。目标柱连续，空信号只用于末尾补齐。`initial_source` 和 `initial_pending` 留空。等五轮完成后再按完工板接口表读取结果。回放实现了同色晶体批量结晶，实际下料与工序提交由制作层处理。
 
 ```bash
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_methods.py \
+  --field row0=original_row_0 --field row1=original_row_1 --field row2=original_row_2 \
+  --field row3=original_row_3 --field row4=original_row_4 --input-channel target=1700872 \
+  --output-channel row0=1701200 --output-channel row1=1701201 --output-channel row2=1701202 \
+  --output-channel row3=1701203 --output-channel row4=1701204 --output read-five-rows.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --read-rows --channel-base 1700300 --output read-target-rows.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --channel-base 1700200 --output stack-prefix-scan.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --check-direct --channel-base 1700450 --output direct-stack-scan.spz2bp

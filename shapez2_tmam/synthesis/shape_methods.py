@@ -140,9 +140,54 @@ def original_rows(target: Shape | None) -> tuple[Shape | None, ...]:
     """按原层号从底到顶返回五层，空层保留为 None。"""
     rows = []
     for height in (5, 4, 3, 2, 1):
-        rows.append(read_top_row_at(target, height))
-        target = advance_target_rows(target, height)
+        present = _has_row_at_bound(target, height)
+        rows.append(unstack_upper(target) if present else None)
+        if present:
+            target = unstack_lower(target)
     return tuple(reversed(rows))
+
+
+def _has_row_at_bound(target: Shape | None, height: int) -> bool:
+    # 前面的轮次已移除更高的原层，填满空位后剥去 height-1 层即可判断。
+    if height == 1:
+        return target is not None
+    dense = unstack_lower(crystal(target, "r"))
+    for level in (2, 3, 4):
+        if level < height:
+            dense = unstack_lower(dense)
+    return dense is not None
+
+
+def _read_original_row(target: Shape | None, wanted: int) -> Shape | None:
+    for height in (5, 4, 3, 2, 1):
+        present = _has_row_at_bound(target, height)
+        if height == wanted:
+            if present:
+                return unstack_upper(target)
+            return None
+        if present:
+            target = unstack_lower(target)
+    return None
+
+
+def original_row_0(target: Shape | None) -> Shape | None:
+    return _read_original_row(target, 1)
+
+
+def original_row_1(target: Shape | None) -> Shape | None:
+    return _read_original_row(target, 2)
+
+
+def original_row_2(target: Shape | None) -> Shape | None:
+    return _read_original_row(target, 3)
+
+
+def original_row_3(target: Shape | None) -> Shape | None:
+    return _read_original_row(target, 4)
+
+
+def original_row_4(target: Shape | None) -> Shape | None:
+    return _read_original_row(target, 5)
 
 
 def bottom_material(target: Shape | None) -> int:

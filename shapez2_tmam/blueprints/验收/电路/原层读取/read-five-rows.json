@@ -1,0 +1,98 @@
+{
+  "methods": {
+    "row0": "original_row_0",
+    "row1": "original_row_1",
+    "row2": "original_row_2",
+    "row3": "original_row_3",
+    "row4": "original_row_4"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "target": {
+      "channel": 1700872,
+      "type": "shape"
+    }
+  },
+  "outputs": {
+    "row0": {
+      "channel": 1701200,
+      "type": "shape"
+    },
+    "row1": {
+      "channel": 1701201,
+      "type": "shape"
+    },
+    "row2": {
+      "channel": 1701202,
+      "type": "shape"
+    },
+    "row3": {
+      "channel": 1701203,
+      "type": "shape"
+    },
+    "row4": {
+      "channel": 1701204,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1700872,
+    1701200,
+    1701201,
+    1701202,
+    1701203,
+    1701204
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "row0": {
+      "original_row_0": 1,
+      "_read_original_row": 130,
+      "_has_row_at_bound": 190
+    },
+    "row1": {
+      "original_row_1": 1,
+      "_read_original_row": 84,
+      "_has_row_at_bound": 180
+    },
+    "row2": {
+      "original_row_2": 1,
+      "_read_original_row": 47,
+      "_has_row_at_bound": 112
+    },
+    "row3": {
+      "original_row_3": 1,
+      "_read_original_row": 22,
+      "_has_row_at_bound": 58
+    },
+    "row4": {
+      "original_row_4": 1,
+      "_read_original_row": 7,
+      "_has_row_at_bound": 20
+    }
+  },
+  "settling": {
+    "max_gate_depth": 28,
+    "hold_signal_ticks": 1920,
+    "hold_simulation_seconds": 160.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    1246,
+    913,
+    929
+  ],
+  "logic_gates": 113,
+  "logic_gates_before_reuse": 281,
+  "building_entries": 3088,
+  "global_receivers": 1,
+  "global_transmitters": 5,
+  "internal_global_devices": 0
+}
