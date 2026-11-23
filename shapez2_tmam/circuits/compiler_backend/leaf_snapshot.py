@@ -5,16 +5,17 @@ from pathlib import Path
 
 from ...mari.signals import decode_constant
 from ..circuit import constant
-from ..circuit_packing import stack_platforms
 from ..local_module import Module
 from . import _write_blueprint
+from ._snapshot_layout import compact_batch, compact_snapshot
 from .auto_prefix_scan import _radio_ports
 from .method_sequence import _radio_channels
 from .module_caller import _RADIO_RECEIVER, _compare, _gate, _local_wiring
 from .prefix_scan_wiring import _append, _native_wiring
 
 
-_HOLD, _CAPTURE, _READY, _PHASE, _COMMIT, _BATCH_READY = range(1704600, 1704606)
+_HOLD, _CAPTURE, _READY, _PHASE = range(1704600, 1704604)
+_BATCH_READY = 1704605
 _CHOSEN, _COLUMN, _BATCH = 1703004, 1703003, 1702850
 _SOURCE = (1703002, 1703006, *range(1703008, 1703017), *range(1703116, 1703120))
 _STORED = tuple(range(1704620, 1704635))
@@ -27,34 +28,17 @@ def _capture() -> Module:
     holding = _compare(board, "holding", "hold", 1)
     requested = _compare(board, "requested", "capture", 1)
     chosen = _compare(board, "chosen_leaf", "chosen", 1)
-    phases = tuple(_compare(board, f"phase{i}", "phase", i) for i in range(4))
-    idle = _gate(board, "Or", "idle", phases[0], _compare(board, "uninitialized", "phase", None))
-    accept = _gate(board, "And", "accept", idle, _gate(board, "And", "capture_chosen", requested, chosen))
-    wait = _gate(board, "And", "wait", idle, _gate(board, "Not", "no_capture", accept))
-    _gate(board, "If", "next", 0, wait)
-    _gate(board, "If", "next", 1, accept)
-    _gate(board, "If", "next", 2, phases[1])
-    _gate(board, "If", "next", 3, _gate(board, "Or", "settled", phases[2], phases[3]))
+    idle = _compare(board, "idle", "phase", None)
+    accepted = _gate(board, "And", "accept", idle, _gate(board, "And", "capture_chosen", requested, chosen))
+    phase1, phase2, phase3 = (_compare(board, f"phase{i}", "phase", i) for i in range(1, 4))
+    _gate(board, "If", "next", 1, accepted)
+    _gate(board, "If", "next", 2, phase1)
+    _gate(board, "If", "next", 3, _gate(board, "Or", "settled", phase2, phase3))
     _gate(board, "If", "state", "next", holding)
-    _gate(board, "If", "state", 0, _gate(board, "Not", "reset", holding))
-    board.outputs = {"state": _PHASE,
-                     _gate(board, "And", "commit", holding, phases[1]): _COMMIT,
-                     _gate(board, "And", "ready", holding, phases[3]): _READY}
-    return board
-
-
-def _bank(fields: tuple[tuple[int, int], ...]) -> Module:
-    board = Module({"hold": _HOLD, "commit": _COMMIT})
-    holding = _compare(board, "holding", "hold", 1)
-    load = _gate(board, "And", "load", holding, "commit")
-    retain = _gate(board, "And", "retain", holding, _gate(board, "Not", "no_commit", "commit"))
-    for i, (source, destination) in enumerate(fields):
-        board.inputs[f"incoming{i}"] = source
-        board.inputs[f"saved{i}"] = destination
-        value = f"value{i}"
-        _gate(board, "If", value, f"incoming{i}", load)
-        _gate(board, "If", value, f"saved{i}", retain)
-        board.outputs[value] = destination
+    # 读到阶段 2 时写入，等于旧阶段 1 的 commit 再经过一次无线传输。
+    _gate(board, "And", "load", holding, phase2)
+    _gate(board, "And", "retain", holding, _gate(board, "Not", "no_load", phase2))
+    board.outputs = {"state": _PHASE, _gate(board, "And", "ready", holding, phase3): _READY}
     return board
 
 
@@ -91,11 +75,9 @@ def _attach_path(document: dict, path: Path) -> None:
 
 def build(path: Path | None = None) -> tuple[dict, dict]:
     fields = tuple(zip(_SOURCE, _STORED, strict=True))
-    modules = [_capture(), *(_bank(fields[i:i + 2]) for i in range(0, len(fields), 2)), _height()]
+    platforms = [compact_snapshot(fields, _capture(), _height(), _COLUMN)]
     if path is not None:
-        modules.append(_batch())
-    platforms = [module.layout()["BP"]["Entries"][0] for module in modules]
-    stack_platforms(platforms)
+        platforms.append({**compact_batch(_batch()), "Z": 1})
     document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}}
     if path is not None:
         _attach_path(document, path)

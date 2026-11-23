@@ -10,7 +10,10 @@ from ..mari.ports import PORTS
 
 
 class _Board:
-    def __init__(self):
+    def __init__(self, *, size=54, origin=-17, foundation="Foundation_3x3"):
+        self.size = size
+        self.origin = origin
+        self.foundation = foundation
         self.entries = []
         self.occupied = set()
         self.traces = defaultdict(dict)
@@ -19,11 +22,11 @@ class _Board:
     def place(self, kind, x, y, level, rotation=0, config=None, *, radius=0, height=1):
         footprint = {(x + dx, y + dy, level + dz) for dx, dy in product(range(-radius, radius + 1), repeat=2)
                      for dz in range(height)}
-        if self.occupied & footprint or any(not (0 <= a < 54 and 0 <= b < 54 and 0 <= l < 3)
+        if self.occupied & footprint or any(not (0 <= a < self.size and 0 <= b < self.size and 0 <= l < 3)
                                             for a, b, l in footprint):
             raise ValueError(f"建筑占地冲突或越界 {kind}@{(x, y, level)}")
         self.occupied.update(footprint)
-        entry = {"T": _TYPES.get(kind, kind + "InternalVariant"), "X": x - 17, "Y": y - 17,
+        entry = {"T": _TYPES.get(kind, kind + "InternalVariant"), "X": x + self.origin, "Y": y + self.origin,
                  "L": level, "R": rotation}
         if config is not None:
             entry["C"] = config
@@ -34,7 +37,7 @@ class _Board:
         dx, dy = DIRECTIONS[facing]
         site = x + dx, y + dy, level
         if (site in self.occupied or self.traces[site].keys() - {net}
-                or not (0 <= site[0] < 54 and 0 <= site[1] < 54)):
+                or not (0 <= site[0] < self.size and 0 <= site[1] < self.size)):
             raise ValueError(f"本地端口出口被占用 {site}")
         self.traces[site].setdefault(net, set()).add((facing + 2) % 4)
         self.terminals[net, level].add(site)
@@ -43,7 +46,7 @@ class _Board:
         pins = self.terminals[net, low] | self.terminals[net, high]
         cx = sum(x for x, _, _ in pins) / len(pins)
         cy = sum(y for _, y, _ in pins) / len(pins)
-        for x, y in sorted(product(range(1, 53), repeat=2), key=lambda xy: dist(xy, (cx, cy))):
+        for x, y in sorted(product(range(1, self.size - 1), repeat=2), key=lambda xy: dist(xy, (cx, cy))):
             if any((x + dx, y + dy, l) in self.occupied or (x + dx, y + dy, l) in self.traces
                    for dx, dy in product(range(-1, 2), repeat=2) for l in range(low, high + 1)):
                 continue
@@ -57,9 +60,10 @@ class _Board:
                 return
         raise ValueError("平台中没有可用的换层格")
 
-    def route(self, net, terminals):
+    def route(self, net, terminals, *, connected=(), protect_pads=False):
         """把端口逐一接入同一棵树。两条异网直线正交时才允许共用线桥。"""
-        tree = {min(terminals)}
+        pads = set().union(*self.terminals.values()) if protect_pads else set()
+        tree = set(connected) or {min(terminals)}
         todo = terminals - tree
         while todo:
             queue = deque(sorted(todo))
@@ -71,7 +75,7 @@ class _Board:
                 x, y, level = site
                 for direction, (dx, dy) in enumerate(DIRECTIONS):
                     a, b = x + dx, y + dy
-                    while 0 <= a < 54 and 0 <= b < 54 and (a, b, level) not in self.occupied:
+                    while 0 <= a < self.size and 0 <= b < self.size and (a, b, level) not in self.occupied:
                         target = a, b, level
                         wires = self.traces.get(target, {})
                         if not wires or net in wires:
@@ -79,7 +83,8 @@ class _Board:
                                 previous[target] = site, direction
                                 queue.append(target)
                             break
-                        if len(wires) != 1 or next(iter(wires.values())) != {(direction + 1) % 4, (direction + 3) % 4}:
+                        if (target in pads or len(wires) != 1
+                                or next(iter(wires.values())) != {(direction + 1) % 4, (direction + 3) % 4}):
                             break
                         a, b = a + dx, b + dy
             else:
@@ -112,7 +117,7 @@ class _Board:
             else:
                 raise ValueError(f"线桥混接 {(x, y, level)}")
             self.place("WireDefault" + kind, x, y, level, rotation)
-        return {"$type": "Island", "BinaryVersion": 1137, "Entries": [{"T": "Foundation_3x3", "B": {
+        return {"$type": "Island", "BinaryVersion": 1137, "Entries": [{"T": self.foundation, "B": {
             "$type": "Building", "BinaryVersion": 1137, "Entries": self.entries}}]}
 
 

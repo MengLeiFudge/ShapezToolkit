@@ -14,7 +14,7 @@ from .compiler_backend.prefix_scan_wiring import _native_wiring
 
 _TILE_SIZE = 20
 _LEVELS = 3
-_FOUNDATION_WIDTH = {"Foundation_1x1": 1, "Foundation_3x3": 3}
+_FOUNDATION_WIDTH = {f"Foundation_{size}x{size}": size for size in (1, 2, 3)}
 
 
 def _position(wiring, index):
@@ -44,9 +44,9 @@ def _diagram(path):
     for i, platform in enumerate(wiring.platforms, 1):
         width = _FOUNDATION_WIDTH.get(platform["T"])
         if width is None or platform.get("R", 0):
-            raise ValueError(f"{path.name} 的 P{i} 需要未旋转的 1×1 或 3×3 电路平台")
-        x = platform.get("X", 0) - width // 2
-        y = platform.get("Y", 0) - width // 2
+            raise ValueError(f"{path.name} 的 P{i} 需要未旋转的 1×1、2×2 或 3×3 电路平台")
+        x = platform.get("X", 0) - (width - 1) // 2
+        y = platform.get("Y", 0) - (width - 1) // 2
         count = len(platform["B"]["Entries"])
         platforms.append((i, x, y, platform.get("Z", 0), width, count))
     entries = []
@@ -136,7 +136,7 @@ figure { margin: 0; max-width: 100% } canvas { display: block; max-width: 100%; 
 figcaption { color: #394a60; padding-top: 3px } table { border-collapse: collapse } th,td { padding: 4px 12px; border-bottom: 1px solid #d2dae3; text-align: right }
 .legend { display: flex; flex-wrap: wrap; gap: 14px } .chip { display: inline-block; width: .85em; height: .85em; margin-right: .3em; border-radius: 2px }
 </style><body><h1>TMAM 电路审阅</h1>
-<p>按原生蓝图坐标画出平台、建筑和导线。岛层 Z 区分叠放的平台，建筑层 L 区分平台内部三层。把鼠标放到图上可读取建筑类型和坐标。</p>
+<p>按原生蓝图坐标画出平台、建筑和导线。岛层 Z 区分叠放的平台，建筑层 L 区分平台内部三层。无线收发器的半透明方块表示占地。把鼠标放到图上可读取建筑类型和坐标。</p>
 <div class="legend" id="legend"></div>
 """
 _SCRIPT = """<script>
@@ -173,6 +173,13 @@ function draw(container, platforms, entries, links, island, layer) {
     ctx.strokeStyle = '#839ab2'; ctx.strokeRect(xAt(x), yAt(y), scale * edge, scale * edge);
     ctx.fillStyle = '#b8cadd'; ctx.font = '12px sans-serif'; ctx.fillText(`P${id}`, xAt(x)+4, yAt(y)+14);
   }
+  for (const [x,y,,level,color] of entries) {
+    if ((color !== 'tx' && color !== 'rx') || layer < level || layer >= level+3) continue;
+    ctx.globalAlpha = layer === level ? .36 : .14;
+    ctx.fillStyle = colors[color];
+    ctx.fillRect(xAt(x-1), yAt(y-1), scale*3, scale*3);
+  }
+  ctx.globalAlpha = 1;
   const cells = new Map();
   for (const [x,y,,level,color,kind,parts] of entries) {
     if (level !== layer) continue;
