@@ -1,0 +1,87 @@
+{
+  "methods": {
+    "next": "packet_next_step"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "step": {
+      "channel": 1701710,
+      "type": "int"
+    },
+    "successor_low": {
+      "channel": 1701738,
+      "type": "int"
+    },
+    "successor_high": {
+      "channel": 1701739,
+      "type": "int"
+    },
+    "terminal": {
+      "channel": 1701746,
+      "type": "bool"
+    },
+    "enable": {
+      "channel": 1701741,
+      "type": "bool"
+    },
+    "settled": {
+      "channel": 1701742,
+      "type": "bool"
+    },
+    "has_packet": {
+      "channel": 1701743,
+      "type": "bool"
+    },
+    "confirmed": {
+      "channel": 1701744,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "next": {
+      "channel": 1701745,
+      "type": "int"
+    }
+  },
+  "reserved_channels": [
+    1701710,
+    1701738,
+    1701739,
+    1701741,
+    1701742,
+    1701743,
+    1701744,
+    1701745,
+    1701746
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "next": {
+      "packet_next_step": 7
+    }
+  },
+  "settling": {
+    "max_gate_depth": 9,
+    "hold_signal_ticks": 704,
+    "hold_simulation_seconds": 58.666666666666664,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    328,
+    174,
+    112
+  ],
+  "logic_gates": 17,
+  "logic_gates_before_reuse": 17,
+  "building_entries": 614,
+  "global_receivers": 8,
+  "global_transmitters": 1,
+  "internal_global_devices": 0
+}

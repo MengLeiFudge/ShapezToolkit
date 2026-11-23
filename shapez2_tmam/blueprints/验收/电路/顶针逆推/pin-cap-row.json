@@ -1,0 +1,60 @@
+{
+  "inputs": {
+    "enable": 1701940,
+    "mode": 1701941,
+    "crystal_mask": 1701942,
+    "members": [
+      1701943,
+      1701944,
+      1701945,
+      1701946
+    ],
+    "candidate_ready": 1701858
+  },
+  "outputs": {
+    "ready": 1701947,
+    "valid": 1701948,
+    "row": 1701949
+  },
+  "channels": {
+    "control_range": [
+      1701940,
+      1701971
+    ],
+    "selector": [
+      1701520,
+      1701521,
+      1701522,
+      1701523,
+      1701524,
+      1701904,
+      1701905,
+      1701906
+    ],
+    "cap": [
+      1701520,
+      1701521,
+      1701522,
+      1701523,
+      1701524,
+      1701525,
+      1701526,
+      1701527
+    ],
+    "join_row": [
+      1701560,
+      1701561,
+      1701562,
+      1701563,
+      1701564
+    ]
+  },
+  "timing": {
+    "channel_signal_ticks": 12,
+    "reset_hold_signal_ticks": 96,
+    "column_hold_signal_ticks": 1680,
+    "start_to_ready_signal_ticks": 8244
+  },
+  "platforms": 23,
+  "building_entries": 26065
+}

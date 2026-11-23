@@ -1,0 +1,81 @@
+{
+  "methods": {
+    "next": "pair_job_next",
+    "done": "pair_job_done"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "phase": {
+      "channel": 1701690,
+      "type": "int"
+    },
+    "enable": {
+      "channel": 1701695,
+      "type": "bool"
+    },
+    "settled": {
+      "channel": 1701696,
+      "type": "bool"
+    },
+    "kind": {
+      "channel": 1701691,
+      "type": "int"
+    },
+    "confirmed": {
+      "channel": 1701697,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "next": {
+      "channel": 1701698,
+      "type": "int"
+    },
+    "done": {
+      "channel": 1701699,
+      "type": "bool"
+    }
+  },
+  "reserved_channels": [
+    1701690,
+    1701691,
+    1701695,
+    1701696,
+    1701697,
+    1701698,
+    1701699
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "next": {
+      "pair_job_next": 26
+    },
+    "done": {
+      "pair_job_done": 1
+    }
+  },
+  "settling": {
+    "max_gate_depth": 17,
+    "hold_signal_ticks": 1216,
+    "hold_simulation_seconds": 101.33333333333333,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    903,
+    750,
+    538
+  ],
+  "logic_gates": 68,
+  "logic_gates_before_reuse": 68,
+  "building_entries": 2191,
+  "global_receivers": 5,
+  "global_transmitters": 2,
+  "internal_global_devices": 0
+}

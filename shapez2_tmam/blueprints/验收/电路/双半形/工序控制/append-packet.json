@@ -1,0 +1,115 @@
+{
+  "methods": {
+    "opcode": "append_packet_opcode",
+    "a": "append_packet_a",
+    "b": "append_packet_b",
+    "destination": "append_packet_destination",
+    "base": "append_packet_base"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "row": {
+      "channel": 1701720,
+      "type": "shape"
+    },
+    "load": {
+      "channel": 1701721,
+      "type": "bool"
+    },
+    "has_lower": {
+      "channel": 1701722,
+      "type": "bool"
+    },
+    "lower": {
+      "channel": 1701692,
+      "type": "int"
+    },
+    "upper": {
+      "channel": 1701694,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "opcode": {
+      "channel": 1701723,
+      "type": "int"
+    },
+    "a": {
+      "channel": 1701724,
+      "type": "int"
+    },
+    "b": {
+      "channel": 1701725,
+      "type": "int"
+    },
+    "destination": {
+      "channel": 1701726,
+      "type": "int"
+    },
+    "base": {
+      "channel": 1701727,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1701692,
+    1701694,
+    1701720,
+    1701721,
+    1701722,
+    1701723,
+    1701724,
+    1701725,
+    1701726,
+    1701727
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "opcode": {
+      "append_packet_opcode": 7
+    },
+    "a": {
+      "append_packet_a": 1
+    },
+    "b": {
+      "append_packet_b": 1
+    },
+    "destination": {
+      "append_packet_destination": 3
+    },
+    "base": {
+      "append_packet_base": 1
+    }
+  },
+  "settling": {
+    "max_gate_depth": 15,
+    "hold_signal_ticks": 1088,
+    "hold_simulation_seconds": 90.66666666666667,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    800,
+    0,
+    0
+  ],
+  "logic_gates": 32,
+  "logic_gates_before_reuse": 108,
+  "building_entries": 800,
+  "global_receivers": 5,
+  "global_transmitters": 5,
+  "internal_global_devices": 0,
+  "publish_when": {
+    "opcode": "append_packet_active",
+    "destination": "append_packet_active",
+    "a": "append_packet_stack",
+    "b": "append_packet_stack",
+    "base": "append_packet_load"
+  }
+}

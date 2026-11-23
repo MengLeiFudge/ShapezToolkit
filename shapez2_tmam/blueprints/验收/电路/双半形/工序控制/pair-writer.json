@@ -1,0 +1,205 @@
+{
+  "inputs": {
+    "selector": 1701740,
+    "packets": {
+      "dense": {
+        "opcode": 1701406,
+        "a": 1701407,
+        "b": 1701408,
+        "destination": 1701409,
+        "base": 1701410,
+        "color": 1701411
+      },
+      "release": {
+        "opcode": 1701666,
+        "a": 1701667,
+        "b": 1701668,
+        "destination": 1701669,
+        "base": 1701670
+      },
+      "join": {
+        "opcode": 1701712,
+        "a": 1701713,
+        "b": 1701714,
+        "destination": 1701715
+      },
+      "append": {
+        "opcode": 1701723,
+        "a": 1701724,
+        "b": 1701725,
+        "destination": 1701726,
+        "base": 1701727
+      }
+    }
+  },
+  "outputs": {
+    "opcode": {
+      "channel": 1701750,
+      "type": "int"
+    },
+    "a": {
+      "channel": 1701751,
+      "type": "int"
+    },
+    "b": {
+      "channel": 1701752,
+      "type": "int"
+    },
+    "destination": {
+      "channel": 1701753,
+      "type": "int"
+    },
+    "base": {
+      "channel": 1701754,
+      "type": "shape"
+    },
+    "color": {
+      "channel": 1701755,
+      "type": "color"
+    }
+  },
+  "selector_values": {
+    "dense": 1,
+    "release": 2,
+    "join": 3,
+    "append": 4
+  },
+  "reserved_channels": [
+    1701406,
+    1701407,
+    1701408,
+    1701409,
+    1701410,
+    1701411,
+    1701666,
+    1701667,
+    1701668,
+    1701669,
+    1701670,
+    1701712,
+    1701713,
+    1701714,
+    1701715,
+    1701723,
+    1701724,
+    1701725,
+    1701726,
+    1701727,
+    1701740,
+    1701750,
+    1701751,
+    1701752,
+    1701753,
+    1701754,
+    1701755
+  ],
+  "platforms": 58,
+  "building_entries": 70509,
+  "method_run": 1701761,
+  "method_done": 1701766,
+  "clock": {
+    "inputs": {
+      "enable": 1701741,
+      "address": 1701763,
+      "ack_address": 1701764,
+      "done": 1701746,
+      "opcode": 1701750
+    },
+    "outputs": {
+      "settled": 1701742,
+      "has_packet": 1701743,
+      "confirmed": 1701744,
+      "request_address": 1701765
+    },
+    "states": {
+      "step": {
+        "current": 1701710,
+        "next": 1701745,
+        "initial": 0
+      },
+      "appended": {
+        "current": 1701747,
+        "next": 1701748,
+        "initial": 0
+      }
+    },
+    "reserved_channels": [
+      1701770,
+      1701778
+    ],
+    "timing": {
+      "input_hold_signal_ticks": 6400,
+      "update_hold_signal_ticks": 1600,
+      "settle_phase_signal_ticks": 6432,
+      "update_phase_signal_ticks": 1620,
+      "reset_hold_signal_ticks": 48
+    },
+    "platforms": 9,
+    "building_entries": 9959
+  },
+  "write_bridge": {
+    "inputs": {
+      "run": 1640030,
+      "write_reset": 1640012,
+      "write_address": 1640000,
+      "write_request": 1640011,
+      "write_ack": 1640013,
+      "caller_request_address": 1701762,
+      "packet": {
+        "opcode": 1701750,
+        "a": 1701751,
+        "b": 1701752,
+        "destination": 1701753,
+        "base": 1701754,
+        "color": 1701755
+      }
+    },
+    "outputs": {
+      "caller_enable": 1701760,
+      "caller_address": 1701763,
+      "caller_ack_address": 1701764,
+      "candidate_address": 1680007,
+      "candidate_fields": {
+        "opcode": 1680001,
+        "a": 1680002,
+        "b": 1680003,
+        "destination": 1680004,
+        "base": 1680005,
+        "color": 1680006
+      }
+    },
+    "reserved_channels": [
+      1701780,
+      1701781
+    ],
+    "platforms": 6,
+    "building_entries": 3972
+  },
+  "global_transmitters": 104,
+  "parts": [
+    "pair-job",
+    "pair-job-inputs",
+    "pair-job-cursor",
+    "pair-join-word",
+    "pair-join-packet",
+    "append-packet",
+    "packet-successor-low",
+    "packet-successor-high",
+    "packet-cursor",
+    "packet-done",
+    "append-step-input",
+    "append-step-presence",
+    "tail-row-mask",
+    "tail-row-original",
+    "tail-row"
+  ],
+  "top_level": {
+    "kind": 1701691,
+    "control_phase": 1701690,
+    "control_next": 1701698,
+    "control_done": 1701699,
+    "current_column": 1700873,
+    "append_level": 1701749,
+    "release_stage": 1701660
+  }
+}

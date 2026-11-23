@@ -1,0 +1,95 @@
+{
+  "methods": {
+    "kind": "pair_job_kind",
+    "column": "pair_job_column",
+    "destination": "pair_job_destination"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "phase": {
+      "channel": 1701690,
+      "type": "int"
+    },
+    "h0": {
+      "channel": 1700766,
+      "type": "int"
+    },
+    "h1": {
+      "channel": 1700767,
+      "type": "int"
+    },
+    "h2": {
+      "channel": 1700768,
+      "type": "int"
+    },
+    "h3": {
+      "channel": 1700769,
+      "type": "int"
+    },
+    "alternate": {
+      "channel": 1700871,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "kind": {
+      "channel": 1701691,
+      "type": "int"
+    },
+    "column": {
+      "channel": 1700873,
+      "type": "int"
+    },
+    "destination": {
+      "channel": 1701692,
+      "type": "int"
+    }
+  },
+  "reserved_channels": [
+    1700766,
+    1700767,
+    1700768,
+    1700769,
+    1700871,
+    1700873,
+    1701690,
+    1701691,
+    1701692
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "kind": {
+      "pair_job_kind": 11
+    },
+    "column": {
+      "pair_job_column": 9
+    },
+    "destination": {
+      "pair_job_destination": 5
+    }
+  },
+  "settling": {
+    "max_gate_depth": 14,
+    "hold_signal_ticks": 1024,
+    "hold_simulation_seconds": 85.33333333333333,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    854,
+    774,
+    637
+  ],
+  "logic_gates": 70,
+  "logic_gates_before_reuse": 79,
+  "building_entries": 2265,
+  "global_receivers": 6,
+  "global_transmitters": 3,
+  "internal_global_devices": 0
+}

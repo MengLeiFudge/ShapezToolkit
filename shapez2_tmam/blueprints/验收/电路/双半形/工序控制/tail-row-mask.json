@@ -1,0 +1,57 @@
+{
+  "methods": {
+    "mask": "tail_mask_at"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "mask": {
+      "channel": 1701196,
+      "type": "shape"
+    },
+    "level": {
+      "channel": 1701749,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "mask": {
+      "channel": 1701728,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1701196,
+    1701728,
+    1701749
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "mask": {
+      "tail_mask_at": 12
+    }
+  },
+  "settling": {
+    "max_gate_depth": 11,
+    "hold_signal_ticks": 832,
+    "hold_simulation_seconds": 69.33333333333333,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    322,
+    248,
+    406
+  ],
+  "logic_gates": 31,
+  "logic_gates_before_reuse": 35,
+  "building_entries": 976,
+  "global_receivers": 2,
+  "global_transmitters": 1,
+  "internal_global_devices": 0
+}

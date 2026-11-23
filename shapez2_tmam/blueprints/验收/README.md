@@ -17,12 +17,12 @@
 | 电路 | 四列逐层堆叠前缀扫描 | [整行编码](电路/堆叠前缀/pack-stack-row.json) · [复位、行输入和采样时序](电路/堆叠前缀/stack-prefix-scan.json) |
 | 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) · [单列可用顶盖](电路/顶针逆推/pin-cap-column.json) |
 | 电路 | 枚举四列顶针前态并保持候选 | [控制与频道](电路/顶针逆推/README.md) · [原生蓝图](电路/顶针逆推/pin-column-sample.spz2bp) |
-| 电路 | 恢复顶针来源标签并回放 | [来源序号](电路/顶针逆推/pin-source-rank.json) · [五轮查标签](电路/顶针逆推/pin-retained-label.json) · [来源格](电路/顶针逆推/pin-source-label.json) · [整行拼合](电路/顶针逆推/pin-source-row.json) · [回放](电路/顶针逆推/pin-replay.json) |
+| 电路 | 恢复顶针来源标签并回放 | [原色来源行](电路/顶针逆推/pin-candidate-row.md) · [第五层顶盖行](电路/顶针逆推/pin-cap-row.md) · [整形回放](电路/顶针逆推/pin-replay.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) · [两种切向自动试查](电路/双半形/choose-cut.json) · [试查时钟](电路/双半形/choose-cut-clock.json) |
 | 电路 | 从原图提取材料与检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
-| 电路 | 自动双切向、五层取料与前缀闭包 | [自动闭包](电路/双半形/auto-prefix-scan.spz2bp) · [接口](电路/双半形/auto-prefix-scan.json) · [独立行编码与双完工启动](电路/双半形/prefix-scan-wiring.json) |
+| 电路 | 自动双切向、五层取料与前缀闭包 | [79 板飞线合装](电路/双半形/auto-prefix-flywire.spz2bp) · [频道与重导](电路/双半形/auto-prefix-flywire.md) · [81 板基线接口](电路/双半形/auto-prefix-scan.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [前缀角参数](电路/双半形/prefix-corner-parameters.json) · [独立落点样件](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 | 电路 | 从原图检查两列半形的支撑 | [两半顺序预处理](电路/双半形/seed-two-halves.json) · [四列合成五层材料字](电路/双半形/join-material-words.json) · [前半输入](电路/双半形/seed-pair-0.json) · [后半输入](电路/双半形/seed-pair-1.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
 | 电路 | 读取已选前缀的材料和原色 | [原单格读取](电路/双半形/read-labeled-corner.json) · [从整列剪取前缀](电路/双半形/clip-prefix-word.json) · [前缀原格](电路/双半形/read-prefix-corner.json) |
@@ -32,7 +32,8 @@
 | 电路 | 顶破支路的补料与半形拼接 | [触顶补形](电路/双半形/pin-corner-complement.json) · [上部单层](电路/双半形/pin-corner-upper-layer.json) · [收尾](电路/双半形/pin-corner-finish.json) · [相邻两角拼接](电路/双半形/join-corner-half.json) |
 | 电路 | 合并两个已制半形并复用五轮追加 | [标准切向拼接](电路/双半形/join-oriented-halves.json) · [尾料掩码](电路/双半形/mask-paired-tail.json) · [两路完工启动](电路/双半形/paired-tail-start.json) · [尾料回放](电路/双半形/replay-paired-tail.json) · [恢复原方向与验收](电路/双半形/finish-paired-tail.json) |
 | 电路 | 带原色的紧柱备料与回放 | [单步备料](电路/双半形/dense-column-actions.json) · [五轮回放](电路/双半形/dense-column.json) · [完工取柱](电路/双半形/dense-column-finish.json) |
-| 电路 | 紧柱配方接六槽工道，匹配同地址写入确认 | [接口](电路/双半形/dense-write-bridge.json) · [原生蓝图](电路/双半形/dense-write-bridge.spz2bp) |
+| 电路 | 四角调度、紧柱、拼合与尾料的共用写入 | [工序控制分册](电路/双半形/工序控制/README.md) · [原生蓝图](电路/双半形/工序控制/pair-writer.spz2bp) |
+| 实体 | 直接落角与悬空落角的整形配方 | [94 和 145 道的逐步回放](../../circuits/factory_assembly/corner_line_sample.md) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
 
