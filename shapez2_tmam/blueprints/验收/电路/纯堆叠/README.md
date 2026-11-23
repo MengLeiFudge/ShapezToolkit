@@ -1,6 +1,6 @@
 # 纯堆叠配方电路
 
-目标通过本册的稳定性判定和五轮扫描后，电路按工段地址输出动态配方。提交桥向六槽工道提交配方。已离线核对配方接口和两层订单，游戏内锁存与持续出货仍待验收。
+目标通过稳定性判定和五轮扫描后，电路按工段地址输出动态配方。已合装九段实体工道与动态提交桥，并在离线模型核对两层三笔、五层九笔与换单复位。快版每笔等待 900 信号 tick。游戏内锁存与持续出货待验收。 [合装蓝图](../../实体/纯堆叠/direct-dynamic-fast.spz2bp) · [接口](../../实体/纯堆叠/direct-dynamic-fast.json)
 
 | 蓝图 | 输入 | 输出 |
 |---|---|---|
@@ -24,7 +24,13 @@
 
 ## 重新生成
 
-在仓库根目录运行以下命令，并把输出放进本册。
+在仓库根目录可直接重导合装版。
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.direct_sample --fast-fields --output direct-dynamic-fast.spz2bp
+```
+
+以下命令用于重导各电路部件。
 
 ```bash
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/direct_stack.py \

@@ -59,6 +59,16 @@ def select_prefix_height(done: bool, h0: int, h1: int, h2: int, h3: int, column:
     return -1
 
 
+def checked_prefix_ready(done: bool, h0: int, h1: int, h2: int, h3: int,
+                         column: int, a0: bool, a1: bool, a2: bool, a3: bool) -> bool:
+    return a0 & a1 & a2 & a3 & closed_prefix_ready(done, h0, h1, h2, h3)
+
+
+def checked_prefix_height(done: bool, h0: int, h1: int, h2: int, h3: int,
+                          column: int, a0: bool, a1: bool, a2: bool, a3: bool) -> int:
+    return select_prefix_height(done & a0 & a1 & a2 & a3, h0, h1, h2, h3, column)
+
+
 def corner_counterclockwise(column: int) -> bool:
     """标准半形的左角朝 q3，右角在旋转前朝 q1。"""
     return (column == 0) | (column == 2)

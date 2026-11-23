@@ -1,0 +1,130 @@
+{
+  "inputs": {
+    "enable": 1700930,
+    "oriented_target": 1700872,
+    "seed_done": 1701072,
+    "closure_initial": [
+      1700761,
+      1700762,
+      1700763,
+      1700764
+    ]
+  },
+  "outputs": {
+    "pack_done": 1701252,
+    "closure_run": 1700760
+  },
+  "layers": [
+    {
+      "height": 5,
+      "row": 1701204,
+      "below": 1701203,
+      "ground": false,
+      "packed": 1701263,
+      "closure_item": 1700770
+    },
+    {
+      "height": 4,
+      "row": 1701203,
+      "below": 1701202,
+      "ground": false,
+      "packed": 1701264,
+      "closure_item": 1700771
+    },
+    {
+      "height": 3,
+      "row": 1701202,
+      "below": 1701201,
+      "ground": false,
+      "packed": 1701265,
+      "closure_item": 1700772
+    },
+    {
+      "height": 2,
+      "row": 1701201,
+      "below": 1701200,
+      "ground": false,
+      "packed": 1701266,
+      "closure_item": 1700773
+    },
+    {
+      "height": 1,
+      "row": 1701200,
+      "below": null,
+      "ground": true,
+      "packed": 1701267,
+      "closure_item": 1700774
+    }
+  ],
+  "timing": {
+    "orientation_hold_signal_ticks": 448,
+    "read_hold_signal_ticks": 1920,
+    "first_pack_hold_signal_ticks": 4380,
+    "later_pack_hold_signal_ticks": 2004,
+    "restore_hold_signal_ticks": 448,
+    "closure_reset_hold_signal_ticks": 256,
+    "closure_wait_after_both_done_signal_ticks": 708,
+    "source_reset_hold_signal_ticks": 384,
+    "closure_start_to_sample_signal_ticks": 160
+  },
+  "channel_use": {
+    "read": [
+      1701200,
+      1701201,
+      1701202,
+      1701203,
+      1701204
+    ],
+    "pack": [
+      1701250,
+      1701267
+    ],
+    "pack_inputs": {
+      "row": 1701240,
+      "below": 1701241,
+      "ground": 1701242
+    },
+    "transmitters": [
+      1700760,
+      1700770,
+      1700771,
+      1700772,
+      1700773,
+      1700774,
+      1700881,
+      1701200,
+      1701201,
+      1701202,
+      1701203,
+      1701204,
+      1701240,
+      1701241,
+      1701242,
+      1701251,
+      1701252,
+      1701253,
+      1701254,
+      1701255,
+      1701256,
+      1701257,
+      1701258,
+      1701259,
+      1701260,
+      1701261,
+      1701262,
+      1701263,
+      1701264,
+      1701265,
+      1701266,
+      1701267,
+      1701270,
+      1701271,
+      1701272,
+      1701273,
+      1701274,
+      1701275
+    ]
+  },
+  "platforms": 22,
+  "building_entries": 24335
+}

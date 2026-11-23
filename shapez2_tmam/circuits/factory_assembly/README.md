@@ -26,6 +26,36 @@ python -m shapez2_tmam.circuits.factory_assembly.books trains --direct-stack --o
 
 使用下文 `--direct-stack` 的动态提交桥和装方信息板。工道沿用六字段总线、整单放行和 128 tick 清空流程。同名 JSON 额外列出各工段 `opcode` 及合法的 `supported_lengths`。Python 可调用 `production.build_direct_stack()` 取得蓝图文本和接口表。
 
+### 动态纯堆叠接管样件
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.direct_sample --output direct-dynamic-handoff.spz2bp
+```
+
+样件将发布册的六个纯堆叠电路、动态提交桥和九段实体接管工道合装为一份蓝图。同名 JSON 的 `circuits` 和 `submit_bridge` 列出信号频道，`interfaces` 列出操作开关、配料接点和成品带口。纯堆叠的颜色字段始终发空信号，槽 0 以整数 `0` 传输。
+
+换单先停料并排空旧单。工道进入复位后即可送入新目标 `1600000`，将写入相位 `3` 的 128 tick 连续清空等待与新目标计算并行。按 `timing` 保持目标至稳定，在扫描开关为 `0` 时完成扫描复位，再置 `1` 启动扫描并等待采样和装方信息收敛。扫描开关用 `circuits.direct-stack-scan.inputs.run`。清空等待完成、装方信息收敛且回放吻合后，打开工道 `RUN` 和 `CLEAN_CONFIRMED`。等 `loaded=1` 再开料。
+
+离线回放按板内组合信号同刻传播、跨板无线延迟 12 信号 tick 建模。两层与五层订单分别确认 3、9 笔，覆盖地址 0、末地址、双回读和换单清除。五层从启动装方到 `loaded=1` 为 22,104 信号 tick。实体锁存和供货速率仍需实机验收。
+
+### 缩短逐地址计算等待
+
+```bash
+python -m shapez2_tmam.circuits.factory_assembly.direct_sample --fast-fields --output direct-dynamic-fast.spz2bp
+```
+
+`--fast-fields` 把基础料深度和读层合编到一块板，并用发布条件让四个整数值共用有效地址判断。两路报告分别要求保持 896 和 768 tick，提交桥按较长的一路向上取整到 900 tick。按同名 JSON 的 `submit_bridge` 查看实际等待和六字段频道。操作步骤和换单清空按上一节执行。
+
+| 指标 | 原字段 | 快字段 |
+|---|---:|---:|
+| 提交桥每地址等待（tick） | 1,668 | 900 |
+| 九笔装方到 `loaded=1`（tick） | 24,218 | 17,210 |
+| 三笔装方到 `loaded=1`（tick） | 8,060 | 5,732 |
+| 岛项目 | 384 | 383 |
+| 建筑 | 203,348 | 201,329 |
+
+这组装方时间用同一离线模型测得。编译板和桥板按板内同刻传播，实体写入和存储按每门一拍，板间无线为 12 拍。五层换两层后，仍从地址 `0` 起写，末笔确认后放行，未用的六个工段保持空值。
+
 ## 四色含晶验收样件
 
 ```bash

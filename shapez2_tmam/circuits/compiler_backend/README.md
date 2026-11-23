@@ -144,3 +144,20 @@ python -m shapez2_tmam.circuits.compiler_backend.module_caller \
   --callee shapez2_tmam/blueprints/验收/电路/双半形/pack-prefix-row.spz2bp \
   --output pack-prefix-row-caller.spz2bp
 ```
+
+### 五层行编码接入双半形闭包
+
+`prefix_scan_wiring` 与验收册的切向转换、四列读取、两块 `seed-pair`、`seed-two-halves`、两块 `restore-seed` 和 `paired-prefix-scan` 合用。导入件已经包含原层读取和行编码。批次开关沿用四列的 `1700930`。从该开关复位开始保持目标与切向不变，直到闭包结果读完。
+
+并行读取板从底到顶将原色单层发布到 `1701200`～`1701204`。行编码使用本层与紧邻下层，只有第 1 层的 `ground=1`，其下层为空。空顶层保留为空信号，第 5 至第 1 层依次进入 `1700770`～`1700774`。
+
+批次开关拉高后，首组相位等待 4380 信号 tick，包含切向转换的 448 tick、原层读取的 1920 tick、行编码和参数选通时间。其余四组各等 2004 tick。原层读取持续发布，换单复位清空已锁存的行编码和闭包启动信号。
+
+行编码 `1701252` 和两半预处理 `1701072` 均为 `1` 后，启动电路再等待 708 信号 tick，覆盖恢复列序和闭包复位，然后置 `1700760=1`。保持开关为 `1`，按闭包接口表等满采样时间并读到 `1700765=1` 后取四列高度。换单时将批次开关置 `0` 至少 384 tick，下一轮重读五层。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend.prefix_scan_wiring \
+  --circuits shapez2_tmam/blueprints/验收/电路 \
+  --rows shapez2_tmam/blueprints/验收/电路/原层读取/read-five-rows.spz2bp \
+  --output prefix-scan-wiring.spz2bp
+```

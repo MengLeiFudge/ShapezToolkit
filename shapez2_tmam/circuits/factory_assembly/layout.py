@@ -147,11 +147,11 @@ def assemble(count: int, *, packet_tag: int,
     return _assemble(count, packet_tag, base_stages, crystal_stages, handoff=handoff)
 
 
-def assemble_direct_stack(*, packet_tag: int) -> tuple[dict, dict]:
+def assemble_direct_stack(*, packet_tag: int, handoff: bool = False) -> tuple[dict, dict]:
     count = DIRECT_STACK_STAGES
     opcodes = tuple(direct_recipe_opcode(i, count) for i in range(count))
     base_stages = {i for i, opcode in enumerate(opcodes) if opcode == BASE}
-    document, interfaces = _assemble(count, packet_tag, base_stages, (), direct_stack=True)
+    document, interfaces = _assemble(count, packet_tag, base_stages, (), direct_stack=True, handoff=handoff)
     for station, opcode in zip(interfaces['stations'], opcodes):
         station['opcode'] = opcode
     interfaces['recipe']['supported_lengths'] = [direct_recipe_length(height) for height in range(1, 6)]

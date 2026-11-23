@@ -17,8 +17,9 @@
 | 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
-| 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀高度选择](电路/双半形/select-prefix-height.json) |
-| 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
+| 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) |
+| 电路 | 从原图提取材料与检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
+| 电路 | 五层取料、顺序编码、双完工启动闭包 | [原生蓝图](电路/双半形/prefix-scan-wiring.spz2bp) · [接口](电路/双半形/prefix-scan-wiring.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [前缀角参数](电路/双半形/prefix-corner-parameters.json) · [独立落点样件](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 | 电路 | 从原图检查两列半形的支撑 | [两半顺序预处理](电路/双半形/seed-two-halves.json) · [四列合成五层材料字](电路/双半形/join-material-words.json) · [前半输入](电路/双半形/seed-pair-0.json) · [后半输入](电路/双半形/seed-pair-1.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
 | 电路 | 从原图读取已选前缀的材料和原色 | [原单格读取](电路/双半形/read-labeled-corner.json) · [前缀材料字](电路/双半形/read-prefix-column.json) · [前缀原格](电路/双半形/read-prefix-corner.json) |
@@ -39,7 +40,7 @@
 
 整行编码板从当前层与正下方一层读取堆叠支撑，`ground=1` 对应第一层。两块平台间用五对飞线。含晶编码用针标出已经保留的晶体，供双半形闭包使用。半行板只保留 q0/q1。整行板两块相邻平台通过七对原生飞线传递内部数据。
 
-前缀扫描电路接受四列初始前缀高度和五份已编码的行。每轮从同一份旧高度计算四列，依次处理第五层到第一层。电路与实体订单分别验收，实体册当前由固定发送器供给配方。
+双半形闭包接四列初始高度和五份已编码行。每轮从同一份旧高度计算四列，依次处理第五层到第一层。合装版 `prefix-scan-wiring` 已含五层原色读板和含晶整行编码板。与四列调用、含晶预处理、恢复列序和闭包本体一起导入时，每个组件只放一份。含晶实体样件仍由固定发送器供给配方。
 
 纯堆叠电路的目标输入为 `1600000`。稳定性判定板同时转发目标和初始通过位。`initial_replay` 留空。按接口表启动五轮扫描，待 `done=1` 后再采样。装方信息板将实际回放与目标比较，通过后才发布配方长度和回放结果。
 
@@ -47,7 +48,7 @@
 
 前半输入板读 q0/q1 材料字，后半输入板读 q2/q3 材料字。它们各自扫描最高晶体，给出按高度排列的两份材料字、两个高度和交换标志。等这组数据稳定后启动含晶区间预处理。四列完工会启动两半预处理调用器。首轮等待 2184 tick，包含参数稳定和被调用板复位。第二轮只等普通复位。两个结果经前、后半的恢复列序板直接送到五轮闭包的四个初值口。 [前半恢复](电路/双半形/restore-seed-0.json) · [后半恢复](电路/双半形/restore-seed-1.json)独立调试可直接向排序板提供已有的高度。 [独立排序接口](电路/双半形/order-crystal-half.json)较低列高度置入 `initial_required`，较高列高度置入 `high_height`。无晶体列的高度为 `0`。`initial_candidate` 和 `initial_supported` 都置 `0`。五轮后只读取 `result_required`。该值是较低列的新前缀高度，`-1` 表示含晶区间无法由这个半边支撑。恢复列序板沿用较高列的输入高度，按原左右列输出两份前缀高度。普通层的支撑由逐层闭包继续判定。
 
-切向转换板用 `alternate` 将两个切向统一到 q0/q1 和 q2/q3。四列输入板同时输出四种旋转，每种都把对应列转到 q0。调用器按 q0 到 q3 的顺序复用一套列读取模块，四次均读全高。批次 `done=1` 后从 `1700963–1700966` 读四份材料字。 [四次调用参数](电路/双半形/read-four-columns-calls.json)`select-column` 将 `column` 指定的一列转到 q0，把同一图形送给全列和前缀材料读取器。前缀高度选择板也使用这个列号。五轮闭包完成前，或任一列返回 `-1` 时，高度选择板给出 `-1`，不开始该列的实体配方。四列初值接两块半形预处理的结果，`item0` 至 `item4` 接从最高到最低的五份含晶支撑行。前缀结果出现 `-1` 时，该切向不能直接用双半形和堆叠制作。其他结果可送往前缀材料读取板。完成换向后，制造端将输出旋转回目标方位。
+切向转换板用 `alternate` 将两个切向统一到 q0/q1 和 q2/q3。四列调用按 q0 到 q3 的顺序复用整列读取。批次 `done=1` 后从 `1700963` 到 `1700966` 读四份材料字。 `check-column-0` 到 `check-column-3` 分别检查这四份材料。等四块校验板和闭包结果均稳定后，从 `check-prefix` 读取 `1700897` 的可用位与 `1700816` 的当前列高度。任一列不满足列 A 或闭包失败时，当前列高度为 `-1`。
 
 读取整列可将 `read-prefix-column` 的 `prefix_height` 保持为 `5`。已选定前缀高度后，将同一高度送给 `read-prefix-column` 和 `read-prefix-corner`。材料字仍保留五个原层位，超出前缀的格记为空。把材料字接到落点判定，把原格接到备料板。原格输出保留普通图形和晶体的颜色。前缀高度为 `0` 时该列为空。
 
@@ -109,6 +110,20 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/crystal_su
   --input-channel high_height=1700848 --input-channel swapped=1700854 \
   --output-channel left=1700855 --output-channel right=1700856 --output finish-crystal-half.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --close-prefix --channel-base 1700760 --output paired-prefix-scan.spz2bp
+python -m shapez2_tmam.circuits.compiler_backend.prefix_scan_wiring \
+  --circuits shapez2_tmam/blueprints/验收/电路 \
+  --rows shapez2_tmam/blueprints/验收/电路/原层读取/read-five-rows.spz2bp --output prefix-scan-wiring.spz2bp
+for col in 0 1 2 3; do
+  python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_scan.py \
+    --field a=column_word_admissible --input-channel word="$((1700963 + col))" \
+    --output-channel a="$((1701211 + col))" --output "check-column-$col.spz2bp"
+done
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/prefix_route.py \
+  --field ready=checked_prefix_ready --field height=checked_prefix_height --input-channel done=1700765 \
+  --input-channel h0=1700766 --input-channel h1=1700767 --input-channel h2=1700768 --input-channel h3=1700769 \
+  --input-channel column=1700873 --input-channel a0=1701211 --input-channel a1=1701212 \
+  --input-channel a2=1701213 --input-channel a3=1701214 --output-channel ready=1700897 \
+  --output-channel height=1700816 --output check-prefix.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --append-paired-tail --channel-base 1701194 --output replay-paired-tail.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/paired_tail.py \
   --field lower=join_oriented_halves --input-channel front=1700710 --input-channel back=1700711 \

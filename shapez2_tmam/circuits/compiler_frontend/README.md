@@ -198,3 +198,37 @@ for name, methods, inputs, outputs in pin_column_stage_plan(1701000):
 | `materials` | 88 | 2 | 1600 |
 
 这套布局共 923 门、18 块平台、28,173 个建筑和 29 对模块内短距口。按接口表保持期及每次模块间无线传输另计 12 刻计算，同时更新 `word` 和 `slot` 后等 6960 信号刻。目标材料字和桶号已经稳定时，每次换槽等 6308 刻。期间保持整组输入，采样时同时读取有效位和四格材料。这是离线计算的保守等待值，游戏内联动尚待验收。
+
+### 顺序搜索单列来源槽
+
+用同一个单列校验器顺序查询槽 0～19。首个有效候选使推进器锁定当前槽，并随 `done=1` 发布 `valid=1` 和四格材料。全部失败时停在槽 20，`done=1`、`valid=0`，四格材料均为 `-1`。候选中的空格仍发整数 `0`。
+
+```powershell
+py -m shapez2_tmam.circuits.compiler_frontend.pin_column_cursor --column-base 1701000 --channel-base 1701023 --output pin-column/cursor.spz2bp
+```
+
+先按上一节导出并放置 11 个校验模块，再放置推进器。`--column-base` 须与 `pin_column_stage_plan` 的首频道一致。另为 `--channel-base` 起的 15 条连续频道留出空间。导出的同名 JSON 列出完整频道表。
+
+| 信号 | 示例频道 | 用法 |
+| --- | ---: | --- |
+| `word` | 1701000 | 从启动到采样保持同一份五层材料字 |
+| `enable` | 1701023 | 先置 `0` 至少 72 信号刻，再置 `1` 启动。中断或换目标时重复此操作 |
+| `slot` | 1701001 | 推进器发出的查询槽和最终槽。采样时与 `done`、`valid` 一起读取 |
+| `done`、`valid` | 1701024、1701025 | `done=1` 时读取 `valid` 和四格材料 |
+| `material_0` 至 `material_3` | 1701026～1701029 | 自底向上的已发布材料 |
+
+推进器占 6 块平台、8047 个建筑。它为每槽预留 6996 信号刻，其中包含整套校验的最长保持期和无线交接余量。在固定 12 刻无线传输的离线回放中，首槽完成用时 7044 刻，穷尽 20 槽用时 140196 刻，均从启动起算。接口表给出的整次搜索上界为 140712 刻。
+
+#### 从指定槽继续枚举
+
+用 `--start-slot-channel` 接入起始槽。枚举版占 7 块平台、9445 个建筑，为推进器保留 17 条连续频道，并为起始槽分配独占频道。
+
+```powershell
+py -m shapez2_tmam.circuits.compiler_frontend.pin_column_cursor --column-base 1701000 --channel-base 1701023 --start-slot-channel 1701040 --output pin-column/cursor.spz2bp
+```
+
+1. 保持目标材料字，置 `enable=0` 至少 72 信号刻。给 `start_slot` 发送整数 0～20，并在 `enable=1` 前保持该值至少 24 信号刻。两段等待可以重叠。
+2. 等 `done=1` 后一起读 `slot`、`valid`、四格材料和 `next_slot`。`slot` 保持命中槽，`next_slot` 给出命中槽加一。两者保持到本轮复位。
+3. 将读到的 `next_slot` 作为下次的 `start_slot`，重复复位和启动。若 `valid=0`，枚举已耗尽。命中槽 19 时 `next_slot=20`，从槽 20 启动会直接返回耗尽。
+
+示例的 `start_slot` 为 1701040，`next_slot` 为 1701039。起始槽为空信号、越界或为其他类型时，按槽 20 处理。整数 `0` 可作起始槽，四格都为 `0` 的候选也可有效，按 `valid` 区分。
