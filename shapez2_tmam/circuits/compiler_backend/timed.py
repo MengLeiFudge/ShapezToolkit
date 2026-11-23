@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from itertools import combinations
 
 from ...mari.blueprint import Wiring
 from ...mari.signals import decode_constant
@@ -115,21 +116,40 @@ class _Worker:
     gates: int
 
 
+def _partition_outputs(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict[int, Ref], dict[int, Ref]]:
+    # 两组尽量大，把共享计算多的输出留在同一组。
+    first, *rest = outputs
+    left_size = (len(outputs) + 1) // 2
+    best = None
+    for tail in combinations(rest, left_size - 1):
+        left = {channel: outputs[channel] for channel in (first, *tail)}
+        right = {channel: ref for channel, ref in outputs.items() if channel not in left}
+        a, b = logic_gates(circuit, left), logic_gates(circuit, right)
+        score = (a + b, max(a, b))
+        if best is None or score < best[0]:
+            best = score, left, right
+    assert best is not None
+    return best[1], best[2]
+
+
 def _place_workers(circuit: Circuit, outputs: dict[int, Ref], failures: list[dict]) -> list[_Worker]:
     try:
         document, _ = layout(circuit, outputs, retain_inputs=False)
     except LayoutCapacityError as error:
         failures.append({"outputs": list(outputs), "reason": str(error)})
-        if len(outputs) > 1:
-            midpoint = (len(outputs) + 1) // 2
-            entries = tuple(outputs.items())
-            return (_place_workers(circuit, dict(entries[:midpoint]), failures)
-                    + _place_workers(circuit, dict(entries[midpoint:]), failures))
-        channel, = outputs
+        if len(outputs) > 3:
+            left, right = _partition_outputs(circuit, outputs)
+            return _place_workers(circuit, left, failures) + _place_workers(circuit, right, failures)
         try:
-            document, _ = layout_two_platforms(circuit, outputs, retain_inputs=False)
+            document, _ = layout_two_platforms(circuit, outputs, retain_inputs=False,
+                                               balance_load=len(outputs) > 1)
         except LayoutCapacityError as split_error:
-            raise LayoutCapacityError(f"计算频道 {channel} 无法布置，{error}。{split_error}") from split_error
+            if len(outputs) == 1:
+                channel, = outputs
+                raise LayoutCapacityError(f"计算频道 {channel} 无法布置，{error}。{split_error}") from split_error
+            failures.append({"outputs": list(outputs), "reason": str(split_error)})
+            left, right = _partition_outputs(circuit, outputs)
+            return _place_workers(circuit, left, failures) + _place_workers(circuit, right, failures)
     return [_Worker(document["BP"]["Entries"], used_input_channels(circuit, outputs),
                     set(outputs), logic_gates(circuit, outputs))]
 

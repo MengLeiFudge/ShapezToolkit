@@ -15,7 +15,7 @@ _EDGE_SLOTS = tuple((start + row, level) for row in (2, 3, 1, 4) for level in ra
 
 
 def layout_two_platforms(circuit: Circuit, outputs: dict[int, Ref], *,
-                         retain_inputs: bool = True) -> tuple[dict, int]:
+                         retain_inputs: bool = True, balance_load: bool = False) -> tuple[dict, int]:
     """把互斥总线的全部驱动放在同一块板上，再从板间单向传递合并后的值。"""
     channels = circuit.channel_map()
     live = _live_nodes(circuit, channels, outputs, retain_inputs=retain_inputs)
@@ -51,6 +51,8 @@ def layout_two_platforms(circuit: Circuit, outputs: dict[int, Ref], *,
     if len(ordered) < 2:
         raise LayoutCapacityError("组合网表没有可用的前馈切口")
 
+    # 多个反馈输出合用两板时，优先把公共计算和各输出的计算分摊开。
+    wire_cost = 2 if balance_load else 10
     cuts = []
     left = set(radios)
     for owner in ordered[:-1]:
@@ -63,7 +65,7 @@ def layout_two_platforms(circuit: Circuit, outputs: dict[int, Ref], *,
         if len(nets) <= len(_EDGE_SLOTS):
             # 两板容量相同，用较满一侧的门数估算拥塞，另给跨板线留出布线余量。
             peak_gates = max(west_gates, len(right))
-            cuts.append((peak_gates + 10 * len(nets), len(nets), len(left), left.copy(), right, nets))
+            cuts.append((peak_gates + wire_cost * len(nets), len(nets), len(left), left.copy(), right, nets))
 
     last_error = None
     for _, _, _, left, right, nets in sorted(cuts)[:4]:
