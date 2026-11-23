@@ -8,7 +8,7 @@
 | 实体精简版 | 同一条工道，保留两份固定订单所需的 21 个基础料站和 2 个结晶站 | [精简站场及用料](实体/six-slot-acceptance-compact.json) |
 | 实体 | 固定两步订单，核对整组提交及复位 | [样件接口](实体/two-step-sender.json) |
 | 实体 | 两笔六字段写入与保持接管 | [原生样件](实体/writer-handoff.spz2bp) · [接线表](实体/writer-handoff.json) |
-| 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) |
+| 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) · [接轨样件](实体/四色含晶/four-color-feed-ports.spz2bp) · [逐车层供货](../../circuits/factory_assembly/four_color_supply.md) |
 | 实体 | 动态六字段含晶订单，六工段与合并结晶收料站 | [导入蓝图](实体/含晶写入/mixed-dynamic.spz2bp) · [站点接口](实体/含晶写入/mixed-dynamic.json) · [换单与供货](../../circuits/factory_assembly/mixed_sample.md) |
 | 配料 | 基础料与结晶染料的换装站、两种混合车库 | [货种、车厢、层位及接口](配料/proportioning.json) |
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
@@ -16,7 +16,7 @@
 | 电路 | 按原层号读取目标的两层 | [复位、选择与采样](电路/原层读取/read-target-rows.json) |
 | 电路 | 四列逐层堆叠前缀扫描 | [整行编码](电路/堆叠前缀/pack-stack-row.json) · [复位、行输入和采样时序](电路/堆叠前缀/stack-prefix-scan.json) |
 | 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) · [单列可用顶盖](电路/顶针逆推/pin-cap-column.json) |
-| 电路 | 恢复顶针来源标签并回放 | [来源序号](电路/顶针逆推/pin-source-rank.json) · [五轮查标签](电路/顶针逆推/pin-retained-label.json) · [来源格](电路/顶针逆推/pin-source-label.json) · [回放](电路/顶针逆推/pin-replay.json) |
+| 电路 | 恢复顶针来源标签并回放 | [来源序号](电路/顶针逆推/pin-source-rank.json) · [五轮查标签](电路/顶针逆推/pin-retained-label.json) · [来源格](电路/顶针逆推/pin-source-label.json) · [整行拼合](电路/顶针逆推/pin-source-row.json) · [回放](电路/顶针逆推/pin-replay.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) |
@@ -72,7 +72,7 @@
 
 紧柱指令电路把同一构造变成六字段。每层依次用相位 `0` 换色、`1` 领料、`2` 堆叠。这三相位共用本层原格、上一层后的待结晶色和已有下料标志。层完成后更新待结晶色。最后用相位 `3` 到 `7` 结晶并取出紧柱。等满接口保持时间后，遇到空指令就跳过，遇到非空指令就等制作层确认。 [原生指令电路](电路/双半形/dense-column-packet.spz2bp) · [六字段接口](电路/双半形/dense-column-packet.json)
 
-紧柱输入板从五个原格信号选择当前层，向六字段电路提供上一层后的待结晶色。两块推进板共用 `phase`、`level` 和本笔确认。相位 2 从当前原层转到下一层，五层均读完后推进到收尾，再到相位 8。稳定之前保持原值。有指令时需收到本笔确认，空指令直接推进。推进板由外部时序采样，再回写新相位和层号。 [输入接口](电路/双半形/dense-column-input.json) · [相位接口](电路/双半形/dense-column-advance-phase.json) · [层号接口](电路/双半形/dense-column-advance-level.json)
+紧柱输入板从五个原格信号选择当前层，向六字段电路提供上一层后的待结晶色。两块推进板共用 `phase`、`level` 和本笔确认。相位 2 从当前原层转到下一层，五层均读完后推进到收尾，再到相位 8。稳定之前保持原值。有指令时需收到本笔确认，空指令直接推进。确认式调用板统一采样并回写新相位和层号。`1701482` 请求地址，收到 `1701481` 的同址确认后推进。主控须将实体 ACK 与实际写入的地址对应。 [确认式调用](电路/双半形/dense-confirmed-call.json) [输入接口](电路/双半形/dense-column-input.json) · [相位接口](电路/双半形/dense-column-advance-phase.json) · [层号接口](电路/双半形/dense-column-advance-level.json)
 
 顶针逆推按同列内的保序关系恢复标签。对前态当前格，数出其下方的普通格和针。五轮读取按该序号从目标列找对应格，跳过晶体和地面新针。前态的晶体看上一原层，保留晶体沿用目标原色，额外晶体用红色。前态获得制造证书后，虚拟顶针回放输出与目标完全相等才通过。
 
@@ -93,6 +93,13 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_labels
   --field replay=pin_replay --field accepted=pin_replay_matches --input-channel source=1701550 \
   --input-channel target=1701551 --input-channel ready=1701552 --output-channel replay=1701553 \
   --output-channel accepted=1701554 --output pin-replay.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_source_row.py \
+  --field row=pin_source_row --input-channel q0=1701560 --input-channel q1=1701561 \
+  --input-channel q2=1701562 --input-channel q3=1701563 --output-channel row=1701564 --output pin-source-row.spz2bp
+python -m shapez2_tmam.circuits.compiler_backend.confirmed_call \
+  --circuits shapez2_tmam/blueprints/验收/电路/双半形 \
+  --address-channel 1701480 --ack-channel 1701481 --request-channel 1701482 \
+  --channel-base 1701490 --output dense-confirmed-call.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/dense_packet.py \
   --field opcode=dense_packet_opcode --field a=dense_packet_a --field b=dense_packet_b \
   --field destination=dense_packet_destination --field base=dense_packet_base --field color=dense_packet_color \
@@ -257,5 +264,5 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/material_w
   --field word=join_material_words --input-channel q0=1700963 --input-channel q1=1700964 \
   --input-channel q2=1700965 --input-channel q3=1700966 --output-channel word=1701120 \
   --output join-material-words.spz2bp
-python -m shapez2_tmam.circuits.factory_assembly.acceptance --four-color --compact --output four-color.spz2bp
+python -m shapez2_tmam.circuits.factory_assembly.acceptance --four-color --compact --compact-feeds --output four-color.spz2bp
 ```

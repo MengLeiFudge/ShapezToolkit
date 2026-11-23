@@ -133,7 +133,7 @@ def _requirements(production):
 
 
 def build(packet_tag: int, *, compact: bool = False, recipe_path: Path | None = None,
-          four_color: bool = False) -> tuple[str, dict]:
+          four_color: bool = False, compact_feeds: bool = False) -> tuple[str, dict]:
     if recipe_path is not None:
         if four_color:
             raise ValueError('四色样件与外部配方只能选一个')
@@ -143,7 +143,8 @@ def build(packet_tag: int, *, compact: bool = False, recipe_path: Path | None = 
     programs = {name: replay(order['target'], order['instructions']) for name, order in orders.items()}
     count = max(len(program.stages) for program in programs.values())
     fixed = tuple(programs.values()) if compact else None
-    document, interfaces = assemble(count, packet_tag=packet_tag, fixed_orders=fixed, handoff=four_color and compact)
+    document, interfaces = assemble(count, packet_tag=packet_tag, fixed_orders=fixed, handoff=four_color and compact,
+                                    compact_base=compact_feeds, compact_dyes=compact_feeds)
     ports = cargo_ports()
     islands = _islands(document)
     _check_intakes(islands, interfaces['stations'], ports)
@@ -170,12 +171,13 @@ def main() -> int:
     sample.add_argument('--four-color', action='store_true', help='使用两种切向的四色含晶验收订单')
     parser.add_argument('--output', type=Path, help='原生蓝图输出，邻接 JSON 包含订单和供货需求')
     parser.add_argument('--compact', action='store_true', help='仅保留所选固定订单需要的供料站')
+    parser.add_argument('--compact-feeds', action='store_true', help='将基础料和结晶染料的卸货与转接分别合板')
     args = parser.parse_args()
     if args.output is not None and args.output.suffix != '.spz2bp':
         parser.error('--output 需要 .spz2bp 文件路径')
     try:
         blueprint, report = build(args.packet_tag, compact=args.compact, recipe_path=args.recipe,
-                                  four_color=args.four_color)
+                                  four_color=args.four_color, compact_feeds=args.compact_feeds)
     except (OSError, ValueError) as error:
         parser.error(f'{args.recipe}: {error}' if args.recipe is not None else str(error))
     if args.output is not None:

@@ -161,3 +161,18 @@ python -m shapez2_tmam.circuits.compiler_backend.prefix_scan_wiring \
   --rows shapez2_tmam/blueprints/验收/电路/原层读取/read-five-rows.spz2bp \
   --output prefix-scan-wiring.spz2bp
 ```
+
+### 稳定后按地址确认并提交状态
+
+`confirmed_call.build` 复用组合状态板。每轮先保持旧状态和输入。`opcode` 为空则直接进入下一状态计算，非空则锁存待写地址。旧同址确认撤去后，控制器发布 `request_address`。发布期间保持该地址的六字段，写入端回报对应整数地址并保持到请求撤去。整数地址 `0` 可用。
+
+控制器收到匹配确认后撤去请求，保持旧状态直到下一状态稳定，然后同拍提交所有字段。紧柱样件的输入等待为 3360 信号 tick，下一状态等待为 1488 tick。`enable=0` 保持至少 48 tick 以清空请求并恢复两项初值。
+
+紧柱样件配合 `dense-column-input`、`dense-column-packet`、`dense-column-advance-phase` 和 `dense-column-advance-level` 使用。主控在 `1701480` 提供待写地址，在 `1701481` 回报写入的整数地址，请求地址在 `1701482`。实体写入器的布尔 ACK 需由主控与本笔请求地址配对。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend.confirmed_call \
+  --circuits shapez2_tmam/blueprints/验收/电路/双半形 \
+  --address-channel 1701480 --ack-channel 1701481 --request-channel 1701482 \
+  --channel-base 1701490 --output dense-confirmed-call.spz2bp
+```
