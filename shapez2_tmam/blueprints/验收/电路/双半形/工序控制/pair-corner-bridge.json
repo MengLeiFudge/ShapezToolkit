@@ -1,0 +1,128 @@
+{
+  "inputs": {
+    "enable": 1701695,
+    "kind": 1701691,
+    "next": 1701698,
+    "done": 1701699
+  },
+  "outputs": {
+    "phase": 1701690,
+    "settled": 1701696,
+    "confirmed": 1701697
+  },
+  "methods": {
+    "1": {
+      "run": 1702052,
+      "done": 1702053,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "2": {
+      "run": 1702054,
+      "done": 1702062,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "3": {
+      "run": 1702056,
+      "done": 1702062,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "4": {
+      "run": 1702058,
+      "done": 1702062,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "5": {
+      "run": 1702060,
+      "done": 1702062,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    }
+  },
+  "request_address": 1702070,
+  "ack_address": 1702071,
+  "reserved_channels": [
+    1702070,
+    1702138
+  ],
+  "timing": {
+    "input_hold_signal_ticks": 1536,
+    "update_hold_signal_ticks": 1536,
+    "settle_phase_signal_ticks": 1560,
+    "update_phase_signal_ticks": 1548,
+    "reset_hold_signal_ticks": 72
+  },
+  "platforms": 47,
+  "building_entries": 43984,
+  "writer": {
+    "inputs": {
+      "done": 1701766,
+      "packet_run": 1701741,
+      "packet_done": 1701746,
+      "step": 1701710,
+      "appended": 1701747
+    },
+    "outputs": {
+      "selector": 1701740,
+      "run": 1701761
+    },
+    "selectors_by_kind": {
+      "2": 3,
+      "3": 3,
+      "4": 4,
+      "5": 3
+    },
+    "shared_done": 1702062
+  },
+  "combined_platforms": 105,
+  "combined_building_entries": 114493,
+  "combined_global_transmitters": 202,
+  "corner": {
+    "inputs": {
+      "selector": 1701636,
+      "run": 1701637
+    },
+    "outputs": {
+      "done": 1701638
+    },
+    "selector_values": {
+      "dense": 1,
+      "release": 2
+    },
+    "run_low_signal_ticks": 96,
+    "reset_timer_signal_ticks": 288,
+    "sample_timer_signal_ticks": 192,
+    "reserved_channels": [
+      1702140,
+      1702141,
+      1702142,
+      1702143,
+      1702144,
+      1702145,
+      1702146,
+      1702147,
+      1702148,
+      1702149,
+      1702150,
+      1702151,
+      1702152,
+      1702153,
+      1702154,
+      1702155,
+      1702156
+    ]
+  }
+}

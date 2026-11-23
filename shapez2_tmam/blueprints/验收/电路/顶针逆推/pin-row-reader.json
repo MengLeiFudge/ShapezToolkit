@@ -1,0 +1,44 @@
+{
+  "inputs": {
+    "enable": 1702200,
+    "level": 1702201,
+    "mode": 1702202,
+    "crystal_mask": 1702203,
+    "members": [
+      1702204,
+      1702205,
+      1702206,
+      1702207
+    ],
+    "target_rows_bottom_to_top": [
+      1701200,
+      1701201,
+      1701202,
+      1701203,
+      1701204
+    ],
+    "candidate_ready": 1701858
+  },
+  "outputs": {
+    "ready": 1702208,
+    "valid": 1702209,
+    "row": 1702210
+  },
+  "channels": {
+    "private_range": [
+      1702200,
+      1702279
+    ],
+    "initial_label_empty": 1702250
+  },
+  "timing": {
+    "channel_signal_ticks": 12,
+    "reset_hold_signal_ticks": 96,
+    "column_prepare_signal_ticks": 1992,
+    "lower_column_sample_signal_ticks": 1368,
+    "lower_start_to_ready_signal_ticks": 15192,
+    "top_start_to_ready_signal_ticks": 9720
+  },
+  "platforms": 38,
+  "building_entries": 40863
+}

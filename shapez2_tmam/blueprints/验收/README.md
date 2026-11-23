@@ -10,6 +10,7 @@
 | 实体 | 两笔六字段写入与保持接管 | [原生样件](实体/writer-handoff.spz2bp) · [接线表](实体/writer-handoff.json) |
 | 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) · [接轨样件](实体/四色含晶/four-color-feed-ports.spz2bp) · [2 件/秒待测清单](实体/四色含晶/four-color-capacity.json) · [逐车层供货](../../circuits/factory_assembly/four_color_supply.md) |
 | 实体 | 动态六字段含晶订单，六工段与合并结晶收料站 | [导入蓝图](实体/含晶写入/mixed-dynamic.spz2bp) · [站点接口](实体/含晶写入/mixed-dynamic.json) · [换单与供货](../../circuits/factory_assembly/mixed_sample.md) |
+| 实体 | 145 道悬空订单的代表段、满带并联与四路混合车 | [工道页签](实体/含晶工道/stage_pages.md) · [满带样件](实体/含晶工道/full_belt_sample.md) · [接轨与卸货表](实体/含晶工道/long_haul_routes.md) |
 | 配料 | 基础料与结晶染料的换装站、两种混合车库 | [货种、车厢、层位及接口](配料/proportioning.json) |
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
 | 电路 | 从原图一次读取五份原色单层 | [原生蓝图](电路/原层读取/read-five-rows.spz2bp) · [接口](电路/原层读取/read-five-rows.json) |
@@ -18,6 +19,7 @@
 | 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) · [单列可用顶盖](电路/顶针逆推/pin-cap-column.json) |
 | 电路 | 枚举四列顶针前态并保持候选 | [控制与频道](电路/顶针逆推/README.md) · [原生蓝图](电路/顶针逆推/pin-column-sample.spz2bp) |
 | 电路 | 恢复顶针来源标签并回放 | [原色来源行](电路/顶针逆推/pin-candidate-row.md) · [第五层顶盖行](电路/顶针逆推/pin-cap-row.md) · [整形回放](电路/顶针逆推/pin-replay.json) |
+| 电路 | 逐层读取并封存候选的五层原色 | [统一读取](电路/顶针逆推/pin-row-reader.md) · [整组封存](电路/顶针逆推/pin-source-rows.md) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) · [两种切向自动试查](电路/双半形/choose-cut.json) · [试查时钟](电路/双半形/choose-cut-clock.json) |
@@ -33,6 +35,7 @@
 | 电路 | 合并两个已制半形并复用五轮追加 | [标准切向拼接](电路/双半形/join-oriented-halves.json) · [尾料掩码](电路/双半形/mask-paired-tail.json) · [两路完工启动](电路/双半形/paired-tail-start.json) · [尾料回放](电路/双半形/replay-paired-tail.json) · [恢复原方向与验收](电路/双半形/finish-paired-tail.json) |
 | 电路 | 带原色的紧柱备料与回放 | [单步备料](电路/双半形/dense-column-actions.json) · [五轮回放](电路/双半形/dense-column.json) · [完工取柱](电路/双半形/dense-column-finish.json) |
 | 电路 | 四角调度、紧柱、拼合与尾料的共用写入 | [工序控制分册](电路/双半形/工序控制/README.md) · [原生蓝图](电路/双半形/工序控制/pair-writer.spz2bp) |
+| 电路 | 制角与双半形共用写入桥 | [原生确认器与接线](电路/双半形/工序控制/pair-corner-bridge.md) |
 | 实体 | 直接落角与悬空落角的整形配方 | [94 和 145 道的逐步回放](../../circuits/factory_assembly/corner_line_sample.md) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。

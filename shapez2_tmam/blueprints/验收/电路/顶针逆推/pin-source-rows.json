@@ -1,0 +1,58 @@
+{
+  "inputs": {
+    "enable": 1702280,
+    "candidate_ready": 1701858,
+    "mode": 1702281,
+    "crystal_mask": 1702282,
+    "members": [
+      1702283,
+      1702284,
+      1702285,
+      1702286
+    ]
+  },
+  "outputs": {
+    "ready": 1702287,
+    "valid": 1702288,
+    "rows_bottom_to_top": [
+      1702289,
+      1702290,
+      1702291,
+      1702292,
+      1702293
+    ]
+  },
+  "reader": {
+    "inputs": {
+      "enable": 1702200,
+      "level": 1702201,
+      "mode": 1702202,
+      "crystal_mask": 1702203,
+      "members": [
+        1702204,
+        1702205,
+        1702206,
+        1702207
+      ]
+    },
+    "outputs": {
+      "ready": 1702208,
+      "valid": 1702209,
+      "row": 1702210
+    }
+  },
+  "channels": {
+    "private_range": [
+      1702280,
+      1702339
+    ]
+  },
+  "timing": {
+    "channel_signal_ticks": 12,
+    "reset_hold_signal_ticks": 96,
+    "per_layer_reset_signal_ticks": 120,
+    "start_to_ready_signal_ticks": 71664
+  },
+  "platforms": 21,
+  "building_entries": 19738
+}

@@ -1,0 +1,6162 @@
+{
+  "target": "CuRuSuP-:--RuSu--:crRuSuRb:SuRuSu--:WuRuSucg",
+  "stages": 145,
+  "max_supported_stages": 971,
+  "product_slot": 0,
+  "universal": false,
+  "stage_pitch": 18,
+  "stations": [
+    {
+      "stage": 0,
+      "opcode": 14,
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "base_head": [
+        -9,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 1,
+      "opcode": 14,
+      "origin": [
+        18,
+        0,
+        0
+      ],
+      "base_head": [
+        9,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 2,
+      "opcode": 7,
+      "origin": [
+        36,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 3,
+      "opcode": 14,
+      "origin": [
+        54,
+        0,
+        0
+      ],
+      "base_head": [
+        45,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 4,
+      "opcode": 7,
+      "origin": [
+        72,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 5,
+      "opcode": 10,
+      "origin": [
+        90,
+        0,
+        0
+      ],
+      "crystal_head": [
+        84,
+        3
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "stage": 6,
+      "opcode": 4,
+      "origin": [
+        108,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 7,
+      "opcode": 1,
+      "origin": [
+        126,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 8,
+      "opcode": 4,
+      "origin": [
+        144,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 9,
+      "opcode": 2,
+      "origin": [
+        162,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 10,
+      "opcode": 14,
+      "origin": [
+        180,
+        0,
+        0
+      ],
+      "base_head": [
+        171,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 11,
+      "opcode": 7,
+      "origin": [
+        198,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 12,
+      "opcode": 14,
+      "origin": [
+        216,
+        0,
+        0
+      ],
+      "base_head": [
+        207,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 13,
+      "opcode": 7,
+      "origin": [
+        234,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 14,
+      "opcode": 14,
+      "origin": [
+        252,
+        0,
+        0
+      ],
+      "base_head": [
+        243,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 15,
+      "opcode": 7,
+      "origin": [
+        270,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 16,
+      "opcode": 14,
+      "origin": [
+        288,
+        0,
+        0
+      ],
+      "base_head": [
+        279,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 17,
+      "opcode": 7,
+      "origin": [
+        306,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 18,
+      "opcode": 14,
+      "origin": [
+        324,
+        0,
+        0
+      ],
+      "base_head": [
+        315,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 19,
+      "opcode": 7,
+      "origin": [
+        342,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 20,
+      "opcode": 14,
+      "origin": [
+        360,
+        0,
+        0
+      ],
+      "base_head": [
+        351,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 21,
+      "opcode": 10,
+      "origin": [
+        378,
+        0,
+        0
+      ],
+      "crystal_head": [
+        372,
+        3
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "stage": 22,
+      "opcode": 4,
+      "origin": [
+        396,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 23,
+      "opcode": 1,
+      "origin": [
+        414,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 24,
+      "opcode": 4,
+      "origin": [
+        432,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 25,
+      "opcode": 2,
+      "origin": [
+        450,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 26,
+      "opcode": 14,
+      "origin": [
+        468,
+        0,
+        0
+      ],
+      "base_head": [
+        459,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 27,
+      "opcode": 7,
+      "origin": [
+        486,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 28,
+      "opcode": 14,
+      "origin": [
+        504,
+        0,
+        0
+      ],
+      "base_head": [
+        495,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 29,
+      "opcode": 7,
+      "origin": [
+        522,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 30,
+      "opcode": 14,
+      "origin": [
+        540,
+        0,
+        0
+      ],
+      "base_head": [
+        531,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 31,
+      "opcode": 7,
+      "origin": [
+        558,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 32,
+      "opcode": 14,
+      "origin": [
+        576,
+        0,
+        0
+      ],
+      "base_head": [
+        567,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 33,
+      "opcode": 7,
+      "origin": [
+        594,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 34,
+      "opcode": 1,
+      "origin": [
+        612,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 35,
+      "opcode": 3,
+      "origin": [
+        630,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 36,
+      "opcode": 8,
+      "origin": [
+        648,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 37,
+      "opcode": 4,
+      "origin": [
+        666,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 38,
+      "opcode": 2,
+      "origin": [
+        684,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 39,
+      "opcode": 14,
+      "origin": [
+        702,
+        0,
+        0
+      ],
+      "base_head": [
+        693,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 40,
+      "opcode": 14,
+      "origin": [
+        720,
+        0,
+        0
+      ],
+      "base_head": [
+        711,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 41,
+      "opcode": 7,
+      "origin": [
+        738,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 42,
+      "opcode": 14,
+      "origin": [
+        756,
+        0,
+        0
+      ],
+      "base_head": [
+        747,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 43,
+      "opcode": 7,
+      "origin": [
+        774,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 44,
+      "opcode": 14,
+      "origin": [
+        792,
+        0,
+        0
+      ],
+      "base_head": [
+        783,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 45,
+      "opcode": 7,
+      "origin": [
+        810,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 46,
+      "opcode": 14,
+      "origin": [
+        828,
+        0,
+        0
+      ],
+      "base_head": [
+        819,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 47,
+      "opcode": 7,
+      "origin": [
+        846,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 48,
+      "opcode": 1,
+      "origin": [
+        864,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 49,
+      "opcode": 1,
+      "origin": [
+        882,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 50,
+      "opcode": 1,
+      "origin": [
+        900,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 51,
+      "opcode": 8,
+      "origin": [
+        918,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 52,
+      "opcode": 2,
+      "origin": [
+        936,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 53,
+      "opcode": 4,
+      "origin": [
+        954,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 54,
+      "opcode": 14,
+      "origin": [
+        972,
+        0,
+        0
+      ],
+      "base_head": [
+        963,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 55,
+      "opcode": 14,
+      "origin": [
+        990,
+        0,
+        0
+      ],
+      "base_head": [
+        981,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 56,
+      "opcode": 7,
+      "origin": [
+        1008,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 57,
+      "opcode": 14,
+      "origin": [
+        1026,
+        0,
+        0
+      ],
+      "base_head": [
+        1017,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 58,
+      "opcode": 7,
+      "origin": [
+        1044,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 59,
+      "opcode": 14,
+      "origin": [
+        1062,
+        0,
+        0
+      ],
+      "base_head": [
+        1053,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 60,
+      "opcode": 7,
+      "origin": [
+        1080,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 61,
+      "opcode": 14,
+      "origin": [
+        1098,
+        0,
+        0
+      ],
+      "base_head": [
+        1089,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 62,
+      "opcode": 7,
+      "origin": [
+        1116,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 63,
+      "opcode": 14,
+      "origin": [
+        1134,
+        0,
+        0
+      ],
+      "base_head": [
+        1125,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 64,
+      "opcode": 14,
+      "origin": [
+        1152,
+        0,
+        0
+      ],
+      "base_head": [
+        1143,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 65,
+      "opcode": 7,
+      "origin": [
+        1170,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 66,
+      "opcode": 14,
+      "origin": [
+        1188,
+        0,
+        0
+      ],
+      "base_head": [
+        1179,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 67,
+      "opcode": 7,
+      "origin": [
+        1206,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 68,
+      "opcode": 10,
+      "origin": [
+        1224,
+        0,
+        0
+      ],
+      "crystal_head": [
+        1218,
+        3
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "stage": 69,
+      "opcode": 14,
+      "origin": [
+        1242,
+        0,
+        0
+      ],
+      "base_head": [
+        1233,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 70,
+      "opcode": 7,
+      "origin": [
+        1260,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 71,
+      "opcode": 10,
+      "origin": [
+        1278,
+        0,
+        0
+      ],
+      "crystal_head": [
+        1272,
+        3
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "stage": 72,
+      "opcode": 4,
+      "origin": [
+        1296,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 73,
+      "opcode": 14,
+      "origin": [
+        1314,
+        0,
+        0
+      ],
+      "base_head": [
+        1305,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 74,
+      "opcode": 7,
+      "origin": [
+        1332,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 75,
+      "opcode": 14,
+      "origin": [
+        1350,
+        0,
+        0
+      ],
+      "base_head": [
+        1341,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 76,
+      "opcode": 14,
+      "origin": [
+        1368,
+        0,
+        0
+      ],
+      "base_head": [
+        1359,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 77,
+      "opcode": 7,
+      "origin": [
+        1386,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 78,
+      "opcode": 10,
+      "origin": [
+        1404,
+        0,
+        0
+      ],
+      "crystal_head": [
+        1398,
+        3
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "stage": 79,
+      "opcode": 4,
+      "origin": [
+        1422,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 80,
+      "opcode": 1,
+      "origin": [
+        1440,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 81,
+      "opcode": 4,
+      "origin": [
+        1458,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 82,
+      "opcode": 2,
+      "origin": [
+        1476,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 83,
+      "opcode": 14,
+      "origin": [
+        1494,
+        0,
+        0
+      ],
+      "base_head": [
+        1485,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 84,
+      "opcode": 7,
+      "origin": [
+        1512,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 85,
+      "opcode": 14,
+      "origin": [
+        1530,
+        0,
+        0
+      ],
+      "base_head": [
+        1521,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 86,
+      "opcode": 14,
+      "origin": [
+        1548,
+        0,
+        0
+      ],
+      "base_head": [
+        1539,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 87,
+      "opcode": 7,
+      "origin": [
+        1566,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 88,
+      "opcode": 14,
+      "origin": [
+        1584,
+        0,
+        0
+      ],
+      "base_head": [
+        1575,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 89,
+      "opcode": 7,
+      "origin": [
+        1602,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 90,
+      "opcode": 14,
+      "origin": [
+        1620,
+        0,
+        0
+      ],
+      "base_head": [
+        1611,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 91,
+      "opcode": 7,
+      "origin": [
+        1638,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 92,
+      "opcode": 14,
+      "origin": [
+        1656,
+        0,
+        0
+      ],
+      "base_head": [
+        1647,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 93,
+      "opcode": 7,
+      "origin": [
+        1674,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 94,
+      "opcode": 8,
+      "origin": [
+        1692,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 95,
+      "opcode": 1,
+      "origin": [
+        1710,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 96,
+      "opcode": 4,
+      "origin": [
+        1728,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 97,
+      "opcode": 3,
+      "origin": [
+        1746,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 98,
+      "opcode": 8,
+      "origin": [
+        1764,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 99,
+      "opcode": 2,
+      "origin": [
+        1782,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 100,
+      "opcode": 4,
+      "origin": [
+        1800,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 101,
+      "opcode": 14,
+      "origin": [
+        1818,
+        0,
+        0
+      ],
+      "base_head": [
+        1809,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 102,
+      "opcode": 14,
+      "origin": [
+        1836,
+        0,
+        0
+      ],
+      "base_head": [
+        1827,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 103,
+      "opcode": 7,
+      "origin": [
+        1854,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 104,
+      "opcode": 14,
+      "origin": [
+        1872,
+        0,
+        0
+      ],
+      "base_head": [
+        1863,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 105,
+      "opcode": 7,
+      "origin": [
+        1890,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 106,
+      "opcode": 14,
+      "origin": [
+        1908,
+        0,
+        0
+      ],
+      "base_head": [
+        1899,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 107,
+      "opcode": 7,
+      "origin": [
+        1926,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 108,
+      "opcode": 14,
+      "origin": [
+        1944,
+        0,
+        0
+      ],
+      "base_head": [
+        1935,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 109,
+      "opcode": 7,
+      "origin": [
+        1962,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 110,
+      "opcode": 10,
+      "origin": [
+        1980,
+        0,
+        0
+      ],
+      "crystal_head": [
+        1974,
+        3
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "stage": 111,
+      "opcode": 4,
+      "origin": [
+        1998,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 112,
+      "opcode": 1,
+      "origin": [
+        2016,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 113,
+      "opcode": 4,
+      "origin": [
+        2034,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 114,
+      "opcode": 2,
+      "origin": [
+        2052,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 115,
+      "opcode": 14,
+      "origin": [
+        2070,
+        0,
+        0
+      ],
+      "base_head": [
+        2061,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 116,
+      "opcode": 14,
+      "origin": [
+        2088,
+        0,
+        0
+      ],
+      "base_head": [
+        2079,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 117,
+      "opcode": 7,
+      "origin": [
+        2106,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 118,
+      "opcode": 14,
+      "origin": [
+        2124,
+        0,
+        0
+      ],
+      "base_head": [
+        2115,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 119,
+      "opcode": 7,
+      "origin": [
+        2142,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 120,
+      "opcode": 14,
+      "origin": [
+        2160,
+        0,
+        0
+      ],
+      "base_head": [
+        2151,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 121,
+      "opcode": 7,
+      "origin": [
+        2178,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 122,
+      "opcode": 1,
+      "origin": [
+        2196,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 123,
+      "opcode": 3,
+      "origin": [
+        2214,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 124,
+      "opcode": 8,
+      "origin": [
+        2232,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 125,
+      "opcode": 1,
+      "origin": [
+        2250,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 126,
+      "opcode": 8,
+      "origin": [
+        2268,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 127,
+      "opcode": 6,
+      "origin": [
+        2286,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 128,
+      "opcode": 14,
+      "origin": [
+        2304,
+        0,
+        0
+      ],
+      "base_head": [
+        2295,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 129,
+      "opcode": 7,
+      "origin": [
+        2322,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 130,
+      "opcode": 14,
+      "origin": [
+        2340,
+        0,
+        0
+      ],
+      "base_head": [
+        2331,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 131,
+      "opcode": 7,
+      "origin": [
+        2358,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 132,
+      "opcode": 4,
+      "origin": [
+        2376,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 133,
+      "opcode": 1,
+      "origin": [
+        2394,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 134,
+      "opcode": 1,
+      "origin": [
+        2412,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 135,
+      "opcode": 1,
+      "origin": [
+        2430,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 136,
+      "opcode": 8,
+      "origin": [
+        2448,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 137,
+      "opcode": 2,
+      "origin": [
+        2466,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 138,
+      "opcode": 4,
+      "origin": [
+        2484,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 139,
+      "opcode": 3,
+      "origin": [
+        2502,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 140,
+      "opcode": 8,
+      "origin": [
+        2520,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 141,
+      "opcode": 14,
+      "origin": [
+        2538,
+        0,
+        0
+      ],
+      "base_head": [
+        2529,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 142,
+      "opcode": 7,
+      "origin": [
+        2556,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "stage": 143,
+      "opcode": 14,
+      "origin": [
+        2574,
+        0,
+        0
+      ],
+      "base_head": [
+        2565,
+        -17
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14
+      ]
+    },
+    {
+      "stage": 144,
+      "opcode": 7,
+      "origin": [
+        2592,
+        0,
+        0
+      ],
+      "allowed_opcodes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "file": "stage-page-110-118.spz2bp",
+      "start": 110,
+      "stop": 119,
+      "place_at": [
+        1980,
+        0,
+        0
+      ],
+      "input": {
+        "island": [
+          1980,
+          0,
+          0
+        ],
+        "x": -18,
+        "rows": [
+          -12,
+          -9,
+          8,
+          11,
+          28,
+          31
+        ],
+        "level": 0
+      },
+      "output": {
+        "island": [
+          2139,
+          0,
+          0
+        ],
+        "x": 37,
+        "rows": [
+          -12,
+          -9,
+          8,
+          11,
+          28,
+          31
+        ],
+        "level": 0
+      },
+      "rails": [
+        {
+          "stage": 110,
+          "service": "crystal",
+          "head": [
+            1974,
+            3
+          ],
+          "arrival": {
+            "tile": [
+              1974,
+              7,
+              0
+            ],
+            "outside_tile": [
+              1974,
+              8,
+              0
+            ],
+            "rotation": 3
+          },
+          "departure": {
+            "tile": [
+              1973,
+              7,
+              0
+            ],
+            "outside_tile": [
+              1973,
+              8,
+              0
+            ],
+            "rotation": 1
+          }
+        },
+        {
+          "stage": 115,
+          "service": "base",
+          "head": [
+            2061,
+            -17
+          ],
+          "arrival": {
+            "tile": [
+              2060,
+              -18,
+              0
+            ],
+            "outside_tile": [
+              2060,
+              -19,
+              0
+            ],
+            "rotation": 1
+          },
+          "departure": {
+            "tile": [
+              2061,
+              -18,
+              0
+            ],
+            "outside_tile": [
+              2061,
+              -19,
+              0
+            ],
+            "rotation": 3
+          }
+        },
+        {
+          "stage": 116,
+          "service": "base",
+          "head": [
+            2079,
+            -17
+          ],
+          "arrival": {
+            "tile": [
+              2078,
+              -18,
+              0
+            ],
+            "outside_tile": [
+              2078,
+              -19,
+              0
+            ],
+            "rotation": 1
+          },
+          "departure": {
+            "tile": [
+              2079,
+              -18,
+              0
+            ],
+            "outside_tile": [
+              2079,
+              -19,
+              0
+            ],
+            "rotation": 3
+          }
+        },
+        {
+          "stage": 118,
+          "service": "base",
+          "head": [
+            2115,
+            -17
+          ],
+          "arrival": {
+            "tile": [
+              2114,
+              -18,
+              0
+            ],
+            "outside_tile": [
+              2114,
+              -19,
+              0
+            ],
+            "rotation": 1
+          },
+          "departure": {
+            "tile": [
+              2115,
+              -18,
+              0
+            ],
+            "outside_tile": [
+              2115,
+              -19,
+              0
+            ],
+            "rotation": 3
+          }
+        }
+      ],
+      "islands": 274,
+      "platforms": 145,
+      "buildings": 142038
+    },
+    {
+      "file": "stage-page-119-127.spz2bp",
+      "start": 119,
+      "stop": 128,
+      "place_at": [
+        2142,
+        0,
+        0
+      ],
+      "input": {
+        "island": [
+          2142,
+          0,
+          0
+        ],
+        "x": -18,
+        "rows": [
+          -12,
+          -9,
+          8,
+          11,
+          28,
+          31
+        ],
+        "level": 0
+      },
+      "output": {
+        "island": [
+          2301,
+          0,
+          0
+        ],
+        "x": 37,
+        "rows": [
+          -12,
+          -9,
+          8,
+          11,
+          28,
+          31
+        ],
+        "level": 0
+      },
+      "rails": [
+        {
+          "stage": 120,
+          "service": "base",
+          "head": [
+            2151,
+            -17
+          ],
+          "arrival": {
+            "tile": [
+              2150,
+              -18,
+              0
+            ],
+            "outside_tile": [
+              2150,
+              -19,
+              0
+            ],
+            "rotation": 1
+          },
+          "departure": {
+            "tile": [
+              2151,
+              -18,
+              0
+            ],
+            "outside_tile": [
+              2151,
+              -19,
+              0
+            ],
+            "rotation": 3
+          }
+        }
+      ],
+      "islands": 165,
+      "platforms": 108,
+      "buildings": 112922
+    }
+  ],
+  "load": [
+    {
+      "station": "q2",
+      "wagon": 1,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "C",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 1,
+      "kind": "Shapes",
+      "layer": 1,
+      "cargo": "R",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 1,
+      "kind": "Shapes",
+      "layer": 2,
+      "cargo": "S",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 2,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "W",
+      "rows": [
+        8
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 3,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 3,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q2",
+      "wagon": 3,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 4,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "C",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 4,
+      "kind": "Shapes",
+      "layer": 1,
+      "cargo": "R",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 4,
+      "kind": "Shapes",
+      "layer": 2,
+      "cargo": "S",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 5,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "W",
+      "rows": [
+        8
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 6,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 6,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q3",
+      "wagon": 6,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 7,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "C",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 7,
+      "kind": "Shapes",
+      "layer": 1,
+      "cargo": "R",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 7,
+      "kind": "Shapes",
+      "layer": 2,
+      "cargo": "S",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 8,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "W",
+      "rows": [
+        8
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 9,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 9,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q1",
+      "wagon": 9,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 10,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "C",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 10,
+      "kind": "Shapes",
+      "layer": 1,
+      "cargo": "R",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 10,
+      "kind": "Shapes",
+      "layer": 2,
+      "cargo": "S",
+      "rows": [
+        -12
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 11,
+      "kind": "Shapes",
+      "layer": 0,
+      "cargo": "W",
+      "rows": [
+        8
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 12,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 12,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "q0",
+      "wagon": 12,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "crystal",
+      "wagon": 1,
+      "kind": "Fluids",
+      "layer": 0,
+      "cargo": "r",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "crystal",
+      "wagon": 1,
+      "kind": "Fluids",
+      "layer": 1,
+      "cargo": "g",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "station": "crystal",
+      "wagon": 1,
+      "kind": "Fluids",
+      "layer": 2,
+      "cargo": "b",
+      "rows": [
+        28,
+        29,
+        30,
+        31
+      ]
+    }
+  ],
+  "control": {
+    "file": "stage-page-controls.spz2bp",
+    "place_at": [
+      0,
+      12,
+      0
+    ],
+    "islands": 8,
+    "platforms": 8,
+    "buildings": 9608
+  },
+  "recipe": {
+    "channels": {
+      "controller_outputs": {
+        "target": 1600000,
+        "length": 1640043,
+        "replay_result": 1640044,
+        "accepted": 1640045,
+        "payload": {
+          "opcode": 1640002,
+          "a": 1640003,
+          "b": 1640004,
+          "destination": 1640005,
+          "base": 1640006,
+          "color": 1640007
+        },
+        "packet_tag": 1640046
+      },
+      "operator_outputs": {
+        "run": 1640030,
+        "clean_confirmed": 1640060,
+        "enable_feed": 1640059
+      },
+      "factory_outputs": {
+        "address": 1640000,
+        "phase": 1640001,
+        "ready": 1640014,
+        "request": 1640011,
+        "ack": 1640013,
+        "loaded": 1640057,
+        "reset": 1640012,
+        "readback": {
+          "operands": 1640008,
+          "materials": 1640009
+        }
+      },
+      "length": {
+        "min": 1,
+        "max": 145
+      },
+      "address_base": 0,
+      "reset_phase": 3
+    },
+    "before_run": {
+      "target": "shape",
+      "length": 145,
+      "replay_result": "target",
+      "accepted": 1
+    },
+    "candidate": {
+      "address": 1680007,
+      "fields": {
+        "opcode": 1680001,
+        "a": 1680002,
+        "b": 1680003,
+        "destination": 1680004,
+        "base": 1680005,
+        "color": 1680006
+      },
+      "public_fields": {
+        "opcode": 1640002,
+        "a": 1640003,
+        "b": 1640004,
+        "destination": 1640005,
+        "base": 1640006,
+        "color": 1640007
+      },
+      "hold_until_current_ack": true
+    },
+    "reset_phase": 3,
+    "reset_signal_ticks": 128
+  },
+  "supply": {
+    "belt_items_per_second": "2",
+    "per_product": {
+      "C_item": "177",
+      "R_item": "6",
+      "S_item": "6",
+      "W_item": "1",
+      "b_liter": "10",
+      "g_liter": "20",
+      "r_liter": "440"
+    },
+    "wagon_layers": [
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "per_product": "47",
+        "per_second": "94"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "per_product": "47",
+        "per_second": "94"
+      },
+      {
+        "service": "base",
+        "wagon": 6,
+        "layer": 0,
+        "cargo": "r",
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "per_product": "45",
+        "per_second": "90"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 1,
+        "cargo": "R",
+        "per_product": "2",
+        "per_second": "4"
+      },
+      {
+        "service": "base",
+        "wagon": 9,
+        "layer": 0,
+        "cargo": "r",
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "per_product": "38",
+        "per_second": "76"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 1,
+        "cargo": "R",
+        "per_product": "4",
+        "per_second": "8"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 2,
+        "cargo": "S",
+        "per_product": "6",
+        "per_second": "12"
+      },
+      {
+        "service": "base",
+        "wagon": 11,
+        "layer": 0,
+        "cargo": "W",
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "per_product": "300",
+        "per_second": "600"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 2,
+        "cargo": "b",
+        "per_product": "10",
+        "per_second": "20"
+      },
+      {
+        "service": "crystal",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "r",
+        "per_product": "100",
+        "per_second": "200"
+      },
+      {
+        "service": "crystal",
+        "wagon": 1,
+        "layer": 1,
+        "cargo": "g",
+        "per_product": "20",
+        "per_second": "40"
+      }
+    ],
+    "unload_rows": [
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 0,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 3,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 10,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 12,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 14,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 16,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 18,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 20,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 26,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 28,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 30,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 32,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 39,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 40,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 42,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 44,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 46,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 54,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 55,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 57,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 59,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 61,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 63,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 64,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 66,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 69,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 73,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 76,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 83,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 85,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 86,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 88,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 90,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 92,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 101,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 102,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 104,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 106,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 108,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 115,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 116,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 118,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 120,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 128,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 130,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 141,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 143,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 0,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 3,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 10,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 12,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 14,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 16,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 18,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 20,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 26,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 28,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 30,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 32,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 39,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 40,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 42,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 44,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 46,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 54,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 55,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 57,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 59,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 61,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 63,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 64,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 66,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 69,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 73,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 76,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 83,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 85,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 86,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 88,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 90,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 92,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 101,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 102,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 104,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 106,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 108,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 115,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 116,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 118,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 120,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 128,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 130,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 141,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 4,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 143,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 6,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 12,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 0,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 3,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 10,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 12,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 14,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 16,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 18,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 20,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 26,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 28,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 30,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 32,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 39,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 40,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 42,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 44,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 46,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 54,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 55,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 57,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 59,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 61,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 63,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 64,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 66,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 69,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 73,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 76,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 83,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 85,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 86,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 88,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 90,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 92,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 101,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 102,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 104,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 106,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 108,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 115,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 116,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 118,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 120,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 128,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 130,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 1,
+        "cargo": "R",
+        "stage": 141,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 7,
+        "layer": 1,
+        "cargo": "R",
+        "stage": 143,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 9,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 128,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 0,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 1,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 3,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 10,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 12,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 14,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 16,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 18,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 20,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 26,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 28,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 30,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 32,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 44,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 46,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 63,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 64,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 69,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 73,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 75,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 76,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 83,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 85,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 86,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 88,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 90,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 92,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 101,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 102,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 104,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 106,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 108,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 115,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 116,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 118,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 120,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 128,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 0,
+        "cargo": "C",
+        "stage": 130,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 1,
+        "cargo": "R",
+        "stage": 39,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 1,
+        "cargo": "R",
+        "stage": 40,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 1,
+        "cargo": "R",
+        "stage": 42,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 1,
+        "cargo": "R",
+        "stage": 66,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 2,
+        "cargo": "S",
+        "stage": 54,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 2,
+        "cargo": "S",
+        "stage": 55,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 2,
+        "cargo": "S",
+        "stage": 57,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 2,
+        "cargo": "S",
+        "stage": 59,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 2,
+        "cargo": "S",
+        "stage": 61,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 10,
+        "layer": 2,
+        "cargo": "S",
+        "stage": 141,
+        "row": -12,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 11,
+        "layer": 0,
+        "cargo": "W",
+        "stage": 143,
+        "row": 8,
+        "per_product": "1",
+        "per_second": "2"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 0,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 3,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 20,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 63,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 64,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 69,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 76,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 101,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 102,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 104,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 106,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 108,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 115,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 116,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 118,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "base",
+        "wagon": 12,
+        "layer": 2,
+        "cargo": "b",
+        "stage": 66,
+        "row": 31,
+        "per_product": "10",
+        "per_second": "20"
+      },
+      {
+        "service": "crystal",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 5,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "crystal",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 21,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "crystal",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 68,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "crystal",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 78,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "crystal",
+        "wagon": 1,
+        "layer": 0,
+        "cargo": "r",
+        "stage": 110,
+        "row": 28,
+        "per_product": "20",
+        "per_second": "40"
+      },
+      {
+        "service": "crystal",
+        "wagon": 1,
+        "layer": 1,
+        "cargo": "g",
+        "stage": 71,
+        "row": 31,
+        "per_product": "20",
+        "per_second": "40"
+      }
+    ]
+  }
+}
