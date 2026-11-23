@@ -96,26 +96,26 @@ def _section(path, output_dir):
                      for dx in range(size) for dy in range(size)})
     sizes = Counter(size for _, _, _, _, size, _ in platforms)
     summary = "、".join(f"{count} 块 {size}×{size}" for size, count in sorted(sizes.items()))
+    density_target = 0.5
     capacity = 0
-    passed = 0
     board_rows = []
     for board, _, _, island, size, count in platforms:
         slots = (size * _TILE_SIZE) ** 2 * _LEVELS
-        meets_minimum = 2 * count >= slots
+        occupancy = count / slots
         capacity += slots
-        passed += meets_minimum
-        result = "通过" if meets_minimum else "未通过"
+        gap = density_target - occupancy
+        distance = f"差 {gap * 100:.1f} 个百分点" if gap > 0 else "已达到"
         board_rows.append(f"<tr><td>P{board}</td><td>Z{island}</td><td>{size}×{size}</td><td>{count:,}</td>"
-                          f"<td>{slots:,}</td><td>{count / slots:.1%}</td><td>{result}</td></tr>")
+                          f"<td>{slots:,}</td><td>{occupancy:.1%}</td><td>{distance}</td></tr>")
     data = json.dumps({"platforms": platforms, "entries": entries, "links": links}, ensure_ascii=True)
     table = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in (*row[:5], "接收" if row[5] == "rx" else "发射", row[6]))
                     + "</tr>" for row in radio)
     return (f'<section><h2>{escape(path.stem)}</h2><p>{files}</p>'
             f'<p>{summary} · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
             f'飞线 {len(links)} 对 · 全局接收 {receivers} · 全局发射 {transmitters}</p>'
-            f'<p>总建筑占比 {len(entries) / capacity:.1%} · {passed}/{len(platforms)} 块平台达到 50%</p>'
+            f'<p>总建筑占比 {len(entries) / capacity:.1%} · 压缩目标 {density_target:.0%}</p>'
             '<details open><summary>逐块平台建筑占比</summary><table><thead>'
-            '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>三层容量</th><th>占比</th><th>50% 验收</th></tr>'
+            '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>三层容量</th><th>占比</th><th>距目标</th></tr>'
             f'</thead><tbody>{"".join(board_rows)}</tbody></table></details>'
             '<table><thead><tr><th>建筑层</th><th>器件</th><th>线缆件</th></tr></thead>'
             f'<tbody>{layers}</tbody></table>'
