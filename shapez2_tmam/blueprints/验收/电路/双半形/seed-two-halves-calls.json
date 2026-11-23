@@ -1,0 +1,18 @@
+[
+  {
+    "initial_required": {"channel": 1701042},
+    "initial_candidate": {"literal": 0},
+    "initial_supported": {"literal": false},
+    "low_word": {"channel": 1701040},
+    "high_word": {"channel": 1701041},
+    "high_height": {"channel": 1701043}
+  },
+  {
+    "initial_required": {"channel": 1701047},
+    "initial_candidate": {"literal": 0},
+    "initial_supported": {"literal": false},
+    "low_word": {"channel": 1701045},
+    "high_word": {"channel": 1701046},
+    "high_height": {"channel": 1701048}
+  }
+]

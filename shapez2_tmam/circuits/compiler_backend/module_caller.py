@@ -146,14 +146,15 @@ def _wait_digit(phase: int, stamp: int, digit: int, other: int | None, *, high: 
     return module
 
 
-def _wait_timer(phase: int, channels: tuple[int, ...], reset_steps: int, sample_steps: int):
+def _wait_timer(phase: int, channels: tuple[int, ...], reset_steps: int, sample_steps: int, *,
+                first_reset_steps: int | None = None) -> tuple[list[Module], int, int]:
     if len(channels) <= 3:
         modules = [_copy(source, target) for source, target in zip((phase, *channels), channels)]
         return modules, channels[reset_steps - 1], channels[sample_steps - 1]
 
     # 保留原来给等待链分配的频道区间，后面的结果频道无需改号。
     reset_tap, sample_tap, stamp, low, *_ = channels
-    high = channels[4] if len(channels) > _WAIT_RADIX else None
+    high = channels[4] if max(reset_steps, sample_steps, first_reset_steps or 0) > _WAIT_RADIX else None
     modules = [_wait_digit(phase, stamp, low, high)]
     inputs = {"phase": phase, "stamp": stamp, "low": low}
     if high is not None:
@@ -161,20 +162,30 @@ def _wait_timer(phase: int, channels: tuple[int, ...], reset_steps: int, sample_
         inputs["high"] = high
     module = Module(inputs)
     same = _compare(module, "same", "phase", "stamp")
-    for name, steps, output in (("reset", reset_steps, reset_tap), ("sample", sample_steps, sample_tap)):
-        ready = 1
-        if steps > 1:
-            # 传出阶段标记还需一拍。按前一拍的计数判断，保持原采样时刻。
-            upper, lower = divmod(steps - 1, _WAIT_RADIX)
-            reached = _compare(module, f"{name}_low", "low", lower, "Ag==")
-            if high is not None:
-                equal = _compare(module, f"{name}_equal", "high", upper)
-                greater = _compare(module, f"{name}_greater", "high", upper, "Aw==")
-                reached = _gate(module, "Or", f"{name}_reached", greater,
-                                _gate(module, "And", f"{name}_at_upper", equal, reached))
-            ready = _gate(module, "And", f"{name}_ready", same, reached)
-        _gate(module, "If", name, "phase", ready)
-        module.outputs[name] = output
+
+    def ready(name: str, steps: int) -> str | int:
+        if steps == 1:
+            return 1
+        # 传出阶段标记还需一拍。按前一拍的计数判断，保持原采样时刻。
+        upper, lower = divmod(steps - 1, _WAIT_RADIX)
+        reached = _compare(module, f"{name}_low", "low", lower, "Ag==")
+        if high is not None:
+            equal = _compare(module, f"{name}_equal", "high", upper)
+            greater = _compare(module, f"{name}_greater", "high", upper, "Aw==")
+            reached = _gate(module, "Or", f"{name}_reached", greater,
+                            _gate(module, "And", f"{name}_at_upper", equal, reached))
+        return _gate(module, "And", f"{name}_ready", same, reached)
+
+    reset_ready = ready("reset", reset_steps)
+    if first_reset_steps is not None:
+        first = _compare(module, "first_reset", "phase", 1)
+        first_ready = _gate(module, "And", "first_wait_met", first, ready("first", first_reset_steps))
+        later = _gate(module, "Not", "later_reset", first)
+        later_ready = _gate(module, "And", "later_wait_met", later, reset_ready)
+        reset_ready = _gate(module, "Or", "reset_wait_met", first_ready, later_ready)
+    _gate(module, "If", "reset", "phase", reset_ready)
+    _gate(module, "If", "sample", "phase", ready("sample", sample_steps))
+    module.outputs = {"reset": reset_tap, "sample": sample_tap}
     return [*modules, module], reset_tap, sample_tap
 
 
@@ -225,6 +236,7 @@ def _literal(value, type_name: str) -> Literal:
 
 def build_calls(
     interface: dict, calls: list[dict], channel_base: int, *, result_names: tuple[str, ...] | None = None,
+    enable_channel: int | None = None, parameter_hold_signal_ticks: int = 0,
 ) -> tuple[dict, dict]:
     """编译按顺序执行的定步模块调用，各组参数可来自频道或字面量。"""
     inputs, outputs, callee_channels, waits = _interface(interface)
@@ -257,24 +269,39 @@ def build_calls(
         arguments.append(args)
 
     reset_steps, sample_steps = ((wait + _RADIO_TICKS - 1) // _RADIO_TICKS for wait in waits)
+    max_hold = (_WAIT_RADIX ** 2 - reset_steps) * _RADIO_TICKS
+    if type(parameter_hold_signal_ticks) is not int or not 0 <= parameter_hold_signal_ticks <= max_hold:
+        raise ValueError(f"首轮参数稳定等待须为 0～{max_hold} 个信号 tick")
+    hold_steps = (parameter_hold_signal_ticks + _RADIO_TICKS - 1) // _RADIO_TICKS
+    first_reset_steps = reset_steps + hold_steps if hold_steps else None
     delay_count = max(reset_steps, sample_steps)
+    wait_width = delay_count
+    if first_reset_steps is not None:
+        minimum_channels = 5 if max(delay_count, first_reset_steps) > _WAIT_RADIX else 4
+        wait_width = max(wait_width, minimum_channels)
     phases = tuple((i * 3 + 1, i * 3 + 2, i * 3 + 3) for i in range(len(calls)))
-    width = 3 + 2 * len(calls) + delay_count + len(calls) * len(results)
+    width = 3 + 2 * len(calls) + wait_width + len(calls) * len(results)
     _check_channel(channel_base)
     last = channel_base + width - 1
     _check_channel(last)
     callee_first, callee_last = callee_channels
+    enable = channel_base if enable_channel is None else enable_channel
+    _check_channel(enable)
+    if enable != channel_base:
+        external.add(enable)
     if (channel_base <= callee_last and last >= callee_first
             or any(channel_base <= ch <= last or callee_first <= ch <= callee_last for ch in external)):
-        raise ValueError("调用器、定步模块和参数源的频道范围须互不重叠")
-    numbers = iter(range(channel_base, last + 1))
-    enable, phase, done = next(numbers), next(numbers), next(numbers)
+        raise ValueError("调用器、定步模块和外部输入的频道范围须互不重叠")
+    numbers = iter(range(channel_base + 1, last + 1))
+    phase, done = next(numbers), next(numbers)
     active = tuple(next(numbers) for _ in calls)
     captures = tuple(next(numbers) for _ in calls)
-    wait_channels = tuple(next(numbers) for _ in range(delay_count))
+    wait_channels = tuple(next(numbers) for _ in range(wait_width))
     result_ports = [{name: {"channel": next(numbers), "type": port["type"]} for name, port in results.items()}
                     for _ in calls]
-    wait_modules, reset_tap, sample_tap = _wait_timer(phase, wait_channels, reset_steps, sample_steps)
+    wait_modules, reset_tap, sample_tap = _wait_timer(
+        phase, wait_channels, reset_steps, sample_steps, first_reset_steps=first_reset_steps,
+    )
     modules = [_advance(enable, phase, outputs["done"]["channel"], reset_tap, sample_tap, phases),
                *_control(phase, inputs["run"]["channel"], done, phases, active, captures),
                *wait_modules]
@@ -307,6 +334,11 @@ def build_calls(
         "platforms": len(platforms),
         "building_entries": sum(len(board["B"]["Entries"]) for board in platforms),
     }
+    if first_reset_steps is not None:
+        port_report["timing"].update(
+            parameter_hold_signal_ticks=hold_steps * _RADIO_TICKS,
+            first_reset_wait_signal_ticks=first_reset_steps * _RADIO_TICKS,
+        )
     return document, port_report
 
 
@@ -359,13 +391,19 @@ def main() -> int:
     parser.add_argument("--channel-base", type=int, required=True, help="调用器的首个独占频道")
     parser.add_argument("--callee", type=Path, help="合装定步模块的原生蓝图")
     parser.add_argument("--result", action="append", help="只锁存指定结果字段，可重复指定")
+    parser.add_argument("--enable-channel", type=int, help="从已有频道接收 enable，例如上一级的 done")
+    parser.add_argument("--parameter-hold-signal-ticks", type=int, default=0,
+                        help="首轮在复位等待之外附加的参数稳定时间，单位为信号 tick")
     parser.add_argument("--output", type=Path, required=True, help="原生 .spz2bp 输出路径")
     args = parser.parse_args()
     try:
         interface = json.loads(args.interface.read_text(encoding="utf-8"))
         calls = json.loads(args.calls.read_text(encoding="utf-8"))
         result_names = tuple(args.result) if args.result is not None else None
-        document, report = build_calls(interface, calls, args.channel_base, result_names=result_names)
+        document, report = build_calls(
+            interface, calls, args.channel_base, result_names=result_names, enable_channel=args.enable_channel,
+            parameter_hold_signal_ticks=args.parameter_hold_signal_ticks,
+        )
         if args.callee:
             _attach_callee(document, report, args.callee)
         _write_blueprint(document, report, args.output)

@@ -1,0 +1,143 @@
+{
+  "schedule": "repeated_bounded_fold",
+  "inputs": {
+    "enable": {
+      "channel": 1700932,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "done": {
+      "channel": 1701072,
+      "type": "bool"
+    },
+    "calls": [
+      {
+        "result_required": {
+          "channel": 1701099,
+          "type": "int"
+        }
+      },
+      {
+        "result_required": {
+          "channel": 1701100,
+          "type": "int"
+        }
+      }
+    ]
+  },
+  "calls": [
+    {
+      "initial_required": {
+        "channel": 1701042
+      },
+      "initial_candidate": {
+        "literal": 0
+      },
+      "initial_supported": {
+        "literal": false
+      },
+      "low_word": {
+        "channel": 1701040
+      },
+      "high_word": {
+        "channel": 1701041
+      },
+      "high_height": {
+        "channel": 1701043
+      }
+    },
+    {
+      "initial_required": {
+        "channel": 1701047
+      },
+      "initial_candidate": {
+        "literal": 0
+      },
+      "initial_supported": {
+        "literal": false
+      },
+      "low_word": {
+        "channel": 1701045
+      },
+      "high_word": {
+        "channel": 1701046
+      },
+      "high_height": {
+        "channel": 1701048
+      }
+    }
+  ],
+  "callee": {
+    "inputs": {
+      "run": {
+        "channel": 1700830,
+        "type": "bool"
+      },
+      "initial_required": {
+        "channel": 1700831,
+        "type": "int"
+      },
+      "initial_candidate": {
+        "channel": 1700832,
+        "type": "int"
+      },
+      "initial_supported": {
+        "channel": 1700833,
+        "type": "bool"
+      },
+      "low_word": {
+        "channel": 1700846,
+        "type": "shape"
+      },
+      "high_word": {
+        "channel": 1700847,
+        "type": "shape"
+      },
+      "high_height": {
+        "channel": 1700848,
+        "type": "int"
+      }
+    },
+    "outputs": {
+      "done": {
+        "channel": 1700834,
+        "type": "bool"
+      },
+      "result_required": {
+        "channel": 1700835,
+        "type": "int"
+      },
+      "result_candidate": {
+        "channel": 1700836,
+        "type": "int"
+      },
+      "result_supported": {
+        "channel": 1700837,
+        "type": "bool"
+      }
+    },
+    "reserved_channels": [
+      1700830,
+      1700848
+    ],
+    "platforms": 4
+  },
+  "reserved_channels": [
+    1701070,
+    1701100
+  ],
+  "phase_channel": 1701071,
+  "timing": {
+    "channel_signal_ticks": 12,
+    "reset_hold_signal_ticks": 312,
+    "callee_reset_wait_signal_ticks": 264,
+    "callee_sample_wait_signal_ticks": 168,
+    "conditions": "整件批量导入或完整重载。常速 Hybrid 或 AlwaysHighUPS，固定接线与配置，每批最多 4 信号 tick，保留频道由本实例独占。",
+    "protocol": "先将 enable 保持为 0 达到复位时间，再将整组参数与 enable=1 保持到 done=1。此时读取各组结果。下次调用先把 enable 置为 0 并再次等待复位。",
+    "parameter_hold_signal_ticks": 1920,
+    "first_reset_wait_signal_ticks": 2184
+  },
+  "platforms": 17,
+  "building_entries": 16528
+}

@@ -111,3 +111,21 @@ python -m shapez2_tmam.circuits.compiler_backend.module_caller \
   --callee shapez2_tmam/blueprints/验收/电路/双半形/read-prefix-column.spz2bp \
   --output read-four-columns.spz2bp
 ```
+
+### 接续上一级调用
+
+用 `--enable-channel` 接上一级的 `done`。上一级保持 `done=1` 时，下一级继续调用并保留各次结果。换单时，按下一级接口表将 `enable` 保持为 `0` 至少一整个复位期。
+
+用 `--parameter-hold-signal-ticks` 为首轮增加参数稳定时间。调用器从首轮复位阶段起等满稳定时间与定步板复位时间之和，并等定步板的 `done=0` 才启动。后续各轮只等定步板复位时间及 `done=0`。两个等待值分别向上取整到 12 信号 tick。
+
+含晶双半形样件与 `read-four-columns.spz2bp`、`seed-pair-0.spz2bp`、`seed-pair-1.spz2bp` 合用。四列的 `done` 频道为 `1700932`，两块参数板提供 `1701040`～`1701049` 的输入组。下一级首轮等待 `1920 + 264 = 2184` tick，第二轮等待 264 tick。下一级的 `done` 为 `1701062`，两个 `result_required` 分别为 `1701089` 和 `1701090`。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend.module_caller \
+  shapez2_tmam/blueprints/验收/电路/双半形/seed-crystal-half.json \
+  shapez2_tmam/circuits/compiler_backend/seed-half-calls.json \
+  --channel-base 1701060 --enable-channel 1700932 \
+  --parameter-hold-signal-ticks 1920 --result result_required \
+  --callee shapez2_tmam/blueprints/验收/电路/双半形/seed-crystal-half.spz2bp \
+  --output seed-half-caller.spz2bp
+```

@@ -7,6 +7,7 @@
 | 实体 | 48 工段、发送器与单带出口 | [完整站场及用料](实体/physical.json) |
 | 实体精简版 | 同一条工道，保留两份固定订单所需的 21 个基础料站和 2 个结晶站 | [精简站场及用料](实体/six-slot-acceptance-compact.json) |
 | 实体 | 固定两步订单，核对整组提交及复位 | [样件接口](实体/two-step-sender.json) |
+| 实体 | 两笔六字段写入与保持接管 | [原生样件](实体/writer-handoff.spz2bp) · [接线表](实体/writer-handoff.json) |
 | 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) |
 | 配料 | 基础料与结晶染料的换装站、两种混合车库 | [货种、车厢、层位及接口](配料/proportioning.json) |
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
@@ -18,7 +19,7 @@
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀高度选择](电路/双半形/select-prefix-height.json) |
 | 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [前缀角参数](电路/双半形/prefix-corner-parameters.json) · [独立落点样件](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
-| 电路 | 从原图检查两列半形的支撑 | [前半输入](电路/双半形/seed-pair-0.json) · [后半输入](电路/双半形/seed-pair-1.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
+| 电路 | 从原图检查两列半形的支撑 | [两半顺序预处理](电路/双半形/seed-two-halves.json) · [四列合成五层材料字](电路/双半形/join-material-words.json) · [前半输入](电路/双半形/seed-pair-0.json) · [后半输入](电路/双半形/seed-pair-1.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
 | 电路 | 从原图读取已选前缀的材料和原色 | [原单格读取](电路/双半形/read-labeled-corner.json) · [前缀材料字](电路/双半形/read-prefix-column.json) · [前缀原格](电路/双半形/read-prefix-corner.json) |
 | 电路 | 直接释放角的前态与外侧锚料 | [最高晶体层](电路/双半形/corner-highest-crystal.json) · [逐层原料](电路/双半形/simple-corner-source.json) |
 | 电路 | 顶破角的前态与辅助锚柱 | [逐层原料](电路/双半形/pin-corner-source.json) · [近锚和远侧顶针柱](电路/双半形/pin-corner-anchors.json) |
@@ -41,7 +42,7 @@
 
 列读取每次处理 `q0`。将待查列旋转到 `q0`，原图接 `initial_remaining`，`initial_word` 留空，`initial_height` 置 5。五轮后输出保留全部原层位的材料图形，其中 `Cu`、`Ru`、`Su`、`Wu` 依次表示空、普通格、针和晶体。判定与落点两块板共用材料频道。等读取器到采样时刻且 `done=1` 后，再按各接口表等满保持时间。`column_a=1` 时，`crystal` 和 `landing` 给出晶下间隙的原层号，从 0 起算。无间隙时两者为 `-1`。`needs_pin=1` 表示该落点须走顶破路线。换列前重新复位。
 
-前半输入板读 q0/q1 材料字，后半输入板读 q2/q3 材料字。它们各自扫描最高晶体，给出按高度排列的两份材料字、两个高度和交换标志。等这组数据稳定后启动含晶区间预处理。独立调试可直接向排序板提供已有的高度。 [独立排序接口](电路/双半形/order-crystal-half.json)较低列高度置入 `initial_required`，较高列高度置入 `high_height`。无晶体列的高度为 `0`。`initial_candidate` 和 `initial_supported` 都置 `0`。五轮后只读取 `result_required`。该值是较低列的新前缀高度，`-1` 表示含晶区间无法由这个半边支撑。恢复列序板沿用较高列的输入高度，按原左右列输出两份前缀高度。普通层的支撑由逐层闭包继续判定。
+前半输入板读 q0/q1 材料字，后半输入板读 q2/q3 材料字。它们各自扫描最高晶体，给出按高度排列的两份材料字、两个高度和交换标志。等这组数据稳定后启动含晶区间预处理。四列完工会启动两半预处理调用器。首轮等待 2184 tick，包含参数稳定和被调用板复位。第二轮只等普通复位。两个结果经前、后半的恢复列序板直接送到五轮闭包的四个初值口。 [前半恢复](电路/双半形/restore-seed-0.json) · [后半恢复](电路/双半形/restore-seed-1.json)独立调试可直接向排序板提供已有的高度。 [独立排序接口](电路/双半形/order-crystal-half.json)较低列高度置入 `initial_required`，较高列高度置入 `high_height`。无晶体列的高度为 `0`。`initial_candidate` 和 `initial_supported` 都置 `0`。五轮后只读取 `result_required`。该值是较低列的新前缀高度，`-1` 表示含晶区间无法由这个半边支撑。恢复列序板沿用较高列的输入高度，按原左右列输出两份前缀高度。普通层的支撑由逐层闭包继续判定。
 
 切向转换板用 `alternate` 将两个切向统一到 q0/q1 和 q2/q3。四列输入板同时输出四种旋转，每种都把对应列转到 q0。调用器按 q0 到 q3 的顺序复用一套列读取模块，四次均读全高。批次 `done=1` 后从 `1700963–1700966` 读四份材料字。 [四次调用参数](电路/双半形/read-four-columns-calls.json)`select-column` 将 `column` 指定的一列转到 q0，把同一图形送给全列和前缀材料读取器。前缀高度选择板也使用这个列号。五轮闭包完成前，或任一列返回 `-1` 时，高度选择板给出 `-1`，不开始该列的实体配方。四列初值接两块半形预处理的结果，`item0` 至 `item4` 接从最高到最低的五份含晶支撑行。前缀结果出现 `-1` 时，该切向不能直接用双半形和堆叠制作。其他结果可送往前缀材料读取板。完成换向后，制造端将输出旋转回目标方位。
 
@@ -151,5 +152,22 @@ for pair in 0 1; do
     --output-channel low_height="$((out + 2))" --output-channel high_height="$((out + 3))" \
     --output-channel swapped="$((out + 4))" --output "seed-pair-$pair.spz2bp"
 done
+python -m shapez2_tmam.circuits.compiler_backend.module_caller \
+  shapez2_tmam/blueprints/验收/电路/双半形/seed-crystal-half.json \
+  shapez2_tmam/blueprints/验收/电路/双半形/seed-two-halves-calls.json \
+  --channel-base 1701070 --result result_required --enable-channel 1700932 --parameter-hold-signal-ticks 1920 \
+  --callee shapez2_tmam/blueprints/验收/电路/双半形/seed-crystal-half.spz2bp --output seed-two-halves.spz2bp
+for pair in 0 1; do
+  high=$((1701043 + 5 * pair))
+  output=$((1700761 + 2 * pair))
+  python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/crystal_support.py \
+    --field left=seed_left --field right=seed_right --input-channel required="$((1701099 + pair))" \
+    --input-channel high_height="$high" --input-channel swapped="$((high + 1))" \
+    --output-channel left="$output" --output-channel right="$((output + 1))" --output "restore-seed-$pair.spz2bp"
+done
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/material_word.py \
+  --field word=join_material_words --input-channel q0=1700963 --input-channel q1=1700964 \
+  --input-channel q2=1700965 --input-channel q3=1700966 --output-channel word=1701120 \
+  --output join-material-words.spz2bp
 python -m shapez2_tmam.circuits.factory_assembly.acceptance --four-color --compact --output four-color.spz2bp
 ```
