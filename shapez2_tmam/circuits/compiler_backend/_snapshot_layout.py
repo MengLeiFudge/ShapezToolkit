@@ -120,6 +120,7 @@ class _Layout:
 
     def copy(self):
         trial = _Layout(self.board.foundation)
+        trial.board.ground = self.board.ground
         trial.board.entries = self.board.entries.copy()
         trial.board.occupied = self.board.occupied.copy()
         trial.board.traces.update({p: {n: v.copy() for n, v in nets.items()}

@@ -1,6 +1,7 @@
 """把叶端锁存的控制、读高和两组存储叠到三个岛层。"""
 
 from ...mari.blueprint import DIRECTIONS, _rotate
+from ._middle_snapshot import middle_snapshot
 from ._snapshot_layout import _Layout
 
 
@@ -86,34 +87,9 @@ def _storage_bank(fields, control):
     return layout.finish()
 
 
-def _controller(fields, control, height, column):
-    layout = _Layout("Foundation_L3")
-    for i, (source, stored) in enumerate(fields[:3]):
-        layout.cell(9 * i, 4, source, stored, "height0" if i == 2 else None)
-    ports = [(net, ch, True) for net, ch in control.inputs.items()]
-    ports.extend((net, ch, False) for net, ch in control.outputs.items())
-    for i, (net, ch, receive) in enumerate(ports):
-        layout.radio(net, ch, 2 + 5 * i, 1, 1 if receive else 3, receive=receive)
-    layout.radio("column", column, 3, 19, 0, receive=True)
-    receiver_sites = ((10, 19, 3), (3, 26, 2), (10, 26, 2))
-    for q, ((_, stored), (x, y, rotation)) in enumerate(zip(fields[3:6], receiver_sites, strict=True), 1):
-        layout.radio(f"height{q}", stored, x, y, rotation, receive=True)
-    layout.radio("current_height", height.outputs["current_height"], 11, 31, 3, receive=False)
-    buses = (("load", 1), ("retain", 2))
-    for net, level in buses:
-        gate, = (g for g in control.gates if g[2] == (net,))
-        layout.controls((gate,), (level,))
-    order = ("phase2", "no_load", "chosen_leaf", ("next", 3), "requested", "capture_chosen", "phase3",
-             "holding", "ready", ("next", 1), ("next", 2), "phase1", "settled", "state", "accept", "idle")
-    gates = {(out[0], args[0]) if out == ("next",) else out[0]: gate
-             for gate in control.gates for args, out in (gate[1:3],)}
-    layout.controls((*(gates[net] for net in order), *reversed(height.gates)), (0, 1, 2))
-    return layout.finish()
-
-
 def stacked_snapshot(fields, control, height, column):
     return [
         {**_storage_bank(fields[3:9], control), "Z": -1},
-        _controller(fields, control, height, column),
+        *middle_snapshot(fields, control, height, column),
         {**_storage_bank(fields[9:], control), "Z": 1},
     ]
