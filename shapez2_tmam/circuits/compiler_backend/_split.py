@@ -68,7 +68,7 @@ def layout_two_platforms(circuit: Circuit, outputs: dict[int, Ref], *,
             cuts.append((peak_gates + wire_cost * len(nets), len(nets), len(left), left.copy(), right, nets))
 
     last_error = None
-    for _, _, _, left, right, nets in sorted(cuts)[:4]:
+    for _, _, _, left, right, nets in sorted(cuts)[:5]:
         slots = dict(zip(nets, _EDGE_SLOTS))
         west = {channel: ref for channel, ref in outputs.items() if ref.node in left}
         east = {channel: ref for channel, ref in outputs.items() if ref.node in right}

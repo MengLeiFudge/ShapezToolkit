@@ -86,17 +86,28 @@ def crystal_loading(cargo: str) -> dict:
 
 def _stack_lane() -> dict:
     lane = SlotStreams()
-    rows = tuple(range(-15, 31, 9))
-    machine_x = 10
+    groups = (-9, 24)
+    rows = tuple(center + dy for center in groups for dy in (-6, 0, 6))
+    branch_x, split_x, machine_x = A_X - 3, A_X + 3, 10
     for level in (0, 1):
         lane.put('BeltPortReceiver', A_X, -18, level, 1, config='AA==')
-        for y in range(-17, rows[-1]):
-            kind = 'Splitter1To2L' if y in rows else 'BeltDefaultForward'
-            lane.put(kind, A_X, y, level, 1)
-        lane.put('BeltDefaultLeft', A_X, rows[-1], level, 1)
+        lane.put('Splitter1To2L', A_X, -17, level, 1, mirrored=True)
+        for x in range(branch_x + 1, A_X):
+            lane.put('BeltDefaultForward', x, -17, level, 2)
+        lane.put('BeltDefaultLeft', branch_x, -17, level, 2)
+        for x, start, center in ((A_X, -16, groups[0]), (branch_x, -16, groups[1])):
+            for y in range(start, center):
+                lane.put('BeltDefaultForward', x, y, level, 1)
+            lane.put('BeltDefaultLeft', x, center, level, 1)
+            lane.straight(x + 1, split_x, center, level)
+            lane.put('Splitter1To3', split_x, center, level)
+            for dy, rotation in ((-1, 3), (1, 1)):
+                for step in range(1, 6):
+                    lane.put('BeltDefaultForward', split_x, center + dy * step, level, rotation)
+                lane.put('BeltDefaultLeft', split_x, center + dy * 6, level, rotation, mirrored=dy < 0)
     for row in rows:
         for level in (0, 1):
-            lane.straight(A_X + 1, machine_x, row, level)
+            lane.straight(split_x + 1, machine_x, row, level)
         lane.put('StackerStraight', machine_x, row)
         lane.straight(machine_x + 1, OUT_X, row)
     lane.put('BeltDefaultLeft', OUT_X, rows[0], mirrored=True)
@@ -112,10 +123,12 @@ def _stack_lane() -> dict:
     island['Y'] = 3
     paths = transport_paths(island)
     for level in (0, 1):
-        for row in rows[:-1]:
-            paths[A_X, row, level, 3] = ((A_X, row, level, 1), (A_X, row, level, 0))
-        for row in rows:
-            trace(paths, (A_X, -17, level, 3), {(machine_x, row, level, 2)}, {(A_X, row, level)})
+        start = (A_X, -17, level, 3)
+        for center, direction in zip(groups, (1, 2)):
+            paths[start] = ((A_X, -17, level, direction),)
+            for dy, outlet in ((-6, 3), (0, 0), (6, 1)):
+                paths[split_x, center, level, 2] = ((split_x, center, level, outlet),)
+                trace(paths, start, {(machine_x, center + dy, level, 2)}, set())
     for row in rows:
         trace(paths, (machine_x + 1, row, 0, 2), {(37, rows[-1], 0, 2)}, set())
     return island

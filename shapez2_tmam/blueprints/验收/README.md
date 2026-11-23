@@ -11,13 +11,13 @@
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
 | 电路 | 按原层号读取目标的两层 | [复位、选择与采样](电路/原层读取/read-target-rows.json) |
 | 电路 | 四列逐层堆叠前缀扫描 | [整行编码](电路/堆叠前缀/pack-stack-row.json) · [复位、行输入和采样时序](电路/堆叠前缀/stack-prefix-scan.json) |
-| 电路 | 筛选覆盖必要晶体分量的顶盖 | [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) |
+| 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [列选择](电路/双半形/select-column.json) · [前缀高度选择](电路/双半形/select-prefix-height.json) |
 | 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [落点参数](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
-| 电路 | 从原图检查两列半形的支撑 | [按最高晶体排序](电路/双半形/order-crystal-half.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
+| 电路 | 从原图检查两列半形的支撑 | [按最高晶体排序](电路/双半形/order-crystal-half.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
 | 电路 | 从原图读取已选前缀的材料和原色 | [原单格读取](电路/双半形/read-labeled-corner.json) · [前缀材料字](电路/双半形/read-prefix-column.json) · [前缀原格](电路/双半形/read-prefix-corner.json) |
 | 电路 | 直接释放角的前态与外侧锚料 | [最高晶体层](电路/双半形/corner-highest-crystal.json) · [逐层原料](电路/双半形/simple-corner-source.json) |
 | 电路 | 顶破角的前态与辅助锚柱 | [逐层原料](电路/双半形/pin-corner-source.json) · [近锚和远侧顶针柱](电路/双半形/pin-corner-anchors.json) |
@@ -32,7 +32,7 @@
 
 原层读取电路的 `initial_remaining` 接目标图形，`initial_top`、`initial_below` 为空。`item0` 至 `item4` 对应原第五层到第一层。填写 `1` 的层位写入 `result_top`，填写 `2` 的层位写入 `result_below`，其余填写 `0`。到采样时刻且 `done=1` 后读结果，所选层原本为空时输出空信号。
 
-整行编码板从当前层与正下方一层读取堆叠支撑，`ground=1` 对应第一层。两块平台间用五对飞线。含晶半行编码板只保留 q0/q1，另用针标出已经保留的晶体，供双半形闭包使用。
+整行编码板从当前层与正下方一层读取堆叠支撑，`ground=1` 对应第一层。两块平台间用五对飞线。含晶编码用针标出已经保留的晶体，供双半形闭包使用。半行板只保留 q0/q1。整行板两块相邻平台通过七对原生飞线传递内部数据。
 
 前缀扫描电路接受四列初始前缀高度和五份已编码的行。每轮从同一份旧高度计算四列，依次处理第五层到第一层。电路与实体订单分别验收，实体册当前由固定发送器供给配方。
 
@@ -44,7 +44,7 @@
 
 切向转换板用 `alternate` 将两个切向统一到 q0/q1 和 q2/q3。`select-column` 将 `column` 指定的一列转到 q0，把同一图形送给全列和前缀材料读取器。前缀高度选择板也使用这个列号。五轮闭包完成前，或任一列返回 `-1` 时，高度选择板给出 `-1`，不开始该列的实体配方。四列初值接两块半形预处理的结果，`item0` 至 `item4` 接从最高到最低的五份含晶支撑行。前缀结果出现 `-1` 时，该切向不能直接用双半形和堆叠制作。其他结果可送往前缀材料读取板。完成换向后，制造端将输出旋转回目标方位。
 
-已选定前缀高度后，将同一高度送给 `read-prefix-column` 和 `read-prefix-corner`。材料字仍保留五个原层位，超出前缀的格记为空。把材料字接到落点判定，把原格接到备料板。原格输出保留普通图形和晶体的颜色。前缀高度为 `0` 时该列为空。
+读取整列可将 `read-prefix-column` 的 `prefix_height` 保持为 `5`。已选定前缀高度后，将同一高度送给 `read-prefix-column` 和 `read-prefix-corner`。材料字仍保留五个原层位，超出前缀的格记为空。把材料字接到落点判定，把原格接到备料板。原格输出保留普通图形和晶体的颜色。前缀高度为 `0` 时该列为空。
 
 半形支撑检查的图形只占 `q0/q1`。把它接入 `target`，等满接口表的保持时间后读 `result`。虚拟半切后图形与输入相等时输出 `1`。含晶体半形还要对每列分别检查列 A。
 
@@ -109,4 +109,10 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/prefix_rou
   --field height=select_prefix_height --input-channel done=1700765 --input-channel h0=1700766 \
   --input-channel h1=1700767 --input-channel h2=1700768 --input-channel h3=1700769 \
   --input-channel column=1700873 --output-channel height=1700816 --output select-prefix-height.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_methods.py \
+  --field support=pack_prefix_row --input-channel row=1700306 --input-channel below=1700307 \
+  --input-channel ground=1700880 --output-channel support=1700881 --output pack-prefix-row.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_scan.py \
+  --field limit=column_pin_prefix_limit --input-channel word=1700566 \
+  --output-channel limit=1700887 --output column-pin-prefix-limit.spz2bp
 ```

@@ -105,12 +105,12 @@
     3
   ],
   "buildings_by_layer": [
-    1958,
-    1573,
-    1472
+    1638,
+    1280,
+    1079
   ],
-  "building_entries": 5003,
-  "global_receivers": 16,
+  "building_entries": 3997,
+  "global_receivers": 15,
   "global_transmitters": 12,
   "internal_global_devices_per_module": 0,
   "held_inputs": [
@@ -119,11 +119,11 @@
   "worker_partitions": [
     [
       1700812,
-      1700813
+      1700815
     ],
     [
-      1700814,
-      1700815
+      1700813,
+      1700814
     ]
   ],
   "worker_layout_failures": [
@@ -134,19 +134,18 @@
         1700814,
         1700815
       ],
-      "reason": "三层平台未布通 138 个门，三层平台内无法完成本地信号 1000133 的布线"
+      "reason": "三层平台未布通 108 个门，三层平台内无法完成本地信号 1000082 的布线"
     }
   ],
   "worker_ports": [
     {
       "inputs": [
         1700808,
-        1700809,
         1700811
       ],
       "outputs": [
         1700812,
-        1700813
+        1700815
       ]
     },
     {
@@ -158,12 +157,12 @@
         1700816
       ],
       "outputs": [
-        1700814,
-        1700815
+        1700813,
+        1700814
       ]
     }
   ],
-  "worker_logic_gates": 141,
-  "worker_logic_gates_before_reuse": 142,
-  "worker_logic_gates_after_reuse": 138
+  "worker_logic_gates": 111,
+  "worker_logic_gates_before_reuse": 143,
+  "worker_logic_gates_after_reuse": 108
 }

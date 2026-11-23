@@ -3,8 +3,9 @@
 from .column_rules import _check_column_flags
 from .layer_methods import stack
 from .physics import Shape
+from .pin_prefix import _pin_prefix_limit, _two_empty
 from .shape_methods import (advance_target_rows, analyze_part, read_top_row_at, shape_literal,
-                            unstack_lower, unstack_upper)
+                            target_height, unstack_lower, unstack_upper)
 
 
 def _material_marker(row: Shape | None) -> Shape:
@@ -37,14 +38,19 @@ def column_scan_height(remaining: Shape | None, word: Shape | None, height: int)
 
 def column_prefix_remaining(remaining: Shape | None, word: Shape | None, height: int,
                             prefix_height: int) -> Shape | None:
-    return column_scan_remaining(remaining, word, height)
+    if target_height(remaining) == height:
+        return unstack_lower(remaining)
+    return remaining
 
 
 def column_prefix_word(remaining: Shape | None, word: Shape | None, height: int,
                        prefix_height: int) -> Shape | None:
-    if height > prefix_height:
-        remaining = None
-    return column_scan_word(remaining, word, height)
+    marker = shape_literal("Cu------")
+    if (height <= prefix_height) & (target_height(remaining) == height):
+        marker = _material_marker(unstack_upper(remaining))
+    if word is None:
+        return marker
+    return stack(marker, word)
 
 
 def column_prefix_height(remaining: Shape | None, word: Shape | None, height: int, prefix_height: int) -> int:
@@ -71,6 +77,23 @@ def column_word_admissible(word: Shape | None) -> bool:
         z0 == crystal, z1 == crystal, z2 == crystal, z3 == crystal, z4 == crystal,
         z0 == ordinary, z1 == ordinary, z2 == ordinary, z3 == ordinary,
     )
+
+
+def column_pin_prefix_limit(word: Shape | None) -> int:
+    """从完整五层材料字读取最后一次顶针的列前缀上界。"""
+    z4 = unstack_upper(word)
+    word = unstack_lower(word)
+    z3 = unstack_upper(word)
+    word = unstack_lower(word)
+    z2 = unstack_upper(word)
+    word = unstack_lower(word)
+    z1 = unstack_upper(word)
+    z0 = unstack_lower(word)
+    empty = shape_literal("Cu------")
+    crystal = shape_literal("Wu------")
+    room = _two_empty(z0 == empty, z1 == empty, z2 == empty, z3 == empty)
+    return _pin_prefix_limit(z0 == crystal, z0 == shape_literal("Su------"), z1 == crystal,
+                             z2 == crystal, (z3 == crystal) | (z4 == crystal), z1 == empty, room)
 
 
 def column_gap_crystal(word: Shape | None) -> int:
