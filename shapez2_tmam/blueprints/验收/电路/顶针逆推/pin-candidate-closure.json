@@ -1,0 +1,79 @@
+{
+  "inputs": {
+    "enable": 1702400,
+    "optional_top": 1702401,
+    "column": 1702402,
+    "valid": 1702288,
+    "source_rows_bottom_to_top": [
+      1702289,
+      1702290,
+      1702291,
+      1702292,
+      1702293
+    ]
+  },
+  "outputs": {
+    "chosen": 1702403,
+    "exhausted": 1702404,
+    "alternate": 1702405,
+    "height": 1702406,
+    "heights": [
+      1702407,
+      1702408,
+      1702409,
+      1702410
+    ],
+    "rows_bottom_to_top": [
+      1702411,
+      1702412,
+      1702413,
+      1702414,
+      1702415
+    ]
+  },
+  "closure": {
+    "alternate": 1702477,
+    "words": [
+      1702482,
+      1702483,
+      1702484,
+      1702485
+    ],
+    "rows_bottom_to_top": [
+      1702509,
+      1702510,
+      1702511,
+      1702512,
+      1702513
+    ],
+    "words_ready": 1702481,
+    "run": 1702432,
+    "done": 1702437,
+    "top_item": 1702442,
+    "raw_top_item": 1702545
+  },
+  "channels": {
+    "private_range": [
+      1702400,
+      1702629
+    ]
+  },
+  "timing": {
+    "orientation_hold_signal_ticks": 448,
+    "read_hold_signal_ticks": 1920,
+    "first_pack_hold_signal_ticks": 4380,
+    "later_pack_hold_signal_ticks": 2004,
+    "restore_hold_signal_ticks": 448,
+    "closure_reset_hold_signal_ticks": 256,
+    "closure_wait_after_both_done_signal_ticks": 2124,
+    "source_reset_hold_signal_ticks": 384,
+    "closure_start_to_sample_signal_ticks": 160,
+    "top_adapter_hold_signal_ticks": 1408,
+    "candidate_reset_hold_signal_ticks": 432,
+    "words_wait_signal_ticks": 1260
+  },
+  "platforms": 80,
+  "building_entries": 102013,
+  "removed_source_platforms": 17,
+  "short_range_links": 61
+}
