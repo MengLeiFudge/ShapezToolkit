@@ -3,6 +3,7 @@
 import argparse
 from collections import Counter
 from html import escape
+from itertools import product
 import json
 from pathlib import Path
 from shutil import copyfile
@@ -10,10 +11,12 @@ from shutil import copyfile
 from ..mari.blueprint import DIRECTIONS, PORTS, _kind, _rotate
 from ..mari.signals import decode_constant
 from .compiler_backend.prefix_scan_wiring import _native_wiring
-from .foundations import FOUNDATION_CHUNKS, TILE_SIZE
+from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_ground
 
 
 _LEVELS = 3
+_COVERAGE_MIN = 75
+_RADIOS = {"ControlledSignalReceiver", "ControlledSignalTransmitter", "WireGlobalTransmitterReceiver"}
 
 
 def _position(wiring, index):
@@ -35,6 +38,19 @@ def _wire_segments(entry, kind):
     return segments
 
 
+def _building_cells(entry, kind):
+    x, y, z = (entry.get(key, 0) for key in ("X", "Y", "L"))
+    if kind in _RADIOS:
+        return product(range(x - 1, x + 2), range(y - 1, y + 2), range(z, z + 3))
+    if kind in ("Display2x2", "Display3x3"):
+        return None
+    if kind == "VirtualHalvesSwapper":
+        dx, dy = _rotate(0, 1 if entry["T"].endswith("Mirrored") else -1, entry.get("R", 0))
+        return ((x, y, z), (x + dx, y + dy, z))
+    height = 1 + max((p[3] for p in PORTS[kind][2]), default=0)
+    return ((x, y, z + dz) for dz in range(height))
+
+
 def _diagram(path):
     wiring = _native_wiring(path)
     if not wiring.platforms:
@@ -49,11 +65,32 @@ def _diagram(path):
         y = platform.get("Y", 0) - (height - 1) // 2
         count = len(platform["B"]["Entries"])
         platforms.append((i, x, y, platform.get("Z", 0), width, height, count))
+    masks = {size: foundation_ground(*size) for size in {p[4:6] for p in platforms}}
+    ground = [masks[p[4:6]] for p in platforms]
+    occupied = [set() for _ in platforms]
+    placement_errors = Counter()
+    unknown_footprints = set()
     entries = []
     radio = []
     for i, (board, entry) in enumerate(wiring.entries):
         x, y, island, level = _position(wiring, i)
         kind = _kind(entry)
+        footprint = _building_cells(entry, kind)
+        offsets = None
+        if footprint is None:
+            unknown_footprints.add(board)
+        else:
+            _, local_x, local_y, _ = wiring.sites[i]
+            offsets = []
+            for cell in footprint:
+                a, b, z = cell
+                if (a, b) not in ground[board] or not 0 <= z < _LEVELS or cell in occupied[board]:
+                    placement_errors[board] += 1
+                else:
+                    occupied[board].add(cell)
+                    offsets.append((a - local_x, b - local_y, z - level))
+            if offsets == [(0, 0, 0)]:
+                offsets = 1
         color = "gate"
         parts = []
         if PORTS[kind][2]:
@@ -68,13 +105,15 @@ def _diagram(path):
                           decode_constant(wiring.entries[source][1]["C"])))
         elif kind == "ConstantSignal":
             color = "constant"
-        entries.append((x, y, island, level, color, kind, parts))
+        entries.append((x, y, island, level, color, kind, parts, offsets))
     links = [(_position(wiring, tx), _position(wiring, rx)) for rx, tx in wiring.short_ports.items()]
-    return platforms, entries, links, radio
+    coverage = [(len(cells), len({(x, y) for x, y, _ in cells}), len(ground[board]),
+                 placement_errors[board], board in unknown_footprints) for board, cells in enumerate(occupied)]
+    return platforms, entries, links, radio, coverage
 
 
 def _section(path, output_dir):
-    platforms, entries, links, radio = _diagram(path)
+    platforms, entries, links, radio, coverage = _diagram(path)
     native = output_dir / path.name
     if path.resolve() != native.resolve():
         copyfile(path, native)
@@ -99,14 +138,28 @@ def _section(path, output_dir):
     density_target = 0.5
     capacity = 0
     board_rows = []
-    for board, _, _, island, width, height, count in platforms:
+    passed = 0
+    for platform, (used, projected, ground_cells, errors, unknown) in zip(platforms, coverage, strict=True):
+        buildable = ground_cells * _LEVELS
+        board, _, _, island, width, height, count = platform
         slots = width * height * TILE_SIZE ** 2 * _LEVELS
         occupancy = count / slots
         capacity += slots
-        gap = density_target - occupancy
-        distance = f"差 {gap * 100:.1f} 个百分点" if gap > 0 else "已达到"
+        if errors:
+            verdict = f"占地冲突或越界（{errors} 格）"
+        elif unknown:
+            verdict = "待核对器件占地"
+        elif 100 * used >= _COVERAGE_MIN * buildable:
+            verdict = "通过"
+            passed += 1
+        else:
+            verdict = "未达标"
+        rate = "待核算" if unknown else f"{used / buildable:.1%}"
+        plan_rate = "待核算" if unknown else f"{projected / ground_cells:.1%}"
+        cells = "—" if unknown else f"{used:,}"
         board_rows.append(f"<tr><td>P{board}</td><td>Z{island}</td><td>{width}×{height}</td><td>{count:,}</td>"
-                          f"<td>{slots:,}</td><td>{occupancy:.1%}</td><td>{distance}</td></tr>")
+                          f"<td>{occupancy:.1%}</td><td>{cells} / {buildable:,}</td>"
+                          f"<td>{rate}</td><td>{plan_rate}</td><td>{verdict}</td></tr>")
     data = json.dumps({"platforms": platforms, "entries": entries, "links": links}, ensure_ascii=True)
     table = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in (*row[:5], "接收" if row[5] == "rx" else "发射", row[6]))
                     + "</tr>" for row in radio)
@@ -114,8 +167,10 @@ def _section(path, output_dir):
             f'<p>{summary} · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
             f'飞线 {len(links)} 对 · 全局接收 {receivers} · 全局发射 {transmitters}</p>'
             f'<p>总建筑占比 {len(entries) / capacity:.1%} · 压缩目标 {density_target:.0%}</p>'
-            '<details open><summary>逐块平台建筑占比</summary><table><thead>'
-            '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>三层容量</th><th>占比</th><th>距目标</th></tr>'
+            f'<p>占地率达标 {passed} / {len(platforms)} 块 · 每块至少 {_COVERAGE_MIN}%</p>'
+            '<details open><summary>逐块平台占地</summary><table><thead>'
+            '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>建筑占比</th>'
+            '<th>三层已占 / 可建格</th><th>三层占地率</th><th>俯视占地率</th><th>判定</th></tr>'
             f'</thead><tbody>{"".join(board_rows)}</tbody></table></details>'
             '<table><thead><tr><th>建筑层</th><th>器件</th><th>线缆件</th></tr></thead>'
             f'<tbody>{layers}</tbody></table>'
@@ -136,7 +191,7 @@ figure { margin: 0; max-width: 100% } canvas { display: block; max-width: 100%; 
 figcaption { color: #394a60; padding-top: 3px } table { border-collapse: collapse } th,td { padding: 4px 12px; border-bottom: 1px solid #d2dae3; text-align: right }
 .legend { display: flex; flex-wrap: wrap; gap: 14px } .chip { display: inline-block; width: .85em; height: .85em; margin-right: .3em; border-radius: 2px }
 </style><body><h1>TMAM 电路审阅</h1>
-<p>按原生蓝图坐标画出平台、建筑和导线。岛层 Z 区分叠放的平台，建筑层 L 区分平台内部三层。无线收发器的半透明方块表示占地。把鼠标放到图上可读取建筑类型和坐标。</p>
+<p>三层占地率按实占格 ÷ 可建格计算。俯视占地率合并三层投影，同一个平面格只计一次。建筑占比按条目数计算。岛层 Z 区分叠放的平台，建筑层 L 区分平台内部三层。浅色底格显示各层的实际占用范围。把鼠标放到图上可读取建筑类型和坐标。</p>
 <div class="legend" id="legend"></div>
 """
 _SCRIPT = """<script>
@@ -174,11 +229,15 @@ function draw(container, platforms, entries, links, island, layer) {
     ctx.strokeStyle = '#839ab2'; ctx.strokeRect(xAt(x), yAt(y), scale * w, scale * h);
     ctx.fillStyle = '#b8cadd'; ctx.font = '12px sans-serif'; ctx.fillText(`P${id}`, xAt(x)+4, yAt(y)+14);
   }
-  for (const [x,y,,level,color] of entries) {
-    if ((color !== 'tx' && color !== 'rx') || layer < level || layer >= level+3) continue;
-    ctx.globalAlpha = layer === level ? .36 : .14;
+  ctx.globalAlpha = .27;
+  for (const [x,y,,level,color,kind,parts,footprint] of entries) {
     ctx.fillStyle = colors[color];
-    ctx.fillRect(xAt(x-1), yAt(y-1), scale*3, scale*3);
+    if (footprint === 1 && level === layer) ctx.fillRect(xAt(x), yAt(y), scale, scale);
+    else if (Array.isArray(footprint)) {
+      for (const [dx,dy,dz] of footprint) {
+        if (level + dz === layer) ctx.fillRect(xAt(x+dx), yAt(y+dy), scale, scale);
+      }
+    }
   }
   ctx.globalAlpha = 1;
   const cells = new Map();
