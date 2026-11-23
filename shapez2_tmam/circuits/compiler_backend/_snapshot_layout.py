@@ -10,9 +10,8 @@ from ..wired_module import _Board
 
 
 class _Layout:
-    def __init__(self, width):
-        self.width = width
-        self.board = _Board(size=20 * width, origin=0, foundation=f"Foundation_{width}x{width}")
+    def __init__(self, foundation):
+        self.board = _Board(foundation=foundation)
         self.drivers = defaultdict(list)
         self.inputs = {}
         self.literals = {}
@@ -74,7 +73,7 @@ class _Layout:
 
     def controls(self, gates, order):
         board = self.board
-        sites = tuple(product(range(2, board.size - 1, 4), range(3, board.size - 1, 4), order, range(4)))
+        sites = tuple(product(range(2, board.width - 1, 4), range(3, board.height - 1, 4), order, range(4)))
         random = Random(1)
         for gate in gates:
             kind, args, outputs, _ = gate
@@ -118,7 +117,7 @@ class _Layout:
                 raise ValueError(f"锁存板无法放置并接通控制门 {outputs}") from last_error
 
     def copy(self):
-        trial = _Layout(self.width)
+        trial = _Layout(self.board.foundation)
         trial.board.entries = self.board.entries.copy()
         trial.board.occupied = self.board.occupied.copy()
         trial.board.traces.update({p: {n: v.copy() for n, v in nets.items()}
@@ -144,7 +143,7 @@ class _Layout:
         old_track = [p for p, nets in board.traces.items() if p[2] == old and net in nets and len(nets) == 1]
         new_pads = board.terminals[net, new]
         candidates = []
-        for x, y in product(range(1, board.size - 1), repeat=2):
+        for x, y in product(range(1, board.width - 1), range(1, board.height - 1)):
             if any((x, y, z) in board.occupied or (x, y, z) in board.traces for z in range(lo, hi + 1)):
                 continue
             for direction, (dx, dy) in enumerate(DIRECTIONS):
@@ -181,18 +180,18 @@ class _Layout:
 
 
 def compact_snapshot(fields, control, height, column):
-    # 单元的尺寸由三个收发器及两根换层线决定。余下的一行和一列放控制接口。
-    layout = _Layout(2)
+    # 单元的尺寸由三个收发器及两根换层线决定。上侧和右侧留给控制接口。
+    layout = _Layout("Foundation_2x3")
     for i, (source, stored) in enumerate(fields):
-        row, col = divmod(i, 4)
+        row, col = divmod(i, 5)
         saved = f"height{i - 2}" if 2 <= i < 6 else None
         layout.cell(col * 9, 8 + row * 8, source, stored, saved)
     for i, (receive, net, channel) in enumerate(
             [(True, net, channel) for net, channel in control.inputs.items()]
             + [(False, net, channel) for net, channel in control.outputs.items()]):
         layout.radio(net, channel, 2 + 5 * i, 2, 1 if receive else 3, receive=receive)
-    layout.radio("column", column, 38, 10, 2, receive=True)
-    layout.radio("current_height", height.outputs["current_height"], 38, 15, 0, receive=False)
+    layout.radio("column", column, 47, 10, 2, receive=True)
+    layout.radio("current_height", height.outputs["current_height"], 47, 15, 0, receive=False)
     for net, level in (("load", 1), ("retain", 2)):
         gate, = (gate for gate in control.gates if gate[2] == (net,))
         layout.controls((gate,), (level,))
@@ -202,9 +201,9 @@ def compact_snapshot(fields, control, height, column):
 
 
 def compact_batch(batch):
-    layout = _Layout(1)
+    layout = _Layout("Foundation_1x1")
     for (net, channel), y in zip(batch.inputs.items(), (3, 8), strict=True):
         layout.radio(net, channel, 2, y, 0, receive=True)
-    layout.radio("start", batch.outputs["start"], 13, 6, 0, receive=False)
+    layout.radio("start", batch.outputs["start"], 11, 6, 0, receive=False)
     layout.controls(batch.gates, (0,))
     return layout.finish()

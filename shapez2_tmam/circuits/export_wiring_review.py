@@ -10,17 +10,16 @@ from shutil import copyfile
 from ..mari.blueprint import DIRECTIONS, PORTS, _kind, _rotate
 from ..mari.signals import decode_constant
 from .compiler_backend.prefix_scan_wiring import _native_wiring
+from .foundations import FOUNDATION_CHUNKS, TILE_SIZE
 
 
-_TILE_SIZE = 20
 _LEVELS = 3
-_FOUNDATION_WIDTH = {f"Foundation_{size}x{size}": size for size in (1, 2, 3)}
 
 
 def _position(wiring, index):
     board, x, y, level = wiring.sites[index]
     platform = wiring.platforms[board]
-    return (x + _TILE_SIZE * platform.get("X", 0), y + _TILE_SIZE * platform.get("Y", 0),
+    return (x + TILE_SIZE * platform.get("X", 0), y + TILE_SIZE * platform.get("Y", 0),
             platform.get("Z", 0), level)
 
 
@@ -42,13 +41,14 @@ def _diagram(path):
         raise ValueError(f"{path.name} 没有电路平台")
     platforms = []
     for i, platform in enumerate(wiring.platforms, 1):
-        width = _FOUNDATION_WIDTH.get(platform["T"])
-        if width is None or platform.get("R", 0):
-            raise ValueError(f"{path.name} 的 P{i} 需要未旋转的 1×1、2×2 或 3×3 电路平台")
+        chunks = FOUNDATION_CHUNKS.get(platform["T"])
+        if chunks is None or platform.get("R", 0):
+            raise ValueError(f"{path.name} 的 P{i} 使用不支持的电路平台或朝向")
+        width, height = chunks
         x = platform.get("X", 0) - (width - 1) // 2
-        y = platform.get("Y", 0) - (width - 1) // 2
+        y = platform.get("Y", 0) - (height - 1) // 2
         count = len(platform["B"]["Entries"])
-        platforms.append((i, x, y, platform.get("Z", 0), width, count))
+        platforms.append((i, x, y, platform.get("Z", 0), width, height, count))
     entries = []
     radio = []
     for i, (board, entry) in enumerate(wiring.entries):
@@ -91,21 +91,21 @@ def _section(path, output_dir):
                      for level in range(_LEVELS))
     receivers = sum(line[5] == "rx" for line in radio)
     transmitters = len(radio) - receivers
-    outer = tuple(max(p[i] + p[4] for p in platforms) - min(p[i] for p in platforms) for i in (1, 2))
-    footprint = len({(x + dx, y + dy) for _, x, y, _, size, _ in platforms
-                     for dx in range(size) for dy in range(size)})
-    sizes = Counter(size for _, _, _, _, size, _ in platforms)
-    summary = "、".join(f"{count} 块 {size}×{size}" for size, count in sorted(sizes.items()))
+    outer = tuple(max(p[i] + p[i + 3] for p in platforms) - min(p[i] for p in platforms) for i in (1, 2))
+    footprint = len({(x + dx, y + dy) for _, x, y, _, width, height, _ in platforms
+                     for dx in range(width) for dy in range(height)})
+    sizes = Counter((width, height) for _, _, _, _, width, height, _ in platforms)
+    summary = "、".join(f"{count} 块 {width}×{height}" for (width, height), count in sorted(sizes.items()))
     density_target = 0.5
     capacity = 0
     board_rows = []
-    for board, _, _, island, size, count in platforms:
-        slots = (size * _TILE_SIZE) ** 2 * _LEVELS
+    for board, _, _, island, width, height, count in platforms:
+        slots = width * height * TILE_SIZE ** 2 * _LEVELS
         occupancy = count / slots
         capacity += slots
         gap = density_target - occupancy
         distance = f"差 {gap * 100:.1f} 个百分点" if gap > 0 else "已达到"
-        board_rows.append(f"<tr><td>P{board}</td><td>Z{island}</td><td>{size}×{size}</td><td>{count:,}</td>"
+        board_rows.append(f"<tr><td>P{board}</td><td>Z{island}</td><td>{width}×{height}</td><td>{count:,}</td>"
                           f"<td>{slots:,}</td><td>{occupancy:.1%}</td><td>{distance}</td></tr>")
     data = json.dumps({"platforms": platforms, "entries": entries, "links": links}, ensure_ascii=True)
     table = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in (*row[:5], "接收" if row[5] == "rx" else "发射", row[6]))
@@ -153,7 +153,7 @@ function draw(container, platforms, entries, links, island, layer) {
   const minX = Math.min(...platforms.map(p => p[1])) * chunk;
   const minY = Math.min(...platforms.map(p => p[2])) * chunk;
   const width = Math.max(...platforms.map(p => p[1] + p[4])) * chunk - minX;
-  const height = Math.max(...platforms.map(p => p[2] + p[4])) * chunk - minY;
+  const height = Math.max(...platforms.map(p => p[2] + p[5])) * chunk - minY;
   const scale = Math.min(7, 870 / width, 570 / height);
   const figure = document.createElement('figure');
   const canvas = document.createElement('canvas');
@@ -165,12 +165,13 @@ function draw(container, platforms, entries, links, island, layer) {
     ctx.beginPath(); ctx.moveTo(xAt(x1), yAt(y1)); ctx.lineTo(xAt(x2), yAt(y2)); ctx.stroke();
   };
   ctx.fillStyle = '#101a27'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  for (const [id, bx, by, , size] of platforms) {
-    const x = bx * chunk, y = by * chunk, edge = size * chunk;
-    ctx.fillStyle = '#1b2c3d'; ctx.fillRect(xAt(x), yAt(y), scale * edge, scale * edge);
+  for (const [id, bx, by, , cols, rows] of platforms) {
+    const x = bx * chunk, y = by * chunk, w = cols * chunk, h = rows * chunk;
+    ctx.fillStyle = '#1b2c3d'; ctx.fillRect(xAt(x), yAt(y), scale * w, scale * h);
     ctx.strokeStyle = '#344d62'; ctx.lineWidth = 1;
-    for (let d = chunk; d < edge; d += chunk) { segment(x+d,y,x+d,y+edge); segment(x,y+d,x+edge,y+d); }
-    ctx.strokeStyle = '#839ab2'; ctx.strokeRect(xAt(x), yAt(y), scale * edge, scale * edge);
+    for (let d = chunk; d < w; d += chunk) segment(x+d,y,x+d,y+h);
+    for (let d = chunk; d < h; d += chunk) segment(x,y+d,x+w,y+d);
+    ctx.strokeStyle = '#839ab2'; ctx.strokeRect(xAt(x), yAt(y), scale * w, scale * h);
     ctx.fillStyle = '#b8cadd'; ctx.font = '12px sans-serif'; ctx.fillText(`P${id}`, xAt(x)+4, yAt(y)+14);
   }
   for (const [x,y,,level,color] of entries) {
