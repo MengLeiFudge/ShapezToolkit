@@ -30,7 +30,15 @@ def _order_metadata(orders, order_ids):
     return module
 
 
-def _publish(choice, rows):
+def _rows(instructions):
+    rules = Rules(4, 5)
+    for address, packet in enumerate(instructions):
+        values = tuple(rules.parse(packet[field]) if field == 'base' and packet[field] is not None
+                       else packet[field] for field in PAYLOAD)
+        yield address, values
+
+
+def _publish(choice, rows, *, channels=FIELDS):
     module = Module({'order': ORDER_SELECT, 'address': WRITE_BUS['address']})
     module.gate('LogicGateCompare', ('order', choice), ('selected',), 'AQ==')
     for address, values in rows:
@@ -39,7 +47,7 @@ def _publish(choice, rows):
         for name, value in zip(PAYLOAD, values):
             if value is not None:
                 module.gate('LogicGateIf', (Literal(value), f'send{address}'), (name,))
-                module.outputs[name] = FIELDS[name]
+                module.outputs[name] = channels[name]
     return module
 
 
@@ -74,15 +82,10 @@ def build(orders, packet_tag: int) -> tuple[list[dict], dict]:
                 ORDER_SELECT, RUN, PRODUCE, TARGET, CLEAN_CONFIRMED, ENABLE_FEED, LOADED, LOAD_PERMIT, TARGET_INPUT}
     if type(packet_tag) is not int or not 1 <= packet_tag < 1 << 24 or packet_tag in reserved:
         raise ValueError(f'配方地址回读需要独占频道，收到 {packet_tag!r}')
-    rules = Rules(4, 5)
     order_ids = {name: choice for choice, name in enumerate(orders, 1)}
     modules = [_order_metadata(orders, order_ids), _replay_result()]
     for name, choice in order_ids.items():
-        rows = []
-        for address, packet in enumerate(orders[name]['instructions']):
-            values = tuple(rules.parse(packet[field]) if field == 'base' and packet[field] is not None
-                           else packet[field] for field in PAYLOAD)
-            rows.append((address, values))
+        rows = list(_rows(orders[name]['instructions']))
         for offset in range(0, len(rows), ROWS_PER_BOARD):
             batch = rows[offset:offset + ROWS_PER_BOARD]
             modules.extend((_publish(choice, batch), _confirm(choice, batch, packet_tag)))

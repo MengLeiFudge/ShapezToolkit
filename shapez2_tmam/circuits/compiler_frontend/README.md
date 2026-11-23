@@ -232,3 +232,18 @@ py -m shapez2_tmam.circuits.compiler_frontend.pin_column_cursor --column-base 17
 3. 将读到的 `next_slot` 作为下次的 `start_slot`，重复复位和启动。若 `valid=0`，枚举已耗尽。命中槽 19 时 `next_slot=20`，从槽 20 启动会直接返回耗尽。
 
 示例的 `start_slot` 为 1701040，`next_slot` 为 1701039。起始槽为空信号、越界或为其他类型时，按槽 20 处理。整数 `0` 可作起始槽，四格都为 `0` 的候选也可有效，按 `valid` 区分。
+
+### 四列候选组合的推进接口
+
+用 `compile_field_methods` 编译 `pin_column_combinations.py`。`next_column` 和 `next_start` 合编为一组，其余方法分别编译。组合控制重复调用一份单列枚举器，依次查询 q0 到 q3。每列保存命中槽 `slot`、续读槽 `next_slot` 和自底向上的四格材料。
+
+| 方法 | 接线 |
+| --- | --- |
+| `select_word` | 按当前 `column` 选择送往单列枚举器的材料字。 |
+| `retained_start` | 当前列耗尽时提供前一列保存的 `next_slot`。四列组合就绪时提供 q3 保存的 `next_slot`。 |
+| `next_column`、`next_start` | 用同一份旧状态和当前事件计算下次调用的列号和起始槽。`restart` 接 `retained_start`。 |
+| `update_value` | 对每列的每个字段各用一次。槽号字段的 `empty` 用 20，材料字段用 `-1`。 |
+
+复位后以第 0 列、槽 0 开始。列号 0～3 表示要查询的列，4 表示四列结果就绪，`-1` 表示已穷尽。每次调用单列枚举器时沿用上一节的复位和起始槽稳定步骤。每轮新结果只提交一次 `result_ready`。同一次更新用旧状态计算新列、新起始槽和四列保存值，再统一写入。`result_valid` 取自单列枚举器的 `valid`。
+
+当前列命中后，下一列从槽 0 起查。当前列耗尽后，回到前一列保存的 `next_slot`，由前一列的新命中重新开始后续列。收到 `column=4` 时读取四列保存值。读完发一次 `consume`，从 q3 的下一槽继续。q0 耗尽后保持 `column=-1`，复位开启下一轮。全空候选按 `result_valid` 决定是否保存。

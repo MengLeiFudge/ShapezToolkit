@@ -12,6 +12,8 @@ python -m shapez2_tmam.circuits.factory_assembly.production --stages 2 --output 
 
 导入 `.spz2bp` 后，按同名 JSON 的 `interfaces.recipe` 接主控与换单开关，按 `interfaces.stations` 和 `interfaces.load` 接供料，按 `interfaces.output` 接成品带。`--stages` 须在 1 至 971 之间，并覆盖主控会发送的最长配方。Python 可调用 `production.build(count)` 取得同一份原生蓝图文本和接口表。
 
+通用含晶线可选用双回读接管和单平台结晶收料。[动态含晶工道重导、接线与用量](mixed_sample.md)。
+
 ### 纯堆叠三册
 
 ```bash

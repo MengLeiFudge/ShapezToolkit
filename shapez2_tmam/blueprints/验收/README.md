@@ -9,6 +9,7 @@
 | 实体 | 固定两步订单，核对整组提交及复位 | [样件接口](实体/two-step-sender.json) |
 | 实体 | 两笔六字段写入与保持接管 | [原生样件](实体/writer-handoff.spz2bp) · [接线表](实体/writer-handoff.json) |
 | 实体 | 四色含晶整形，两种切向分别用 40 和 41 道工序 | [导入蓝图](实体/四色含晶/four-color.spz2bp) · [短代码、配方与站场](实体/四色含晶/four-color.json) |
+| 实体 | 动态六字段含晶订单，六工段与合并结晶收料站 | [导入蓝图](实体/含晶写入/mixed-dynamic.spz2bp) · [站点接口](实体/含晶写入/mixed-dynamic.json) · [换单与供货](../../circuits/factory_assembly/mixed_sample.md) |
 | 配料 | 基础料与结晶染料的换装站、两种混合车库 | [货种、车厢、层位及接口](配料/proportioning.json) |
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
 | 电路 | 从原图一次读取五份原色单层 | [原生蓝图](电路/原层读取/read-five-rows.spz2bp) · [接口](电路/原层读取/read-five-rows.json) |
