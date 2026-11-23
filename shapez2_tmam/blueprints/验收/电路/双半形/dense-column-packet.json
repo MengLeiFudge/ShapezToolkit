@@ -1,0 +1,143 @@
+{
+  "methods": {
+    "opcode": "dense_packet_opcode",
+    "a": "dense_packet_a",
+    "b": "dense_packet_b",
+    "destination": "dense_packet_destination",
+    "base": "dense_packet_base",
+    "color": "dense_packet_color",
+    "next_pending": "dense_packet_next_pending"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "phase": {
+      "channel": 1701400,
+      "type": "int"
+    },
+    "row": {
+      "channel": 1701401,
+      "type": "shape"
+    },
+    "pending": {
+      "channel": 1701402,
+      "type": "color"
+    },
+    "assembled": {
+      "channel": 1701403,
+      "type": "bool"
+    },
+    "destination": {
+      "channel": 1701404,
+      "type": "int"
+    },
+    "scratch": {
+      "channel": 1701405,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "opcode": {
+      "channel": 1701406,
+      "type": "int"
+    },
+    "a": {
+      "channel": 1701407,
+      "type": "int"
+    },
+    "b": {
+      "channel": 1701408,
+      "type": "int"
+    },
+    "destination": {
+      "channel": 1701409,
+      "type": "int"
+    },
+    "base": {
+      "channel": 1701410,
+      "type": "shape"
+    },
+    "color": {
+      "channel": 1701411,
+      "type": "color"
+    },
+    "next_pending": {
+      "channel": 1701412,
+      "type": "color"
+    }
+  },
+  "reserved_channels": [
+    1701400,
+    1701401,
+    1701402,
+    1701403,
+    1701404,
+    1701405,
+    1701406,
+    1701407,
+    1701408,
+    1701409,
+    1701410,
+    1701411,
+    1701412
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "opcode": {
+      "dense_packet_opcode": 25,
+      "column_build.dense_column_flush": 4
+    },
+    "a": {
+      "dense_packet_a": 1
+    },
+    "b": {
+      "dense_packet_b": 1
+    },
+    "destination": {
+      "dense_packet_destination": 4
+    },
+    "base": {
+      "dense_packet_base": 3,
+      "column_build.dense_column_base": 5
+    },
+    "color": {
+      "dense_packet_color": 3
+    },
+    "next_pending": {
+      "dense_packet_next_pending": 1,
+      "column_build.dense_column_pending": 3
+    }
+  },
+  "settling": {
+    "max_gate_depth": 37,
+    "hold_signal_ticks": 2496,
+    "hold_simulation_seconds": 208.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 2,
+  "island_footprint_chunks": [
+    6,
+    3
+  ],
+  "buildings_by_layer": [
+    1505,
+    1077,
+    1104
+  ],
+  "logic_gates": 114,
+  "logic_gates_before_reuse": 459,
+  "building_entries": 3686,
+  "global_receivers": 6,
+  "global_transmitters": 7,
+  "internal_global_devices": 0,
+  "short_range_links": 7,
+  "publish_when": {
+    "opcode": "dense_packet_has_step",
+    "destination": "dense_packet_has_step",
+    "a": "dense_packet_uses_a",
+    "b": "dense_packet_uses_b",
+    "base": "dense_packet_uses_base",
+    "color": "dense_packet_uses_color"
+  }
+}

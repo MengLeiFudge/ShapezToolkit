@@ -66,9 +66,22 @@
 
 半形成品与闭合前缀稳定后，保持全部输入，按尾料回放的接口复位并启动 `1701194`。到采样时刻且 `1701197=1` 后，结果板按 `alternate` 恢复原方向。主控确认前缀和半形有效时置 `1700894=1`。结果板直接比较原目标 `1600000`，在 `1700896` 发布验收结果。配方提交与启动时序由主控负责。
 
-紧柱回放的 `item0` 至 `item4` 顺序为从底到顶，每次送入已在 q0 上的普通格或有色晶体。目标柱连续，空信号只用于末尾补齐。`initial_source` 和 `initial_pending` 留空。等五轮完成后再按完工板接口表读取结果。回放实现了同色晶体批量结晶，实际下料与工序提交由制作层处理。
+紧柱回放的 `item0` 至 `item4` 顺序为从底到顶，每次送入已在 q0 上的普通格或有色晶体。目标柱连续，空信号只用于末尾补齐。`initial_source` 和 `initial_pending` 留空。等五轮完成后再按完工板接口表读取结果。含晶柱的实体针尾另行追加。
+
+紧柱指令电路把同一构造变成六字段。每层依次用相位 `0` 换色、`1` 领料、`2` 堆叠。这三相位共用本层原格、上一层后的待结晶色和已有下料标志。层完成后更新待结晶色。最后用相位 `3` 到 `7` 结晶并取出紧柱。等满接口保持时间后，遇到空指令就跳过，遇到非空指令就等制作层确认。 [原生指令电路](电路/双半形/dense-column-packet.spz2bp) · [六字段接口](电路/双半形/dense-column-packet.json)
 
 ```bash
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/dense_packet.py \
+  --field opcode=dense_packet_opcode --field a=dense_packet_a --field b=dense_packet_b \
+  --field destination=dense_packet_destination --field base=dense_packet_base --field color=dense_packet_color \
+  --field next_pending=dense_packet_next_pending --publish-when opcode=dense_packet_has_step \
+  --publish-when destination=dense_packet_has_step --publish-when a=dense_packet_uses_a \
+  --publish-when b=dense_packet_uses_b --publish-when base=dense_packet_uses_base \
+  --publish-when color=dense_packet_uses_color --input-channel phase=1701400 --input-channel row=1701401 \
+  --input-channel pending=1701402 --input-channel assembled=1701403 --input-channel destination=1701404 \
+  --input-channel scratch=1701405 --output-channel opcode=1701406 --output-channel a=1701407 \
+  --output-channel b=1701408 --output-channel destination=1701409 --output-channel base=1701410 \
+  --output-channel color=1701411 --output-channel next_pending=1701412 --output dense-column-packet.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_methods.py \
   --field row0=original_row_0 --field row1=original_row_1 --field row2=original_row_2 \
   --field row3=original_row_3 --field row4=original_row_4 --input-channel target=1700872 \
