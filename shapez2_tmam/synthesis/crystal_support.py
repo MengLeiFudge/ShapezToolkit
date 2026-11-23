@@ -4,6 +4,47 @@ from .physics import Shape
 from .shape_methods import shape_literal, unstack_lower, unstack_upper
 
 
+def seed_swap(left_word: Shape | None, right_word: Shape | None, left_height: int, right_height: int) -> bool:
+    return left_height > right_height
+
+
+def seed_low_word(left_word: Shape | None, right_word: Shape | None, left_height: int, right_height: int) -> Shape | None:
+    if seed_swap(left_word, right_word, left_height, right_height):
+        return right_word
+    return left_word
+
+
+def seed_high_word(left_word: Shape | None, right_word: Shape | None,
+                   left_height: int, right_height: int) -> Shape | None:
+    if seed_swap(left_word, right_word, left_height, right_height):
+        return left_word
+    return right_word
+
+
+def seed_low_height(left_word: Shape | None, right_word: Shape | None, left_height: int, right_height: int) -> int:
+    if seed_swap(left_word, right_word, left_height, right_height):
+        return right_height
+    return left_height
+
+
+def seed_high_height(left_word: Shape | None, right_word: Shape | None, left_height: int, right_height: int) -> int:
+    if seed_swap(left_word, right_word, left_height, right_height):
+        return left_height
+    return right_height
+
+
+def seed_left(required: int, high_height: int, swapped: bool) -> int:
+    if swapped:
+        return high_height
+    return required
+
+
+def seed_right(required: int, high_height: int, swapped: bool) -> int:
+    if swapped:
+        return required
+    return high_height
+
+
 def _word_through(word: Shape | None, height: int) -> Shape | None:
     for z in (5, 4, 3, 2):
         if z == height:

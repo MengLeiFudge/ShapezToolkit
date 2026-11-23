@@ -1,0 +1,107 @@
+{
+  "methods": {
+    "low_word": "seed_low_word",
+    "high_word": "seed_high_word",
+    "initial_required": "seed_low_height",
+    "high_height": "seed_high_height",
+    "swapped": "seed_swap"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "left_word": {
+      "channel": 1700850,
+      "type": "shape"
+    },
+    "right_word": {
+      "channel": 1700851,
+      "type": "shape"
+    },
+    "left_height": {
+      "channel": 1700852,
+      "type": "int"
+    },
+    "right_height": {
+      "channel": 1700853,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "low_word": {
+      "channel": 1700846,
+      "type": "shape"
+    },
+    "high_word": {
+      "channel": 1700847,
+      "type": "shape"
+    },
+    "initial_required": {
+      "channel": 1700831,
+      "type": "int"
+    },
+    "high_height": {
+      "channel": 1700848,
+      "type": "int"
+    },
+    "swapped": {
+      "channel": 1700854,
+      "type": "bool"
+    }
+  },
+  "reserved_channels": [
+    1700831,
+    1700846,
+    1700847,
+    1700848,
+    1700850,
+    1700851,
+    1700852,
+    1700853,
+    1700854
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "low_word": {
+      "seed_low_word": 3,
+      "seed_swap": 1
+    },
+    "high_word": {
+      "seed_high_word": 3,
+      "seed_swap": 1
+    },
+    "initial_required": {
+      "seed_low_height": 3,
+      "seed_swap": 1
+    },
+    "high_height": {
+      "seed_high_height": 3,
+      "seed_swap": 1
+    },
+    "swapped": {
+      "seed_swap": 1
+    }
+  },
+  "settling": {
+    "max_gate_depth": 6,
+    "hold_signal_ticks": 512,
+    "hold_simulation_seconds": 42.666666666666664,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    322,
+    94,
+    85
+  ],
+  "logic_gates": 10,
+  "logic_gates_before_reuse": 17,
+  "building_entries": 501,
+  "global_receivers": 4,
+  "global_transmitters": 5,
+  "internal_global_devices": 0
+}
