@@ -156,6 +156,6 @@
     "conditions": "整件批量导入或完整重载。常速 Hybrid 或 AlwaysHighUPS，固定接线与配置，每批最多 4 信号 tick，保留频道由本实例独占。",
     "protocol": "先将 enable 保持为 0 达到复位时间，再将整组参数与 enable=1 保持到 done=1。此时读取各组结果。下次调用先把 enable 置为 0 并再次等待复位。"
   },
-  "platforms": 36,
-  "building_entries": 14881
+  "platforms": 16,
+  "building_entries": 13882
 }

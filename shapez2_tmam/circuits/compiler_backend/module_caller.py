@@ -21,6 +21,7 @@ from . import _write_blueprint
 _RADIO_TICKS = 12
 _MAX_CALLS = 4
 _MAX_DELAY_STEPS = 128
+_WAIT_RADIX = 26
 _RADIO_RECEIVER = "ControlledSignalReceiverInternalVariant"
 _RADIO_TRANSMITTER = "ControlledSignalTransmitterInternalVariant"
 
@@ -111,6 +112,70 @@ def _copy(source: int, target: int) -> Module:
     _gate(module, "If", "copy", "source", 1)
     module.outputs = {"copy": target}
     return module
+
+def _wait_digit(phase: int, stamp: int, digit: int, other: int | None, *, high: bool = False) -> Module:
+    inputs = {"phase": phase, "stamp": stamp, "digit": digit}
+    if other is not None:
+        inputs["other"] = other
+    module = Module(inputs)
+    same = _compare(module, "same", "phase", "stamp")
+    restart = _gate(module, "Not", "restart", same)
+    _gate(module, "If", "count", 0 if high else 1, restart)
+    last = _WAIT_RADIX - 1
+    wrap = other is not None and not high
+    module.lookup("digit", "incremented", ((n, n + 1) for n in range(last)))
+    # 低位进位时回零，计数到表示上限后保持。
+    digit_full = _compare(module, "digit_full", "digit", last)
+    if other is None:
+        hold = digit_full
+    else:
+        other_full = _compare(module, "other_full", "other", last)
+        if high:
+            hold = _gate(module, "Or", "hold", digit_full, _gate(module, "Not", "no_carry", other_full))
+        else:
+            hold = _gate(module, "And", "hold", digit_full, other_full)
+    advance = _gate(module, "And", "advance", same, _gate(module, "Not", "advance_digit", hold))
+    _gate(module, "If", "count", "incremented", advance)
+    if wrap:
+        _gate(module, "If", "count", 0, _gate(module, "And", "wrap", advance, digit_full))
+    _gate(module, "If", "count", "digit", _gate(module, "And", "keep", same, hold))
+    module.outputs = {"count": digit}
+    if not high:
+        _gate(module, "If", "current_stamp", "phase", 1)
+        module.outputs["current_stamp"] = stamp
+    return module
+
+
+def _wait_timer(phase: int, channels: tuple[int, ...], reset_steps: int, sample_steps: int):
+    if len(channels) <= 3:
+        modules = [_copy(source, target) for source, target in zip((phase, *channels), channels)]
+        return modules, channels[reset_steps - 1], channels[sample_steps - 1]
+
+    # 保留原来给等待链分配的频道区间，后面的结果频道无需改号。
+    reset_tap, sample_tap, stamp, low, *_ = channels
+    high = channels[4] if len(channels) > _WAIT_RADIX else None
+    modules = [_wait_digit(phase, stamp, low, high)]
+    inputs = {"phase": phase, "stamp": stamp, "low": low}
+    if high is not None:
+        modules.append(_wait_digit(phase, stamp, high, low, high=True))
+        inputs["high"] = high
+    module = Module(inputs)
+    same = _compare(module, "same", "phase", "stamp")
+    for name, steps, output in (("reset", reset_steps, reset_tap), ("sample", sample_steps, sample_tap)):
+        ready = 1
+        if steps > 1:
+            # 传出阶段标记还需一拍。按前一拍的计数判断，保持原采样时刻。
+            upper, lower = divmod(steps - 1, _WAIT_RADIX)
+            reached = _compare(module, f"{name}_low", "low", lower, "Ag==")
+            if high is not None:
+                equal = _compare(module, f"{name}_equal", "high", upper)
+                greater = _compare(module, f"{name}_greater", "high", upper, "Aw==")
+                reached = _gate(module, "Or", f"{name}_reached", greater,
+                                _gate(module, "And", f"{name}_at_upper", equal, reached))
+            ready = _gate(module, "And", f"{name}_ready", same, reached)
+        _gate(module, "If", name, "phase", ready)
+        module.outputs[name] = output
+    return [*modules, module], reset_tap, sample_tap
 
 
 def _check_channel(channel: int) -> None:
@@ -206,13 +271,13 @@ def build_calls(
     enable, phase, done = next(numbers), next(numbers), next(numbers)
     active = tuple(next(numbers) for _ in calls)
     captures = tuple(next(numbers) for _ in calls)
-    delays = tuple(next(numbers) for _ in range(delay_count))
+    wait_channels = tuple(next(numbers) for _ in range(delay_count))
     result_ports = [{name: {"channel": next(numbers), "type": port["type"]} for name, port in results.items()}
                     for _ in calls]
-    modules = [_advance(enable, phase, outputs["done"]["channel"], delays[reset_steps - 1],
-                        delays[sample_steps - 1], phases),
-               *_control(phase, inputs["run"]["channel"], done, phases, active, captures)]
-    modules.extend(_copy(source, target) for source, target in zip((phase, *delays), delays))
+    wait_modules, reset_tap, sample_tap = _wait_timer(phase, wait_channels, reset_steps, sample_steps)
+    modules = [_advance(enable, phase, outputs["done"]["channel"], reset_tap, sample_tap, phases),
+               *_control(phase, inputs["run"]["channel"], done, phases, active, captures),
+               *wait_modules]
     modules.extend(_arguments(active, tuple(args[name] for args in arguments), port["channel"])
                    for name, port in parameters.items())
     for capture, stored in zip(captures, result_ports, strict=True):

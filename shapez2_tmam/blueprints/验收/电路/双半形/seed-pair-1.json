@@ -1,0 +1,102 @@
+{
+  "methods": {
+    "low_word": "pair_seed_low_word",
+    "high_word": "pair_seed_high_word",
+    "low_height": "pair_seed_low_height",
+    "high_height": "pair_seed_high_height",
+    "swapped": "pair_seed_swap"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "left_word": {
+      "channel": 1700965,
+      "type": "shape"
+    },
+    "right_word": {
+      "channel": 1700966,
+      "type": "shape"
+    }
+  },
+  "outputs": {
+    "low_word": {
+      "channel": 1701045,
+      "type": "shape"
+    },
+    "high_word": {
+      "channel": 1701046,
+      "type": "shape"
+    },
+    "low_height": {
+      "channel": 1701047,
+      "type": "int"
+    },
+    "high_height": {
+      "channel": 1701048,
+      "type": "int"
+    },
+    "swapped": {
+      "channel": 1701049,
+      "type": "bool"
+    }
+  },
+  "reserved_channels": [
+    1700965,
+    1700966,
+    1701045,
+    1701046,
+    1701047,
+    1701048,
+    1701049
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "low_word": {
+      "pair_seed_low_word": 3,
+      "pair_seed_swap": 46
+    },
+    "high_word": {
+      "pair_seed_high_word": 3,
+      "pair_seed_swap": 46
+    },
+    "low_height": {
+      "pair_seed_low_height": 1,
+      "pair_seed_low_word": 3,
+      "pair_seed_swap": 46,
+      "column_scan.column_crystal_height": 36
+    },
+    "high_height": {
+      "pair_seed_high_height": 1,
+      "pair_seed_high_word": 3,
+      "pair_seed_swap": 46,
+      "column_scan.column_crystal_height": 36
+    },
+    "swapped": {
+      "pair_seed_swap": 46
+    }
+  },
+  "settling": {
+    "max_gate_depth": 28,
+    "hold_signal_ticks": 1920,
+    "hold_simulation_seconds": 160.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 2,
+  "island_footprint_chunks": [
+    6,
+    3
+  ],
+  "buildings_by_layer": [
+    1568,
+    1361,
+    1171
+  ],
+  "logic_gates": 119,
+  "logic_gates_before_reuse": 388,
+  "building_entries": 4100,
+  "global_receivers": 2,
+  "global_transmitters": 5,
+  "internal_global_devices": 0,
+  "short_range_links": 2
+}

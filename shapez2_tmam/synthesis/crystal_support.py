@@ -1,5 +1,6 @@
 """预先补齐两列半形的含晶区间支撑。"""
 
+from .column_scan import column_crystal_height
 from .physics import Shape
 from .shape_methods import shape_literal, unstack_lower, unstack_upper
 
@@ -31,6 +32,38 @@ def seed_high_height(left_word: Shape | None, right_word: Shape | None, left_hei
     if seed_swap(left_word, right_word, left_height, right_height):
         return left_height
     return right_height
+
+
+def pair_seed_swap(left_word: Shape | None, right_word: Shape | None) -> bool:
+    crystal = shape_literal("Wu------")
+    for _ in (5, 4, 3, 2, 1):
+        if unstack_upper(right_word) == crystal:
+            return False
+        if unstack_upper(left_word) == crystal:
+            return True
+        left_word = unstack_lower(left_word)
+        right_word = unstack_lower(right_word)
+    return False
+
+
+def pair_seed_low_word(left_word: Shape | None, right_word: Shape | None) -> Shape | None:
+    if pair_seed_swap(left_word, right_word):
+        return right_word
+    return left_word
+
+
+def pair_seed_high_word(left_word: Shape | None, right_word: Shape | None) -> Shape | None:
+    if pair_seed_swap(left_word, right_word):
+        return left_word
+    return right_word
+
+
+def pair_seed_low_height(left_word: Shape | None, right_word: Shape | None) -> int:
+    return column_crystal_height(pair_seed_low_word(left_word, right_word))
+
+
+def pair_seed_high_height(left_word: Shape | None, right_word: Shape | None) -> int:
+    return column_crystal_height(pair_seed_high_word(left_word, right_word))
 
 
 def seed_left(required: int, high_height: int, swapped: bool) -> int:
