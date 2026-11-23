@@ -1,0 +1,56 @@
+{
+  "target": "CuRgSbWm:cr------",
+  "limits": [
+    5,
+    5,
+    5,
+    5
+  ],
+  "lower": [
+    2,
+    0,
+    0,
+    0
+  ],
+  "upper": [
+    2,
+    1,
+    1,
+    1
+  ],
+  "inputs": {
+    "enable": 1703400,
+    "advance": 1703401
+  },
+  "outputs": {
+    "ready": 1703402,
+    "exhausted": 1703403,
+    "rows": [
+      1703404,
+      1703405,
+      1703406,
+      1703407,
+      1703408
+    ],
+    "counts": [
+      1703409,
+      1703410,
+      1703411,
+      1703412
+    ]
+  },
+  "channels": {
+    "reserved_range": [
+      1703400,
+      1703499
+    ],
+    "phase": 1703413
+  },
+  "timing": {
+    "radio_signal_ticks": 12,
+    "settle_signal_ticks": 480,
+    "reset_hold_signal_ticks": 480
+  },
+  "platforms": 15,
+  "building_entries": 15814
+}

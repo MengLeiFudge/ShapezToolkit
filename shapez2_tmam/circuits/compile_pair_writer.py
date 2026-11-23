@@ -180,7 +180,7 @@ def _closure_channels(closure: Path) -> dict[int, int]:
     report = _report(closure)
     ports = report["outputs"]
     return {1700873: report["inputs"]["column"], 1700871: ports["alternate"], 1700816: ports["height"],
-            1700806: report["closure"]["clipped_word"],
+            **dict(zip(range(1700963, 1700967), report["closure"]["material_words"], strict=True)),
             **dict(zip(range(1700766, 1700770), ports["heights"], strict=True)),
             **dict(zip(range(1701200, 1701205), ports["rows_bottom_to_top"], strict=True))}
 
@@ -193,6 +193,8 @@ def _relink(wiring, channels):
 
 def export(circuits: Path, output_dir: Path, *, corner_inputs: bool = False, closure: Path | None = None) -> dict:
     channels = _closure_channels(closure) if closure is not None else {}
+    if corner_inputs:
+        channels[1700806] = 1702666
     lower, upper, initial = (1701654, 1701655, 1701656) if corner_inputs else (1701692, 1701694, 1701693)
     optional_top = _report(closure)["inputs"]["optional_top"] if closure is not None else 1701575
     parts = dict((*_jobs(), *_packets(lower, upper),
@@ -208,7 +210,7 @@ def export(circuits: Path, output_dir: Path, *, corner_inputs: bool = False, clo
         parts.update((*_corner_inputs(), *_dense_stream(), *_corner_release()))
         releases = tuple(circuits / "角备料" / name for name in ("corner-handoff-word", "read-corner-work-label",
                                                                  "read-corner-gap-label", "read-corner-ground-label"))
-        releases += (circuits / "prefix-corner-parameters",)
+        releases += (circuits / "clip-prefix-word", circuits / "prefix-corner-parameters")
     release_report = (parts["corner-release-packet"][1] if corner_inputs
                       else _report(circuits / "角备料" / "corner-release-packet"))
     reports = {"dense": _report(dense[0]), "release": release_report,

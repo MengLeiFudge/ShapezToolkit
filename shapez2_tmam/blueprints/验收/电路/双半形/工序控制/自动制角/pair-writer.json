@@ -93,8 +93,8 @@
     1701754,
     1701755
   ],
-  "platforms": 85,
-  "building_entries": 99062,
+  "platforms": 86,
+  "building_entries": 101398,
   "method_run": 1701761,
   "method_done": 1701766,
   "clock": {
@@ -175,7 +175,7 @@
     "platforms": 6,
     "building_entries": 3972
   },
-  "global_transmitters": 131,
+  "global_transmitters": 132,
   "parts": [
     "pair-job",
     "pair-job-inputs",
