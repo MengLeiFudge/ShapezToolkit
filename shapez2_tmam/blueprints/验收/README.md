@@ -19,7 +19,7 @@
 | 电路 | 恢复顶针来源标签并回放 | [来源序号](电路/顶针逆推/pin-source-rank.json) · [五轮查标签](电路/顶针逆推/pin-retained-label.json) · [来源格](电路/顶针逆推/pin-source-label.json) · [整行拼合](电路/顶针逆推/pin-source-row.json) · [回放](电路/顶针逆推/pin-replay.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
-| 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) |
+| 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) · [两种切向自动试查](电路/双半形/choose-cut.json) · [试查时钟](电路/双半形/choose-cut-clock.json) |
 | 电路 | 从原图提取材料与检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
 | 电路 | 五层取料、顺序编码、双完工启动闭包 | [原生蓝图](电路/双半形/prefix-scan-wiring.spz2bp) · [接口](电路/双半形/prefix-scan-wiring.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [前缀角参数](电路/双半形/prefix-corner-parameters.json) · [独立落点样件](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
@@ -52,6 +52,8 @@
 
 切向转换板用 `alternate` 将两个切向统一到 q0/q1 和 q2/q3。四列调用按 q0 到 q3 的顺序复用整列读取。批次 `done=1` 后从 `1700963` 到 `1700966` 读四份材料字。 `check-column-0` 到 `check-column-3` 分别检查这四份材料。等四块校验板和闭包结果均稳定后，从 `check-prefix` 读取 `1700897` 的可用位与 `1700816` 的当前列高度。任一列不满足列 A 或闭包失败时，当前列高度为 `-1`。
 
+两切向选择器与 `prefix-scan-wiring` 合用，独占 `1700871` 和 `1700930`。目标保持不变，先将 `1701581` 保持为 0 至少 384 信号 tick 后置为 1。闭包完工后另等一轮再读取总校验。第一种切向成功时保留其结果。第一种失败时先换向并复位，再复用同一条闭包。`1701584` 表示当前切向找到可用前缀，`1701585` 表示两个切向均未找到前缀。后者可作为继续顶针逆推的条件。 不可制作须由完整搜索判定。
+
 读取整列可将 `read-prefix-column` 的 `prefix_height` 保持为 `5`。已选定前缀高度后，将同一高度送给 `read-prefix-column` 和 `read-prefix-corner`。材料字仍保留五个原层位，超出前缀的格记为空。把材料字接到落点判定，把原格接到备料板。原格输出保留普通图形和晶体的颜色。前缀高度为 `0` 时该列为空。
 
 半形支撑检查的图形只占 `q0/q1`。把它接入 `target`，等满接口表的保持时间后读 `result`。虚拟半切后图形与输入相等时输出 `1`。含晶体半形还要对每列分别检查列 A。
@@ -79,6 +81,7 @@
 可选顶盖模式先单独处理第五层的半形支撑，再把闭包的第一轮上料留空。`optional-top-prefix` 接两块恢复列序板的四个高度和第五层编码。采用该板时将原高度改送 `1701570` 至 `1701573`，第五层编码改送 `1701574`。板子独占闭包的初值与 `item0` 频道，并用 `1701575` 在普通和可选模式间切换。 [切换接口](电路/顶针逆推/optional-top-prefix.json)
 
 ```bash
+python -m shapez2_tmam.circuits.compile_stack_scan --choose-cut --channel-base 1701580 --output choose-cut.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --restore-pin-label --channel-base 1701530 --output pin-retained-label.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_cap_column.py \
   --field crystal_allowed=top_crystal_allowed --field pin_allowed=top_pin_allowed --field max_cap=cap_material \

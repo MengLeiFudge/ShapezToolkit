@@ -3,12 +3,52 @@
 import argparse
 from pathlib import Path
 
-from ..synthesis import (column_build, column_scan, crystal_support, direct_stack, paired_tail,
-                         pin_labels, row_support, shape_methods)
+from ..synthesis import (column_build, column_scan, crystal_support, cut_cursor, direct_stack,
+                         paired_tail, pin_labels, row_support, shape_methods)
+from .circuit_packing import stack_platforms
 from .compiler_backend import _write_blueprint
+from .compiler_backend.confirmed_call import build as build_confirmed_call
 from .compiler_backend.fields import compile_fields
 from .compiler_backend.timed import compile_state_fold, compile_state_steps
 from .compiler_frontend import FrontendError, compile_method
+from .local_module import Module
+
+
+def _choose_cut(base: int, output: Path) -> int:
+    path = Path(cut_cursor.__file__)
+    source = path.read_text(encoding="utf-8")
+    entries = {"next": "next_cut_phase", "opcode": "cut_event_opcode",
+               **{field: f"cut_{field}" for field in ("start", "alternate", "chosen", "exhausted", "terminal",
+                                                      "address")}}
+    methods = {field: compile_method(source, method, filename=str(path)) for field, method in entries.items()}
+    event = compile_method(source, "cut_event", filename=str(path))
+    inputs = {"phase": base, "enable": base + 1, "settled": base + 2, "confirmed": base + 11,
+              "done": 1700765, "has_prefix": 1700897}
+    outputs = {"next": base + 3, "chosen": base + 4, "exhausted": base + 5, "terminal": base + 6,
+               "address": base + 7, "opcode": base + 9, "start": 1700930, "alternate": 1700871}
+    choice, report = compile_fields(methods, input_channels=inputs, output_channels=outputs,
+                                    publish_when={"opcode": event})
+    # 判定相位重新计时，确认事件之前的空回合不改变切向状态。
+    clock, clock_report = build_confirmed_call(
+        enable=inputs["enable"], address=outputs["address"], ack=base + 8, finished=outputs["terminal"],
+        opcode=outputs["opcode"], settled=inputs["settled"], has_packet=base + 10, confirmed=inputs["confirmed"],
+        request=base + 12, states={"phase": (inputs["phase"], outputs["next"], 0)},
+        settle_ticks=1536, update_ticks=report["settling"]["hold_signal_ticks"], channel_base=base + 16,
+    )
+    ack = Module({"request": base + 12})
+    ack.gate("LogicGateIf", ("request", 1), ("ack",))
+    ack.outputs = {"ack": base + 8}
+    board = ack.layout()["BP"]["Entries"][0]
+    platforms = clock["BP"]["Entries"]
+    platforms.append(board)
+    stack_platforms(platforms)
+    clock_report["platforms"] += 1
+    clock_report["building_entries"] += len(board["B"]["Entries"])
+    clock_output = output.with_name(f"{output.stem}-clock.spz2bp")
+    _write_blueprint(clock, clock_report, clock_output)
+    _write_blueprint(choice, report, output)
+    print(f"已导出 {output} 和 {clock_output}，共 {report['platforms'] + clock_report['platforms']} 块平台。")
+    return 0
 
 
 def main() -> int:
@@ -25,7 +65,15 @@ def main() -> int:
     modes.add_argument("--seed-crystal-half", action="store_true", help="生成两列半形的含晶支撑预处理")
     modes.add_argument("--append-paired-tail", action="store_true", help="生成双半形尾料的五轮筛选和堆叠")
     modes.add_argument("--restore-pin-label", action="store_true", help="按保序序号读回顶针前态原料的原色标签")
+    modes.add_argument("--choose-cut", action="store_true", help="生成复用同一闭包的双切向选择器")
     args = parser.parse_args()
+    if args.choose_cut:
+        try:
+            return _choose_cut(args.channel_base, args.output)
+        except FrontendError as error:
+            parser.exit(2, f"{error.filename}:{error.lineno}:{error.offset} {error.msg}\n")
+        except (OSError, ValueError) as error:
+            parser.exit(2, f"切向选择电路编译失败。{error}\n")
     if args.restore_pin_label:
         path = Path(pin_labels.__file__)
         entries = {field: f"retained_{field}" for field in ("rank", "label")}

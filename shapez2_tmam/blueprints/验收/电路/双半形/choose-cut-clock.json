@@ -1,0 +1,35 @@
+{
+  "inputs": {
+    "enable": 1701581,
+    "address": 1701587,
+    "ack_address": 1701588,
+    "done": 1701586,
+    "opcode": 1701589
+  },
+  "outputs": {
+    "settled": 1701582,
+    "has_packet": 1701590,
+    "confirmed": 1701591,
+    "request_address": 1701592
+  },
+  "states": {
+    "phase": {
+      "current": 1701580,
+      "next": 1701583,
+      "initial": 0
+    }
+  },
+  "reserved_channels": [
+    1701596,
+    1701604
+  ],
+  "timing": {
+    "input_hold_signal_ticks": 1536,
+    "update_hold_signal_ticks": 1536,
+    "settle_phase_signal_ticks": 1560,
+    "update_phase_signal_ticks": 1548,
+    "reset_hold_signal_ticks": 48
+  },
+  "platforms": 9,
+  "building_entries": 9572
+}
