@@ -86,27 +86,38 @@ def crystal_loading(cargo: str) -> dict:
 
 def _stack_lane() -> dict:
     lane = SlotStreams()
-    row, machine_x = 3, 10
+    rows = tuple(range(-15, 31, 9))
+    machine_x = 10
     for level in (0, 1):
         lane.put('BeltPortReceiver', A_X, -18, level, 1, config='AA==')
-        for y in range(-17, row):
-            lane.put('BeltDefaultForward', A_X, y, level, 1)
-        lane.put('BeltDefaultLeft', A_X, row, level, 1)
-        lane.straight(A_X + 1, machine_x, row, level)
-    lane.put('StackerStraight', machine_x, row)
-    lane.straight(machine_x + 1, OUT_X, row)
-    lane.put('BeltDefaultLeft', OUT_X, row, mirrored=True)
-    for y in range(row + 1, 30):
-        lane.put('BeltDefaultForward', OUT_X, y, rotation=1)
-    lane.put('BeltDefaultLeft', OUT_X, 30, rotation=1)
-    lane.straight(OUT_X + 1, 37, 30)
+        for y in range(-17, rows[-1]):
+            kind = 'Splitter1To2L' if y in rows else 'BeltDefaultForward'
+            lane.put(kind, A_X, y, level, 1)
+        lane.put('BeltDefaultLeft', A_X, rows[-1], level, 1)
+    for row in rows:
+        for level in (0, 1):
+            lane.straight(A_X + 1, machine_x, row, level)
+        lane.put('StackerStraight', machine_x, row)
+        lane.straight(machine_x + 1, OUT_X, row)
+    lane.put('BeltDefaultLeft', OUT_X, rows[0], mirrored=True)
+    for y in range(rows[0] + 1, rows[-1]):
+        if y in rows:
+            lane.put('Merger2To1L', OUT_X, y, rotation=1, mirrored=True)
+        else:
+            lane.put('BeltDefaultForward', OUT_X, y, rotation=1)
+    lane.put('Merger2To1L', OUT_X, rows[-1])
+    lane.straight(OUT_X + 1, 37, rows[-1])
     lane.put('BeltPortSender', 37, 30, config='KAAAAAA=')
     island = lane.finish()
     island['Y'] = 3
     paths = transport_paths(island)
     for level in (0, 1):
-        trace(paths, (A_X, -17, level, 3), {(machine_x, row, level, 2)}, set())
-    trace(paths, (machine_x + 1, row, 0, 2), {(37, 30, 0, 2)}, set())
+        for row in rows[:-1]:
+            paths[A_X, row, level, 3] = ((A_X, row, level, 1), (A_X, row, level, 0))
+        for row in rows:
+            trace(paths, (A_X, -17, level, 3), {(machine_x, row, level, 2)}, {(A_X, row, level)})
+    for row in rows:
+        trace(paths, (machine_x + 1, row, 0, 2), {(37, rows[-1], 0, 2)}, set())
     return island
 
 
