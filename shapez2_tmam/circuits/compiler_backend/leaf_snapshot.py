@@ -8,6 +8,7 @@ from ..circuit import constant
 from ..local_module import Module
 from . import _write_blueprint
 from ._snapshot_layout import compact_batch, compact_snapshot
+from ._stacked_snapshot import stacked_snapshot
 from .auto_prefix_scan import _radio_ports
 from .method_sequence import _radio_channels
 from .module_caller import _RADIO_RECEIVER, _compare, _gate, _local_wiring
@@ -73,11 +74,15 @@ def _attach_path(document: dict, path: Path) -> None:
     _append(document, wiring.platforms)
 
 
-def build(path: Path | None = None) -> tuple[dict, dict]:
+def build(path: Path | None = None, *, stacked: bool = False) -> tuple[dict, dict]:
     fields = tuple(zip(_SOURCE, _STORED, strict=True))
-    platforms = [compact_snapshot(fields, _capture(), _height(), _COLUMN)]
+    args = fields, _capture(), _height(), _COLUMN
+    platforms = stacked_snapshot(*args) if stacked else [compact_snapshot(*args)]
     if path is not None:
-        platforms.append({**compact_batch(_batch()), "Z": 1})
+        batch = {**compact_batch(_batch()), "Z": 1}
+        if stacked:
+            batch["Y"] = 1
+        platforms.append(batch)
     document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}}
     if path is not None:
         _attach_path(document, path)
@@ -102,10 +107,11 @@ def build(path: Path | None = None) -> tuple[dict, dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="导出成功叶端的输入锁存")
     parser.add_argument("--path", type=Path, help="将两遍成功路径的读口改接冻结输入")
+    parser.add_argument("--stacked", action="store_true", help="将锁存和读高布置在三个岛层")
     parser.add_argument("--output", required=True, type=Path, help="原生 .spz2bp 输出路径")
     args = parser.parse_args()
     try:
-        document, report = build(args.path)
+        document, report = build(args.path, stacked=args.stacked)
         _write_blueprint(document, report, args.output)
     except (OSError, ValueError, KeyError) as error:
         parser.error(str(error))

@@ -5,7 +5,7 @@ from itertools import product
 from math import dist
 
 from .circuit import Circuit, Literal, Ref, _TYPES, constant
-from .foundations import EDGE_MARGIN, FOUNDATION_CHUNKS, TILE_SIZE
+from .foundations import EDGE_MARGIN, FOUNDATION_CHUNKS, TILE_SIZE, platform_ground
 from ..mari.blueprint import DIRECTIONS, Wiring
 from ..mari.ports import PORTS
 
@@ -18,16 +18,21 @@ class _Board:
         self.origin_x = EDGE_MARGIN - (nx - 1) // 2 * TILE_SIZE
         self.origin_y = EDGE_MARGIN - (ny - 1) // 2 * TILE_SIZE
         self.foundation = foundation
+        self.ground = platform_ground(foundation) if foundation == "Foundation_L3" else None
         self.entries = []
         self.occupied = set()
         self.traces = defaultdict(dict)
         self.terminals = defaultdict(set)
 
+    def on_ground(self, x, y):
+        if self.ground is not None:
+            return (x + self.origin_x, y + self.origin_y) in self.ground
+        return 0 <= x < self.width and 0 <= y < self.height
+
     def place(self, kind, x, y, level, rotation=0, config=None, *, radius=0, height=1):
         footprint = {(x + dx, y + dy, level + dz) for dx, dy in product(range(-radius, radius + 1), repeat=2)
                      for dz in range(height)}
-        if self.occupied & footprint or any(not (0 <= a < self.width and 0 <= b < self.height and 0 <= l < 3)
-                                            for a, b, l in footprint):
+        if self.occupied & footprint or any(not self.on_ground(a, b) or not 0 <= l < 3 for a, b, l in footprint):
             raise ValueError(f"建筑占地冲突或越界 {kind}@{(x, y, level)}")
         self.occupied.update(footprint)
         entry = {"T": _TYPES.get(kind, kind + "InternalVariant"), "X": x + self.origin_x, "Y": y + self.origin_y,
@@ -41,7 +46,7 @@ class _Board:
         dx, dy = DIRECTIONS[facing]
         site = x + dx, y + dy, level
         if (site in self.occupied or self.traces[site].keys() - {net}
-                or not (0 <= site[0] < self.width and 0 <= site[1] < self.height)):
+                or not self.on_ground(*site[:2])):
             raise ValueError(f"本地端口出口被占用 {site}")
         self.traces[site].setdefault(net, set()).add((facing + 2) % 4)
         self.terminals[net, level].add(site)
@@ -80,7 +85,7 @@ class _Board:
                 x, y, level = site
                 for direction, (dx, dy) in enumerate(DIRECTIONS):
                     a, b = x + dx, y + dy
-                    while 0 <= a < self.width and 0 <= b < self.height and (a, b, level) not in self.occupied:
+                    while self.on_ground(a, b) and (a, b, level) not in self.occupied:
                         target = a, b, level
                         wires = self.traces.get(target, {})
                         if not wires or net in wires:

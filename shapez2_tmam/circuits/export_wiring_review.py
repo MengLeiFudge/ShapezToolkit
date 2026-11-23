@@ -11,7 +11,7 @@ from shutil import copyfile
 from ..mari.blueprint import DIRECTIONS, PORTS, _kind, _rotate
 from ..mari.signals import decode_constant
 from .compiler_backend.prefix_scan_wiring import _native_wiring
-from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_ground
+from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_tiles, platform_ground
 
 
 _LEVELS = 3
@@ -64,9 +64,8 @@ def _diagram(path):
         x = platform.get("X", 0) - (width - 1) // 2
         y = platform.get("Y", 0) - (height - 1) // 2
         count = len(platform["B"]["Entries"])
-        platforms.append((i, x, y, platform.get("Z", 0), width, height, count))
-    masks = {size: foundation_ground(*size) for size in {p[4:6] for p in platforms}}
-    ground = [masks[p[4:6]] for p in platforms]
+        platforms.append((i, x, y, platform.get("Z", 0), width, height, count, foundation_tiles(platform["T"])))
+    ground = [platform_ground(p["T"]) for p in wiring.platforms]
     occupied = [set() for _ in platforms]
     placement_errors = Counter()
     unknown_footprints = set()
@@ -108,7 +107,8 @@ def _diagram(path):
         entries.append((x, y, island, level, color, kind, parts, offsets))
     links = [(_position(wiring, tx), _position(wiring, rx)) for rx, tx in wiring.short_ports.items()]
     coverage = [(len(cells), len({(x, y) for x, y, _ in cells}), len(ground[board]),
-                 placement_errors[board], board in unknown_footprints) for board, cells in enumerate(occupied)]
+                 placement_errors[board], board in unknown_footprints, Counter(z for _, _, z in cells))
+                for board, cells in enumerate(occupied)]
     return platforms, entries, links, radio, coverage
 
 
@@ -131,18 +131,18 @@ def _section(path, output_dir):
     receivers = sum(line[5] == "rx" for line in radio)
     transmitters = len(radio) - receivers
     outer = tuple(max(p[i] + p[i + 3] for p in platforms) - min(p[i] for p in platforms) for i in (1, 2))
-    footprint = len({(x + dx, y + dy) for _, x, y, _, width, height, _ in platforms
-                     for dx in range(width) for dy in range(height)})
-    sizes = Counter((width, height) for _, _, _, _, width, height, _ in platforms)
-    summary = "、".join(f"{count} 块 {width}×{height}" for (width, height), count in sorted(sizes.items()))
+    footprint = len({(x + dx, y + dy) for _, x, y, _, _, _, _, tiles in platforms for dx, dy in tiles})
+    sizes = Counter((p[4], p[5], len(p[7])) for p in platforms)
+    summary = "、".join(f"{count} 块 {width}×{height}" + (" L 形" if tiles < width * height else "")
+                       for (width, height, tiles), count in sorted(sizes.items()))
     density_target = 0.5
     capacity = 0
     board_rows = []
     passed = 0
-    for platform, (used, projected, ground_cells, errors, unknown) in zip(platforms, coverage, strict=True):
+    for platform, (used, projected, ground_cells, errors, unknown, level_cells) in zip(platforms, coverage, strict=True):
         buildable = ground_cells * _LEVELS
-        board, _, _, island, width, height, count = platform
-        slots = width * height * TILE_SIZE ** 2 * _LEVELS
+        board, _, _, island, width, height, count, tiles = platform
+        slots = len(tiles) * TILE_SIZE ** 2 * _LEVELS
         occupancy = count / slots
         capacity += slots
         if errors:
@@ -157,8 +157,11 @@ def _section(path, output_dir):
         rate = "待核算" if unknown else f"{used / buildable:.1%}"
         plan_rate = "待核算" if unknown else f"{projected / ground_cells:.1%}"
         cells = "—" if unknown else f"{used:,}"
+        layer_columns = "".join(f"<td>{level_cells[z] / ground_cells:.1%}</td>" for z in range(_LEVELS))
+        if unknown:
+            layer_columns = "<td>—</td>" * _LEVELS
         board_rows.append(f"<tr><td>P{board}</td><td>Z{island}</td><td>{width}×{height}</td><td>{count:,}</td>"
-                          f"<td>{occupancy:.1%}</td><td>{cells} / {buildable:,}</td>"
+                          f"<td>{occupancy:.1%}</td>{layer_columns}<td>{cells} / {buildable:,}</td>"
                           f"<td>{rate}</td><td>{plan_rate}</td><td>{verdict}</td></tr>")
     data = json.dumps({"platforms": platforms, "entries": entries, "links": links}, ensure_ascii=True)
     table = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in (*row[:5], "接收" if row[5] == "rx" else "发射", row[6]))
@@ -170,7 +173,7 @@ def _section(path, output_dir):
             f'<p>占地率达标 {passed} / {len(platforms)} 块 · 每块至少 {_COVERAGE_MIN}%</p>'
             '<details open><summary>逐块平台占地</summary><table><thead>'
             '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>建筑占比</th>'
-            '<th>三层已占 / 可建格</th><th>三层占地率</th><th>俯视占地率</th><th>判定</th></tr>'
+            '<th>L0</th><th>L1</th><th>L2</th><th>三层已占 / 可建格</th><th>三层占地率</th><th>俯视占地率</th><th>判定</th></tr>'
             f'</thead><tbody>{"".join(board_rows)}</tbody></table></details>'
             '<table><thead><tr><th>建筑层</th><th>器件</th><th>线缆件</th></tr></thead>'
             f'<tbody>{layers}</tbody></table>'
@@ -220,14 +223,15 @@ function draw(container, platforms, entries, links, island, layer) {
     ctx.beginPath(); ctx.moveTo(xAt(x1), yAt(y1)); ctx.lineTo(xAt(x2), yAt(y2)); ctx.stroke();
   };
   ctx.fillStyle = '#101a27'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  for (const [id, bx, by, , cols, rows] of platforms) {
-    const x = bx * chunk, y = by * chunk, w = cols * chunk, h = rows * chunk;
-    ctx.fillStyle = '#1b2c3d'; ctx.fillRect(xAt(x), yAt(y), scale * w, scale * h);
-    ctx.strokeStyle = '#344d62'; ctx.lineWidth = 1;
-    for (let d = chunk; d < w; d += chunk) segment(x+d,y,x+d,y+h);
-    for (let d = chunk; d < h; d += chunk) segment(x,y+d,x+w,y+d);
-    ctx.strokeStyle = '#839ab2'; ctx.strokeRect(xAt(x), yAt(y), scale * w, scale * h);
-    ctx.fillStyle = '#b8cadd'; ctx.font = '12px sans-serif'; ctx.fillText(`P${id}`, xAt(x)+4, yAt(y)+14);
+  for (const [id, bx, by, , , , , tiles] of platforms) {
+    ctx.lineWidth = 1;
+    for (const [dx,dy] of tiles) {
+      const x = xAt((bx + dx) * chunk), y = yAt((by + dy) * chunk), side = scale * chunk;
+      ctx.fillStyle = '#1b2c3d'; ctx.fillRect(x,y,side,side);
+      ctx.strokeStyle = '#839ab2'; ctx.strokeRect(x,y,side,side);
+    }
+    ctx.fillStyle = '#b8cadd'; ctx.font = '12px sans-serif';
+    ctx.fillText(`P${id}`, xAt(bx * chunk)+4, yAt(by * chunk)+14);
   }
   ctx.globalAlpha = .27;
   for (const [x,y,,level,color,kind,parts,footprint] of entries) {

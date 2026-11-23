@@ -31,16 +31,18 @@ class _Layout:
             dx, dy = _rotate(-1, 0, rotation)
             self.board.pin(net, x + dx, y + dy, 0, (rotation + 2) % 4)
 
-    def gate(self, gate, x, y, z, rotation):
+    def gate(self, gate, x, y, z, rotation, *, direct=()):
         kind, args, outputs, config = gate
         index = self.board.place(kind, x, y, z, rotation, config)
         for port, (net, (direction, _, _, _)) in enumerate(zip(outputs, PORTS[kind][0], strict=True)):
             self.drivers[net].append((index, port))
-            self.board.pin(net, x, y, z, (direction + rotation) % 4)
+            if net not in direct:
+                self.board.pin(net, x, y, z, (direction + rotation) % 4)
         for port, (arg, (direction, _, _, _)) in enumerate(zip(args, PORTS[kind][1], strict=True)):
             side = (direction + rotation) % 4
             if isinstance(arg, str):
-                self.board.pin(arg, x, y, z, side)
+                if arg not in direct:
+                    self.board.pin(arg, x, y, z, side)
                 self.inputs[index, port] = arg
             else:
                 dx, dy = DIRECTIONS[side]
@@ -83,14 +85,14 @@ class _Layout:
                     for net in signals if isinstance(net, str)}
             candidates = []
             for x, y, z, rotation in sites:
-                if (x, y, z) in board.occupied or (x, y, z) in board.traces:
+                if not board.on_ground(x, y) or (x, y, z) in board.occupied or (x, y, z) in board.traces:
                     continue
                 score = 2 * sum((x + dx, y + dy, z) in board.occupied or (x + dx, y + dy, z) in board.traces
                                 for dx, dy in product(range(-2, 3), repeat=2))
                 for net, direction in zip(signals, directions, strict=True):
                     dx, dy = DIRECTIONS[(direction + rotation) % 4]
                     site = a, b, _ = x + dx, y + dy, z
-                    if site in board.occupied:
+                    if site in board.occupied or not board.on_ground(a, b):
                         break
                     traces = board.traces.get(site)
                     if traces and (not isinstance(net, str) or traces.keys() != {net}):
