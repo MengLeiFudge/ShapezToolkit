@@ -71,6 +71,8 @@
 
 紧柱指令电路把同一构造变成六字段。每层依次用相位 `0` 换色、`1` 领料、`2` 堆叠。这三相位共用本层原格、上一层后的待结晶色和已有下料标志。层完成后更新待结晶色。最后用相位 `3` 到 `7` 结晶并取出紧柱。等满接口保持时间后，遇到空指令就跳过，遇到非空指令就等制作层确认。 [原生指令电路](电路/双半形/dense-column-packet.spz2bp) · [六字段接口](电路/双半形/dense-column-packet.json)
 
+紧柱输入板从五个原格信号选择当前层，向六字段电路提供上一层后的待结晶色。两块推进板共用 `phase`、`level` 和本笔确认。相位 2 从当前原层转到下一层，五层均读完后推进到收尾，再到相位 8。稳定之前保持原值。有指令时需收到本笔确认，空指令直接推进。推进板由外部时序采样，再回写新相位和层号。 [输入接口](电路/双半形/dense-column-input.json) · [相位接口](电路/双半形/dense-column-advance-phase.json) · [层号接口](电路/双半形/dense-column-advance-level.json)
+
 ```bash
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/dense_packet.py \
   --field opcode=dense_packet_opcode --field a=dense_packet_a --field b=dense_packet_b \
@@ -83,6 +85,21 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/dense_pack
   --input-channel scratch=1701405 --output-channel opcode=1701406 --output-channel a=1701407 \
   --output-channel b=1701408 --output-channel destination=1701409 --output-channel base=1701410 \
   --output-channel color=1701411 --output-channel next_pending=1701412 --output dense-column-packet.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/dense_input.py \
+  --field row=dense_input_row --field pending=dense_input_pending --field assembled=dense_input_assembled \
+  --input-channel row0=1701466 --input-channel row1=1701467 --input-channel row2=1701468 \
+  --input-channel row3=1701469 --input-channel row4=1701470 --input-channel level=1701465 \
+  --output-channel row=1701401 --output-channel pending=1701402 --output-channel assembled=1701403 \
+  --output dense-column-input.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/dense_cursor.py \
+  --field phase=dense_advance_phase --field done=dense_done --input-channel phase=1701400 \
+  --input-channel level=1701465 --input-channel enable=1701461 --input-channel settled=1701462 \
+  --input-channel has_packet=1701463 --input-channel confirmed=1701471 --output-channel phase=1701472 \
+  --output-channel done=1701464 --output dense-column-advance-phase.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/dense_cursor.py \
+  --field level=dense_advance_level --input-channel phase=1701400 --input-channel level=1701465 \
+  --input-channel enable=1701461 --input-channel settled=1701462 --input-channel has_packet=1701463 \
+  --input-channel confirmed=1701471 --output-channel level=1701473 --output dense-column-advance-level.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_methods.py \
   --field row0=original_row_0 --field row1=original_row_1 --field row2=original_row_2 \
   --field row3=original_row_3 --field row4=original_row_4 --input-channel target=1700872 \
