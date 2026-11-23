@@ -24,6 +24,22 @@ def select_column(target: Shape | None, column: int) -> Shape | None:
     return None
 
 
+def column_target_q0(target: Shape | None) -> Shape | None:
+    return select_column(target, 0)
+
+
+def column_target_q1(target: Shape | None) -> Shape | None:
+    return select_column(target, 1)
+
+
+def column_target_q2(target: Shape | None) -> Shape | None:
+    return select_column(target, 2)
+
+
+def column_target_q3(target: Shape | None) -> Shape | None:
+    return select_column(target, 3)
+
+
 def closed_prefix_ready(done: bool, h0: int, h1: int, h2: int, h3: int) -> bool:
     return done & (h0 >= 0) & (h1 >= 0) & (h2 >= 0) & (h3 >= 0)
 

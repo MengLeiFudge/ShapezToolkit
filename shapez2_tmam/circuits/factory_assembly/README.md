@@ -257,6 +257,12 @@ python -m shapez2_tmam.circuits.factory_assembly.books trains --recipe solver4-o
 
 两次合角、一次拼半形和最多五层追加合计至多 23 工段。加上四个角的顶破释放，每角至多 22 工段，合计至多 111 工段。预算整单时还要计入主形、近锚和补形等备料，以及角本身可能需要的后续拼接和恢复朝向。
 
+## 紧柱与触顶补形备料
+
+[`dense_column.py`](dense_column.py) 的两个入口都返回六字段指令。`dense_column_instructions` 接收从底到顶的单格短代码，每层原料放在 `q0`，空信号只用于补齐末尾层。调用时给出两个空槽 `destination` 和 `scratch_slot`。普通格保留原形状和颜色。有色晶体先领 `P-CuCuCu`，旧颜色在下一种晶色到来或完工时一次结晶。纯普通格与顶针的柱也可以直接备制。含晶柱的真实针尾通过 `append_five_instructions` 追加。最后两次半切移除 `q1/q2/q3` 的临时料，将紧柱存入 `destination`，上料槽释放。单根五层紧柱最多 18 工段。
+
+`pin_complement_instructions` 接收 `pin_corner_trigger` 给出的单格层序，三个空槽分别作结果、触顶柱和临时上料。先造五层红晶脊，再造触顶柱，按 `counterclockwise` 转向并交换。调用时可同时保留前半形、第一角和已转交支撑的主形，备制峰值为六槽。补形存入 `destination` 后，另外两个槽可复用。当前构造用三至四层触顶柱，最多 25 工段。入口允许五层，最多 27 工段。补形做完即可接 `pin_corner_top_break_instructions`。
+
 ## 工段容量与共用供料
 
 当前装配让每个配方地址占一个工段。两份订单中较长的一份有 48 条指令，因此固定双订单示例需要 48 段。两份订单的地址 `0、1、5、7` 都领取基础单层，地址 `2、6、8` 都走堆叠。这七段可随换单重用同一路径，基础料选择器按当前订单领货。

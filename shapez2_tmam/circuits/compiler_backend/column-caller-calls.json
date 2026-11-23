@@ -1,0 +1,14 @@
+[
+  {
+    "initial_remaining": {"literal": "Cu------:Ru------:P-------"},
+    "initial_word": {"literal": null},
+    "initial_height": {"literal": 5},
+    "prefix_height": {"literal": 5}
+  },
+  {
+    "initial_remaining": {"literal": "Ru------:P-------:cr------"},
+    "initial_word": {"literal": null},
+    "initial_height": {"literal": 5},
+    "prefix_height": {"literal": 2}
+  }
+]
