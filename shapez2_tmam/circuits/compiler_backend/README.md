@@ -36,7 +36,7 @@ python -m shapez2_tmam.circuits.compiler_backend append_five --channel-base 1700
 
 ## 固定次数的时序复用
 
-`timed.compile_fold(program, steps, channel_base)` 编译一个 `(累积值, 本轮输入) → 累积值` 方法。从 `initial` 开始依次折叠 `item0` 至 `item{steps-1}`，支持 1～8 轮。状态和单步计算各占一块平台，四条公开频道传递当前索引、当前累计值、下一索引和下一累计值。
+`timed.compile_fold(program, steps, channel_base)` 编译一个 `(累积值, 本轮输入) → 累积值` 方法。从 `initial` 开始依次折叠 `item0` 至 `item{steps-1}`，支持 1～8 轮。状态模块占一块平台，四条频道在状态与计算模块之间传递当前索引、当前累计值、下一索引和下一累计值。
 
 ```bash
 python -m shapez2_tmam.circuits.compiler_backend append_five_timed --channel-base 1700020 --output append_five_timed.spz2bp
@@ -44,7 +44,7 @@ python -m shapez2_tmam.circuits.compiler_backend append_five_timed --channel-bas
 
 在 `run=0` 时给出整组 `initial` 和 `item` 并按接口表等待复位，再一次置 `run=1`。保持整组输入，达到采样时间且 `done=1` 后读取 `result`。空图形也是有效结果。
 
-两块内部的门网均无环。记 `S(t)` 为状态模块发布的索引和累计值，`F` 为按索引运行一步的计算。复位时 `S(t)=(0, initial)`，一个往返后状态模块持续收到 `F(0, initial)`。启动后 `S(t)=F(S(t−24))`，第一轮在 `run` 抵达状态模块时已经可读。其余每轮相隔 24 tick，末轮索引和结果在后续往返中保持。运行前提见[固定频道边](../../docs/proofs/08-circuits.md#s08-05)。
+状态和计算模块的本地门网均无环。记 `S(t)` 为状态模块发布的索引和累计值，`F` 为按索引运行一步的计算。复位时 `S(t)=(0, initial)`，一个往返后状态模块持续收到 `F(0, initial)`。启动后 `S(t)=F(S(t−24))`，第一轮在 `run` 抵达状态模块时已经可读。其余每轮相隔 24 tick，末轮索引和结果在后续往返中保持。运行前提见[固定频道边](../../docs/proofs/08-circuits.md#s08-05)。
 
 采样时间包含启动和结果的各一次 12 tick 频道传播、后续各轮的 24 tick 往返及余量。生产编译核对常量、端口和收发频道。游戏内导入和时序观察单独验收。
 
@@ -54,9 +54,11 @@ python -m shapez2_tmam.circuits.compiler_backend append_five_timed --channel-bas
 
 同一轮的各个入口共用同一份旧状态和当前 `item`。所有下一值都有相同的 12 tick 回程延迟，由状态平台同时发布到下一轮。复位、每轮 24 tick 的往返和 `done` 采样协议与单字段一致。向 `initial_<字段>` 提供初值，完成后从 `result_<字段>` 读取结果。频道表的 `module_links` 按两个方向列出索引以及各字段的类型和频道。
 
-状态平台每侧占用 `2N+2` 个无线口，`N` 为字段数。计算平台最多接收 `N+1+steps` 个频道。逐轮输入模式按每侧最多 10 个无线口分配频道，最多支持四个字段，四字段最多折叠五轮。计算门网超出单板容量或走线失败时，后端按下一状态输出拆到并行计算平台，每块只接收各自输出依赖的旧状态、索引或 `item`。每个下一状态频道由一个平台发布，往返为 24 tick。
+状态平台每侧占用 `2N+2` 个无线口，`N` 为字段数。计算平台最多接收 `N+1+steps` 个频道。逐轮输入模式按每侧最多 10 个无线口分配频道，最多支持四个字段，四字段最多折叠五轮。计算门网超出单板容量或走线失败时，后端按下一状态输出拆成并行模块，每个模块只接收其输出依赖的输入。
 
-`worker_logic_gates_before_reuse` 和 `worker_logic_gates_after_reuse` 统计拆板前的计算门网。`worker_logic_gates` 是各计算平台实际布置的门数总和，各板重复计算也计入。`worker_partitions` 列出各计算平台的输出频道，`worker_layout_failures` 记录导致拆板或退回原门网的走线问题。拆板或有接收口裁剪时，`worker_ports` 列出各计算平台实际接收和发布的频道。
+单个下一值仍无法在一块平台上布置时，后端把该计算模块拆到同岛层的相邻两板。飞线端口共享一个 `SignalPortTransferSimulation`，按同一信号 tick 读取并写出。整件批量导入或完整重载后，这段前馈路径与两侧的本地导线属于同一无环更新图。状态与计算之间仍按每向 12 tick 传输，往返为 24 tick。
+
+`worker_logic_gates_before_reuse` 和 `worker_logic_gates_after_reuse` 统计拆板前的计算门网。`worker_logic_gates` 是实际布置的计算门数总和。`worker_partitions` 和 `worker_ports` 分别列出各计算模块的输出分组及实际收发频道，`worker_layout_failures` 记录导致拆板或退回原门网的走线问题。使用飞线时，`worker_platforms` 给出每个计算模块的平台数，`short_range_links` 给出飞线端口对数。
 
 ```bash
 python -m shapez2_tmam.circuits.compiler_backend scalar_ring_timed --channel-base 1700060 --output scalar_ring_timed.spz2bp

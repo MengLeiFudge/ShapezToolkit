@@ -128,12 +128,17 @@ def corner_helper_column(crystal: int, landing: int, suspended: bool) -> Shape:
 
 
 def column_highest_crystal(word: Shape | None) -> int:
+    return column_crystal_height(word) - 1
+
+
+def column_crystal_height(word: Shape | None) -> int:
+    """给出保留全部晶体的初始前缀高度，无晶体为 0。"""
     crystal = shape_literal("Wu------")
-    for z in (4, 3, 2, 1, 0):
+    for height in (5, 4, 3, 2, 1):
         if unstack_upper(word) == crystal:
-            return z
+            return height
         word = unstack_lower(word)
-    return -1
+    return 0
 
 
 def _is_raised_source(level: int, crystal: int) -> bool:

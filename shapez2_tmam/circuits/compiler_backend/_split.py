@@ -14,10 +14,11 @@ _EDGE_SLOTS = tuple((start + row, level) for row in (2, 3, 1, 4) for level in ra
                     for start in (24, 4, 44))
 
 
-def layout_two_platforms(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[dict, int]:
+def layout_two_platforms(circuit: Circuit, outputs: dict[int, Ref], *,
+                         retain_inputs: bool = True) -> tuple[dict, int]:
     """把互斥总线的全部驱动放在同一块板上，再从板间单向传递合并后的值。"""
     channels = circuit.channel_map()
-    live = _live_nodes(circuit, channels, outputs)
+    live = _live_nodes(circuit, channels, outputs, retain_inputs=retain_inputs)
     radios = {i for i in live if circuit.gates[i].kind == "ControlledSignalReceiver"}
     if (len(radios) > len(_RADIO_ROWS) or len(outputs) > 2 * len(_RADIO_ROWS)
             or len(live) - len(radios) > 2 * _GATE_CAPACITY):

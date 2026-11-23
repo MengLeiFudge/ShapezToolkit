@@ -12,6 +12,7 @@ from ..sequential_circuit import select
 from ._layout import _RADIO_ROWS, LayoutCapacityError, layout, logic_gates, used_input_channels
 from ._lower import Lowering, _Value
 from ._optimize import compact
+from ._split import layout_two_platforms
 
 
 _CHANNEL_TICKS = 12
@@ -20,21 +21,30 @@ _IO_MARGIN_TICKS = 64
 _MAX_STATE_STEPS = 32
 
 
-def _verify_radios(document: dict, ports: tuple[tuple[set[int], set[int]], ...]) -> None:
+def _verify_radios(document: dict, ports: tuple[tuple[int, set[int], set[int]], ...]) -> int:
     wiring = Wiring(document["BP"])
-    by_platform: list[tuple[set[int], set[int]]] = [(set(), set()) for _ in ports]
+    platform_workers = [worker for worker, (count, _, _) in enumerate(ports) for _ in range(count)]
+    actual: list[tuple[set[int], set[int]]] = [(set(), set()) for _ in ports]
     radio_kinds = ("ControlledSignalReceiverInternalVariant", "ControlledSignalTransmitterInternalVariant")
     for index, (platform, entry) in enumerate(wiring.entries):
         if entry["T"] not in radio_kinds:
             continue
         (source, _), = wiring.sources(index, 0)
         channel = decode_constant(wiring.entries[source][1]["C"])
-        side = by_platform[platform][radio_kinds.index(entry["T"])]
+        side = actual[platform_workers[platform]][radio_kinds.index(entry["T"])]
         if not isinstance(channel, int) or channel in side:
-            raise ValueError(f"模块 {platform} 的频道 {channel} 非整数或重复")
+            raise ValueError(f"平台 {platform} 的频道 {channel} 非整数或在同一模块重复")
         side.add(channel)
-    if tuple(by_platform) != ports:
+    if tuple(actual) != tuple((inputs, outputs) for _, inputs, outputs in ports):
         raise ValueError("状态与计算模块的实际收发频道和接口表不一致")
+    for receiver, sender in wiring.short_ports.items():
+        if platform_workers[wiring.entries[receiver][0]] != platform_workers[wiring.entries[sender][0]]:
+            raise ValueError("短距口跨出了计算模块")
+    if 2 * len(wiring.short_ports) != sum(e["T"] in ("WireTransmitterSenderInternalVariant",
+                                                      "WireTransmitterReceiverInternalVariant")
+                                          for _, e in wiring.entries):
+        raise ValueError("时序计算模块存在未配对的短距口")
+    return len(wiring.short_ports)
 
 
 @dataclass(frozen=True)
@@ -99,7 +109,7 @@ def _worker(lowerings: tuple[Lowering, ...], methods: tuple[Function, ...], port
 
 @dataclass(frozen=True)
 class _Worker:
-    platform: dict
+    platforms: list[dict]
     inputs: set[int]
     outputs: set[int]
     gates: int
@@ -109,15 +119,18 @@ def _place_workers(circuit: Circuit, outputs: dict[int, Ref], failures: list[dic
     try:
         document, _ = layout(circuit, outputs, retain_inputs=False)
     except LayoutCapacityError as error:
-        if len(outputs) == 1:
-            channel, = outputs
-            raise LayoutCapacityError(f"计算频道 {channel} 无法单独布置，{error}") from error
         failures.append({"outputs": list(outputs), "reason": str(error)})
-        midpoint = (len(outputs) + 1) // 2
-        entries = tuple(outputs.items())
-        return (_place_workers(circuit, dict(entries[:midpoint]), failures)
-                + _place_workers(circuit, dict(entries[midpoint:]), failures))
-    return [_Worker(document["BP"]["Entries"][0], used_input_channels(circuit, outputs),
+        if len(outputs) > 1:
+            midpoint = (len(outputs) + 1) // 2
+            entries = tuple(outputs.items())
+            return (_place_workers(circuit, dict(entries[:midpoint]), failures)
+                    + _place_workers(circuit, dict(entries[midpoint:]), failures))
+        channel, = outputs
+        try:
+            document, _ = layout_two_platforms(circuit, outputs, retain_inputs=False)
+        except LayoutCapacityError as split_error:
+            raise LayoutCapacityError(f"计算频道 {channel} 无法布置，{error}。{split_error}") from split_error
+    return [_Worker(document["BP"]["Entries"], used_input_channels(circuit, outputs),
                     set(outputs), logic_gates(circuit, outputs))]
 
 
@@ -215,18 +228,25 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
             raise
         failures.append({"reason": str(error), "unreduced_fallback": True})
         workers = _place_workers(circuit, updates, failures)
-    platforms = [state, *(worker.platform for worker in workers)]
-    if len(platforms) == 2:
-        platforms[1]["X"] = 3
+    platforms = [state]
+    if any(len(worker.platforms) > 1 for worker in workers):
+        # 每组计算板占独立一行，保留组内的同层相邻缺口。
+        for row, worker in enumerate(workers, start=1):
+            platforms.extend({**platform, "Y": 3 * row} for platform in worker.platforms)
     else:
-        stack_platforms(platforms)
+        platforms.extend(worker.platforms[0] for worker in workers)
+        if len(platforms) == 2:
+            platforms[1]["X"] = 3
+        else:
+            stack_platforms(platforms)
     document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}}
     state_link = {ports.index, *ports.value.values()}
     worker_link = {ports.next_index, *ports.next_value.values()}
     worker_inputs = {*ports.items.values(), *ports.held.values(), *state_link}
-    _verify_radios(document, (({ports.run, *ports.initial.values(), *worker_link},
-                              {ports.done, *ports.result.values(), *state_link}),
-                              *((worker.inputs, worker.outputs) for worker in workers)))
+    short_links = _verify_radios(document, ((1, {ports.run, *ports.initial.values(), *worker_link},
+                                           {ports.done, *ports.result.values(), *state_link}),
+                                          *((len(worker.platforms), worker.inputs, worker.outputs)
+                                            for worker in workers)))
 
     def typed(named: dict[str, int], types: tuple[ValueType, ...]) -> dict:
         return {name: {"channel": channel, "type": type_.value}
@@ -283,9 +303,12 @@ def _compile_fold(programs: Mapping[str, Program], steps: int, channel_base: int
     if failures:
         report["worker_partitions"] = [sorted(worker.outputs) for worker in workers]
         report["worker_layout_failures"] = failures
-    if len(workers) > 1 or any(worker.inputs != worker_inputs for worker in workers):
+    if len(workers) > 1 or any(worker.inputs != worker_inputs for worker in workers) or short_links:
         report["worker_ports"] = [{"inputs": sorted(worker.inputs), "outputs": sorted(worker.outputs)}
                                   for worker in workers]
+    if short_links:
+        report["short_range_links"] = short_links
+        report["worker_platforms"] = [len(worker.platforms) for worker in workers]
     report["worker_logic_gates"] = sum(worker.gates for worker in workers)
     report["worker_logic_gates_before_reuse"] = logic_gates(circuit, updates)
     report["worker_logic_gates_after_reuse"] = logic_gates(reduced, reduced_outputs)
