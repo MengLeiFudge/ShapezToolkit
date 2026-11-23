@@ -1,0 +1,208 @@
+{
+  "methods": {
+    "required": "seed_required",
+    "candidate": "seed_candidate",
+    "supported": "seed_supported"
+  },
+  "schedule": "bounded_fold",
+  "quadrants": 4,
+  "height": 5,
+  "steps": 5,
+  "inputs": {
+    "run": {
+      "channel": 1700830,
+      "type": "bool"
+    },
+    "initial_required": {
+      "channel": 1700831,
+      "type": "int"
+    },
+    "initial_candidate": {
+      "channel": 1700832,
+      "type": "int"
+    },
+    "initial_supported": {
+      "channel": 1700833,
+      "type": "bool"
+    },
+    "low_word": {
+      "channel": 1700846,
+      "type": "shape"
+    },
+    "high_word": {
+      "channel": 1700847,
+      "type": "shape"
+    },
+    "high_height": {
+      "channel": 1700848,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "done": {
+      "channel": 1700834,
+      "type": "bool"
+    },
+    "result_required": {
+      "channel": 1700835,
+      "type": "int"
+    },
+    "result_candidate": {
+      "channel": 1700836,
+      "type": "int"
+    },
+    "result_supported": {
+      "channel": 1700837,
+      "type": "bool"
+    }
+  },
+  "module_links": {
+    "state_to_step": {
+      "index": {
+        "channel": 1700838,
+        "type": "int"
+      },
+      "value_required": {
+        "channel": 1700839,
+        "type": "int"
+      },
+      "value_candidate": {
+        "channel": 1700840,
+        "type": "int"
+      },
+      "value_supported": {
+        "channel": 1700841,
+        "type": "bool"
+      }
+    },
+    "step_to_state": {
+      "next_index": {
+        "channel": 1700842,
+        "type": "int"
+      },
+      "next_value_required": {
+        "channel": 1700843,
+        "type": "int"
+      },
+      "next_value_candidate": {
+        "channel": 1700844,
+        "type": "int"
+      },
+      "next_value_supported": {
+        "channel": 1700845,
+        "type": "bool"
+      }
+    }
+  },
+  "reserved_channels": [
+    1700830,
+    1700848
+  ],
+  "timing": {
+    "channel_signal_ticks": 12,
+    "round_signal_ticks": 24,
+    "reset_hold_signal_ticks": 256,
+    "start_to_sample_signal_ticks": 160,
+    "conditions": "整件批量导入或完整重载。常速 Hybrid 或 AlwaysHighUPS，固定接线与配置，每批最多 4 信号 tick，保留频道由本实例独占。",
+    "protocol": "从 run=0 复位开始，保持本次所有初值和常驻输入，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 4,
+  "island_footprint_chunks": [
+    6,
+    3
+  ],
+  "buildings_by_layer": [
+    2485,
+    2179,
+    1891
+  ],
+  "building_entries": 6555,
+  "global_receivers": 23,
+  "global_transmitters": 12,
+  "internal_global_devices_per_module": 0,
+  "held_inputs": [
+    "low_word",
+    "high_word",
+    "high_height"
+  ],
+  "round_values": [
+    5,
+    4,
+    3,
+    2,
+    1
+  ],
+  "worker_partitions": [
+    [
+      1700842
+    ],
+    [
+      1700843
+    ],
+    [
+      1700844,
+      1700845
+    ]
+  ],
+  "worker_layout_failures": [
+    {
+      "outputs": [
+        1700842,
+        1700843,
+        1700844,
+        1700845
+      ],
+      "reason": "三层平台未布通 121 个门，三层平台内无法完成本地信号 1000088 的布线"
+    },
+    {
+      "outputs": [
+        1700842,
+        1700843
+      ],
+      "reason": "三层平台未布通 111 个门，三层平台内无法完成本地信号 1000001 的布线"
+    }
+  ],
+  "worker_ports": [
+    {
+      "inputs": [
+        1700838
+      ],
+      "outputs": [
+        1700842
+      ]
+    },
+    {
+      "inputs": [
+        1700838,
+        1700839,
+        1700840,
+        1700841,
+        1700846,
+        1700847,
+        1700848
+      ],
+      "outputs": [
+        1700843
+      ]
+    },
+    {
+      "inputs": [
+        1700838,
+        1700839,
+        1700840,
+        1700841,
+        1700846,
+        1700847,
+        1700848
+      ],
+      "outputs": [
+        1700844,
+        1700845
+      ]
+    }
+  ],
+  "worker_logic_gates": 213,
+  "worker_logic_gates_before_reuse": 301,
+  "worker_logic_gates_after_reuse": 121
+}

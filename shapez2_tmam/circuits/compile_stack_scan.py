@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from ..synthesis import column_build, column_scan, direct_stack, row_support, shape_methods
+from ..synthesis import column_build, column_scan, crystal_support, direct_stack, row_support, shape_methods
 from .compiler_backend import _write_blueprint
 from .compiler_backend.fields import compile_fields
 from .compiler_backend.timed import compile_state_fold, compile_state_steps
@@ -21,8 +21,12 @@ def main() -> int:
     modes.add_argument("--build-dense-column", action="store_true", help="生成紧柱逐层回放与完工电路")
     modes.add_argument("--close-prefix", action="store_true", help="生成双半形前缀的五轮逐层闭包")
     modes.add_argument("--read-prefix-column", action="store_true", help="生成已闭合前缀的 q0 列材料读取电路")
+    modes.add_argument("--seed-crystal-half", action="store_true", help="生成两列半形的含晶支撑预处理")
     args = parser.parse_args()
-    if args.close_prefix:
+    if args.seed_crystal_half:
+        path = Path(crystal_support.__file__)
+        entries = {field: f"seed_{field}" for field in ("required", "candidate", "supported")}
+    elif args.close_prefix:
         path = Path(row_support.__file__)
         entries = {f"h{q}": f"prefix_scan_q{q}" for q in range(4)}
     elif args.read_rows:
@@ -44,7 +48,11 @@ def main() -> int:
     try:
         source = path.read_text(encoding="utf-8")
         methods = {field: compile_method(source, method, filename=str(path)) for field, method in entries.items()}
-        if args.read_prefix_column:
+        if args.seed_crystal_half:
+            document, report = compile_state_steps(methods, 5, args.channel_base,
+                                                   held_inputs=("low_word", "high_word", "high_height"),
+                                                   round_values=(5, 4, 3, 2, 1))
+        elif args.read_prefix_column:
             document, report = compile_state_steps(methods, 5, args.channel_base, held_inputs=("prefix_height",))
         elif args.check_direct or args.read_column:
             document, report = compile_state_steps(methods, 5, args.channel_base)
