@@ -15,7 +15,8 @@
 | 电路 | 从原图一次读取五份原色单层 | [原生蓝图](电路/原层读取/read-five-rows.spz2bp) · [接口](电路/原层读取/read-five-rows.json) |
 | 电路 | 按原层号读取目标的两层 | [复位、选择与采样](电路/原层读取/read-target-rows.json) |
 | 电路 | 四列逐层堆叠前缀扫描 | [整行编码](电路/堆叠前缀/pack-stack-row.json) · [复位、行输入和采样时序](电路/堆叠前缀/stack-prefix-scan.json) |
-| 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) |
+| 电路 | 筛选顶针来源及顶盖 | [单列前缀上界](电路/双半形/column-pin-prefix-limit.json) · [顶盖、接触集及通过信号](电路/顶盖筛选/cap-covers-required.json) · [单列可用顶盖](电路/顶针逆推/pin-cap-column.json) |
+| 电路 | 恢复顶针来源标签并回放 | [来源序号](电路/顶针逆推/pin-source-rank.json) · [五轮查标签](电路/顶针逆推/pin-retained-label.json) · [来源格](电路/顶针逆推/pin-source-label.json) · [回放](电路/顶针逆推/pin-replay.json) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) |
@@ -73,7 +74,25 @@
 
 紧柱输入板从五个原格信号选择当前层，向六字段电路提供上一层后的待结晶色。两块推进板共用 `phase`、`level` 和本笔确认。相位 2 从当前原层转到下一层，五层均读完后推进到收尾，再到相位 8。稳定之前保持原值。有指令时需收到本笔确认，空指令直接推进。推进板由外部时序采样，再回写新相位和层号。 [输入接口](电路/双半形/dense-column-input.json) · [相位接口](电路/双半形/dense-column-advance-phase.json) · [层号接口](电路/双半形/dense-column-advance-level.json)
 
+顶针逆推按同列内的保序关系恢复标签。对前态当前格，数出其下方的普通格和针。五轮读取按该序号从目标列找对应格，跳过晶体和地面新针。前态的晶体看上一原层，保留晶体沿用目标原色，额外晶体用红色。前态获得制造证书后，虚拟顶针回放输出与目标完全相等才通过。
+
 ```bash
+python -m shapez2_tmam.circuits.compile_stack_scan --restore-pin-label --channel-base 1701530 --output pin-retained-label.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_cap_column.py \
+  --field crystal_allowed=top_crystal_allowed --field pin_allowed=top_pin_allowed --field max_cap=cap_material \
+  --input-channel word=1701520 --input-channel z0=1701521 --input-channel z1=1701522 \
+  --input-channel z2=1701523 --input-channel z3=1701524 --output-channel crystal_allowed=1701525 \
+  --output-channel pin_allowed=1701526 --output-channel max_cap=1701527 --output pin-cap-column.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_labels.py \
+  --field rank=source_rank --input-channel z0=1701521 --input-channel z1=1701522 --input-channel z2=1701523 \
+  --input-channel level=1701547 --output-channel rank=1701531 --output pin-source-rank.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_labels.py \
+  --field cell=source_cell --input-channel material=1701548 --input-channel forced_row=1701549 \
+  --input-channel label=1701535 --output-channel cell=1701555 --output pin-source-label.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_labels.py \
+  --field replay=pin_replay --field accepted=pin_replay_matches --input-channel source=1701550 \
+  --input-channel target=1701551 --input-channel ready=1701552 --output-channel replay=1701553 \
+  --output-channel accepted=1701554 --output pin-replay.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/dense_packet.py \
   --field opcode=dense_packet_opcode --field a=dense_packet_a --field b=dense_packet_b \
   --field destination=dense_packet_destination --field base=dense_packet_base --field color=dense_packet_color \

@@ -14,6 +14,8 @@ python -m shapez2_tmam.circuits.factory_assembly.production --stages 2 --output 
 
 通用含晶线可选用双回读接管和单平台结晶收料。[动态含晶工道重导、接线与用量](mixed_sample.md)。
 
+通用工段可用 `--compact-base` 将卸货并入四角选料台。[基础料合板、车头位置与共用供货下界](base_feed.md)。
+
 ### 纯堆叠三册
 
 ```bash

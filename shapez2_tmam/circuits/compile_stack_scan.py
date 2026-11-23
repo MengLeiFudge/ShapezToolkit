@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from ..synthesis import (column_build, column_scan, crystal_support, direct_stack, paired_tail,
-                         row_support, shape_methods)
+                         pin_labels, row_support, shape_methods)
 from .compiler_backend import _write_blueprint
 from .compiler_backend.fields import compile_fields
 from .compiler_backend.timed import compile_state_fold, compile_state_steps
@@ -24,8 +24,12 @@ def main() -> int:
     modes.add_argument("--read-prefix-column", action="store_true", help="生成已闭合前缀的 q0 列材料读取电路")
     modes.add_argument("--seed-crystal-half", action="store_true", help="生成两列半形的含晶支撑预处理")
     modes.add_argument("--append-paired-tail", action="store_true", help="生成双半形尾料的五轮筛选和堆叠")
+    modes.add_argument("--restore-pin-label", action="store_true", help="按保序序号读回顶针前态原料的原色标签")
     args = parser.parse_args()
-    if args.append_paired_tail:
+    if args.restore_pin_label:
+        path = Path(pin_labels.__file__)
+        entries = {field: f"retained_{field}" for field in ("rank", "label")}
+    elif args.append_paired_tail:
         path = Path(paired_tail.__file__)
         entries = {field: f"tail_{field}_step" for field in ("replay", "mask")}
     elif args.seed_crystal_half:
@@ -61,6 +65,8 @@ def main() -> int:
             document, report = compile_state_steps(methods, 5, args.channel_base, held_inputs=("prefix_height",))
         elif args.check_direct or args.read_column:
             document, report = compile_state_steps(methods, 5, args.channel_base)
+        elif args.restore_pin_label:
+            document, report = compile_state_fold(methods, 5, args.channel_base, round_values=(0, 1, 2, 3, 4))
         elif args.build_dense_column or args.append_paired_tail:
             document, report = compile_state_fold(methods, 5, args.channel_base)
         else:

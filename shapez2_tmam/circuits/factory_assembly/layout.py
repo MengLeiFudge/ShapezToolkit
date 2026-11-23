@@ -12,6 +12,7 @@ from ..slot_stream_ports import trace, transport_paths
 from ..slot_streams import SLOT_ROWS, SlotStreams
 from ..stock_selector import SOURCES
 from ..work_lane import A_X, OUT_X
+from .base_feed import HEAD as COMPACT_BASE_HEAD, build_base_stage
 from .changeover import controls
 from .crystal_feed import HEAD as COMPACT_CRYSTAL_HEAD, add_crystal_feed
 from .interface import recipe_interface
@@ -136,7 +137,7 @@ def _stack_lane() -> dict:
 
 
 def assemble(count: int, *, packet_tag: int, fixed_orders: tuple[Production, ...] | None = None,
-             handoff: bool = False, compact_dyes: bool = False) -> tuple[dict, dict]:
+             handoff: bool = False, compact_dyes: bool = False, compact_base: bool = False) -> tuple[dict, dict]:
     if type(count) is not int or not 1 <= count <= MAX_STAGES:
         raise ValueError(f'工段数须在 1 至 {MAX_STAGES} 之间')
     base_stages = crystal_stages = range(count)
@@ -145,7 +146,8 @@ def assemble(count: int, *, packet_tag: int, fixed_orders: tuple[Production, ...
             raise ValueError('精简工道需要至少一份已回放且不超过工段容量的固定配方')
         base_stages = {s.index for order in fixed_orders for s in order.stages if s.opcode == BASE}
         crystal_stages = {s.index for order in fixed_orders for s in order.stages if s.opcode == CRYSTAL}
-    return _assemble(count, packet_tag, base_stages, crystal_stages, handoff=handoff, compact_dyes=compact_dyes)
+    return _assemble(count, packet_tag, base_stages, crystal_stages, handoff=handoff,
+                     compact_dyes=compact_dyes, compact_base=compact_base)
 
 
 def assemble_direct_stack(*, packet_tag: int, handoff: bool = False) -> tuple[dict, dict]:
@@ -160,7 +162,7 @@ def assemble_direct_stack(*, packet_tag: int, handoff: bool = False) -> tuple[di
 
 
 def _assemble(count, packet_tag, base_stages, crystal_stages, *, direct_stack=False, handoff=False,
-              compact_dyes=False):
+              compact_dyes=False, compact_base=False):
     islands = []
     stations = []
     bridge = slot_bridge()
@@ -169,7 +171,10 @@ def _assemble(count, packet_tag, base_stages, crystal_stages, *, direct_stack=Fa
         x = STAGE_PITCH * index
         base, crystal = index in base_stages, index in crystal_stages
         if base:
-            stage = freight_stage(index, machine_dyes=crystal and not compact_dyes, stream=True)['BP']['Entries']
+            if compact_base:
+                stage = build_base_stage(index)
+            else:
+                stage = freight_stage(index, machine_dyes=crystal and not compact_dyes, stream=True)['BP']['Entries']
             if direct_stack:
                 # 基础料从北口领入，只保留六槽台、译码、存储和供货路线。
                 stage = stage[:2] + stage[3:6] + stage[9:]
@@ -182,10 +187,11 @@ def _assemble(count, packet_tag, base_stages, crystal_stages, *, direct_stack=Fa
                 check_jump(take, receive, row, 0)
             for level in (0, 1):
                 check_jump(take, work, A_X, 1, level)
-            if crystal and not compact_dyes:
+        if crystal:
+            if compact_dyes:
+                add_crystal_feed(stage)
+            elif not base or compact_base:
                 add_machine_dyes(stage)
-        if crystal and compact_dyes:
-            add_crystal_feed(stage)
         for obj in stage:
             obj['X'] = obj.get('X', 0) + x
         take, receive = stage[:2]
@@ -202,7 +208,8 @@ def _assemble(count, packet_tag, base_stages, crystal_stages, *, direct_stack=Fa
         previous = receive
         station = {'stage': index}
         if base:
-            station['base_head'] = x - 12, -17
+            head_x, head_y = COMPACT_BASE_HEAD if compact_base else (-12, -17)
+            station['base_head'] = x + head_x, head_y
         if crystal:
             head_x, head_y = COMPACT_CRYSTAL_HEAD if compact_dyes else (-9, 3)
             station['crystal_head'] = x + head_x, head_y

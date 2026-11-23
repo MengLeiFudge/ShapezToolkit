@@ -10,8 +10,10 @@ from .layout import DIRECT_STACK_STAGES, assemble, assemble_direct_stack
 from .recipe import MAX_STAGES
 
 
-def build(count: int, *, handoff: bool = False, compact_dyes: bool = False) -> tuple[str, dict]:
-    document, interfaces = assemble(count, packet_tag=PACKET_TAG, handoff=handoff, compact_dyes=compact_dyes)
+def build(count: int, *, handoff: bool = False, compact_dyes: bool = False,
+          compact_base: bool = False) -> tuple[str, dict]:
+    document, interfaces = assemble(count, packet_tag=PACKET_TAG, handoff=handoff,
+                                    compact_dyes=compact_dyes, compact_base=compact_base)
     return _encode(count, document, interfaces)
 
 
@@ -32,17 +34,19 @@ def main() -> int:
     mode.add_argument('--direct-stack', action='store_true', help='九工段纯堆叠生产线')
     parser.add_argument('--handoff', action='store_true', help='用双回读确认写入后接管保持路')
     parser.add_argument('--compact-dyes', action='store_true', help='通用工段将结晶卸货和转接合在一块平台')
+    parser.add_argument('--compact-base', action='store_true', help='通用工段将基础料卸货和四角选料合板')
     parser.add_argument('--output', type=Path, required=True, help='原生 .spz2bp 文件，同名 JSON 保存接线和供货表')
     args = parser.parse_args()
     if args.output.suffix != '.spz2bp':
         parser.error('--output 需要 .spz2bp 文件路径')
-    if args.direct_stack and args.compact_dyes:
-        parser.error('--compact-dyes 只用于 --stages 通用工段')
+    if args.direct_stack and (args.compact_base or args.compact_dyes):
+        parser.error('--compact-base 和 --compact-dyes 只用于 --stages 通用工段')
     try:
         if args.direct_stack:
             blueprint, report = build_direct_stack(handoff=args.handoff)
         else:
-            blueprint, report = build(args.stages, handoff=args.handoff, compact_dyes=args.compact_dyes)
+            blueprint, report = build(args.stages, handoff=args.handoff,
+                                      compact_dyes=args.compact_dyes, compact_base=args.compact_base)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(blueprint + '\n', encoding='utf-8')
         args.output.with_suffix('.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n',
