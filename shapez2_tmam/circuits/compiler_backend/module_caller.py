@@ -118,14 +118,23 @@ def _arguments(active: tuple[int, ...], sources: tuple[int | Literal, ...], outp
     return module
 
 
-def _result(enable: int, capture: int, result: int, output: int) -> Module:
-    module = Module({"enable": enable, "capture": capture, "result": result, "stored": output})
+def _results(enable: int, result: int, registers: tuple[tuple[int, int], ...]) -> Module:
+    module = Module({"enable": enable})
+    names = tuple("" if len(registers) == 1 else str(i) for i in range(len(registers)))
+    for suffix, (capture, output) in zip(names, registers, strict=True):
+        module.inputs["capture" + suffix] = capture
+        module.inputs["result"] = result
+        module.inputs["stored" + suffix] = output
     enabled = _compare(module, "enabled", "enable", 1)
-    load = _gate(module, "And", "load", enabled, "capture")
-    keep = _gate(module, "And", "keep", enabled, _gate(module, "Not", "outside_capture", "capture"))
-    _gate(module, "If", "latched", "result", load)
-    _gate(module, "If", "latched", "stored", keep)
-    module.outputs = {"latched": output}
+    for suffix, (_, output) in zip(names, registers, strict=True):
+        capture = "capture" + suffix
+        load = _gate(module, "And", "load" + suffix, enabled, capture)
+        keep = _gate(module, "And", "keep" + suffix, enabled,
+                     _gate(module, "Not", "outside_capture" + suffix, capture))
+        latched = "latched" + suffix
+        _gate(module, "If", latched, "result", load)
+        _gate(module, "If", latched, "stored" + suffix, keep)
+        module.outputs[latched] = output
     return module
 
 
@@ -271,7 +280,7 @@ def _literal(value, type_name: str) -> Literal:
 
 def build_calls(
     interface: dict, calls: list[dict], channel_base: int, *, result_names: tuple[str, ...] | None = None,
-    enable_channel: int | None = None, parameter_hold_signal_ticks: int = 0,
+    enable_channel: int | None = None, parameter_hold_signal_ticks: int = 0, compact_results: bool = False,
 ) -> tuple[dict, dict]:
     """依次调用定步或组合模块，参数可来自频道或字面量。"""
     inputs, outputs, callee_channels, waits, conditions = _interface(interface)
@@ -351,9 +360,16 @@ def build_calls(
     modules.extend(_arguments(active, tuple(args[name] for args in arguments), port["channel"],
                               phase=phase if combination else None, phases=phases)
                    for name, port in parameters.items())
-    for capture, stored in zip(captures, result_ports, strict=True):
-        modules.extend(_result(enable, capture, results[name]["channel"], port["channel"])
-                       for name, port in stored.items())
+    if compact_results:
+        for name, port in results.items():
+            registers = tuple((capture, ports[name]["channel"])
+                              for capture, ports in zip(captures, result_ports, strict=True))
+            modules.extend(_results(enable, port["channel"], registers[i:i + 2])
+                           for i in range(0, len(registers), 2))
+    else:
+        for capture, stored in zip(captures, result_ports, strict=True):
+            modules.extend(_results(enable, results[name]["channel"], ((capture, port["channel"]),))
+                           for name, port in stored.items())
     platforms = [module.layout()["BP"]["Entries"][0] for module in modules]
     stack_platforms(platforms)
     document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}}

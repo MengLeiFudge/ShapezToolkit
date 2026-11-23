@@ -121,7 +121,8 @@ def _closure_links(items: list[tuple[int, int]], enable: int, pack_done: int, se
     return platforms
 
 
-def build(root: Path, read_path: Path) -> tuple[dict, dict]:
+def build(root: Path, read_path: Path, *, top_adapter: dict | None = None,
+          compact_results: bool = False) -> tuple[dict, dict]:
     halves = root / "双半形"
     orientation = _report(halves / "orient-cut")
     upstream = _report(halves / "read-four-columns")
@@ -142,7 +143,8 @@ def build(root: Path, read_path: Path) -> tuple[dict, dict]:
         calls.append({"row": {"channel": row}, "below": {"literal": None} if below is None else {"channel": below},
                       "ground": {"literal": height == 1}})
     doc, pack = build_calls(pack_interface, calls, _PACK_BASE, enable_channel=enable,
-                            parameter_hold_signal_ticks=orientation_hold + read_hold)
+                            parameter_hold_signal_ticks=orientation_hold + read_hold,
+                            compact_results=compact_results)
     _append(doc, pack_boards)
     _append(doc, read_boards)
 
@@ -159,6 +161,13 @@ def build(root: Path, read_path: Path) -> tuple[dict, dict]:
     restore_wait = max(report["settling"]["hold_signal_ticks"] for report in restores)
     reset_wait = closure["timing"]["reset_hold_signal_ticks"]
     wait = restore_wait + reset_wait
+    if top_adapter is not None:
+        if ([_channel(top_adapter, "outputs", f"h{i}") for i in range(4)] != heights
+                or _channel(top_adapter, "outputs", "item0") != wires[0][1]):
+            raise ValueError("顶格适配板与五轮闭包的初值或首行不匹配")
+        heights = [_channel(top_adapter, "inputs", f"h{i}") for i in range(4)]
+        wires[0] = (wires[0][0], _channel(top_adapter, "inputs", "row"))
+        wait += top_adapter["settling"]["hold_signal_ticks"] + _RADIO_TICKS
     _append(doc, _closure_links(wires, enable, pack_done, seed_done, run, wait))
     wiring = _local_wiring(doc["BP"])
     transmitters = set()

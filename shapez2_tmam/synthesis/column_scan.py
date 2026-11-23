@@ -214,10 +214,9 @@ def pin_corner_base_far(above: Shape | None, moved: Shape | None, ground: Shape 
     """临时远柱只在被补齐的主列空底段内放晶体。"""
     if level < 0 or level > 4:
         return None
-    if ground is None:
-        if (level == 0) | ((crystal == 4) & (level == 1)):
-            return shape_literal("cr------")
-    elif (ground != shape_literal("P-------")) & (crystal == 4) & (level == 0):
+    filled_bottom = (ground is None) | (ground == shape_literal("P-------"))
+    high_gap = crystal == 4
+    if ((level == 0) & (high_gap | filled_bottom)) | ((level == 1) & high_gap & filled_bottom):
         return shape_literal("cr------")
     return shape_literal("Cu------")
 

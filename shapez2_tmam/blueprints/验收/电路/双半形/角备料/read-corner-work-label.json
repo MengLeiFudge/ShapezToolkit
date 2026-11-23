@@ -1,0 +1,99 @@
+{
+  "methods": {
+    "original": "corner_work_label"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "row0": {
+      "channel": 1701200,
+      "type": "shape"
+    },
+    "row1": {
+      "channel": 1701201,
+      "type": "shape"
+    },
+    "row2": {
+      "channel": 1701202,
+      "type": "shape"
+    },
+    "row3": {
+      "channel": 1701203,
+      "type": "shape"
+    },
+    "row4": {
+      "channel": 1701204,
+      "type": "shape"
+    },
+    "column": {
+      "channel": 1700873,
+      "type": "int"
+    },
+    "level": {
+      "channel": 1701615,
+      "type": "int"
+    },
+    "height": {
+      "channel": 1700816,
+      "type": "int"
+    },
+    "needs_pin": {
+      "channel": 1700579,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "original": {
+      "channel": 1701612,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1700579,
+    1700816,
+    1700873,
+    1701200,
+    1701201,
+    1701202,
+    1701203,
+    1701204,
+    1701612,
+    1701615
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "original": {
+      "corner_work_label": 1,
+      "corner_source_query": 11,
+      "corner_label_at": 3,
+      "dense_input.dense_input_row": 11,
+      "prefix_route.select_column": 9,
+      "shape_methods.read_labeled_corner": 8,
+      "shape_methods._cut_ground_corner": 1
+    }
+  },
+  "settling": {
+    "max_gate_depth": 35,
+    "hold_signal_ticks": 2368,
+    "hold_simulation_seconds": 197.33333333333334,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 2,
+  "island_footprint_chunks": [
+    6,
+    3
+  ],
+  "buildings_by_layer": [
+    1224,
+    762,
+    673
+  ],
+  "logic_gates": 95,
+  "logic_gates_before_reuse": 97,
+  "building_entries": 2659,
+  "global_receivers": 9,
+  "global_transmitters": 1,
+  "internal_global_devices": 0,
+  "short_range_links": 3
+}

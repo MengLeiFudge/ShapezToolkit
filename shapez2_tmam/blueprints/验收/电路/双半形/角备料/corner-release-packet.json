@@ -1,0 +1,121 @@
+{
+  "methods": {
+    "opcode": "release_opcode",
+    "a": "release_a",
+    "b": "release_b",
+    "destination": "release_destination",
+    "base": "release_base"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "word": {
+      "channel": 1701671,
+      "type": "int"
+    },
+    "counterclockwise": {
+      "channel": 1700678,
+      "type": "bool"
+    },
+    "main": {
+      "channel": 1701662,
+      "type": "int"
+    },
+    "support": {
+      "channel": 1701663,
+      "type": "int"
+    },
+    "far": {
+      "channel": 1701664,
+      "type": "int"
+    },
+    "upper": {
+      "channel": 1701665,
+      "type": "int"
+    }
+  },
+  "outputs": {
+    "opcode": {
+      "channel": 1701666,
+      "type": "int"
+    },
+    "a": {
+      "channel": 1701667,
+      "type": "int"
+    },
+    "b": {
+      "channel": 1701668,
+      "type": "int"
+    },
+    "destination": {
+      "channel": 1701669,
+      "type": "int"
+    },
+    "base": {
+      "channel": 1701670,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1700678,
+    1701662,
+    1701663,
+    1701664,
+    1701665,
+    1701666,
+    1701667,
+    1701668,
+    1701669,
+    1701670,
+    1701671
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "opcode": {
+      "release_opcode": 13
+    },
+    "a": {
+      "release_a": 5
+    },
+    "b": {
+      "release_b": 5
+    },
+    "destination": {
+      "release_destination": 5,
+      "release_a": 5
+    },
+    "base": {
+      "release_base": 3
+    }
+  },
+  "settling": {
+    "max_gate_depth": 13,
+    "hold_signal_ticks": 960,
+    "hold_simulation_seconds": 80.0,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 1,
+  "island_footprint_chunks": [
+    3,
+    3
+  ],
+  "buildings_by_layer": [
+    1130,
+    838,
+    1006
+  ],
+  "logic_gates": 104,
+  "logic_gates_before_reuse": 104,
+  "building_entries": 2974,
+  "global_receivers": 6,
+  "global_transmitters": 5,
+  "internal_global_devices": 0,
+  "publish_when": {
+    "opcode": "release_has_packet",
+    "a": "release_uses_a",
+    "b": "release_uses_b",
+    "destination": "release_has_packet",
+    "base": "release_uses_base"
+  }
+}

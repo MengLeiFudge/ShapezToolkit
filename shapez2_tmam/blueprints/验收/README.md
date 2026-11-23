@@ -22,15 +22,15 @@
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) · [两种切向自动试查](电路/双半形/choose-cut.json) · [试查时钟](电路/双半形/choose-cut-clock.json) |
 | 电路 | 从原图提取材料与检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
-| 电路 | 五层取料、顺序编码、双完工启动闭包 | [原生蓝图](电路/双半形/prefix-scan-wiring.spz2bp) · [接口](电路/双半形/prefix-scan-wiring.json) |
+| 电路 | 自动双切向、五层取料与前缀闭包 | [自动闭包](电路/双半形/auto-prefix-scan.spz2bp) · [接口](电路/双半形/auto-prefix-scan.json) · [独立行编码与双完工启动](电路/双半形/prefix-scan-wiring.json) |
 | 电路 | 生成角的晶下落点参数和助手柱 | [前缀角参数](电路/双半形/prefix-corner-parameters.json) · [独立落点样件](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 | 电路 | 从原图检查两列半形的支撑 | [两半顺序预处理](电路/双半形/seed-two-halves.json) · [四列合成五层材料字](电路/双半形/join-material-words.json) · [前半输入](电路/双半形/seed-pair-0.json) · [后半输入](电路/双半形/seed-pair-1.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
 | 电路 | 读取已选前缀的材料和原色 | [原单格读取](电路/双半形/read-labeled-corner.json) · [从整列剪取前缀](电路/双半形/clip-prefix-word.json) · [前缀原格](电路/双半形/read-prefix-corner.json) |
 | 电路 | 直接释放角的前态与外侧锚料 | [最高晶体层](电路/双半形/corner-highest-crystal.json) · [逐层原料](电路/双半形/simple-corner-source.json) |
 | 电路 | 顶破角的前态与辅助锚柱 | [逐层原料](电路/双半形/pin-corner-source.json) · [近锚和远侧顶针柱](电路/双半形/pin-corner-anchors.json) |
-| 电路 | 原料就位后的角级回放 | [直接释放](电路/双半形/simple-corner-release.json) · [支撑交接和顶破](电路/双半形/pin-corner-release.json) |
+| 电路 | 四角共用原色备料和两种释放工序 | [备料和六字段指令](电路/双半形/角备料/README.md) · [直接释放回放](电路/双半形/simple-corner-release.json) · [支撑交接和顶破回放](电路/双半形/pin-corner-release.json) |
 | 电路 | 顶破支路的补料与半形拼接 | [触顶补形](电路/双半形/pin-corner-complement.json) · [上部单层](电路/双半形/pin-corner-upper-layer.json) · [收尾](电路/双半形/pin-corner-finish.json) · [相邻两角拼接](电路/双半形/join-corner-half.json) |
-| 电路 | 合并两个已制半形并复用五轮追加 | [标准切向拼接](电路/双半形/join-oriented-halves.json) · [尾料掩码](电路/双半形/mask-paired-tail.json) · [尾料回放](电路/双半形/replay-paired-tail.json) · [恢复原方向与验收](电路/双半形/finish-paired-tail.json) |
+| 电路 | 合并两个已制半形并复用五轮追加 | [标准切向拼接](电路/双半形/join-oriented-halves.json) · [尾料掩码](电路/双半形/mask-paired-tail.json) · [两路完工启动](电路/双半形/paired-tail-start.json) · [尾料回放](电路/双半形/replay-paired-tail.json) · [恢复原方向与验收](电路/双半形/finish-paired-tail.json) |
 | 电路 | 带原色的紧柱备料与回放 | [单步备料](电路/双半形/dense-column-actions.json) · [五轮回放](电路/双半形/dense-column.json) · [完工取柱](电路/双半形/dense-column-finish.json) |
 | 电路 | 紧柱配方接六槽工道，匹配同地址写入确认 | [接口](电路/双半形/dense-write-bridge.json) · [原生蓝图](电路/双半形/dense-write-bridge.spz2bp) |
 
@@ -54,7 +54,7 @@
 
 切向转换板用 `alternate` 将两个切向统一到 q0/q1 和 q2/q3。四列调用按 q0 到 q3 的顺序复用整列读取。批次 `done=1` 后从 `1700963` 到 `1700966` 读四份材料字。 `check-column-0` 到 `check-column-3` 分别检查这四份材料。等四块校验板和闭包结果均稳定后，从 `check-prefix` 读取 `1700897` 的可用位与 `1700816` 的当前列高度。任一列不满足列 A 或闭包失败时，当前列高度为 `-1`。
 
-两切向选择器与 `prefix-scan-wiring` 合用，独占 `1700871` 和 `1700930`。目标保持不变，先将 `1701581` 保持为 0 至少 384 信号 tick 后置为 1。闭包完工后另等一轮再读取总校验。第一种切向成功时保留其结果。第一种失败时先换向并复位，再复用同一条闭包。`1701584` 表示当前切向找到可用前缀，`1701585` 表示两个切向均未找到前缀。后者可作为继续顶针逆推的条件。 不可制作须由完整搜索判定。
+自动闭包包含切向选择、两半预处理和可选顶格适配。整件占 81 块 3×3 平台。合装时采用整件或相应的独立板。目标和顶格模式保持不变，先将 `1701581` 保持为 0 至少 384 信号 tick 后置为 1。闭包完工后另等一轮再读取总校验。第一种切向成功时保留其结果。第一种失败时先换向并复位，再复用同一条闭包。`1701584=1` 表示找到可用前缀。`1701585=1` 表示两切向均未找到前缀，可继续顶针逆推。不可制作须由完整搜索判定。
 
 前缀材料字直接从已锁存的四列里选一列。剪取板读 `1700873` 的列号和 `1700816` 的高度，向 `1700806` 发布五层材料字。超出前缀的格填空材料标记。合装时只装剪取板发布这个频道。原格读取使用同一高度，保留普通图形和晶体的颜色。前缀高度为 `0` 时，该列各层为空。
 
@@ -70,7 +70,7 @@
 
 五轮尾料回放接五层原色读取、四列闭包和两个标准切向半形。两个半形均占 q0/q1，空侧留空。拼接和逐层追加均在标准切向完成。允许追加的普通格和针由闭包高度决定。掩码从顶到底对应目标的第一层到第五层，每轮剥去一层掩码并堆叠对应尾料。
 
-半形成品与闭合前缀稳定后，保持全部输入，按尾料回放的接口复位并启动 `1701194`。到采样时刻且 `1701197=1` 后，结果板按 `alternate` 恢复原方向。主控确认前缀和半形有效时置 `1700894=1`。结果板直接比较原目标 `1600000`，在 `1700896` 发布验收结果。配方提交与启动时序由主控负责。
+尾料启动板分别等待闭包完成 `1700765` 与两个半形就绪 `1701279`，再启动 `1701194`。批次复位期间将 `1700930` 和半形就绪同时拉低。到采样时刻且 `1701197=1` 后，结果板按 `alternate` 恢复原方向。主控确认前缀和半形有效时置 `1700894=1`。结果板直接比较原目标 `1600000`，在 `1700896` 发布验收结果。
 
 紧柱回放的 `item0` 至 `item4` 顺序为从底到顶，每次送入已在 q0 上的普通格或有色晶体。目标柱连续，空信号只用于末尾补齐。`initial_source` 和 `initial_pending` 留空。等五轮完成后再按完工板接口表读取结果。含晶柱的实体针尾另行追加。
 
