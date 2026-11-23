@@ -26,7 +26,7 @@
 | 电路 | 顶破角的前态与辅助锚柱 | [逐层原料](电路/双半形/pin-corner-source.json) · [近锚和远侧顶针柱](电路/双半形/pin-corner-anchors.json) |
 | 电路 | 原料就位后的角级回放 | [直接释放](电路/双半形/simple-corner-release.json) · [支撑交接和顶破](电路/双半形/pin-corner-release.json) |
 | 电路 | 顶破支路的补料与半形拼接 | [触顶补形](电路/双半形/pin-corner-complement.json) · [上部单层](电路/双半形/pin-corner-upper-layer.json) · [收尾](电路/双半形/pin-corner-finish.json) · [相邻两角拼接](电路/双半形/join-corner-half.json) |
-| 电路 | 合并两个已制半形并追加尾部 | [整形拼接](电路/双半形/join-built-halves.json) · [上料选择](电路/双半形/tail-stack-row.json) · [逐层追加](电路/双半形/append-paired-tail.json) · [回放验收](电路/双半形/paired-order-accept.json) |
+| 电路 | 合并两个已制半形并复用五轮追加 | [标准切向拼接](电路/双半形/join-oriented-halves.json) · [尾料掩码](电路/双半形/mask-paired-tail.json) · [尾料回放](电路/双半形/replay-paired-tail.json) · [恢复原方向与验收](电路/双半形/finish-paired-tail.json) |
 | 电路 | 带原色的紧柱备料与回放 | [单步备料](电路/双半形/dense-column-actions.json) · [五轮回放](电路/双半形/dense-column.json) · [完工取柱](电路/双半形/dense-column-finish.json) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
@@ -61,7 +61,9 @@
 
 列选择板同时发布助手方向。角结果板按顶破选择取一份已完成角，前缀为空时输出空信号。半形拼接板接收按次保存的两角，主列分别在 q0、q1，助手分别在 q3、q2。 [角结果选择](电路/双半形/place-released-corner.json)
 
-整形拼接接收两个均占 q0/q1 的已制半形，空侧留空。`alternate=1` 将结果顺时针转一象限以恢复另一切向的原方位。上料选择板读目标的一个原单层、从 0 起算的层号和四列的闭合前缀高度。它保留各列前缀以外的普通格和针。尾部板接拼接结果和按原层号排列的五份已选上料，空层留空。回放验收板比较追加后的整形和原目标，同时要求主控给出有效和完工信号。逐层调用与实体工序由主控调度。
+五轮尾料回放接五层原色读取、四列闭包和两个标准切向半形。两个半形均占 q0/q1，空侧留空。拼接和逐层追加均在标准切向完成。允许追加的普通格和针由闭包高度决定。掩码从顶到底对应目标的第一层到第五层，每轮剥去一层掩码并堆叠对应尾料。
+
+半形成品与闭合前缀稳定后，保持全部输入，按尾料回放的接口复位并启动 `1701194`。到采样时刻且 `1701197=1` 后，结果板按 `alternate` 恢复原方向。主控确认前缀和半形有效时置 `1700894=1`。结果板直接比较原目标 `1600000`，在 `1700896` 发布验收结果。配方提交与启动时序由主控负责。
 
 紧柱回放的 `item0` 至 `item4` 顺序为从底到顶，每次送入已在 q0 上的普通格或有色晶体。目标柱连续，空信号只用于末尾补齐。`initial_source` 和 `initial_pending` 留空。等五轮完成后再按完工板接口表读取结果。回放实现了同色晶体批量结晶，实际下料与工序提交由制作层处理。
 
@@ -107,6 +109,19 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/crystal_su
   --input-channel high_height=1700848 --input-channel swapped=1700854 \
   --output-channel left=1700855 --output-channel right=1700856 --output finish-crystal-half.spz2bp
 python -m shapez2_tmam.circuits.compile_stack_scan --close-prefix --channel-base 1700760 --output paired-prefix-scan.spz2bp
+python -m shapez2_tmam.circuits.compile_stack_scan --append-paired-tail --channel-base 1701194 --output replay-paired-tail.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/paired_tail.py \
+  --field lower=join_oriented_halves --input-channel front=1700710 --input-channel back=1700711 \
+  --output-channel lower=1701195 --output join-oriented-halves.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/paired_tail.py \
+  --field mask=tail_mask --input-channel h0=1700766 --input-channel h1=1700767 \
+  --input-channel h2=1700768 --input-channel h3=1700769 \
+  --output-channel mask=1701196 --output mask-paired-tail.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/paired_tail.py \
+  --field replay=restore_cut --field accepted=tail_accepted --input-channel replay=1701198 \
+  --input-channel alternate=1700871 --input-channel done=1701197 --input-channel valid=1700894 \
+  --input-channel target=1600000 --output-channel replay=1700719 \
+  --output-channel accepted=1700896 --output finish-paired-tail.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_scan.py \
   --field height=column_crystal_height --input-channel word=1700566 \
   --output-channel height=1700858 --output column-crystal-height.spz2bp

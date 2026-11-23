@@ -1,0 +1,158 @@
+{
+  "methods": {
+    "replay": "tail_replay_step",
+    "mask": "tail_mask_step"
+  },
+  "schedule": "bounded_fold",
+  "quadrants": 4,
+  "height": 5,
+  "steps": 5,
+  "inputs": {
+    "run": {
+      "channel": 1701194,
+      "type": "bool"
+    },
+    "initial_replay": {
+      "channel": 1701195,
+      "type": "shape"
+    },
+    "initial_mask": {
+      "channel": 1701196,
+      "type": "shape"
+    },
+    "item0": {
+      "channel": 1701200,
+      "type": "shape"
+    },
+    "item1": {
+      "channel": 1701201,
+      "type": "shape"
+    },
+    "item2": {
+      "channel": 1701202,
+      "type": "shape"
+    },
+    "item3": {
+      "channel": 1701203,
+      "type": "shape"
+    },
+    "item4": {
+      "channel": 1701204,
+      "type": "shape"
+    }
+  },
+  "outputs": {
+    "done": {
+      "channel": 1701197,
+      "type": "bool"
+    },
+    "result_replay": {
+      "channel": 1701198,
+      "type": "shape"
+    },
+    "result_mask": {
+      "channel": 1701199,
+      "type": "shape"
+    }
+  },
+  "module_links": {
+    "state_to_step": {
+      "index": {
+        "channel": 1701205,
+        "type": "int"
+      },
+      "value_replay": {
+        "channel": 1701206,
+        "type": "shape"
+      },
+      "value_mask": {
+        "channel": 1701207,
+        "type": "shape"
+      }
+    },
+    "step_to_state": {
+      "next_index": {
+        "channel": 1701208,
+        "type": "int"
+      },
+      "next_value_replay": {
+        "channel": 1701209,
+        "type": "shape"
+      },
+      "next_value_mask": {
+        "channel": 1701210,
+        "type": "shape"
+      }
+    }
+  },
+  "reserved_channels": [
+    1701194,
+    1701210
+  ],
+  "timing": {
+    "channel_signal_ticks": 12,
+    "round_signal_ticks": 24,
+    "reset_hold_signal_ticks": 256,
+    "start_to_sample_signal_ticks": 160,
+    "conditions": "整件批量导入或完整重载。常速 Hybrid 或 AlwaysHighUPS，固定接线与配置，每批最多 4 信号 tick，保留频道由本实例独占。",
+    "protocol": "从 run=0 复位开始，保持本次所有初值和 item，达到复位时间才置 run=1。保持所有输入，达到采样时间且 done=1 后读取结果。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 3,
+  "island_footprint_chunks": [
+    6,
+    6
+  ],
+  "buildings_by_layer": [
+    2337,
+    1593,
+    1338
+  ],
+  "building_entries": 5268,
+  "global_receivers": 14,
+  "global_transmitters": 9,
+  "internal_global_devices_per_module": 0,
+  "worker_partitions": [
+    [
+      1701208,
+      1701209,
+      1701210
+    ]
+  ],
+  "worker_layout_failures": [
+    {
+      "outputs": [
+        1701208,
+        1701209,
+        1701210
+      ],
+      "reason": "三层平台未布通 134 个门，三层平台内无法完成本地信号 1000069 的布线"
+    }
+  ],
+  "worker_ports": [
+    {
+      "inputs": [
+        1701200,
+        1701201,
+        1701202,
+        1701203,
+        1701204,
+        1701205,
+        1701206,
+        1701207
+      ],
+      "outputs": [
+        1701208,
+        1701209,
+        1701210
+      ]
+    }
+  ],
+  "short_range_links": 13,
+  "worker_platforms": [
+    2
+  ],
+  "worker_logic_gates": 134,
+  "worker_logic_gates_before_reuse": 139,
+  "worker_logic_gates_after_reuse": 134
+}
