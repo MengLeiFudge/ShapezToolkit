@@ -41,3 +41,26 @@ def select_prefix_height(done: bool, h0: int, h1: int, h2: int, h3: int, column:
     if column == 3:
         return h3
     return -1
+
+
+def corner_counterclockwise(column: int) -> bool:
+    """标准半形的左角朝 q3，右角在旋转前朝 q1。"""
+    return (column == 0) | (column == 2)
+
+
+def select_column_handedness(target: Shape | None, column: int) -> bool:
+    return corner_counterclockwise(column)
+
+
+def place_released_corner(simple: Shape | None, broken: Shape | None, needs_pin: bool,
+                          column: int, prefix_height: int) -> Shape | None:
+    """选已完成的角并恢复它在标准半形里的位置。"""
+    if (prefix_height <= 0) | (column < 0) | (column > 3):
+        return None
+    if needs_pin:
+        corner = broken
+    else:
+        corner = simple
+    if corner_counterclockwise(column):
+        return corner
+    return rotate_cw(corner)

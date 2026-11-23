@@ -16,14 +16,14 @@
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [列选择](电路/双半形/select-column.json) · [前缀高度选择](电路/双半形/select-prefix-height.json) |
 | 电路 | 从原图提取一列并检查列 A | [材料读取](电路/双半形/read-column.json) · [列 A 判定](电路/双半形/read-column-admissible.json) · [初始晶体高度](电路/双半形/column-crystal-height.json) |
-| 电路 | 生成角的晶下落点参数和助手柱 | [落点参数](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
+| 电路 | 生成角的晶下落点参数和助手柱 | [前缀角参数](电路/双半形/prefix-corner-parameters.json) · [独立落点样件](电路/双半形/corner-gap.json) · [助手柱](电路/双半形/corner-helper.json) |
 | 电路 | 从原图检查两列半形的支撑 | [按最高晶体排序](电路/双半形/order-crystal-half.json) · [含晶区间预处理](电路/双半形/seed-crystal-half.json) · [恢复列序](电路/双半形/finish-crystal-half.json) · [五轮逐层闭包](电路/双半形/paired-prefix-scan.json) · [含晶整行编码](电路/双半形/pack-prefix-row.json) · [含晶半行编码](电路/双半形/pack-prefix-half.json) · [虚拟半切稳定性判定](电路/双半形/half-stability.json) |
 | 电路 | 从原图读取已选前缀的材料和原色 | [原单格读取](电路/双半形/read-labeled-corner.json) · [前缀材料字](电路/双半形/read-prefix-column.json) · [前缀原格](电路/双半形/read-prefix-corner.json) |
 | 电路 | 直接释放角的前态与外侧锚料 | [最高晶体层](电路/双半形/corner-highest-crystal.json) · [逐层原料](电路/双半形/simple-corner-source.json) |
 | 电路 | 顶破角的前态与辅助锚柱 | [逐层原料](电路/双半形/pin-corner-source.json) · [近锚和远侧顶针柱](电路/双半形/pin-corner-anchors.json) |
 | 电路 | 原料就位后的角级回放 | [直接释放](电路/双半形/simple-corner-release.json) · [支撑交接和顶破](电路/双半形/pin-corner-release.json) |
 | 电路 | 顶破支路的补料与半形拼接 | [触顶补形](电路/双半形/pin-corner-complement.json) · [上部单层](电路/双半形/pin-corner-upper-layer.json) · [收尾](电路/双半形/pin-corner-finish.json) · [相邻两角拼接](电路/双半形/join-corner-half.json) |
-| 电路 | 合并两个已制半形并追加尾部 | [整形拼接](电路/双半形/join-built-halves.json) · [上料选择](电路/双半形/tail-stack-row.json) · [逐层追加](电路/双半形/append-paired-tail.json) |
+| 电路 | 合并两个已制半形并追加尾部 | [整形拼接](电路/双半形/join-built-halves.json) · [上料选择](电路/双半形/tail-stack-row.json) · [逐层追加](电路/双半形/append-paired-tail.json) · [回放验收](电路/双半形/paired-order-accept.json) |
 | 电路 | 带原色的紧柱备料与回放 | [单步备料](电路/双半形/dense-column-actions.json) · [五轮回放](电路/双半形/dense-column.json) · [完工取柱](电路/双半形/dense-column-finish.json) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
@@ -52,9 +52,11 @@
 
 顶破路线的原料板读取原目标的上一层格、落点原格、地面原格与当前层号，输出截去顶层前的主列格及初次底部补晶使用的远柱格。近锚和远侧顶针柱由同一组落点参数生成，输出统一在 q0。触顶补形板接远侧顶针柱，和 q2 的触顶晶体柱合并。角级回放板接受已组装的前态、近锚和补形，依次执行底部碎晶、支撑交接和顶破。
 
-收尾板接顶破结果与依原层号排列的五份上部单层，未使用的层位留空。释放、补形、上部单层和收尾共用频道 `1700678`。发 `0` 时助手在 q1，发 `1` 时助手在 q3。半形拼接板接收已定向的两角，主列分别在 q0、q1，助手分别在 q3、q2。
+收尾板接顶破结果与依原层号排列的五份上部单层，未使用的层位留空。释放、补形、上部单层和收尾共用频道 `1700678`。发 `0` 时助手在 q1，发 `1` 时助手在 q3。角参数合装板接前缀材料字，向已有备料口同时发布最高晶层、间隙、落点和顶破选择。合装时用它替换独立的落点板和最高晶层板。
 
-整形拼接接收两个均占 q0/q1 的已制半形，空侧留空。`alternate=1` 将结果顺时针转一象限以恢复另一切向的原方位。上料选择板读目标的一个原单层、从 0 起算的层号和四列的闭合前缀高度。它保留各列前缀以外的普通格和针。尾部板接拼接结果和按原层号排列的五份已选上料，空层留空。主控还需接通前缀选择、逐层调度及实体工序。
+列选择板同时发布助手方向。角结果板按顶破选择取一份已完成角，前缀为空时输出空信号。半形拼接板接收按次保存的两角，主列分别在 q0、q1，助手分别在 q3、q2。 [角结果选择](电路/双半形/place-released-corner.json)
+
+整形拼接接收两个均占 q0/q1 的已制半形，空侧留空。`alternate=1` 将结果顺时针转一象限以恢复另一切向的原方位。上料选择板读目标的一个原单层、从 0 起算的层号和四列的闭合前缀高度。它保留各列前缀以外的普通格和针。尾部板接拼接结果和按原层号排列的五份已选上料，空层留空。回放验收板比较追加后的整形和原目标，同时要求主控给出有效和完工信号。逐层调用与实体工序由主控调度。
 
 紧柱回放的 `item0` 至 `item4` 顺序为从底到顶，每次送入已在 q0 上的普通格或有色晶体。目标柱连续，空信号只用于末尾补齐。`initial_source` 和 `initial_pending` 留空。等五轮完成后再按完工板接口表读取结果。回放实现了同色晶体批量结晶，实际下料与工序提交由制作层处理。
 
@@ -102,9 +104,9 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/prefix_rou
   --field target=orient_cut --input-channel target=1600000 --input-channel alternate=1700871 \
   --output-channel target=1700872 --output orient-cut.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/prefix_route.py \
-  --field original=select_column --field prefix=select_column --input-channel target=1700872 \
-  --input-channel column=1700873 --output-channel original=1700561 --output-channel prefix=1700801 \
-  --output select-column.spz2bp
+  --field original=select_column --field prefix=select_column --field counterclockwise=select_column_handedness \
+  --input-channel target=1700872 --input-channel column=1700873 --output-channel original=1700561 \
+  --output-channel prefix=1700801 --output-channel counterclockwise=1700678 --output select-column.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/prefix_route.py \
   --field height=select_prefix_height --input-channel done=1700765 --input-channel h0=1700766 \
   --input-channel h1=1700767 --input-channel h2=1700768 --input-channel h3=1700769 \
@@ -115,4 +117,17 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/shape_meth
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_scan.py \
   --field limit=column_pin_prefix_limit --input-channel word=1700566 \
   --output-channel limit=1700887 --output column-pin-prefix-limit.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/column_scan.py \
+  --field crystal=column_gap_crystal --field landing=column_gap_landing --field needs_pin=column_gap_needs_pin \
+  --field highest=column_highest_crystal --input-channel word=1700806 --output-channel crystal=1700577 \
+  --output-channel landing=1700578 --output-channel needs_pin=1700579 --output-channel highest=1700588 \
+  --output prefix-corner-parameters.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/prefix_route.py \
+  --field corner=place_released_corner --input-channel simple=1700672 --input-channel broken=1700695 \
+  --input-channel needs_pin=1700579 --input-channel column=1700873 --input-channel prefix_height=1700816 \
+  --output-channel corner=1700890 --output place-released-corner.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/direct_stack.py \
+  --field accepted=direct_order_accepted --input-channel target=1600000 --input-channel replay=1700719 \
+  --input-channel valid=1700894 --input-channel done=1700895 --output-channel accepted=1700896 \
+  --output paired-order-accept.spz2bp
 ```

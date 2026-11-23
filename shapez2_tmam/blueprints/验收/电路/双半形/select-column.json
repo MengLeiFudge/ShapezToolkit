@@ -1,7 +1,8 @@
 {
   "methods": {
     "original": "select_column",
-    "prefix": "select_column"
+    "prefix": "select_column",
+    "counterclockwise": "select_column_handedness"
   },
   "quadrants": 4,
   "height": 5,
@@ -23,10 +24,15 @@
     "prefix": {
       "channel": 1700801,
       "type": "shape"
+    },
+    "counterclockwise": {
+      "channel": 1700678,
+      "type": "bool"
     }
   },
   "reserved_channels": [
     1700561,
+    1700678,
     1700801,
     1700872,
     1700873
@@ -38,6 +44,10 @@
     },
     "prefix": {
       "select_column": 9
+    },
+    "counterclockwise": {
+      "select_column_handedness": 1,
+      "corner_counterclockwise": 1
     }
   },
   "settling": {
@@ -53,14 +63,14 @@
     3
   ],
   "buildings_by_layer": [
-    211,
-    145,
-    120
+    239,
+    192,
+    117
   ],
-  "logic_gates": 19,
-  "logic_gates_before_reuse": 40,
-  "building_entries": 476,
+  "logic_gates": 20,
+  "logic_gates_before_reuse": 43,
+  "building_entries": 548,
   "global_receivers": 2,
-  "global_transmitters": 2,
+  "global_transmitters": 3,
   "internal_global_devices": 0
 }

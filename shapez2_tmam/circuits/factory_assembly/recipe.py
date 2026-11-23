@@ -38,6 +38,21 @@ def _slot(value: object) -> int:
     return value
 
 
+def _packet(opcode: int, a: int | None = None, b: int | None = None, *, destination: int | None = None,
+            base: str | None = None) -> dict:
+    return {'opcode': opcode, 'a': a, 'b': b, 'destination': a if destination is None else destination,
+            'base': base, 'color': None}
+
+
+def _base_shape(rules: Rules, base: object) -> Shape:
+    if not isinstance(base, str):
+        raise ValueError('操作 14 需要基础单层短代码')
+    result = rules.parse(base)
+    if len(result.layers) != 1 or any(cell[0] == 'c' for cell in result.layers[0]):
+        raise ValueError('基础料须为非空且不含晶体的单层')
+    return result
+
+
 def _process(rules: Rules, opcode: int, used: tuple[Shape, ...],
              color: str | None) -> tuple[Shape | None, Shape | None]:
     a = used[0]
@@ -78,12 +93,7 @@ def replay(target: str, packets: Iterable[Mapping[str, object]]) -> Production:
             discarded = None
             if opcode == BASE:
                 operands = ()
-                base = packet['base']
-                if not isinstance(base, str):
-                    raise ValueError('操作 14 需要基础单层短代码')
-                result = rules.parse(base)
-                if len(result.layers) != 1 or any(cell[0] == 'c' for cell in result.layers[0]):
-                    raise ValueError('基础料须为非空且不含晶体的单层')
+                result = _base_shape(rules, packet['base'])
             else:
                 operands = (_slot(packet['a']),)
                 if opcode in BINARY:

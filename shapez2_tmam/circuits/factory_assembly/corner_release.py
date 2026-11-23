@@ -3,19 +3,13 @@
 主形、锚柱和补形来自调用方的活槽，方向与 synthesis.column_build 一致。
 未用操作数用 None 表示空信号。有效槽号沿用整数，包括槽 0。
 结果写回主槽。用过的锚柱、补形和临时槽在释放后可复用。
-顶破的 reserved_slots 指调用方还需保留的其他活槽，另留两个空槽搭远柱。
+顶破可先转交支撑，再制作补形，让已保存的半形和另一角同时留在槽中。
 """
 
 from collections.abc import Iterable
 
 from ..slot_streams import SLOT_ROWS
-from .recipe import BASE, _slot
-
-
-def _packet(opcode: int, a: int | None = None, b: int | None = None, *, destination: int | None = None,
-            base: str | None = None) -> dict:
-    return {'opcode': opcode, 'a': a, 'b': b, 'destination': a if destination is None else destination,
-            'base': base, 'color': None}
+from .recipe import BASE, _packet, _slot
 
 
 def simple_corner_instructions(retained_slot: int, far_slot: int | None = None, *,
@@ -40,7 +34,18 @@ def pin_corner_instructions(initial_slot: int, anchor_slot: int, complement_slot
     reserved = {_slot(slot) for slot in reserved_slots}
     if len(inputs) != 3 or inputs & reserved:
         raise ValueError('主形、近锚、补形和其他活槽须分开')
-    free = [slot for slot in range(len(SLOT_ROWS)) if slot not in inputs and slot not in reserved]
+    handoff = pin_corner_handoff_instructions(initial, anchor, counterclockwise=counterclockwise,
+                                             reserved_slots=(*reserved, complement))
+    return (*handoff, *pin_corner_top_break_instructions(initial, complement, counterclockwise=counterclockwise))
+
+
+def pin_corner_handoff_instructions(initial_slot: int, anchor_slot: int, *, counterclockwise: bool,
+                                    reserved_slots: Iterable[int] = ()) -> tuple[dict, ...]:
+    initial, anchor = (_slot(slot) for slot in (initial_slot, anchor_slot))
+    reserved = {_slot(slot) for slot in reserved_slots}
+    if initial == anchor or {initial, anchor} & reserved:
+        raise ValueError('主形、近锚和其他活槽须分开')
+    free = [slot for slot in range(len(SLOT_ROWS)) if slot not in (initial, anchor) and slot not in reserved]
     if len(free) < 2:
         raise ValueError('顶破释放需要两个空槽搭建五层远柱')
     far, upper = free[:2]
@@ -56,11 +61,19 @@ def pin_corner_instructions(initial_slot: int, anchor_slot: int, complement_slot
         return (_packet(1, initial), _packet(4, initial), *post,
                 _packet(8, initial, far), _packet(2, initial), _packet(4, initial),
                 _packet(2, anchor), _packet(8, initial, anchor),
-                _packet(1, initial), _packet(4, initial), _packet(1, complement),
-                _packet(8, initial, complement), _packet(2, initial), _packet(6, initial))
+                _packet(1, initial), _packet(4, initial))
 
     # 远侧半切后的主形留在转正方向，近锚转半圈后接手支撑。
     return (_packet(4, initial), *post,
             _packet(8, initial, far), _packet(1, initial), _packet(4, initial),
-            _packet(3, anchor), _packet(8, initial, anchor), _packet(2, initial), _packet(4, initial),
-            _packet(8, initial, complement), _packet(6, initial))
+            _packet(3, anchor), _packet(8, initial, anchor), _packet(2, initial), _packet(4, initial))
+
+
+def pin_corner_top_break_instructions(initial_slot: int, complement_slot: int, *,
+                                      counterclockwise: bool) -> tuple[dict, ...]:
+    initial, complement = (_slot(slot) for slot in (initial_slot, complement_slot))
+    if initial == complement:
+        raise ValueError('转交后的主形和补形须来自不同的槽')
+    if counterclockwise:
+        return (_packet(1, complement), _packet(8, initial, complement), _packet(2, initial), _packet(6, initial))
+    return (_packet(8, initial, complement), _packet(6, initial))

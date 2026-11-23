@@ -243,6 +243,20 @@ python -m shapez2_tmam.circuits.factory_assembly.books trains --recipe solver4-o
 
 验收例沿用已入库的[尾部顶针指令包](../../examples/json/4q-required-tail-pin.instructions.json)。总物料清单若与验收线并用，`synthesis/production_bill.py` 的占位整片和制针染料也应采用装载表里的固定 C 片和红色支管。
 
+## 无尾针的双半形拼装
+
+[`half_assembly.py`](half_assembly.py) 的三个入口返回按发包顺序排列的六字段指令。按顺序连到前面的备料指令即可。缺失的角、半形和尾料用 `None` 表示。槽 `0` 是有效地址。配方发令前用 `recipe.replay` 核对整单成品和末槽。
+
+| 入口 | 输入槽和结果槽 | 最多工段 |
+|---|---|---:|
+| `join_corner_half_instructions` | 左角主列和助手在 `q0/q3`，右角在 `q1/q2`。消费存在的角，结果默认进第一个存在的输入槽 | 5 |
+| `join_built_halves_instructions` | 两个半形均以 `q0/q1` 为正面。先转第二半形再拼合，按 `alternate` 恢复切向。可指定 `destination=0` | 3 |
+| `append_five_instructions` | 按原层号从低到高领无晶基础单层。指定 `lower_slot` 和空闲的 `upper_slot`。`has_lower=False` 时第一份尾料直接进入下料槽，之后复用上料槽 | 10 |
+
+合角和拼半形的目标槽可用输入槽或空槽。先保留前半形，再保留后一半的第一角。最后一角若需顶破，先备好主形和近锚，再用 `pin_corner_handoff_instructions` 搭远柱并转交支撑。此时两个保留槽、主形、近锚和搭远柱的两个槽恰占六槽。备近锚时只需两槽造柱，另保留主形和两个外部产物，峰值五槽。转交后远柱、近锚和临时槽均已释放，可在三个空槽内备补形，再用 `pin_corner_top_break_instructions` 消费补形并写回主槽。两段使用同一个 `counterclockwise` 值。
+
+两次合角、一次拼半形和最多五层追加合计至多 23 工段。加上四个角的顶破释放，每角至多 22 工段，合计至多 111 工段。预算整单时还要计入主形、近锚和补形等备料，以及角本身可能需要的后续拼接和恢复朝向。
+
 ## 工段容量与共用供料
 
 当前装配让每个配方地址占一个工段。两份订单中较长的一份有 48 条指令，因此固定双订单示例需要 48 段。两份订单的地址 `0、1、5、7` 都领取基础单层，地址 `2、6、8` 都走堆叠。这七段可随换单重用同一路径，基础料选择器按当前订单领货。
