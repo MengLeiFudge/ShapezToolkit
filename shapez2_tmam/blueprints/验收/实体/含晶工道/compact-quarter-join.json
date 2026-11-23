@@ -1,0 +1,1735 @@
+{
+  "start": 0,
+  "stop": 9,
+  "terminal": false,
+  "baseline": {
+    "islands": 666,
+    "platforms": 288,
+    "buildings": 241236
+  },
+  "compact": {
+    "islands": 657,
+    "platforms": 279,
+    "buildings": 239814
+  },
+  "input": {
+    "island": [
+      0,
+      0,
+      0
+    ],
+    "x": -18,
+    "rows": [
+      -12,
+      -9,
+      8,
+      11,
+      28,
+      31
+    ],
+    "level": 0
+  },
+  "output": {
+    "island": [
+      159,
+      0,
+      0
+    ],
+    "x": 37,
+    "rows": [
+      -12,
+      -9,
+      8,
+      11,
+      28,
+      31
+    ],
+    "level": 0
+  },
+  "rails": [
+    {
+      "stage": 0,
+      "service": "crystal",
+      "head": [
+        -6,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          -6,
+          7,
+          0
+        ],
+        "outside_tile": [
+          -6,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          -7,
+          7,
+          0
+        ],
+        "outside_tile": [
+          -7,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 1,
+      "service": "crystal",
+      "head": [
+        12,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          12,
+          7,
+          0
+        ],
+        "outside_tile": [
+          12,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          11,
+          7,
+          0
+        ],
+        "outside_tile": [
+          11,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 2,
+      "service": "crystal",
+      "head": [
+        30,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          30,
+          7,
+          0
+        ],
+        "outside_tile": [
+          30,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          29,
+          7,
+          0
+        ],
+        "outside_tile": [
+          29,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 3,
+      "service": "crystal",
+      "head": [
+        48,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          48,
+          7,
+          0
+        ],
+        "outside_tile": [
+          48,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          47,
+          7,
+          0
+        ],
+        "outside_tile": [
+          47,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 4,
+      "service": "crystal",
+      "head": [
+        66,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          66,
+          7,
+          0
+        ],
+        "outside_tile": [
+          66,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          65,
+          7,
+          0
+        ],
+        "outside_tile": [
+          65,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 5,
+      "service": "crystal",
+      "head": [
+        84,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          84,
+          7,
+          0
+        ],
+        "outside_tile": [
+          84,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          83,
+          7,
+          0
+        ],
+        "outside_tile": [
+          83,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 6,
+      "service": "crystal",
+      "head": [
+        102,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          102,
+          7,
+          0
+        ],
+        "outside_tile": [
+          102,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          101,
+          7,
+          0
+        ],
+        "outside_tile": [
+          101,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 7,
+      "service": "crystal",
+      "head": [
+        120,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          120,
+          7,
+          0
+        ],
+        "outside_tile": [
+          120,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          119,
+          7,
+          0
+        ],
+        "outside_tile": [
+          119,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 8,
+      "service": "crystal",
+      "head": [
+        138,
+        3
+      ],
+      "arrival": {
+        "tile": [
+          138,
+          7,
+          0
+        ],
+        "outside_tile": [
+          138,
+          8,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          137,
+          7,
+          0
+        ],
+        "outside_tile": [
+          137,
+          8,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    {
+      "stage": 0,
+      "service": "base",
+      "head": [
+        -6,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          -7,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          -7,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          -6,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          -6,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    {
+      "stage": 1,
+      "service": "base",
+      "head": [
+        12,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          11,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          11,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          12,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          12,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    {
+      "stage": 2,
+      "service": "base",
+      "head": [
+        30,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          29,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          29,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          30,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          30,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    {
+      "stage": 3,
+      "service": "base",
+      "head": [
+        48,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          47,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          47,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          48,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          48,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    {
+      "stage": 4,
+      "service": "base",
+      "head": [
+        66,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          65,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          65,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          66,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          66,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    {
+      "stage": 5,
+      "service": "base",
+      "head": [
+        84,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          83,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          83,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          84,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          84,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    {
+      "stage": 6,
+      "service": "base",
+      "head": [
+        102,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          101,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          101,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          102,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          102,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    {
+      "stage": 7,
+      "service": "base",
+      "head": [
+        120,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          119,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          119,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          120,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          120,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    {
+      "stage": 8,
+      "service": "base",
+      "head": [
+        138,
+        -17
+      ],
+      "arrival": {
+        "tile": [
+          137,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          137,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          138,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          138,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    }
+  ],
+  "stack": {
+    "0": {
+      "island": [
+        0,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            0,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            0,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            0,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "1": {
+      "island": [
+        18,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            18,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            18,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            18,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "2": {
+      "island": [
+        36,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            36,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            36,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            36,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "3": {
+      "island": [
+        54,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            54,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            54,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            54,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "4": {
+      "island": [
+        72,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            72,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            72,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            72,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "5": {
+      "island": [
+        90,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            90,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            90,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            90,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "6": {
+      "island": [
+        108,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            108,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            108,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            108,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "7": {
+      "island": [
+        126,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            126,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            126,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            126,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "8": {
+      "island": [
+        144,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            144,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            144,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            144,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    }
+  },
+  "joins": [
+    {
+      "stage": 0,
+      "platform": [
+        3,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600077
+    },
+    {
+      "stage": 1,
+      "platform": [
+        21,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600109
+    },
+    {
+      "stage": 2,
+      "platform": [
+        39,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600141
+    },
+    {
+      "stage": 3,
+      "platform": [
+        57,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600173
+    },
+    {
+      "stage": 4,
+      "platform": [
+        75,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600205
+    },
+    {
+      "stage": 5,
+      "platform": [
+        93,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600237
+    },
+    {
+      "stage": 6,
+      "platform": [
+        111,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600269
+    },
+    {
+      "stage": 7,
+      "platform": [
+        129,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600301
+    },
+    {
+      "stage": 8,
+      "platform": [
+        147,
+        -3,
+        0
+      ],
+      "north_belts": {
+        "q2": [
+          11,
+          -18,
+          0
+        ],
+        "q3": [
+          10,
+          -18,
+          0
+        ],
+        "q1": [
+          9,
+          -18,
+          0
+        ],
+        "q0": [
+          8,
+          -18,
+          0
+        ]
+      },
+      "base_result": [
+        30,
+        37,
+        0
+      ],
+      "direct_channel": 1600333
+    }
+  ],
+  "capacity_486": {
+    "stages": 486,
+    "9_stage_pages": 54,
+    "baseline_platforms_with_control": 15557,
+    "compact_platforms_with_control": 15071
+  }
+}

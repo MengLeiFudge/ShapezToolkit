@@ -31,4 +31,6 @@ python -m shapez2_tmam.circuits.compiler_frontend.s_predecessor_dynamic --output
 
 同一份蓝图连续回放七组输入，核对了 24 个原生候选、四列上下界、复位、旧确认高电平、越过空候选和上界耗尽。回放采用板内组合、无线固定 12 tick 模型。离线应用 Python 的接地和尾料判据后，七组顺序均与 `Solver4._predecessors` 一致。
 
+比较边界回放使用 `----cr--:CuCu----:crcrcr--:--P-crCu:P-P---Cu` 及四个上界 `5`。已保留格从本行新增块判定中排除。下界为 `(3,2,3,1)`，六项计数和原色行与 Python 一致。上界 `6` 或 `-1` 时直接耗尽。
+
 样件为 81 块 3×3 平台、98,193 个建筑。游戏内时序待验。

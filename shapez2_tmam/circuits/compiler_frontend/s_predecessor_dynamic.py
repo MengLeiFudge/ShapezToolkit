@@ -71,7 +71,7 @@ def _new_cells(z, lanes, states, heights, outputs):
     board = Module({key + str(q): channels[q] for q in lanes
                     for key, channels in (("state", states), ("height", heights))})
     for q in lanes:
-        fresh = _compare(board, f"fresh{q}", f"height{q}", z + 1, "BQ==")
+        fresh = _compare(board, f"fresh{q}", f"height{q}", z + 1, "BA==")
         board.outputs[_gate(board, "If", f"added{q}", f"state{q}", fresh)] = outputs[q]
     return board
 
@@ -107,7 +107,7 @@ def _bounds(ranks, height, limit, lower, upper, valid):
     _gate(board, "If", "upper", "limit", limited)
     _gate(board, "If", "upper", "rank5", _gate(board, "Not", "all", limited))
     nonnegative = _compare(board, "nonnegative", "limit", 0, "Ag==")
-    within_max = _compare(board, "within_max", "limit", 6, "BQ==")
+    within_max = _compare(board, "within_max", "limit", 5, "BQ==")
     ordered = _compare(board, "ordered", "upper", "lower", "Ag==")
     _gate(board, "And", "valid", ordered, _gate(board, "And", "typed", nonnegative, within_max))
     board.outputs = {"lower": lower, "upper": upper, "valid": valid}

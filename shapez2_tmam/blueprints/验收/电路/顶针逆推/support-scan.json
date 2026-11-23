@@ -1,0 +1,34 @@
+{
+  "inputs": {
+    "enable": 1704410,
+    "grounded": 1704413,
+    "optional_top": 1704414,
+    "rows": [
+      1704420,
+      1704421,
+      1704422,
+      1704423,
+      1704424
+    ]
+  },
+  "outputs": {
+    "done": 1704412,
+    "accepted": 1704416,
+    "reached_rows": [
+      1704425,
+      1704426,
+      1704427,
+      1704428,
+      1704429
+    ]
+  },
+  "timing": {
+    "input_hold_signal_ticks": 7168,
+    "update_hold_signal_ticks": 768,
+    "settle_phase_signal_ticks": 7200,
+    "update_phase_signal_ticks": 780,
+    "reset_hold_signal_ticks": 48
+  },
+  "platforms": 36,
+  "building_entries": 33812
+}

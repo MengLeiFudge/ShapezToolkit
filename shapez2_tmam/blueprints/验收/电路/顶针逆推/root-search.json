@@ -1,0 +1,23 @@
+{
+  "inputs": {
+    "enable": 1704673,
+    "nonempty": 1704670,
+    "unknown": 1704671,
+    "chosen": 1703004,
+    "exhausted": 1703005,
+    "snapshot_ready": 1704602
+  },
+  "outputs": {
+    "closure": 1704676,
+    "snapshot": 1704677,
+    "tail": 1704678,
+    "unknown": 1704679,
+    "invalid": 1704680,
+    "fault": 1704681,
+    "replay": 1704687
+  },
+  "phase": 1704674,
+  "input_hold_signal_ticks": 4128,
+  "platforms": 6,
+  "building_entries": 5608
+}

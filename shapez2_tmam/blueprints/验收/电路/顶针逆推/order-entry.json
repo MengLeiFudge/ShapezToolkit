@@ -1,0 +1,19 @@
+{
+  "inputs": {
+    "rows": [
+      1701200,
+      1701201,
+      1701202,
+      1701203,
+      1701204
+    ]
+  },
+  "outputs": {
+    "nonempty": 1704670,
+    "unknown": 1704671,
+    "budget": 1704672
+  },
+  "hold_signal_ticks": 1420,
+  "platforms": 8,
+  "building_entries": 3503
+}

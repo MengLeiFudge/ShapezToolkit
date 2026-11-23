@@ -13,7 +13,7 @@
 | 实体 | 145 道悬空订单的代表段、满带并联与四路混合车 | [145 道全线](实体/含晶工道/full_line_pages.md) · [代表页签](实体/含晶工道/stage_pages.md) · [满带样件](实体/含晶工道/full_belt_sample.md) · [接轨与卸货表](实体/含晶工道/long_haul_routes.md) |
 | 配料 | 基础料与结晶染料的换装站、两种混合车库 | [货种、车厢、层位及接口](配料/proportioning.json) |
 | 配料、通用火车 | 145 道长单的五路换装场与混合车库 | [导入和装载说明](配料/长单/long_haul_transfer.md) |
-| 配料 | 九道通用页的共用混合车分配 | [分组容量和原生接点](配料/共用供料/shared_supply.md) |
+| 配料 | 九道通用页的共用混合车分配 | [分组容量和原生接点](配料/共用供料/shared_supply.md) · [全页接线与面积对照](配料/共用供料/shared_supply_page.md) |
 | 通用火车 | 图形和流体单料车的车库、装货站、卸货站 | [装载类型及方向](通用火车/trains.json) |
 | 电路 | 从原图一次读取五份原色单层 | [原生蓝图](电路/原层读取/read-five-rows.spz2bp) · [接口](电路/原层读取/read-five-rows.json) |
 | 电路 | 按原层号读取目标的两层 | [复位、选择与采样](电路/原层读取/read-target-rows.json) |
@@ -23,8 +23,11 @@
 | 电路 | 恢复顶针来源标签并回放 | [原色来源行](电路/顶针逆推/pin-candidate-row.md) · [第五层顶盖行](电路/顶针逆推/pin-cap-row.md) · [整形回放](电路/顶针逆推/pin-replay.json) |
 | 电路 | 逐层读取并封存候选的五层原色 | [统一读取](电路/顶针逆推/pin-row-reader.md) · [整组封存](电路/顶针逆推/pin-source-rows.md) |
 | 电路 | 原图和顶针候选共用前缀闭包 | [101 板共用闭包](电路/顶针逆推/dual-source-closure.md) · [四列材料字](电路/顶针逆推/pin-source-words.md) |
-| 电路 | 遍历 S 前态和单层顶针候选 | [动态枚举](电路/顶针逆推/s-predecessor-dynamic.md) · [单层顶针控制](电路/顶针逆推/pin-layer-search.md) · [正向尾部指令](电路/顶针逆推/tail-frame.md) |
+| 电路 | 从原图自动选定并写入直接路线配方 | [启动、重导与离线回放](电路/顶针逆推/root-search.md) |
+| 电路 | 遍历 S 前态和单层顶针候选 | [动态枚举](电路/顶针逆推/s-predecessor-dynamic.md) · [S 追加许可](电路/顶针逆推/s-addition-filter.md) · [K/G 支撑](电路/顶针逆推/support-scan.md) · [单层顶针控制](电路/顶针逆推/pin-layer-search.md) |
+| 电路 | 筛选顶盖和顶针像 | [顶盖遍历](电路/顶针逆推/pin-cap-plan.md) · [晶体筛选](电路/顶针逆推/pin-cap-crystals.md) · [落点筛选](电路/顶针逆推/pin-landings.md) |
 | 电路 | 虚拟六槽逐笔确认和整单验收 | [单笔回放](电路/配方回放/virtual-recipe-step.md) · [整单回放](电路/配方回放/virtual-recipe-replay.md) · [虚拟与实体两遍控制](电路/配方回放/two-pass-recipe.md) |
+| 电路 | 从冻结的叶端和父帧生成配方 | [叶端锁存](电路/配方回放/leaf-snapshot.md) · [三层父帧存储](电路/顶针逆推/tail-frames.md) · [尾帧写入](电路/顶针逆推/tail-frame-writer.md) · [成功路径](电路/配方回放/success-path.md) |
 | 电路 | 无晶体路线的原图稳定性和回放 | [稳定性判定](电路/纯堆叠/direct-stability.json) · [五轮扫描](电路/纯堆叠/direct-stack-scan.json) |
 | 纯堆叠 | 动态制单、九工段实体、火车配料与一带出口 | [纯堆叠各分册与接线](电路/纯堆叠/README.md) |
 | 电路 | 统一切向并选择当前列 | [切向转换](电路/双半形/orient-cut.json) · [四列扫描输入](电路/双半形/four-column-targets.json) · [四列调用](电路/双半形/read-four-columns.json) · [列选择](电路/双半形/select-column.json) · [前缀与列 A 总校验](电路/双半形/check-prefix.json) · [两种切向自动试查](电路/双半形/choose-cut.json) · [试查时钟](电路/双半形/choose-cut-clock.json) |
@@ -42,6 +45,7 @@
 | 电路 | 四角调度、紧柱、拼合与尾料的共用写入 | [工序控制分册](电路/双半形/工序控制/README.md) · [原生蓝图](电路/双半形/工序控制/pair-writer.spz2bp) |
 | 电路 | 制角与双半形共用写入桥 | [自动制角与工序写入](电路/双半形/工序控制/自动制角/README.md) · [独立确认器](电路/双半形/工序控制/pair-corner-bridge.md) |
 | 实体 | 直接落角与悬空落角的整形配方 | [94 和 145 道的逐步回放](../../circuits/factory_assembly/corner_line_sample.md) |
+| 实体 | 四角转向与拼合共用 3×3 平台 | [通用九道及末页接线](实体/含晶工道/compact_quarter_join.md) |
 
 单料车把同一种货物送往配料站。配料站按装载表把每种货物放入混合车的指定层，再由混合车向制作工段供货。同一车厢每层的带或管使用同一种物料。游戏内按坐标接轨、装方、开料和换单，验收时记录满带出货和卸货量。实机持续产量待测。
 
