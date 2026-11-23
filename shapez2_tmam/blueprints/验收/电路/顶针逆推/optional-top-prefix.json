@@ -1,0 +1,122 @@
+{
+  "methods": {
+    "h0": "optional_top_q0",
+    "h1": "optional_top_q1",
+    "h2": "optional_top_q2",
+    "h3": "optional_top_q3",
+    "item0": "optional_top_item"
+  },
+  "quadrants": 4,
+  "height": 5,
+  "inputs": {
+    "h0": {
+      "channel": 1701570,
+      "type": "int"
+    },
+    "h1": {
+      "channel": 1701571,
+      "type": "int"
+    },
+    "h2": {
+      "channel": 1701572,
+      "type": "int"
+    },
+    "h3": {
+      "channel": 1701573,
+      "type": "int"
+    },
+    "row": {
+      "channel": 1701574,
+      "type": "shape"
+    },
+    "optional": {
+      "channel": 1701575,
+      "type": "bool"
+    }
+  },
+  "outputs": {
+    "h0": {
+      "channel": 1700761,
+      "type": "int"
+    },
+    "h1": {
+      "channel": 1700762,
+      "type": "int"
+    },
+    "h2": {
+      "channel": 1700763,
+      "type": "int"
+    },
+    "h3": {
+      "channel": 1700764,
+      "type": "int"
+    },
+    "item0": {
+      "channel": 1700770,
+      "type": "shape"
+    }
+  },
+  "reserved_channels": [
+    1700761,
+    1700762,
+    1700763,
+    1700764,
+    1700770,
+    1701570,
+    1701571,
+    1701572,
+    1701573,
+    1701574,
+    1701575
+  ],
+  "schedule": "combination",
+  "expanded_blocks": {
+    "h0": {
+      "optional_top_q0": 3,
+      "_optional_top_height": 6,
+      "row_support._keep_plain": 1
+    },
+    "h1": {
+      "optional_top_q1": 3,
+      "_optional_top_height": 6,
+      "row_support._keep_plain": 1
+    },
+    "h2": {
+      "optional_top_q2": 3,
+      "_optional_top_height": 6,
+      "row_support._keep_plain": 1
+    },
+    "h3": {
+      "optional_top_q3": 3,
+      "_optional_top_height": 6,
+      "row_support._keep_plain": 1
+    },
+    "item0": {
+      "optional_top_item": 3
+    }
+  },
+  "settling": {
+    "max_gate_depth": 20,
+    "hold_signal_ticks": 1408,
+    "hold_simulation_seconds": 117.33333333333333,
+    "conditions": "整件批量导入或完整重载，固定接线与配置，公开频道独占。采用 Hybrid 或 AlwaysHighUPS 常速推进，每批最多 4 信号 tick。调用方保持整组输入满采样时间后读取各字段。"
+  },
+  "platform_type": "Foundation_3x3",
+  "platforms": 2,
+  "island_footprint_chunks": [
+    6,
+    3
+  ],
+  "buildings_by_layer": [
+    1647,
+    999,
+    1107
+  ],
+  "logic_gates": 109,
+  "logic_gates_before_reuse": 130,
+  "building_entries": 3753,
+  "global_receivers": 6,
+  "global_transmitters": 5,
+  "internal_global_devices": 0,
+  "short_range_links": 6
+}

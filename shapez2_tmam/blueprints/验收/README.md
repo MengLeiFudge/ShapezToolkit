@@ -76,6 +76,8 @@
 
 顶针逆推按同列内的保序关系恢复标签。对前态当前格，数出其下方的普通格和针。五轮读取按该序号从目标列找对应格，跳过晶体和地面新针。前态的晶体看上一原层，保留晶体沿用目标原色，额外晶体用红色。前态获得制造证书后，虚拟顶针回放输出与目标完全相等才通过。
 
+可选顶盖模式先单独处理第五层的半形支撑，再把闭包的第一轮上料留空。`optional-top-prefix` 接两块恢复列序板的四个高度和第五层编码。采用该板时将原高度改送 `1701570` 至 `1701573`，第五层编码改送 `1701574`。板子独占闭包的初值与 `item0` 频道，并用 `1701575` 在普通和可选模式间切换。 [切换接口](电路/顶针逆推/optional-top-prefix.json)
+
 ```bash
 python -m shapez2_tmam.circuits.compile_stack_scan --restore-pin-label --channel-base 1701530 --output pin-retained-label.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_cap_column.py \
@@ -93,6 +95,13 @@ python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_labels
   --field replay=pin_replay --field accepted=pin_replay_matches --input-channel source=1701550 \
   --input-channel target=1701551 --input-channel ready=1701552 --output-channel replay=1701553 \
   --output-channel accepted=1701554 --output pin-replay.spz2bp
+python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/optional_top.py \
+  --field h0=optional_top_q0 --field h1=optional_top_q1 --field h2=optional_top_q2 \
+  --field h3=optional_top_q3 --field item0=optional_top_item --input-channel h0=1701570 \
+  --input-channel h1=1701571 --input-channel h2=1701572 --input-channel h3=1701573 \
+  --input-channel row=1701574 --input-channel optional=1701575 --output-channel h0=1700761 \
+  --output-channel h1=1700762 --output-channel h2=1700763 --output-channel h3=1700764 \
+  --output-channel item0=1700770 --output optional-top-prefix.spz2bp
 python -m shapez2_tmam.circuits.compile_method shapez2_tmam/synthesis/pin_source_row.py \
   --field row=pin_source_row --input-channel q0=1701560 --input-channel q1=1701561 \
   --input-channel q2=1701562 --input-channel q3=1701563 --output-channel row=1701564 --output pin-source-row.spz2bp
