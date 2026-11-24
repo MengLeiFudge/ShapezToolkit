@@ -37,6 +37,19 @@
 python -m shapez2_tmam.circuits.compile_factory_v1 --output factory-v1.spz2bp
 ```
 
-生成器用项目分册内的原生部件合装，自动使用三岛层叶端锁存。相邻飞线两端随整组移动。导出时核对平台占地、飞线配对及所有送入和送出频道。
+生成器从项目分册合装，并从 `direct-root-stacked.spz2bp` 载入三个岛层的叶端锁存。默认针对占地率低于 18% 的平台。仅含直通线或空格的行列经过端口核对后可以裁剪。同一部件的稀疏板合用平台，板间隔一格避免串线。有飞线的组可以整体转向，缩板时保留飞线两端间的相对坐标。单侧飞线的小型控制板在裁线后仍低于 5% 时，生成器可沿原接收边缩成一排岛格，再利用三个建筑层重新走线。导出时核对平台占地、飞线配对及收发频道。
+
+同名 JSON 的 `occupancy` 给出这次生成前后的实际占地率。`sparsest_platforms` 按占地率列出最空的 20 块平台及其岛格坐标，坐标相对蓝图原点。三层建筑实际占格与可建格的定义见[电路走线与压缩](../../电路走线与压缩.md)。
+
+单独修改叶端锁存后，从仓库根目录重导合装所用的直接路线。
+
+```bash
+parts=shapez2_tmam/blueprints/验收/电路
+python -m shapez2_tmam.circuits.compile_root_search \
+  --reader "$parts/原层读取/read-five-rows.spz2bp" \
+  --closure "$parts/顶针逆推/dual-source-closure.spz2bp" \
+  --path "$parts/配方回放/success-path.spz2bp" --stacked-leaf \
+  --output "$parts/顶针逆推/direct-root-stacked.spz2bp"
+```
 
 当前验收状态为原生解码及静态接线通过。直接路线的前版有完整离线回放记录。本版的游戏内放置、换目标，以及必须经尾针逆推的整单完成仍待验收。

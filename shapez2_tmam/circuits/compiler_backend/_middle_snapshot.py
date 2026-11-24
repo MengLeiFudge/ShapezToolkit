@@ -83,6 +83,8 @@ def _radio(layout, name, channel, receive, site, level):
     direction = rotation if receive else (rotation + 2) % 4
     dx, dy = DIRECTIONS[direction]
     a, b = x + 2 * dx, y + 2 * dy
+    if layout.board.traces.get((a, b, 0)):
+        return None
     for z in (level, 3 - level):
         for kind, turn in (("Forward", 0), ("Left", 3), ("Backward", 2)):
             trial = layout.copy()
@@ -90,7 +92,9 @@ def _radio(layout, name, channel, receive, site, level):
             try:
                 trial.radio(name, channel, x, y, rotation, receive=receive)
                 board.traces.pop((a, b, 0))
-                board.terminals.pop((name, 0))
+                board.terminals[name, 0].remove((a, b, 0))
+                if not board.terminals[name, 0]:
+                    del board.terminals[name, 0]
                 board.place(f"WireDefault{z}Up{kind}", a, b, 0, direction, height=z + 1)
                 board.pin(name, a, b, z, (direction + turn) % 4)
             except ValueError:

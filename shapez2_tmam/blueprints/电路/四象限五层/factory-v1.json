@@ -12,6 +12,284 @@
     "recipe_length": 1640043,
     "feed": 1640059
   },
+  "occupancy": {
+    "before": {
+      "occupied_cells": 1280966,
+      "buildable_cells": 8826408,
+      "percent": 14.51,
+      "below_5_percent": 108,
+      "below_10_percent": 389
+    },
+    "after": {
+      "occupied_cells": 1156308,
+      "buildable_cells": 4864368,
+      "percent": 23.77,
+      "below_5_percent": 0,
+      "below_10_percent": 20
+    },
+    "sparsest_platforms": [
+      {
+        "platform": 404,
+        "part": "pin-column-sample",
+        "foundation": "Foundation_2x3",
+        "position": [
+          28,
+          3,
+          1
+        ],
+        "occupied_cells": 300,
+        "buildable_cells": 5628,
+        "percent": 5.33
+      },
+      {
+        "platform": 417,
+        "part": "pin-column-sample",
+        "foundation": "Foundation_1x2",
+        "position": [
+          4,
+          6,
+          -1
+        ],
+        "occupied_cells": 80,
+        "buildable_cells": 1500,
+        "percent": 5.33
+      },
+      {
+        "platform": 75,
+        "part": "direct-root",
+        "foundation": "Foundation_1x2",
+        "position": [
+          1,
+          6,
+          1
+        ],
+        "occupied_cells": 82,
+        "buildable_cells": 1500,
+        "percent": 5.47
+      },
+      {
+        "platform": 96,
+        "part": "direct-root",
+        "foundation": "Foundation_1x3",
+        "position": [
+          34,
+          3,
+          0
+        ],
+        "occupied_cells": 138,
+        "buildable_cells": 2364,
+        "percent": 5.84
+      },
+      {
+        "platform": 77,
+        "part": "direct-root",
+        "foundation": "Foundation_2x3",
+        "position": [
+          28,
+          3,
+          -1
+        ],
+        "occupied_cells": 335,
+        "buildable_cells": 5628,
+        "percent": 5.95
+      },
+      {
+        "platform": 421,
+        "part": "pin-column-sample",
+        "foundation": "Foundation_2x3",
+        "position": [
+          31,
+          3,
+          -1
+        ],
+        "occupied_cells": 355,
+        "buildable_cells": 5628,
+        "percent": 6.31
+      },
+      {
+        "platform": 419,
+        "part": "pin-column-sample",
+        "foundation": "Foundation_1x3",
+        "position": [
+          39,
+          3,
+          -1
+        ],
+        "occupied_cells": 154,
+        "buildable_cells": 2364,
+        "percent": 6.51
+      },
+      {
+        "platform": 424,
+        "part": "pin-column-sample",
+        "foundation": "Foundation_2x3",
+        "position": [
+          31,
+          3,
+          0
+        ],
+        "occupied_cells": 372,
+        "buildable_cells": 5628,
+        "percent": 6.61
+      },
+      {
+        "platform": 535,
+        "part": "pin-landings",
+        "foundation": "Foundation_1x3",
+        "position": [
+          39,
+          3,
+          1
+        ],
+        "occupied_cells": 167,
+        "buildable_cells": 2364,
+        "percent": 7.06
+      },
+      {
+        "platform": 541,
+        "part": "pin-landings",
+        "foundation": "Foundation_1x3",
+        "position": [
+          40,
+          3,
+          0
+        ],
+        "occupied_cells": 167,
+        "buildable_cells": 2364,
+        "percent": 7.06
+      },
+      {
+        "platform": 547,
+        "part": "pin-landings",
+        "foundation": "Foundation_1x3",
+        "position": [
+          1,
+          6,
+          -1
+        ],
+        "occupied_cells": 167,
+        "buildable_cells": 2364,
+        "percent": 7.06
+      },
+      {
+        "platform": 553,
+        "part": "pin-landings",
+        "foundation": "Foundation_1x3",
+        "position": [
+          1,
+          6,
+          0
+        ],
+        "occupied_cells": 167,
+        "buildable_cells": 2364,
+        "percent": 7.06
+      },
+      {
+        "platform": 72,
+        "part": "direct-root",
+        "foundation": "Foundation_2x3",
+        "position": [
+          25,
+          0,
+          1
+        ],
+        "occupied_cells": 411,
+        "buildable_cells": 5628,
+        "percent": 7.3
+      },
+      {
+        "platform": 412,
+        "part": "pin-column-sample",
+        "foundation": "Foundation_1x3",
+        "position": [
+          36,
+          0,
+          1
+        ],
+        "occupied_cells": 186,
+        "buildable_cells": 2364,
+        "percent": 7.87
+      },
+      {
+        "platform": 297,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_2x2",
+        "position": [
+          33,
+          0,
+          1
+        ],
+        "occupied_cells": 310,
+        "buildable_cells": 3564,
+        "percent": 8.7
+      },
+      {
+        "platform": 300,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_2x2",
+        "position": [
+          36,
+          0,
+          -1
+        ],
+        "occupied_cells": 310,
+        "buildable_cells": 3564,
+        "percent": 8.7
+      },
+      {
+        "platform": 8,
+        "part": "direct-root",
+        "foundation": "Foundation_2x3",
+        "position": [
+          25,
+          3,
+          0
+        ],
+        "occupied_cells": 526,
+        "buildable_cells": 5628,
+        "percent": 9.35
+      },
+      {
+        "platform": 126,
+        "part": "direct-root",
+        "foundation": "Foundation_3x3",
+        "position": [
+          10,
+          10,
+          0
+        ],
+        "occupied_cells": 847,
+        "buildable_cells": 8892,
+        "percent": 9.53
+      },
+      {
+        "platform": 320,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_3x3",
+        "position": [
+          22,
+          22,
+          0
+        ],
+        "occupied_cells": 851,
+        "buildable_cells": 8892,
+        "percent": 9.57
+      },
+      {
+        "platform": 414,
+        "part": "pin-column-sample",
+        "foundation": "Foundation_1x3",
+        "position": [
+          37,
+          0,
+          0
+        ],
+        "occupied_cells": 228,
+        "buildable_cells": 2364,
+        "percent": 9.64
+      }
+    ]
+  },
   "factory": {
     "receives": {
       "run": 1640030,
@@ -45,19 +323,20 @@
     "5": "内部核对失败"
   },
   "parts": {
-    "direct-root": 417,
-    "tail-search": 12,
-    "tail-frames-control": 17,
-    "search-checkpoint": 22,
-    "tail-search-workers": 238,
-    "tail-node-inputs": 28,
-    "pin-column-sample": 49,
-    "pin-row-reader": 38,
-    "pin-rows-prefetch": 24,
-    "pin-layer-search": 14,
-    "pin-cap-plan": 26,
-    "pin-cap-crystals": 27,
-    "pin-landings": 79
+    "direct-root": 219,
+    "tail-search": 7,
+    "tail-frames-control": 6,
+    "search-checkpoint": 18,
+    "tail-search-workers": 132,
+    "tail-node-inputs": 20,
+    "pin-column-sample": 34,
+    "pin-row-reader": 20,
+    "pin-rows-prefetch": 10,
+    "pin-layer-search": 9,
+    "pin-cap-plan": 15,
+    "pin-cap-crystals": 13,
+    "pin-landings": 66,
+    "controls": 3
   },
   "external_inputs": [
     1600000,
@@ -84,15 +363,18 @@
     1704431,
     1704432
   ],
-  "platforms": 998,
+  "platforms": 572,
   "platform_sizes": {
-    "Foundation_3x3": 992,
-    "Foundation_1x2": 2,
-    "Foundation_1x1": 4
+    "Foundation_3x3": 527,
+    "Foundation_2x3": 25,
+    "Foundation_1x2": 4,
+    "Foundation_1x1": 5,
+    "Foundation_1x3": 9,
+    "Foundation_2x2": 2
   },
   "footprint_chunks": [
-    60,
-    51
+    42,
+    41
   ],
   "island_levels": [
     -1,
@@ -100,7 +382,7 @@
     1
   ],
   "short_range_links": 176,
-  "building_entries": 1104425,
+  "building_entries": 979775,
   "global_transmitters": 1804,
   "global_receivers": 4168
 }

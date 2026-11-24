@@ -2,17 +2,16 @@
 
 import argparse
 from collections import Counter, defaultdict
-from itertools import product
-from math import ceil, isqrt
+from math import isqrt
 from pathlib import Path
 
 from ..mari.blueprint import Wiring, _kind
 from .circuit import constant
-from .compile_root_search import build_direct
 from .compiler_backend import _write_blueprint
 from .compiler_backend.module_caller import _compare, _gate, _local_wiring
 from .compiler_backend.prefix_scan_wiring import _native_wiring
 from .factory_assembly.interface import FIELDS, LOADED, OPERATOR_INPUTS, ORDER_INPUTS, PACKET_TAG, WRITE_RESET, WRITE_STATUS
+from .factory_circuit_packing import compact_platforms, shrink_short_groups
 from .foundations import FOUNDATION_CHUNKS, foundation_tiles
 from .compiler_frontend.pin_candidate_closure import _radio_ports
 from .local_module import Module
@@ -150,46 +149,55 @@ def _place_platforms(platforms, short_pairs, leaf):
                                  for d, base in enumerate((x0, y0, z0)))
         if levels > 3 or sum(len(footprints[i]) for i in indices) != len(tiles):
             raise ValueError("同一飞线组的平台重叠或超过三个岛层")
-        slots = {((x - x0) // 3, (y - y0) // 3, z - z0) for x, y, z in tiles}
-        groups.append((indices, (x0, y0, z0), slots, ceil(width / 3), ceil(height / 3), levels))
+        slots = {(x - x0, y - y0, z - z0) for x, y, z in tiles}
+        groups.append((indices, (x0, y0, z0), slots, width, height, levels))
     groups.sort(key=lambda group: (-len(group[2]), group[0][0]))
-    span = max(2 + isqrt(sum(len(group[2]) for group in groups) // 3),
+    span = max(3 + isqrt(sum(len(group[2]) for group in groups) // 3),
                max(max(g[3], g[4]) for g in groups))
-    occupied = set()
+    occupied = [0, 0, 0]
+    rows = 0
     for indices, (x0, y0, z0), slots, width, height, levels in groups:
-        for y, x, z in product(range(len(platforms)), range(span - width + 1), range(-1, 3 - levels)):
-            placed = {(x + a, y + b, z + c) for a, b, c in slots}
-            if occupied.isdisjoint(placed):
-                occupied.update(placed)
-                break
-        else:
-            raise ValueError(f"无法为飞线组 {indices} 放置平台")
+        edge = (1 << (span - width + 1)) - 1
+        origins = sum(edge << (row * span) for row in range(rows + 1))
+        offsets = [(y * span + x, layer) for x, y, layer in slots]
+        choices = []
+        for z in range(4 - levels):
+            available = origins
+            for offset, layer in offsets:
+                available &= ~(occupied[z + layer] >> offset)
+            if available:
+                choices.append(((available & -available).bit_length() - 1, z))
+        origin, z = min(choices)
+        y, x = divmod(origin, span)
+        for offset, layer in offsets:
+            occupied[z + layer] |= 1 << (origin + offset)
+        rows = max(rows, y + height)
         for i in indices:
             p = platforms[i]
-            p.update(X=p.get("X", 0) + 3 * x - x0, Y=p.get("Y", 0) + 3 * y - y0, Z=p.get("Z", 0) + z - z0)
+            p.update(X=p.get("X", 0) + x - x0, Y=p.get("Y", 0) + y - y0, Z=p.get("Z", 0) + z - 1 - z0)
 
 
 def _check_short_pairs(platforms, expected):
     # 平移整板保留板内线路。只需从合装坐标重新推导板间配对。
     ports = []
     indices = []
-    offset = 0
+    count = 0
     for platform in platforms:
         entries = platform["B"]["Entries"]
         short = []
-        for i, entry in enumerate(entries):
+        for entry in entries:
             if _kind(entry) in ("WireTransmitterSender", "WireTransmitterReceiver"):
-                indices.append(offset + i)
+                indices.append(id(entry))
                 short.append(entry)
         ports.append({**platform, "B": {"Entries": short}})
-        offset += len(entries)
+        count += len(entries)
     actual = Wiring({"Entries": ports}).short_ports
     if {indices[rx]: indices[tx] for rx, tx in actual.items()} != expected:
         raise ValueError("整厂合装改变了原生飞线配对")
-    return offset
+    return count
 
 
-def build(pieces: Path | None = None, *, direct_root: Path | None = None) -> tuple[dict, dict]:
+def build(pieces: Path | None = None, *, direct_root: Path | None = None, density_threshold: int = 18) -> tuple[dict, dict]:
     parts = (
         ("direct-root", {1704676: 1703000}, {1704601: 1705375, 1702850: 1705376,
                                              1703001: 1705377, 1703002: 1705378, 1704000: 1705379,
@@ -209,44 +217,59 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None) -> tup
     )
     folder = pieces or _BOOK / "顶针逆推"
     locations = {"tail-search-workers": _CIRCUITS / "compiler_backend", "tail-node-inputs": _CIRCUITS / "compiler_frontend"}
-    direct = None
     if direct_root is None and pieces is None:
-        direct, _ = build_direct(_BOOK / "原层读取/read-five-rows.spz2bp",
-                                 _BOOK / "顶针逆推/dual-source-closure.spz2bp",
-                                 _BOOK / "配方回放/success-path.spz2bp", 4096, stacked_leaf=True)
+        direct_root = folder / "direct-root-stacked.spz2bp"
     counts, platforms, pairs = {}, [], {}
     received, sent = Counter(), Counter()
-    offset = 0
     leaf = []
     board_links = []
+    before, after = [], []
     for name, receivers, transmitters in parts:
-        if name == "direct-root" and direct is not None:
-            wiring = _local_wiring(direct["BP"])
-        else:
-            source = folder if pieces else locations.get(name, folder)
-            path = direct_root if name == "direct-root" and direct_root is not None else source / f"{name}.spz2bp"
-            wiring = _native_wiring(path)
+        source = folder if pieces else locations.get(name, folder)
+        path = direct_root if name == "direct-root" and direct_root is not None else source / f"{name}.spz2bp"
+        wiring = _native_wiring(path)
         base = len(platforms)
-        for rx, tx in wiring.short_ports.items():
-            pairs[offset + rx] = offset + tx
-            board_links.append((base + wiring.entries[rx][0], base + wiring.entries[tx][0]))
-        if name == "direct-root":
-            leaf = [i for i, board in enumerate(wiring.platforms) if board["T"] in ("Foundation_1x1", "Foundation_1x2")]
-        counts[name] = len(wiring.platforms)
         rx, tx = _rewrite(wiring, receivers, transmitters)
         received.update(rx)
         sent.update(tx)
-        platforms.extend(wiring.platforms)
-        offset += len(wiring.entries)
+        boards = wiring.platforms
+        leaf_boards = [p for p in boards if name == "direct-root" and p["T"] in ("Foundation_1x1", "Foundation_1x2")]
+        links = [(wiring.entries[rx][0], wiring.entries[tx][0]) for rx, tx in wiring.short_ports.items()]
+        groups = _groups(len(boards), links)
+        shrunk = shrink_short_groups(boards, groups, min(10, density_threshold))
+        packed, old_usage, new_usage = compact_platforms(shrunk, density_threshold, baseline=boards)
+        before.extend(old_usage)
+        after.extend(new_usage)
+        index = {id(board): base + i for i, board in enumerate(packed)}
+        leaf.extend(index[id(board)] for board in leaf_boards)
+        moved = {}
+        for a in {i for pair in links for i in pair}:
+            if shrunk[a] is not boards[a]:
+                old, new = ([e for e in board["B"]["Entries"] if _kind(e).startswith("WireTransmitter")]
+                            for board in (boards[a], shrunk[a]))
+                moved.update((id(p), id(q)) for p, q in zip(old, new, strict=True))
+        for input_port, output_port in wiring.short_ports.items():
+            a, port_a = wiring.entries[input_port]
+            b, port_b = wiring.entries[output_port]
+            pairs[moved.get(id(port_a), id(port_a))] = moved.get(id(port_b), id(port_b))
+            board_links.append((index[id(shrunk[a])], index[id(shrunk[b])]))
+        counts[name] = len(packed)
+        platforms.extend(packed)
     controls = (_root_closure(), _successful_path(), _leaf_and_reject(), _remaining(),
                 _ports(tuple(zip(range(1703513, 1703518), range(1704304, 1704309), strict=True))), _status(),
                 _ports(((1705331, 1704800), (1705332, 1704801))))
+    control_boards = []
     for board in controls:
         wiring = _local_wiring(board.layout()["BP"])
         rx, tx = _rewrite(wiring, {}, {})
         received.update(rx)
         sent.update(tx)
-        platforms.extend(wiring.platforms)
+        control_boards.extend(wiring.platforms)
+    packed, old_usage, new_usage = compact_platforms(control_boards, density_threshold)
+    before.extend(old_usage)
+    after.extend(new_usage)
+    counts["controls"] = len(packed)
+    platforms.extend(packed)
     _place_platforms(platforms, board_links, leaf)
     document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}}
     buildings = _check_short_pairs(platforms, pairs)
@@ -275,7 +298,21 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None) -> tup
     if len(tiles) != sum(map(len, footprints)):
         raise ValueError("整厂电路平台占地重叠")
     xs, ys, zs = (set(coords) for coords in zip(*tiles, strict=True))
-    return document, {"inputs": order, "outputs": outputs,
+    usage = {}
+    for label, rows in (("before", before), ("after", after)):
+        used, capacity = map(sum, zip(*rows, strict=True))
+        usage[label] = {"occupied_cells": used, "buildable_cells": capacity, "percent": round(100 * used / capacity, 2),
+                        "below_5_percent": sum(20 * a < b for a, b in rows),
+                        "below_10_percent": sum(10 * a < b for a, b in rows)}
+    usage["sparsest_platforms"] = [
+        {"platform": i + 1, "part": part, "foundation": p["T"],
+         "position": [p[axis] for axis in ("X", "Y", "Z")],
+         "occupied_cells": occupied, "buildable_cells": capacity, "percent": round(100 * occupied / capacity, 2)}
+        for i, (part, p, (occupied, capacity)) in sorted(
+            enumerate(zip((name for name, count in counts.items() for _ in range(count)), platforms, after, strict=True)),
+            key=lambda item: item[1][2][0] / item[1][2][1])[:20]
+    ]
+    return document, {"inputs": order, "outputs": outputs, "occupancy": usage,
                       "factory": {"receives": shop_commands, "sends": shop_replies},
                       "status": {0: "计算中", 1: "配方已写入", 2: "不可制作", 3: "未着色晶体供料未定",
                                  4: "空目标", 5: "内部核对失败"},
@@ -291,10 +328,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="从分册原生部件导出首版整厂电路")
     parser.add_argument("pieces", nargs="?", type=Path, help="覆盖项目分册，使用指定目录中的部件")
     parser.add_argument("--direct-root", type=Path, help="替换目录内的直接路线蓝图，例如三岛层叶端版")
+    parser.add_argument("--density-threshold", type=int, default=18, choices=range(0, 101), metavar="0–100",
+                        help="参与压缩的最大占地率，默认 18%%")
     parser.add_argument("--output", type=Path, required=True, help="原生蓝图路径")
     args = parser.parse_args()
     try:
-        _write_blueprint(*build(args.pieces, direct_root=args.direct_root), args.output)
+        _write_blueprint(*build(args.pieces, direct_root=args.direct_root, density_threshold=args.density_threshold), args.output)
     except (ValueError, OSError) as error:
         parser.error(str(error))
     print(f"已导出 {args.output}")
