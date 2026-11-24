@@ -322,6 +322,8 @@ def _pack_pieces(ordered):
             fit = _fit(bin_, variants, area if best is None else best[0][0])
             if fit is not None and (best is None or fit[0] < best[0]):
                 best, target = fit, bin_
+                if fit[0][0] == 0:
+                    break
         if target is None:
             target = _Bin([], set())
             best = _fit(target, variants, area)

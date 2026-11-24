@@ -37,7 +37,7 @@
 python -m shapez2_tmam.circuits.compile_factory_v1 --output factory-v1.spz2bp
 ```
 
-生成器从项目分册合装，并从 `direct-root-stacked.spz2bp` 载入三个岛层的叶端锁存。它缩短能安全合并的直线，在同一部件内按可用岛格合板。有飞线的组可以整体转向，缩板时保留端口的相对坐标。导出使用第 5 版蓝图封装，核对建筑占地、飞线配对及收发频道。
+生成器从项目分册合装，并从 `direct-root-stacked.spz2bp` 载入三个岛层的叶端锁存。它缩短能安全合并的直线，优先在同一部件内合板，再让不依赖飞线位置的稀疏平台共用空间。接口表把共用平台列为 `shared-space`。有飞线的组可以整体转向，缩板时保留端口的相对坐标。导出使用第 5 版蓝图封装，核对建筑占地、飞线配对及收发频道。
 
 同名 JSON 的 `island_cells` 是实际岛格总数，3×3 计 9 格，各岛层分别累计。`platforms` 是平台件数。`occupancy` 给出占格和无线数据，`sparsest_platforms` 和 `radio_over_limit` 用于定位还值得缩板的位置。坐标相对蓝图原点。计算口径见[电路走线与压缩](../../电路走线与压缩.md)。
 

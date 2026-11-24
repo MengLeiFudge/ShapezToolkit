@@ -239,6 +239,31 @@ def _check_short_pairs(platforms, expected):
     return count
 
 
+def _share_sparse_space(platforms, counts, usage, links, leaf, threshold):
+    fixed = {i for pair in links for i in pair} | set(leaf)
+    names = (part for part, count in counts.items() for _ in range(count))
+    entries, occupied, source = [], [], []
+    retained, reindex = Counter(), {}
+    for i, (name, board, size) in enumerate(zip(names, platforms, usage, strict=True)):
+        used, capacity = size
+        if (i not in fixed and board["T"] == "Foundation_3x3" and 100 * used < threshold * capacity
+                and all(_kind(e) not in _SHORT for e in board["B"]["Entries"])):
+            source.append(board)
+        else:
+            reindex[i] = len(entries)
+            entries.append(board)
+            occupied.append(size)
+            retained[name] += 1
+    if not source:
+        return platforms, counts, usage, links, leaf
+    shared, _, packed_usage = compact_platforms(source, threshold)
+    if len(shared) == len(source) and all(a is b for a, b in zip(shared, source, strict=True)):
+        return platforms, counts, usage, links, leaf
+    retained["shared-space"] = len(shared)
+    return (entries + shared, dict(retained), occupied + packed_usage,
+            [(reindex[r], reindex[s]) for r, s in links], [reindex[i] for i in leaf])
+
+
 def _measure_placement(platforms, counts, xs, ys):
     left, top = min(xs) * TILE_SIZE, min(ys) * TILE_SIZE
     layout, used = defaultdict(int), defaultdict(int)
@@ -382,6 +407,8 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
     after.extend(new_usage)
     counts["controls"] = len(packed)
     platforms.extend(packed)
+    platforms, counts, after, board_links, leaf = _share_sparse_space(
+        platforms, counts, after, board_links, leaf, min(density_threshold, 30))
     _place_platforms(platforms, board_links, leaf)
     document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}}
     buildings = _check_short_pairs(platforms, pairs)
