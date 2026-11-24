@@ -11,11 +11,11 @@ from shutil import copyfile
 from ..mari.blueprint import DIRECTIONS, PORTS, _kind, _rotate
 from ..mari.signals import decode_constant
 from .compiler_backend.prefix_scan_wiring import _native_wiring
-from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_origin, foundation_tiles, platform_ground
+from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_origin, foundation_tiles, platform_ground, platform_interior
 
 
 _LEVELS = 3
-_COVERAGE_MIN = 75
+_SHORT = {"WireTransmitterSender", "WireTransmitterReceiver"}
 _RADIOS = {"ControlledSignalReceiver", "ControlledSignalTransmitter", "WireGlobalTransmitterReceiver"}
 
 
@@ -67,7 +67,10 @@ def _diagram(path):
         count = len(platform["B"]["Entries"])
         platforms.append((i, x, y, platform.get("Z", 0), width, height, count, foundation_tiles(platform["T"])))
     ground = [platform_ground(p["T"]) for p in wiring.platforms]
+    interior = [platform_interior(p["T"]) for p in wiring.platforms]
+    notches = [area - center for area, center in zip(ground, interior, strict=True)]
     occupied = [set() for _ in platforms]
+    radio_cells = Counter()
     placement_errors = Counter()
     unknown_footprints = set()
     entries = []
@@ -82,12 +85,15 @@ def _diagram(path):
         else:
             _, local_x, local_y, _ = wiring.sites[i]
             offsets = []
+            allowed = notches[board] if kind in _SHORT else interior[board]
             for cell in footprint:
                 a, b, z = cell
-                if (a, b) not in ground[board] or not 0 <= z < _LEVELS or cell in occupied[board]:
+                if (a, b) not in allowed or not 0 <= z < _LEVELS or cell in occupied[board]:
                     placement_errors[board] += 1
                 else:
                     occupied[board].add(cell)
+                    if kind in _RADIOS:
+                        radio_cells[board] += 1
                     offsets.append((a - local_x, b - local_y, z - level))
             if offsets == [(0, 0, 0)]:
                 offsets = 1
@@ -96,7 +102,7 @@ def _diagram(path):
         if PORTS[kind][2]:
             parts = _wire_segments(entry, kind)
             color = "vertical" if any(dz for _, _, dz in parts) else "wire"
-        elif kind in ("WireTransmitterSender", "WireTransmitterReceiver"):
+        elif kind in _SHORT:
             color = "short"
         elif kind in ("ControlledSignalTransmitter", "ControlledSignalReceiver"):
             color = "tx" if kind == "ControlledSignalTransmitter" else "rx"
@@ -108,7 +114,7 @@ def _diagram(path):
         entries.append((x, y, island, level, color, kind, parts, offsets))
     links = [(_position(wiring, tx), _position(wiring, rx)) for rx, tx in wiring.short_ports.items()]
     coverage = [(len(cells), len({(x, y) for x, y, _ in cells}), len(ground[board]),
-                 placement_errors[board], board in unknown_footprints, Counter(z for _, _, z in cells))
+                 placement_errors[board], board in unknown_footprints, Counter(z for _, _, z in cells), radio_cells[board])
                 for board, cells in enumerate(occupied)]
     return platforms, entries, links, radio, coverage
 
@@ -139,8 +145,8 @@ def _section(path, output_dir):
     density_target = 0.5
     capacity = 0
     board_rows = []
-    passed = 0
-    for platform, (used, projected, ground_cells, errors, unknown, level_cells) in zip(platforms, coverage, strict=True):
+    radio_violations = 0
+    for platform, (used, projected, ground_cells, errors, unknown, level_cells, wireless) in zip(platforms, coverage, strict=True):
         buildable = ground_cells * _LEVELS
         board, _, _, island, width, height, count, tiles = platform
         slots = len(tiles) * TILE_SIZE ** 2 * _LEVELS
@@ -150,11 +156,11 @@ def _section(path, output_dir):
             verdict = f"占地冲突或越界（{errors} 格）"
         elif unknown:
             verdict = "待核对器件占地"
-        elif 100 * used >= _COVERAGE_MIN * buildable:
-            verdict = "通过"
-            passed += 1
         else:
-            verdict = "未达标"
+            verdict = "占格正常"
+        over_limit = 10 * wireless >= buildable
+        radio_violations += over_limit
+        radio_rate = f"{wireless / buildable:.2%}" + (" · 超限" if over_limit else "")
         rate = "待核算" if unknown else f"{used / buildable:.1%}"
         plan_rate = "待核算" if unknown else f"{projected / ground_cells:.1%}"
         cells = "—" if unknown else f"{used:,}"
@@ -163,7 +169,7 @@ def _section(path, output_dir):
             layer_columns = "<td>—</td>" * _LEVELS
         board_rows.append(f"<tr><td>P{board}</td><td>Z{island}</td><td>{width}×{height}</td><td>{count:,}</td>"
                           f"<td>{occupancy:.1%}</td>{layer_columns}<td>{cells} / {buildable:,}</td>"
-                          f"<td>{rate}</td><td>{plan_rate}</td><td>{verdict}</td></tr>")
+                          f"<td>{rate}</td><td>{plan_rate}</td><td>{radio_rate}</td><td>{verdict}</td></tr>")
     data = json.dumps({"platforms": platforms, "entries": entries, "links": links}, ensure_ascii=True)
     table = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in (*row[:5], "接收" if row[5] == "rx" else "发射", row[6]))
                     + "</tr>" for row in radio)
@@ -171,10 +177,11 @@ def _section(path, output_dir):
             f'<p>{summary} · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
             f'飞线 {len(links)} 对 · 全局接收 {receivers} · 全局发射 {transmitters}</p>'
             f'<p>总建筑占比 {len(entries) / capacity:.1%} · 压缩目标 {density_target:.0%}</p>'
-            f'<p>占地率达标 {passed} / {len(platforms)} 块 · 每块至少 {_COVERAGE_MIN}%</p>'
+            f'<p>{radio_violations} / {len(platforms)} 块平台的全局收发面积达到或超过 10%</p>'
             '<details open><summary>逐块平台占地</summary><table><thead>'
             '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>建筑占比</th>'
-            '<th>L0</th><th>L1</th><th>L2</th><th>三层已占 / 可建格</th><th>三层占地率</th><th>俯视占地率</th><th>判定</th></tr>'
+            '<th>L0</th><th>L1</th><th>L2</th><th>三层已占 / 可建格</th><th>三层占地率</th>'
+            '<th>俯视占地率</th><th>全局收发占地</th><th>放置检查</th></tr>'
             f'</thead><tbody>{"".join(board_rows)}</tbody></table></details>'
             '<table><thead><tr><th>建筑层</th><th>器件</th><th>线缆件</th></tr></thead>'
             f'<tbody>{layers}</tbody></table>'
