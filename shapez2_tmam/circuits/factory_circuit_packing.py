@@ -8,12 +8,12 @@ from .export_wiring_review import _building_cells
 from .factory_short_layout import reroute_short_board
 from .factory_wire_compaction import compact_axis
 from .foundations import (EDGE_MARGIN, FOUNDATION_CHUNKS, IRREGULAR_FOUNDATIONS, TILE_SIZE,
-                          foundation_origin, platform_ground, platform_interior)
+                          foundation_origin, foundation_tiles, platform_ground, platform_interior)
 
 
 _SIZE = 56
 _PLANE = _SIZE ** 2
-_FOUNDATIONS = sorted(FOUNDATION_CHUNKS, key=lambda name: len(platform_ground(name)))
+_FOUNDATIONS = sorted(FOUNDATION_CHUNKS, key=lambda name: (len(foundation_tiles(name)), len(platform_ground(name))))
 _SHORT = {"WireTransmitterSender", "WireTransmitterReceiver"}
 
 
@@ -155,8 +155,8 @@ class _Bin:
     height: int = 0
 
     @property
-    def capacity(self):
-        return _capacity(self.width, self.height) if self.entries else 0
+    def island_cells(self):
+        return _island_cells(self.width, self.height) if self.entries else 0
 
     def add(self, piece, x, y, z):
         body = {(a + x, b + y, c + z) for a, b, c in piece.cells}
@@ -167,18 +167,19 @@ class _Bin:
         self.width, self.height = max(self.width, x + piece.width), max(self.height, y + piece.height)
 
 
-def _capacity(width, height):
-    cols, rows = (width + 25) // 20, (height + 25) // 20
-    return (20 * cols - 6) * (20 * rows - 6) + 8 * (cols + rows)
+def _island_cells(width, height):
+    span = 2 * EDGE_MARGIN + TILE_SIZE - 1
+    return ((width + span) // TILE_SIZE) * ((height + span) // TILE_SIZE)
 
 
 def _fit(bin_, variants, limit):
-    current = bin_.capacity
-    for capacity, width, height in _packing_sizes(bin_.width, bin_.height):
-        if capacity - current > limit:
+    current = bin_.island_cells
+    for island_cells, width, height in _packing_sizes(bin_.width, bin_.height):
+        if island_cells - current > limit:
             break
+        free = 3 * width * height - len(bin_.cells)
         for piece in variants:
-            if piece.width > width or piece.height > height:
+            if len(piece.cells) > free or piece.width > width or piece.height > height:
                 continue
             for z in range(4 - piece.levels):
                 for y in range(height - piece.height + 1):
@@ -186,14 +187,14 @@ def _fit(bin_, variants, limit):
                     for x in range(width - piece.width + 1):
                         if not bin_.blocked & (mask << x):
                             w, h = max(bin_.width, x + piece.width), max(bin_.height, y + piece.height)
-                            return (capacity - current, w * h, max(w, h)), piece, x, y, z
+                            return (island_cells - current, w * h, max(w, h)), piece, x, y, z
     return None
 
 
 @cache
 def _packing_sizes(width, height):
-    return sorted((_capacity(w, h), w, h) for w in (14, 34, 54) for h in (14, 34, 54)
-                  if w >= width and h >= height)
+    spans = tuple(TILE_SIZE * i - 2 * EDGE_MARGIN for i in range(1, 4))
+    return sorted((_island_cells(w, h), w, h) for w in spans for h in spans if w >= width and h >= height)
 
 
 def _finish(bin_):
@@ -298,15 +299,52 @@ def shrink_short_groups(platforms, groups, threshold):
     return packed
 
 
+def _compact_piece(entries):
+    choices = []
+    for axis in (0, 1):
+        tight = compact_axis(compact_axis(compact_axis(entries, axis), 1 - axis), axis)
+        if not tight:
+            continue
+        variants = tuple(_variants(tight, range(4)))
+        piece = variants[0]
+        if max(piece.width, piece.height) <= 54:
+            score = (_island_cells(piece.width, piece.height), piece.width * piece.height, len(piece.cells))
+            choices.append((score, variants))
+    return min(choices, key=lambda choice: choice[0])[1] if choices else None
+
+
+def _pack_pieces(ordered):
+    bins = []
+    for variants in ordered:
+        area = _island_cells(variants[0].width, variants[0].height)
+        best, target = None, None
+        for bin_ in reversed(bins):
+            fit = _fit(bin_, variants, area if best is None else best[0][0])
+            if fit is not None and (best is None or fit[0] < best[0]):
+                best, target = fit, bin_
+        if target is None:
+            target = _Bin([], set())
+            best = _fit(target, variants, area)
+            bins.append(target)
+        _, piece, x, y, z = best
+        target.add(piece, x, y, z)
+    return list(map(_finish, bins))
+
+
+def _platform_cost(platforms):
+    return sum(len(foundation_tiles(p["T"])) for p in platforms), len(platforms)
+
+
 def compact_platforms(platforms, threshold, *, baseline=None):
     untouched, sparse = [], []
-    before = []
+    before, unchanged = [], []
     original = platforms if baseline is None else baseline
     for index, platform in enumerate(platforms):
         entries = platform["B"]["Entries"]
         cells = _cells(entries)
         count = sum(map(len, cells)) if cells is not None else 0
         capacity = 3 * len(platform_ground(platform["T"]))
+        unchanged.append((count, capacity))
         old = original[index]
         if old is platform:
             before.append((count, capacity))
@@ -317,29 +355,22 @@ def compact_platforms(platforms, threshold, *, baseline=None):
                 or any(_kind(entry) in _SHORT for entry in entries)):
             untouched.append((platform, count))
             continue
-        pieces = []
-        for group in _components(entries, cells):
-            tight = compact_axis(compact_axis(group, 0), 1)
-            if tight:
-                pieces.append(tuple(_variants(tight, range(4))))
-        if any(max(pair[0].width, pair[0].height) > 54 for pair in pieces):
+        pieces = [_compact_piece(group) for group in _components(entries, cells)]
+        if any(piece is None for piece in pieces):
             untouched.append((platform, count))
             continue
         sparse.extend(pieces)
-    sparse.sort(key=lambda pair: (-pair[0].width * pair[0].height, -len(pair[0].cells)))
-    bins = []
-    for variants in sparse:
-        empty = _Bin([], set())
-        area = _capacity(variants[0].width, variants[0].height)
-        best, target = _fit(empty, variants, area), empty
-        for bin_ in reversed(bins[-12:]):
-            fit = _fit(bin_, variants, best[0][0])
-            if fit is not None and (fit[0][0] <= best[0][0] if target is empty else fit[0] < best[0]):
-                best, target = fit, bin_
-        if target is empty:
-            bins.append(target)
-        _, piece, x, y, z = best
-        target.add(piece, x, y, z)
-    packed = [*untouched, *map(_finish, bins)]
-    after = [(count, 3 * len(platform_ground(board["T"]))) for board, count in packed]
-    return [p for p, _ in packed], before, after
+    original_cost = _platform_cost(platforms)
+    best = [(p, count) for p, (count, _) in zip(platforms, unchanged, strict=True)]
+    best_cost = original_cost
+    if sparse:
+        by_size = sorted(sparse, key=lambda pair: (-pair[0].width * pair[0].height, -len(pair[0].cells)))
+        by_island = sorted(by_size, key=lambda pair: -_island_cells(pair[0].width, pair[0].height))
+        orders = (by_size,) if all(a is b for a, b in zip(by_size, by_island, strict=True)) else (by_size, by_island)
+        for order in orders:
+            packed = [*untouched, *_pack_pieces(order)]
+            cost = _platform_cost([p for p, _ in packed])
+            if cost < best_cost and cost[1] <= original_cost[1]:
+                best, best_cost = packed, cost
+    after = [(count, 3 * len(platform_ground(board["T"]))) for board, count in best]
+    return [p for p, _ in best], before, after

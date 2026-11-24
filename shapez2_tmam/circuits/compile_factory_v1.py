@@ -345,7 +345,7 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
         leaf_boards = [p for p in boards if name == "direct-root" and p["T"] in ("Foundation_1x1", "Foundation_1x2")]
         links = [(wiring.entries[rx][0], wiring.entries[tx][0]) for rx, tx in wiring.short_ports.items()]
         groups = _groups(len(boards), links)
-        shrunk = shrink_short_groups(boards, groups, min(10, density_threshold))
+        shrunk = shrink_short_groups(boards, groups, density_threshold)
         packed, old_usage, new_usage = compact_platforms(shrunk, density_threshold, baseline=boards)
         before.extend(old_usage)
         after.extend(new_usage)
@@ -422,7 +422,8 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
                       "status": {0: "计算中", 1: "配方已写入", 2: "不可制作", 3: "未着色晶体供料未定",
                                  4: "空目标", 5: "内部核对失败"},
                       "parts": counts, "external_inputs": sorted(external), "unused_inputs": sorted(open_ports),
-                      "platforms": len(platforms), "platform_sizes": dict(Counter(board["T"] for board in platforms)),
+                      "platforms": len(platforms), "island_cells": len(tiles),
+                      "platform_sizes": dict(Counter(board["T"] for board in platforms)),
                       "footprint_chunks": [max(xs) - min(xs) + 1, max(ys) - min(ys) + 1],
                       "island_levels": sorted(zs), "short_range_links": len(pairs),
                       "building_entries": buildings, "global_transmitters": len(sent),
