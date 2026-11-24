@@ -1,0 +1,106 @@
+{
+  "inputs": {
+    "target": 1600000,
+    "enable": 1704673,
+    "feed_request": 1702851
+  },
+  "outputs": {
+    "status": 1705399,
+    "root_phase": 1704674,
+    "tail_phase": 1705301,
+    "tail_depth": 1705344,
+    "recipe_length": 1640043,
+    "feed": 1640059
+  },
+  "factory": {
+    "receives": {
+      "run": 1640030,
+      "feed": 1640059,
+      "length": 1640043,
+      "replay_result": 1640044,
+      "accepted": 1640045,
+      "tag": 1640046,
+      "opcode": 1640002,
+      "a": 1640003,
+      "b": 1640004,
+      "destination": 1640005,
+      "base": 1640006,
+      "color": 1640007
+    },
+    "sends": {
+      "address": 1640000,
+      "request": 1640011,
+      "ack": 1640013,
+      "reset": 1640012,
+      "loaded": 1640057,
+      "clean": 1640060
+    }
+  },
+  "status": {
+    "0": "计算中",
+    "1": "配方已写入",
+    "2": "不可制作",
+    "3": "未着色晶体供料未定",
+    "4": "空目标",
+    "5": "内部核对失败"
+  },
+  "parts": {
+    "direct-root": 417,
+    "tail-search": 12,
+    "tail-frames-control": 17,
+    "search-checkpoint": 22,
+    "tail-search-workers": 238,
+    "tail-node-inputs": 28,
+    "pin-column-sample": 49,
+    "pin-row-reader": 38,
+    "pin-rows-prefetch": 24,
+    "pin-layer-search": 14,
+    "pin-cap-plan": 26,
+    "pin-cap-crystals": 27,
+    "pin-landings": 79
+  },
+  "external_inputs": [
+    1600000,
+    1640000,
+    1640011,
+    1640012,
+    1640013,
+    1640057,
+    1640060,
+    1702250,
+    1702851,
+    1703306,
+    1703307,
+    1704430,
+    1704431,
+    1704432,
+    1704673
+  ],
+  "unused_inputs": [
+    1702250,
+    1703306,
+    1703307,
+    1704430,
+    1704431,
+    1704432
+  ],
+  "platforms": 998,
+  "platform_sizes": {
+    "Foundation_3x3": 992,
+    "Foundation_1x2": 2,
+    "Foundation_1x1": 4
+  },
+  "footprint_chunks": [
+    60,
+    51
+  ],
+  "island_levels": [
+    -1,
+    0,
+    1
+  ],
+  "short_range_links": 176,
+  "building_entries": 1104425,
+  "global_transmitters": 1804,
+  "global_receivers": 4168
+}

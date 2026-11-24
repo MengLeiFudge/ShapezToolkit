@@ -1,0 +1,305 @@
+"""生成首版四象限五层整厂的共用求解电路。"""
+
+import argparse
+from collections import Counter, defaultdict
+from itertools import product
+from math import ceil, isqrt
+from pathlib import Path
+
+from ..mari.blueprint import Wiring, _kind
+from .circuit import constant
+from .compile_root_search import build_direct
+from .compiler_backend import _write_blueprint
+from .compiler_backend.module_caller import _compare, _gate, _local_wiring
+from .compiler_backend.prefix_scan_wiring import _native_wiring
+from .factory_assembly.interface import FIELDS, LOADED, OPERATOR_INPUTS, ORDER_INPUTS, PACKET_TAG, WRITE_RESET, WRITE_STATUS
+from .foundations import FOUNDATION_CHUNKS, foundation_tiles
+from .compiler_frontend.pin_candidate_closure import _radio_ports
+from .local_module import Module
+
+
+_CIRCUITS = Path(__file__).resolve().parent
+_BOOK = _CIRCUITS.parent / "blueprints/验收/电路"
+_TAIL_CLOSURE = 1705370
+_TAIL_COUNT = 1705371
+_REMAINING = 1703740
+
+
+def _rewrite(wiring, receivers, transmitters):
+    found = (set(), set())
+    counts = (Counter(), Counter())
+    configs = {}
+    maps = (receivers, transmitters)
+    for _, sends, channel, config in _radio_ports(wiring):
+        output = maps[sends].get(channel, channel)
+        if configs.setdefault(id(config), (config, output))[1] != output:
+            raise ValueError(f"共用频道常量 {channel} 对应不同接点")
+        found[sends].add(channel)
+        counts[sends][output] += 1
+    absent = tuple(mapping.keys() - seen for mapping, seen in zip(maps, found, strict=True))
+    if any(absent):
+        raise ValueError(f"合装需要重接的端口未找到 {absent}")
+    for config, output in configs.values():
+        config["C"] = constant(output)
+    return counts
+
+
+def _root_closure():
+    board = Module({"direct": 1704676, "tail": 1704678, "tail_run": _TAIL_CLOSURE})
+    searching = _gate(board, "And", "searching", "tail", "tail_run")
+    running = _gate(board, "Or", "running", "direct", searching)
+    for name, channel in (("mode", 1703001), ("top", 1703002)):
+        _gate(board, "If", name, 0, "direct")
+        _gate(board, "If", name, 1, searching)
+        board.outputs[name] = channel
+    board.outputs[running] = 1703000
+    return board
+
+
+def _successful_path():
+    board = Module({"direct_capture": 1704677, "tail_capture": 1705336,
+                    "direct_replay": 1704687, "tail_replay": 1705341, "frame_count": _TAIL_COUNT})
+    capture = _gate(board, "Or", "capture", "direct_capture", "tail_capture")
+    replay = _gate(board, "Or", "replay", "direct_replay", "tail_replay")
+    _gate(board, "If", "count", 0, "direct_replay")
+    _gate(board, "If", "count", "frame_count", "tail_replay")
+    board.outputs = {capture: 1704601, replay: 1702850, "count": 1704000}
+    return board
+
+
+def _leaf_and_reject():
+    board = Module({"missed": 1705334, "order": 1704673})
+    board.outputs = {"missed": 1703304, _gate(board, "If", "without_proof", 0, "missed"): 1703305,
+                     "order": 1705358}
+    return board
+
+
+def _remaining():
+    board = Module({"budget": 1704672, "depth": 1705344})
+    for depth in range(3):
+        here = _compare(board, f"depth{depth}", "depth", depth)
+        for budget in range(depth + 1, 4):
+            amount = _compare(board, f"budget{depth}_{budget}", "budget", budget)
+            selected = _gate(board, "And", f"use{depth}_{budget}", here, amount)
+            _gate(board, "If", "remaining", budget - depth - 1, selected)
+    board.outputs = {"remaining": _REMAINING}
+    return board
+
+
+def _ports(pairs):
+    board = Module({f"input{i}": source for i, (source, _) in enumerate(pairs)})
+    board.outputs = {f"input{i}": destination for i, (_, destination) in enumerate(pairs)}
+    return board
+
+
+def _status():
+    board = Module({"ready": 1702854, "exhausted": 1705342, "unknown": 1704679, "invalid": 1704680,
+                    "root_fault": 1704681, "tail_fault": 1705343, "replay_fault": 1702853,
+                    "support_fault": 1705230, "enable": 1704673})
+    fault = _gate(board, "Or", "root_or_tail", "root_fault", "tail_fault")
+    fault = _gate(board, "Or", "faults", fault, _gate(board, "Or", "hardware", "replay_fault", "support_fault"))
+    terminal = _gate(board, "Or", "done", "ready", "exhausted")
+    terminal = _gate(board, "Or", "terminal", terminal, _gate(board, "Or", "invalid_order", "unknown", "invalid"))
+    running = _gate(board, "And", "running", "enable", _gate(board, "Not", "searching", terminal))
+    _gate(board, "If", "state", 0, running)
+    for code, pin in enumerate(("ready", "exhausted", "unknown", "invalid"), 1):
+        _gate(board, "If", "state", code, pin)
+    _gate(board, "If", "status", "state", _gate(board, "Not", "healthy", fault))
+    _gate(board, "If", "status", 5, fault)
+    board.outputs = {"status": 1705399}
+    return board
+
+
+def _footprint(platform):
+    if platform.get("R", 0):
+        raise ValueError("整厂合装需要未旋转的平台部件")
+    width, height = FOUNDATION_CHUNKS[platform["T"]]
+    x = platform.get("X", 0) - (width - 1) // 2
+    y = platform.get("Y", 0) - (height - 1) // 2
+    z = platform.get("Z", 0)
+    return {(x + dx, y + dy, z) for dx, dy in foundation_tiles(platform["T"])}
+
+
+def _groups(board_count, short_pairs):
+    parent = list(range(board_count))
+
+    def root(index):
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    for a, b in short_pairs:
+        parent[root(b)] = root(a)
+    groups = defaultdict(list)
+    for i in range(board_count):
+        groups[root(i)].append(i)
+    return groups.values()
+
+
+def _place_platforms(platforms, short_pairs, leaf):
+    # 有飞线的板一起平移。叶端和批次门控保持已审阅的三岛层位置关系。
+    pairs = list(short_pairs)
+    pairs.extend(zip(leaf, leaf[1:]))
+    groups = []
+    footprints = tuple(map(_footprint, platforms))
+    for indices in _groups(len(platforms), pairs):
+        tiles = set.union(*(footprints[i] for i in indices))
+        x0, y0, z0 = (min(tile[d] for tile in tiles) for d in range(3))
+        width, height, levels = (max(tile[d] for tile in tiles) - base + 1
+                                 for d, base in enumerate((x0, y0, z0)))
+        if levels > 3 or sum(len(footprints[i]) for i in indices) != len(tiles):
+            raise ValueError("同一飞线组的平台重叠或超过三个岛层")
+        slots = {((x - x0) // 3, (y - y0) // 3, z - z0) for x, y, z in tiles}
+        groups.append((indices, (x0, y0, z0), slots, ceil(width / 3), ceil(height / 3), levels))
+    groups.sort(key=lambda group: (-len(group[2]), group[0][0]))
+    span = max(2 + isqrt(sum(len(group[2]) for group in groups) // 3),
+               max(max(g[3], g[4]) for g in groups))
+    occupied = set()
+    for indices, (x0, y0, z0), slots, width, height, levels in groups:
+        for y, x, z in product(range(len(platforms)), range(span - width + 1), range(-1, 3 - levels)):
+            placed = {(x + a, y + b, z + c) for a, b, c in slots}
+            if occupied.isdisjoint(placed):
+                occupied.update(placed)
+                break
+        else:
+            raise ValueError(f"无法为飞线组 {indices} 放置平台")
+        for i in indices:
+            p = platforms[i]
+            p.update(X=p.get("X", 0) + 3 * x - x0, Y=p.get("Y", 0) + 3 * y - y0, Z=p.get("Z", 0) + z - z0)
+
+
+def _check_short_pairs(platforms, expected):
+    # 平移整板保留板内线路。只需从合装坐标重新推导板间配对。
+    ports = []
+    indices = []
+    offset = 0
+    for platform in platforms:
+        entries = platform["B"]["Entries"]
+        short = []
+        for i, entry in enumerate(entries):
+            if _kind(entry) in ("WireTransmitterSender", "WireTransmitterReceiver"):
+                indices.append(offset + i)
+                short.append(entry)
+        ports.append({**platform, "B": {"Entries": short}})
+        offset += len(entries)
+    actual = Wiring({"Entries": ports}).short_ports
+    if {indices[rx]: indices[tx] for rx, tx in actual.items()} != expected:
+        raise ValueError("整厂合装改变了原生飞线配对")
+    return offset
+
+
+def build(pieces: Path | None = None, *, direct_root: Path | None = None) -> tuple[dict, dict]:
+    parts = (
+        ("direct-root", {1704676: 1703000}, {1704601: 1705375, 1702850: 1705376,
+                                             1703001: 1705377, 1703002: 1705378, 1704000: 1705379,
+                                             1704201: 1705355}),
+        ("tail-search", {1705300: 1704678, 1705307: 1705001, 1705311: 1704602}, {}),
+        ("tail-frames-control", {1705300: 1704678, 1705357: 1702288}, {1704000: _TAIL_COUNT}),
+        ("search-checkpoint", {}, {}),
+        ("tail-search-workers", {}, {}),
+        ("tail-node-inputs", {}, {}),
+        ("pin-column-sample", {}, {}),
+        ("pin-row-reader", dict(zip(range(1701200, 1701205), range(1703513, 1703518), strict=True)), {}),
+        ("pin-rows-prefetch", {}, {}),
+        ("pin-layer-search", {1703300: 1705333}, {1703000: _TAIL_CLOSURE, 1703001: 1705380, 1703002: 1705381}),
+        ("pin-cap-plan", {1703300: 1705333}, {}),
+        ("pin-cap-crystals", {}, {}),
+        ("pin-landings", {}, {}),
+    )
+    folder = pieces or _BOOK / "顶针逆推"
+    locations = {"tail-search-workers": _CIRCUITS / "compiler_backend", "tail-node-inputs": _CIRCUITS / "compiler_frontend"}
+    direct = None
+    if direct_root is None and pieces is None:
+        direct, _ = build_direct(_BOOK / "原层读取/read-five-rows.spz2bp",
+                                 _BOOK / "顶针逆推/dual-source-closure.spz2bp",
+                                 _BOOK / "配方回放/success-path.spz2bp", 4096, stacked_leaf=True)
+    counts, platforms, pairs = {}, [], {}
+    received, sent = Counter(), Counter()
+    offset = 0
+    leaf = []
+    board_links = []
+    for name, receivers, transmitters in parts:
+        if name == "direct-root" and direct is not None:
+            wiring = _local_wiring(direct["BP"])
+        else:
+            source = folder if pieces else locations.get(name, folder)
+            path = direct_root if name == "direct-root" and direct_root is not None else source / f"{name}.spz2bp"
+            wiring = _native_wiring(path)
+        base = len(platforms)
+        for rx, tx in wiring.short_ports.items():
+            pairs[offset + rx] = offset + tx
+            board_links.append((base + wiring.entries[rx][0], base + wiring.entries[tx][0]))
+        if name == "direct-root":
+            leaf = [i for i, board in enumerate(wiring.platforms) if board["T"] in ("Foundation_1x1", "Foundation_1x2")]
+        counts[name] = len(wiring.platforms)
+        rx, tx = _rewrite(wiring, receivers, transmitters)
+        received.update(rx)
+        sent.update(tx)
+        platforms.extend(wiring.platforms)
+        offset += len(wiring.entries)
+    controls = (_root_closure(), _successful_path(), _leaf_and_reject(), _remaining(),
+                _ports(tuple(zip(range(1703513, 1703518), range(1704304, 1704309), strict=True))), _status(),
+                _ports(((1705331, 1704800), (1705332, 1704801))))
+    for board in controls:
+        wiring = _local_wiring(board.layout()["BP"])
+        rx, tx = _rewrite(wiring, {}, {})
+        received.update(rx)
+        sent.update(tx)
+        platforms.extend(wiring.platforms)
+    _place_platforms(platforms, board_links, leaf)
+    document = {"V": 1137, "BP": {"$type": "Island", "BinaryVersion": 1137, "Entries": platforms}}
+    buildings = _check_short_pairs(platforms, pairs)
+    duplicates = sorted(channel for channel, count in sent.items() if count != 1)
+    if duplicates:
+        raise ValueError(f"整厂电路重复发射频道 {duplicates}")
+    # 支撑扫描空地址运行。单层候选的独立回放口留空，由主控二次回放全路径。
+    order = {"target": ORDER_INPUTS["target"], "enable": 1704673, "feed_request": 1702851}
+    shop_replies = {name: WRITE_STATUS[name] for name in ("address", "request", "ack")}
+    shop_replies.update(reset=WRITE_RESET, loaded=LOADED, clean=OPERATOR_INPUTS["clean_confirmed"])
+    shop_commands = {"run": OPERATOR_INPUTS["run"], "feed": OPERATOR_INPUTS["enable_feed"],
+                     **{name: channel for name, channel in ORDER_INPUTS.items() if name != "target"},
+                     "tag": PACKET_TAG, **FIELDS}
+    inputs = {*order.values(), *shop_replies.values()}
+    open_ports = {1702250, 1703306, 1703307, 1704430, 1704431, 1704432}
+    external = received.keys() - sent.keys()
+    if external != inputs | open_ports:
+        raise ValueError(f"整厂收发接口不符，缺少 {sorted((inputs | open_ports) - external)}，额外 {sorted(external - inputs - open_ports)}")
+    outputs = {"status": 1705399, "root_phase": 1704674, "tail_phase": 1705301, "tail_depth": 1705344,
+               "recipe_length": shop_commands["length"], "feed": shop_commands["feed"]}
+    missing = set(outputs.values()) | set(shop_commands.values())
+    if missing := missing - sent.keys():
+        raise ValueError(f"整厂缺少配方或状态输出 {sorted(missing)}")
+    footprints = list(map(_footprint, platforms))
+    tiles = set.union(*footprints)
+    if len(tiles) != sum(map(len, footprints)):
+        raise ValueError("整厂电路平台占地重叠")
+    xs, ys, zs = (set(coords) for coords in zip(*tiles, strict=True))
+    return document, {"inputs": order, "outputs": outputs,
+                      "factory": {"receives": shop_commands, "sends": shop_replies},
+                      "status": {0: "计算中", 1: "配方已写入", 2: "不可制作", 3: "未着色晶体供料未定",
+                                 4: "空目标", 5: "内部核对失败"},
+                      "parts": counts, "external_inputs": sorted(external), "unused_inputs": sorted(open_ports),
+                      "platforms": len(platforms), "platform_sizes": dict(Counter(board["T"] for board in platforms)),
+                      "footprint_chunks": [max(xs) - min(xs) + 1, max(ys) - min(ys) + 1],
+                      "island_levels": sorted(zs), "short_range_links": len(pairs),
+                      "building_entries": buildings, "global_transmitters": len(sent),
+                      "global_receivers": sum(received.values())}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="从分册原生部件导出首版整厂电路")
+    parser.add_argument("pieces", nargs="?", type=Path, help="覆盖项目分册，使用指定目录中的部件")
+    parser.add_argument("--direct-root", type=Path, help="替换目录内的直接路线蓝图，例如三岛层叶端版")
+    parser.add_argument("--output", type=Path, required=True, help="原生蓝图路径")
+    args = parser.parse_args()
+    try:
+        _write_blueprint(*build(args.pieces, direct_root=args.direct_root), args.output)
+    except (ValueError, OSError) as error:
+        parser.error(str(error))
+    print(f"已导出 {args.output}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

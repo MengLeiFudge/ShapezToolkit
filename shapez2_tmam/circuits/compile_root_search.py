@@ -77,10 +77,10 @@ def _direct_controls():
     return board.layout()["BP"]["Entries"]
 
 
-def build_direct(reader: Path, closure: Path, path: Path, input_hold_ticks: int):
+def build_direct(reader: Path, closure: Path, path: Path, input_hold_ticks: int, *, stacked_leaf: bool = False):
     document, report = build(input_hold_ticks)
     intake, _ = build_order_entry()
-    replay, _ = build_leaf_snapshot(path)
+    replay, _ = build_leaf_snapshot(path, stacked=stacked_leaf)
     _attach(document, reader, {1700872: 1600000})
     _append(document, intake["BP"]["Entries"])
     _attach(document, closure, {1703000: _FLAGS["closure"]})
@@ -104,6 +104,7 @@ def main() -> int:
     parser.add_argument("--reader", type=Path, help="合装时使用的五层原色读取蓝图")
     parser.add_argument("--closure", type=Path, help="合装时使用的双来源闭包蓝图")
     parser.add_argument("--path", type=Path, help="合装时使用的两遍成功路径蓝图")
+    parser.add_argument("--stacked-leaf", action="store_true", help="使用三个岛层的叶端锁存")
     parser.add_argument("--output", type=Path, required=True, help="原生蓝图路径")
     args = parser.parse_args()
     parts = (args.reader, args.closure, args.path)
@@ -111,7 +112,7 @@ def main() -> int:
         parser.error("合装需要同时给出 --reader、--closure 和 --path")
     try:
         if all(parts):
-            document, report = build_direct(*parts, args.input_hold)
+            document, report = build_direct(*parts, args.input_hold, stacked_leaf=args.stacked_leaf)
         else:
             document, report = build(args.input_hold)
         _write_blueprint(document, report, args.output)
