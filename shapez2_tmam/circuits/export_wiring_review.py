@@ -11,7 +11,7 @@ from shutil import copyfile
 from ..mari.blueprint import DIRECTIONS, PORTS, _kind, _rotate
 from ..mari.signals import decode_constant
 from .compiler_backend.prefix_scan_wiring import _native_wiring
-from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_tiles, platform_ground
+from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_origin, foundation_tiles, platform_ground
 
 
 _LEVELS = 3
@@ -61,8 +61,9 @@ def _diagram(path):
         if chunks is None or platform.get("R", 0):
             raise ValueError(f"{path.name} 的 P{i} 使用不支持的电路平台或朝向")
         width, height = chunks
-        x = platform.get("X", 0) - (width - 1) // 2
-        y = platform.get("Y", 0) - (height - 1) // 2
+        dx, dy = foundation_origin(platform["T"])
+        x = platform.get("X", 0) + dx
+        y = platform.get("Y", 0) + dy
         count = len(platform["B"]["Entries"])
         platforms.append((i, x, y, platform.get("Z", 0), width, height, count, foundation_tiles(platform["T"])))
     ground = [platform_ground(p["T"]) for p in wiring.platforms]

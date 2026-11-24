@@ -5,7 +5,7 @@ from random import Random
 
 from ...mari.blueprint import DIRECTIONS, Wiring, _rotate
 from ..circuit import constant
-from ..foundations import platform_ground
+from ..foundations import platform_ground, platform_interior
 from ._snapshot_layout import _Layout
 from ._snapshot_router import connect_bus, place_controls
 
@@ -15,15 +15,24 @@ _EAST = (("load", 5, 1), ("retain", 6, 2))
 _SOUTH = (("load", 5, 2), ("retain", 8, 0))
 
 
-def _small():
-    layout = _Layout("Foundation_1x1")
-    layout.board.ground = platform_ground("Foundation_1x1")
+def _notch_layout(foundation):
+    layout = _Layout(foundation)
+    layout.board.ground = platform_interior(foundation)
     return layout
 
 
 def _short(layout, name, x, y, z, direction, *, receive):
     suffix = "Receiver" if receive else "Sender"
-    index = layout.board.place("WireTransmitter" + suffix, x, y, z, direction)
+    board = layout.board
+    position = x + board.origin_x, y + board.origin_y
+    if position not in platform_ground(board.foundation) - board.ground:
+        raise ValueError(f"飞线端口不在可用缺口 {position}")
+    ground = board.ground
+    board.ground = ground | {position}
+    try:
+        index = board.place("WireTransmitter" + suffix, x, y, z, direction)
+    finally:
+        board.ground = ground
     layout.board.pin(name, x, y, z, direction if receive else (direction + 2) % 4)
     if receive:
         layout.drivers[name].append((index, 0))
@@ -122,7 +131,7 @@ def _place_radios(layout, radios, random, prefer_edge):
 
 
 def _capture_board(control, seed):
-    layout = _small()
+    layout = _notch_layout("Foundation_1x1")
     for name, y, z in _EAST:
         _short(layout, name, 14, y, z, 0, receive=False)
     for name, x, z in _SOUTH:
@@ -136,7 +145,7 @@ def _capture_board(control, seed):
 
 
 def _register_board(fields, seed):
-    layout = _small()
+    layout = _notch_layout("Foundation_1x1")
     random = Random(seed)
     for field, slot in zip(fields, random.sample(range(4), 2), strict=True):
         _cell(layout, field, f"saved-{field[1]}", 7 * (slot % 2), 7 * (slot // 2), random.randrange(4))
@@ -148,7 +157,7 @@ def _register_board(fields, seed):
 
 
 def _height_board(fields, height, column, seed):
-    layout = _small()
+    layout = _notch_layout("Foundation_1x1")
     random = Random(seed)
     slot = random.randrange(4)
     _cell(layout, fields[2], "height0", 7 * (slot % 2), 7 * (slot // 2), random.randrange(4))
@@ -164,7 +173,7 @@ def _height_board(fields, height, column, seed):
 
 def middle_snapshot(fields, control, height, column):
     # 从已布通的摆放顺序开始。门位和路径仍由真实端口共同决定。
-    layouts = (_capture_board(control, 45), _register_board(fields[:2], 82),
+    layouts = (_capture_board(control, 17), _register_board(fields[:2], 11),
                _height_board(fields, height, column, 30))
     entries = []
     expected = {}

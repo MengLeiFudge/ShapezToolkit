@@ -1,18 +1,20 @@
 """生成首版四象限五层整厂的共用求解电路。"""
 
 import argparse
+import json
 from collections import Counter, defaultdict
 from math import isqrt
 from pathlib import Path
 
 from ..mari.blueprint import Wiring, _kind
-from .circuit import constant
-from .compiler_backend import _write_blueprint
+from .circuit import constant, encode_document
+from .compile_root_search import build_direct
 from .compiler_backend.module_caller import _compare, _gate, _local_wiring
 from .compiler_backend.prefix_scan_wiring import _native_wiring
 from .factory_assembly.interface import FIELDS, LOADED, OPERATOR_INPUTS, ORDER_INPUTS, PACKET_TAG, WRITE_RESET, WRITE_STATUS
-from .factory_circuit_packing import compact_platforms, shrink_short_groups
-from .foundations import FOUNDATION_CHUNKS, foundation_tiles
+from .export_wiring_review import _building_cells
+from .factory_circuit_packing import _SHORT, compact_platforms, shrink_short_groups
+from .foundations import TILE_SIZE, foundation_origin, foundation_tiles, platform_ground, platform_interior
 from .compiler_frontend.pin_candidate_closure import _radio_ports
 from .local_module import Module
 
@@ -22,15 +24,19 @@ _BOOK = _CIRCUITS.parent / "blueprints/验收/电路"
 _TAIL_CLOSURE = 1705370
 _TAIL_COUNT = 1705371
 _REMAINING = 1703740
+_TAIL_RELAYS = {1704800: 1705331, 1704801: 1705332,
+                **dict(zip(range(1704304, 1704309), range(1703513, 1703518), strict=True))}
 
 
-def _rewrite(wiring, receivers, transmitters):
+def _rewrite(wiring, receivers, transmitters, aliases=None):
     found = (set(), set())
     counts = (Counter(), Counter())
     configs = {}
     maps = (receivers, transmitters)
     for _, sends, channel, config in _radio_ports(wiring):
         output = maps[sends].get(channel, channel)
+        if not sends and aliases is not None:
+            output = aliases.get(output, output)
         if configs.setdefault(id(config), (config, output))[1] != output:
             raise ValueError(f"共用频道常量 {channel} 对应不同接点")
         found[sends].add(channel)
@@ -55,15 +61,51 @@ def _root_closure():
     return board
 
 
-def _successful_path():
+def _successful_path(retain_leaf):
     board = Module({"direct_capture": 1704677, "tail_capture": 1705336,
                     "direct_replay": 1704687, "tail_replay": 1705341, "frame_count": _TAIL_COUNT})
     capture = _gate(board, "Or", "capture", "direct_capture", "tail_capture")
     replay = _gate(board, "Or", "replay", "direct_replay", "tail_replay")
     _gate(board, "If", "count", 0, "direct_replay")
     _gate(board, "If", "count", "frame_count", "tail_replay")
-    board.outputs = {capture: 1704601, replay: 1702850, "count": 1704000}
+    board.outputs = {replay: 1702850, "count": 1704000}
+    if retain_leaf:
+        board.inputs["chosen"] = 1703004
+        board.outputs[_gate(board, "And", "ready", capture, "chosen")] = 1704602
+    else:
+        board.outputs[capture] = 1704601
     return board
+
+
+def _retain_tail_leaf(wiring):
+    channels = set(range(1705330, 1705335))
+    outputs = defaultdict(set)
+    for platform, sends, channel, _ in _radio_ports(wiring):
+        if sends:
+            outputs[platform].add(channel)
+    matches = [platform for platform, ports in outputs.items() if ports == channels]
+    if len(matches) != 1:
+        raise ValueError("尾部调度缺少独立的候选启停板")
+    index, = matches
+    board = Module({"phase": 1705301, "enable": 1705300})
+    solved = _compare(board, "solved", "phase", 14)
+    through = _compare(board, "before_pop", "phase", 10, "BQ==")
+    for name, lower, channel in (("stack", 2, 1705331), ("pin", 5, 1705333)):
+        reached = _compare(board, f"{name}_entered", "phase", lower, "Ag==")
+        searching = _gate(board, "And", f"{name}_searching", reached, through)
+        active = _gate(board, "Or", f"{name}_active", searching, solved)
+        board.outputs[_gate(board, "And", name, active, "enable")] = channel
+    for name, phase, channel in (("preflight", 1, 1705330), ("stack_reject", 3, 1705332)):
+        active = _compare(board, f"is_{name}", "phase", phase)
+        board.outputs[_gate(board, "And", name, active, "enable")] = channel
+    missed = _gate(board, "Or", "missed", _compare(board, "skip", "phase", 6),
+                   _compare(board, "resume", "phase", 7))
+    board.outputs[_gate(board, "And", "proof_missed", missed, "enable")] = 1705334
+    new, = board.layout()["BP"]["Entries"]
+    old = wiring.platforms[index]
+    platforms = [*wiring.platforms]
+    platforms[index] = {**old, "B": new["B"]}
+    return _local_wiring({"Entries": platforms})
 
 
 def _leaf_and_reject():
@@ -112,9 +154,9 @@ def _status():
 def _footprint(platform):
     if platform.get("R", 0):
         raise ValueError("整厂合装需要未旋转的平台部件")
-    width, height = FOUNDATION_CHUNKS[platform["T"]]
-    x = platform.get("X", 0) - (width - 1) // 2
-    y = platform.get("Y", 0) - (height - 1) // 2
+    dx, dy = foundation_origin(platform["T"])
+    x = platform.get("X", 0) + dx
+    y = platform.get("Y", 0) + dy
     z = platform.get("Z", 0)
     return {(x + dx, y + dy, z) for dx, dy in foundation_tiles(platform["T"])}
 
@@ -197,7 +239,65 @@ def _check_short_pairs(platforms, expected):
     return count
 
 
-def build(pieces: Path | None = None, *, direct_root: Path | None = None, density_threshold: int = 18) -> tuple[dict, dict]:
+def _measure_placement(platforms, counts, xs, ys):
+    left, top = min(xs) * TILE_SIZE, min(ys) * TILE_SIZE
+    layout, used = defaultdict(int), defaultdict(int)
+    records = []
+    for i, (name, board) in enumerate(zip((p for p, n in counts.items() for _ in range(n)), platforms, strict=True), 1):
+        foundation = board["T"]
+        ground = platform_ground(foundation)
+        interior = platform_interior(foundation)
+        notches = ground - interior
+        occupied = set()
+        radio = 0
+        for entry in board["B"]["Entries"]:
+            kind = _kind(entry)
+            body = _building_cells(entry, kind)
+            if body is None:
+                raise ValueError(f"平台 {i} 的建筑 {kind} 缺少占地定义")
+            allowed = notches if kind in _SHORT else interior
+            for x, y, z in body:
+                pos = x, y, z
+                if (x, y) not in allowed or not 0 <= z < 3 or pos in occupied:
+                    raise ValueError(f"平台 {i} ({name}) 的 {kind} 在 {pos} 越界、占用缺口或重叠")
+                occupied.add(pos)
+                radio += kind in ("ControlledSignalReceiver", "ControlledSignalTransmitter", "WireGlobalTransmitterReceiver")
+        dx, dy = board["X"] * TILE_SIZE - left, board["Y"] * TILE_SIZE - top
+        for x, y in ground:
+            layout[y + dy] |= 1 << (x + dx)
+        projection = {(x, y) for x, y, _ in occupied}
+        for x, y in projection:
+            used[y + dy] |= 1 << (x + dx)
+        capacity = 3 * len(ground)
+        records.append({"platform": i, "part": name, "foundation": foundation,
+                        "position": [board[k] for k in ("X", "Y", "Z")],
+                        "occupied_cells": len(occupied), "buildable_cells": capacity,
+                        "percent": round(100 * len(occupied) / capacity, 2),
+                        "projected_cells": len(projection), "radio_cells": radio,
+                        "radio_percent": round(100 * radio / capacity, 2),
+                        "radio_percent_of_occupied": round(100 * radio / len(occupied), 2) if occupied else 0})
+    projected, available = (sum(map(int.bit_count, rows.values())) for rows in (used, layout))
+    capacity = sum(r["buildable_cells"] for r in records)
+    area = (max(xs) - min(xs) + 1) * (max(ys) - min(ys) + 1) * TILE_SIZE ** 2
+    radio = sum(r["radio_cells"] for r in records)
+    occupied = sum(r["occupied_cells"] for r in records)
+    radio_order = sorted(records, key=lambda r: -r["radio_cells"] / r["buildable_cells"])
+    radio_over_limit = [r for r in radio_order if 10 * r["radio_cells"] >= r["buildable_cells"]]
+    return {"top_projected_cells": projected, "top_buildable_cells": available,
+            "top_percent": round(100 * projected / available, 2),
+            "top_outline_percent": round(100 * projected / area, 2),
+            "platform_top_percent": round(300 * sum(r["projected_cells"] for r in records) / capacity, 2),
+            "radio_cells": radio, "radio_percent": round(100 * radio / capacity, 2),
+            "radio_percent_of_occupied": round(100 * radio / occupied, 2),
+            "platforms_at_or_above_10_percent_radio": len(radio_over_limit),
+            "sparsest_platforms": sorted(records, key=lambda r: r["occupied_cells"] / r["buildable_cells"])[:20],
+            "highest_radio_platforms": radio_order[:20], "radio_over_limit": radio_over_limit}
+
+
+def build(pieces: Path | None = None, *, direct_root: Path | None = None, density_threshold: int = 60,
+          retain_leaf: bool = False) -> tuple[dict, dict]:
+    if retain_leaf and (pieces is not None or direct_root is not None):
+        raise ValueError("保留闭包结果时需要从项目分册重建根订单和尾部调度")
     parts = (
         ("direct-root", {1704676: 1703000}, {1704601: 1705375, 1702850: 1705376,
                                              1703001: 1705377, 1703002: 1705378, 1704000: 1705379,
@@ -226,10 +326,19 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
     before, after = [], []
     for name, receivers, transmitters in parts:
         source = folder if pieces else locations.get(name, folder)
-        path = direct_root if name == "direct-root" and direct_root is not None else source / f"{name}.spz2bp"
-        wiring = _native_wiring(path)
+        if retain_leaf and name == "direct-root":
+            document, _ = build_direct(_BOOK / "原层读取/read-five-rows.spz2bp", folder / "dual-source-closure.spz2bp",
+                                       _BOOK / "配方回放/success-path.spz2bp", 4096, retain_leaf=True)
+            wiring = _local_wiring(document["BP"])
+            transmitters = {**transmitters, 1704602: transmitters[1704601]}
+            del transmitters[1704601]
+        else:
+            path = direct_root if name == "direct-root" and direct_root is not None else source / f"{name}.spz2bp"
+            wiring = _native_wiring(path)
+            if retain_leaf and name == "tail-search":
+                wiring = _retain_tail_leaf(wiring)
         base = len(platforms)
-        rx, tx = _rewrite(wiring, receivers, transmitters)
+        rx, tx = _rewrite(wiring, receivers, transmitters, _TAIL_RELAYS if retain_leaf else None)
         received.update(rx)
         sent.update(tx)
         boards = wiring.platforms
@@ -255,9 +364,12 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
             board_links.append((index[id(shrunk[a])], index[id(shrunk[b])]))
         counts[name] = len(packed)
         platforms.extend(packed)
-    controls = (_root_closure(), _successful_path(), _leaf_and_reject(), _remaining(),
-                _ports(tuple(zip(range(1703513, 1703518), range(1704304, 1704309), strict=True))), _status(),
-                _ports(((1705331, 1704800), (1705332, 1704801))))
+    controls = (_root_closure(), _successful_path(retain_leaf), _leaf_and_reject(), _remaining())
+    if retain_leaf:
+        controls += (_status(),)
+    else:
+        controls += (_ports(tuple(zip(range(1703513, 1703518), range(1704304, 1704309), strict=True))),
+                     _status(), _ports(((1705331, 1704800), (1705332, 1704801))))
     control_boards = []
     for board in controls:
         wiring = _local_wiring(board.layout()["BP"])
@@ -304,14 +416,7 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
         usage[label] = {"occupied_cells": used, "buildable_cells": capacity, "percent": round(100 * used / capacity, 2),
                         "below_5_percent": sum(20 * a < b for a, b in rows),
                         "below_10_percent": sum(10 * a < b for a, b in rows)}
-    usage["sparsest_platforms"] = [
-        {"platform": i + 1, "part": part, "foundation": p["T"],
-         "position": [p[axis] for axis in ("X", "Y", "Z")],
-         "occupied_cells": occupied, "buildable_cells": capacity, "percent": round(100 * occupied / capacity, 2)}
-        for i, (part, p, (occupied, capacity)) in sorted(
-            enumerate(zip((name for name, count in counts.items() for _ in range(count)), platforms, after, strict=True)),
-            key=lambda item: item[1][2][0] / item[1][2][1])[:20]
-    ]
+    usage.update(_measure_placement(platforms, counts, xs, ys))
     return document, {"inputs": order, "outputs": outputs, "occupancy": usage,
                       "factory": {"receives": shop_commands, "sends": shop_replies},
                       "status": {0: "计算中", 1: "配方已写入", 2: "不可制作", 3: "未着色晶体供料未定",
@@ -328,12 +433,19 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="从分册原生部件导出首版整厂电路")
     parser.add_argument("pieces", nargs="?", type=Path, help="覆盖项目分册，使用指定目录中的部件")
     parser.add_argument("--direct-root", type=Path, help="替换目录内的直接路线蓝图，例如三岛层叶端版")
-    parser.add_argument("--density-threshold", type=int, default=18, choices=range(0, 101), metavar="0–100",
-                        help="参与压缩的最大占地率，默认 18%%")
+    parser.add_argument("--density-threshold", type=int, default=60, choices=range(0, 101), metavar="0–100",
+                        help="参与压缩的最大空间利用率，默认 60%%")
+    parser.add_argument("--retain-leaf", action="store_true", help="复用闭包已选字段，省去叶端锁存板，供原生验收")
     parser.add_argument("--output", type=Path, required=True, help="原生蓝图路径")
     args = parser.parse_args()
     try:
-        _write_blueprint(*build(args.pieces, direct_root=args.direct_root, density_threshold=args.density_threshold), args.output)
+        if args.output.suffix != ".spz2bp":
+            raise ValueError("蓝图输出路径须使用 .spz2bp 后缀")
+        document, report = build(args.pieces, direct_root=args.direct_root, density_threshold=args.density_threshold,
+                                 retain_leaf=args.retain_leaf)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(encode_document(document, format_version=5), encoding="utf-8")
+        args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     except (ValueError, OSError) as error:
         parser.error(str(error))
     print(f"已导出 {args.output}")

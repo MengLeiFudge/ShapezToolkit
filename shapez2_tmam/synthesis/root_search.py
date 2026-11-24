@@ -29,6 +29,10 @@ def root_search_closure(phase: int, enable: bool) -> bool:
     return enable & ((phase == 2) | (phase == 3))
 
 
+def root_search_keep_closure(phase: int, enable: bool) -> bool:
+    return root_search_closure(phase, enable) | (enable & (phase == 8))
+
+
 def root_search_snapshot(phase: int, enable: bool) -> bool:
     return enable & (phase == 3)
 

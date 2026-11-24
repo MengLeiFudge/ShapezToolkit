@@ -5,10 +5,9 @@ from random import Random
 
 from ..mari.blueprint import Wiring, _kind
 from ..mari.signals import decode_constant
-from .compiler_backend._middle_snapshot import _radio, _short
-from .compiler_backend._snapshot_layout import _Layout
+from .compiler_backend._middle_snapshot import _notch_layout, _radio, _short
 from .compiler_backend._snapshot_router import connect_bus, place_controls
-from .foundations import TILE_SIZE, platform_ground
+from .foundations import TILE_SIZE
 
 
 _FOUNDATION = "Foundation_1x3"
@@ -39,10 +38,8 @@ def _gate_layout(wiring, indices):
 
 
 def _route(wiring, ports, radios, gates, row, seed):
-    layout = _Layout(_FOUNDATION)
-    ground = platform_ground(_FOUNDATION)
+    layout = _notch_layout(_FOUNDATION)
     board = layout.board
-    board.ground = ground
     for index in ports:
         entry = wiring.entries[index][1]
         outputs, inputs, _ = wiring.pins[index]

@@ -28,7 +28,7 @@ def _row_timer(elapsed):
     return board
 
 
-def build(input_hold_ticks: int):
+def build(input_hold_ticks: int, *, retain_leaf: bool = False):
     steps = (input_hold_ticks + _RADIO_TICKS - 1) // _RADIO_TICKS + 2
     if not _WAIT_RADIX < steps <= _WAIT_RADIX ** 2:
         raise ValueError("根订单原色保持时间超出计数范围")
@@ -38,8 +38,10 @@ def build(input_hold_ticks: int):
     for _, transmitter, channel, config in _radio_ports(_local_wiring(document["BP"])):
         if transmitter and channel == _PHASE + 20:
             config["C"] = constant(_PHASE)
-    flags, _ = _compile("root_search", {name: f"root_search_{name}" for name in _FLAGS},
-                        {"phase": _PHASE, "enable": _ENABLE}, _FLAGS)
+    methods = {name: f"root_search_{name}" for name in _FLAGS}
+    if retain_leaf:
+        methods["closure"] = "root_search_keep_closure"
+    flags, _ = _compile("root_search", methods, {"phase": _PHASE, "enable": _ENABLE}, _FLAGS)
     _append(document, flags["BP"]["Entries"])
     timers, elapsed, _ = _wait_timer(_PHASE, _TIMERS, steps, 1)
     for board in (*timers, _row_timer(elapsed)):
@@ -64,28 +66,36 @@ def _attach(document, path, channels):
     _append(document, wiring.platforms)
 
 
-def _direct_controls():
+def _direct_controls(retain_leaf):
     board = Module({"order": _ENABLE, "capture": _FLAGS["snapshot"], "replay": _FLAGS["replay"]})
     board.outputs = {
-        _gate(board, "If", "hold_leaf", 1, "order"): 1704600,
-        _gate(board, "If", "capture_leaf", 1, "capture"): 1704601,
         _gate(board, "If", "run_replay", 1, "replay"): 1702850,
         _gate(board, "If", "raw_mode", 0, "order"): 1703001,
         _gate(board, "If", "strict_top", 0, "order"): 1703002,
         _gate(board, "If", "no_frames", 0, "order"): 1704000,
     }
+    if retain_leaf:
+        board.inputs["chosen"] = 1703004
+        board.outputs[_gate(board, "And", "ready", "capture", "chosen")] = 1704602
+    else:
+        board.outputs[_gate(board, "If", "hold_leaf", 1, "order")] = 1704600
+        board.outputs[_gate(board, "If", "capture_leaf", 1, "capture")] = 1704601
     return board.layout()["BP"]["Entries"]
 
 
-def build_direct(reader: Path, closure: Path, path: Path, input_hold_ticks: int, *, stacked_leaf: bool = False):
-    document, report = build(input_hold_ticks)
+def build_direct(reader: Path, closure: Path, path: Path, input_hold_ticks: int, *, stacked_leaf: bool = False,
+                 retain_leaf: bool = False):
+    document, report = build(input_hold_ticks, retain_leaf=retain_leaf)
     intake, _ = build_order_entry()
-    replay, _ = build_leaf_snapshot(path, stacked=stacked_leaf)
     _attach(document, reader, {1700872: 1600000})
     _append(document, intake["BP"]["Entries"])
     _attach(document, closure, {1703000: _FLAGS["closure"]})
-    _append(document, _direct_controls())
-    _append(document, replay["BP"]["Entries"])
+    _append(document, _direct_controls(retain_leaf))
+    if retain_leaf:
+        _attach(document, path, {})
+    else:
+        replay, _ = build_leaf_snapshot(path, stacked=stacked_leaf)
+        _append(document, replay["BP"]["Entries"])
     wiring = _local_wiring(document["BP"])
     received, sent = _radio_channels(wiring)
     duplicate = sorted(channel for channel, count in sent.items() if count != 1)

@@ -84,10 +84,14 @@ _SUPPORTED = (set(_TYPES) - {"WireForward", "WireLeft"}) | {
 }
 
 
-def encode_document(document: dict) -> str:
+def encode_document(document: dict, *, format_version: int = 4) -> str:
     """编码已经完成静态接线核对的生产蓝图，固定压缩时间戳。"""
+    if format_version not in (4, 5):
+        raise ValueError(f"不支持的蓝图格式 {format_version}")
     raw = json.dumps(document, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    return "SHAPEZ2-4-" + base64.b64encode(gzip.compress(raw, mtime=0)).decode("ascii") + "$"
+    body = base64.b64encode(gzip.compress(raw, mtime=0)).decode("ascii")
+    metadata = "[]_2" if format_version == 5 else ""
+    return f"SHAPEZ2-{format_version}-{body}{metadata}$"
 
 
 def _place_pair(gate: Gate, provider: Gate, source: Ref, output_channel: int, channels: dict[Ref, int],

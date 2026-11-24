@@ -14,22 +14,31 @@
   },
   "occupancy": {
     "before": {
-      "occupied_cells": 1280966,
+      "occupied_cells": 1280831,
       "buildable_cells": 8826408,
       "percent": 14.51,
       "below_5_percent": 108,
       "below_10_percent": 389
     },
     "after": {
-      "occupied_cells": 1156308,
-      "buildable_cells": 4864368,
-      "percent": 23.77,
+      "occupied_cells": 1096192,
+      "buildable_cells": 4210080,
+      "percent": 26.04,
       "below_5_percent": 0,
-      "below_10_percent": 20
+      "below_10_percent": 18
     },
+    "top_projected_cells": 332379,
+    "top_buildable_cells": 485764,
+    "top_percent": 68.42,
+    "top_outline_percent": 56.15,
+    "platform_top_percent": 48.64,
+    "radio_cells": 161244,
+    "radio_percent": 3.83,
+    "radio_percent_of_occupied": 14.71,
+    "platforms_at_or_above_10_percent_radio": 40,
     "sparsest_platforms": [
       {
-        "platform": 404,
+        "platform": 398,
         "part": "pin-column-sample",
         "foundation": "Foundation_2x3",
         "position": [
@@ -39,36 +48,48 @@
         ],
         "occupied_cells": 300,
         "buildable_cells": 5628,
-        "percent": 5.33
+        "percent": 5.33,
+        "projected_cells": 186,
+        "radio_cells": 27,
+        "radio_percent": 0.48,
+        "radio_percent_of_occupied": 9.0
       },
       {
-        "platform": 417,
+        "platform": 406,
         "part": "pin-column-sample",
         "foundation": "Foundation_1x2",
         "position": [
           4,
           6,
-          -1
+          1
         ],
         "occupied_cells": 80,
         "buildable_cells": 1500,
-        "percent": 5.33
+        "percent": 5.33,
+        "projected_cells": 62,
+        "radio_cells": 27,
+        "radio_percent": 1.8,
+        "radio_percent_of_occupied": 33.75
       },
       {
-        "platform": 75,
+        "platform": 27,
         "part": "direct-root",
         "foundation": "Foundation_1x2",
         "position": [
-          1,
+          4,
           6,
-          1
+          0
         ],
         "occupied_cells": 82,
         "buildable_cells": 1500,
-        "percent": 5.47
+        "percent": 5.47,
+        "projected_cells": 64,
+        "radio_cells": 27,
+        "radio_percent": 1.8,
+        "radio_percent_of_occupied": 32.93
       },
       {
-        "platform": 96,
+        "platform": 37,
         "part": "direct-root",
         "foundation": "Foundation_1x3",
         "position": [
@@ -78,10 +99,14 @@
         ],
         "occupied_cells": 138,
         "buildable_cells": 2364,
-        "percent": 5.84
+        "percent": 5.84,
+        "projected_cells": 105,
+        "radio_cells": 27,
+        "radio_percent": 1.14,
+        "radio_percent_of_occupied": 19.57
       },
       {
-        "platform": 77,
+        "platform": 29,
         "part": "direct-root",
         "foundation": "Foundation_2x3",
         "position": [
@@ -91,10 +116,31 @@
         ],
         "occupied_cells": 335,
         "buildable_cells": 5628,
-        "percent": 5.95
+        "percent": 5.95,
+        "projected_cells": 216,
+        "radio_cells": 27,
+        "radio_percent": 0.48,
+        "radio_percent_of_occupied": 8.06
       },
       {
-        "platform": 421,
+        "platform": 401,
+        "part": "pin-column-sample",
+        "foundation": "Foundation_1x3",
+        "position": [
+          36,
+          0,
+          1
+        ],
+        "occupied_cells": 143,
+        "buildable_cells": 2364,
+        "percent": 6.05,
+        "projected_cells": 104,
+        "radio_cells": 27,
+        "radio_percent": 1.14,
+        "radio_percent_of_occupied": 18.88
+      },
+      {
+        "platform": 410,
         "part": "pin-column-sample",
         "foundation": "Foundation_2x3",
         "position": [
@@ -104,23 +150,31 @@
         ],
         "occupied_cells": 355,
         "buildable_cells": 5628,
-        "percent": 6.31
+        "percent": 6.31,
+        "projected_cells": 231,
+        "radio_cells": 27,
+        "radio_percent": 0.48,
+        "radio_percent_of_occupied": 7.61
       },
       {
-        "platform": 419,
+        "platform": 408,
         "part": "pin-column-sample",
         "foundation": "Foundation_1x3",
         "position": [
-          39,
-          3,
+          37,
+          5,
           -1
         ],
         "occupied_cells": 154,
         "buildable_cells": 2364,
-        "percent": 6.51
+        "percent": 6.51,
+        "projected_cells": 118,
+        "radio_cells": 27,
+        "radio_percent": 1.14,
+        "radio_percent_of_occupied": 17.53
       },
       {
-        "platform": 424,
+        "platform": 412,
         "part": "pin-column-sample",
         "foundation": "Foundation_2x3",
         "position": [
@@ -130,36 +184,14 @@
         ],
         "occupied_cells": 372,
         "buildable_cells": 5628,
-        "percent": 6.61
+        "percent": 6.61,
+        "projected_cells": 221,
+        "radio_cells": 81,
+        "radio_percent": 1.44,
+        "radio_percent_of_occupied": 21.77
       },
       {
-        "platform": 535,
-        "part": "pin-landings",
-        "foundation": "Foundation_1x3",
-        "position": [
-          39,
-          3,
-          1
-        ],
-        "occupied_cells": 167,
-        "buildable_cells": 2364,
-        "percent": 7.06
-      },
-      {
-        "platform": 541,
-        "part": "pin-landings",
-        "foundation": "Foundation_1x3",
-        "position": [
-          40,
-          3,
-          0
-        ],
-        "occupied_cells": 167,
-        "buildable_cells": 2364,
-        "percent": 7.06
-      },
-      {
-        "platform": 547,
+        "platform": 486,
         "part": "pin-landings",
         "foundation": "Foundation_1x3",
         "position": [
@@ -169,10 +201,14 @@
         ],
         "occupied_cells": 167,
         "buildable_cells": 2364,
-        "percent": 7.06
+        "percent": 7.06,
+        "projected_cells": 123,
+        "radio_cells": 27,
+        "radio_percent": 1.14,
+        "radio_percent_of_occupied": 16.17
       },
       {
-        "platform": 553,
+        "platform": 488,
         "part": "pin-landings",
         "foundation": "Foundation_1x3",
         "position": [
@@ -182,10 +218,48 @@
         ],
         "occupied_cells": 167,
         "buildable_cells": 2364,
-        "percent": 7.06
+        "percent": 7.06,
+        "projected_cells": 123,
+        "radio_cells": 27,
+        "radio_percent": 1.14,
+        "radio_percent_of_occupied": 16.17
       },
       {
-        "platform": 72,
+        "platform": 490,
+        "part": "pin-landings",
+        "foundation": "Foundation_1x3",
+        "position": [
+          1,
+          6,
+          1
+        ],
+        "occupied_cells": 167,
+        "buildable_cells": 2364,
+        "percent": 7.06,
+        "projected_cells": 123,
+        "radio_cells": 27,
+        "radio_percent": 1.14,
+        "radio_percent_of_occupied": 16.17
+      },
+      {
+        "platform": 492,
+        "part": "pin-landings",
+        "foundation": "Foundation_1x3",
+        "position": [
+          4,
+          6,
+          -1
+        ],
+        "occupied_cells": 167,
+        "buildable_cells": 2364,
+        "percent": 7.06,
+        "projected_cells": 123,
+        "radio_cells": 27,
+        "radio_percent": 1.14,
+        "radio_percent_of_occupied": 16.17
+      },
+      {
+        "platform": 24,
         "part": "direct-root",
         "foundation": "Foundation_2x3",
         "position": [
@@ -195,23 +269,14 @@
         ],
         "occupied_cells": 411,
         "buildable_cells": 5628,
-        "percent": 7.3
+        "percent": 7.3,
+        "projected_cells": 280,
+        "radio_cells": 81,
+        "radio_percent": 1.44,
+        "radio_percent_of_occupied": 19.71
       },
       {
-        "platform": 412,
-        "part": "pin-column-sample",
-        "foundation": "Foundation_1x3",
-        "position": [
-          36,
-          0,
-          1
-        ],
-        "occupied_cells": 186,
-        "buildable_cells": 2364,
-        "percent": 7.87
-      },
-      {
-        "platform": 297,
+        "platform": 253,
         "part": "tail-search-workers",
         "foundation": "Foundation_2x2",
         "position": [
@@ -221,10 +286,14 @@
         ],
         "occupied_cells": 310,
         "buildable_cells": 3564,
-        "percent": 8.7
+        "percent": 8.7,
+        "projected_cells": 182,
+        "radio_cells": 27,
+        "radio_percent": 0.76,
+        "radio_percent_of_occupied": 8.71
       },
       {
-        "platform": 300,
+        "platform": 255,
         "part": "tail-search-workers",
         "foundation": "Foundation_2x2",
         "position": [
@@ -234,10 +303,14 @@
         ],
         "occupied_cells": 310,
         "buildable_cells": 3564,
-        "percent": 8.7
+        "percent": 8.7,
+        "projected_cells": 182,
+        "radio_cells": 27,
+        "radio_percent": 0.76,
+        "radio_percent_of_occupied": 8.71
       },
       {
-        "platform": 8,
+        "platform": 4,
         "part": "direct-root",
         "foundation": "Foundation_2x3",
         "position": [
@@ -247,36 +320,14 @@
         ],
         "occupied_cells": 526,
         "buildable_cells": 5628,
-        "percent": 9.35
+        "percent": 9.35,
+        "projected_cells": 321,
+        "radio_cells": 135,
+        "radio_percent": 2.4,
+        "radio_percent_of_occupied": 25.67
       },
       {
-        "platform": 126,
-        "part": "direct-root",
-        "foundation": "Foundation_3x3",
-        "position": [
-          10,
-          10,
-          0
-        ],
-        "occupied_cells": 847,
-        "buildable_cells": 8892,
-        "percent": 9.53
-      },
-      {
-        "platform": 320,
-        "part": "tail-search-workers",
-        "foundation": "Foundation_3x3",
-        "position": [
-          22,
-          22,
-          0
-        ],
-        "occupied_cells": 851,
-        "buildable_cells": 8892,
-        "percent": 9.57
-      },
-      {
-        "platform": 414,
+        "platform": 403,
         "part": "pin-column-sample",
         "foundation": "Foundation_1x3",
         "position": [
@@ -286,7 +337,1069 @@
         ],
         "occupied_cells": 228,
         "buildable_cells": 2364,
-        "percent": 9.64
+        "percent": 9.64,
+        "projected_cells": 145,
+        "radio_cells": 108,
+        "radio_percent": 4.57,
+        "radio_percent_of_occupied": 47.37
+      },
+      {
+        "platform": 101,
+        "part": "direct-root",
+        "foundation": "Foundation_3x3",
+        "position": [
+          34,
+          8,
+          1
+        ],
+        "occupied_cells": 973,
+        "buildable_cells": 8892,
+        "percent": 10.94,
+        "projected_cells": 919,
+        "radio_cells": 81,
+        "radio_percent": 0.91,
+        "radio_percent_of_occupied": 8.32
+      },
+      {
+        "platform": 377,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x1",
+        "position": [
+          39,
+          2,
+          -1
+        ],
+        "occupied_cells": 70,
+        "buildable_cells": 636,
+        "percent": 11.01,
+        "projected_cells": 34,
+        "radio_cells": 54,
+        "radio_percent": 8.49,
+        "radio_percent_of_occupied": 77.14
+      }
+    ],
+    "highest_radio_platforms": [
+      {
+        "platform": 16,
+        "part": "direct-root",
+        "foundation": "Foundation_1x2",
+        "position": [
+          27,
+          32,
+          -1
+        ],
+        "occupied_cells": 877,
+        "buildable_cells": 1500,
+        "percent": 58.47,
+        "projected_cells": 383,
+        "radio_cells": 540,
+        "radio_percent": 36.0,
+        "radio_percent_of_occupied": 61.57
+      },
+      {
+        "platform": 20,
+        "part": "direct-root",
+        "foundation": "Foundation_1x2",
+        "position": [
+          27,
+          32,
+          1
+        ],
+        "occupied_cells": 877,
+        "buildable_cells": 1500,
+        "percent": 58.47,
+        "projected_cells": 383,
+        "radio_cells": 540,
+        "radio_percent": 36.0,
+        "radio_percent_of_occupied": 61.57
+      },
+      {
+        "platform": 19,
+        "part": "direct-root",
+        "foundation": "Foundation_1x1",
+        "position": [
+          27,
+          33,
+          0
+        ],
+        "occupied_cells": 419,
+        "buildable_cells": 636,
+        "percent": 65.88,
+        "projected_cells": 168,
+        "radio_cells": 216,
+        "radio_percent": 33.96,
+        "radio_percent_of_occupied": 51.55
+      },
+      {
+        "platform": 17,
+        "part": "direct-root",
+        "foundation": "Foundation_1x1",
+        "position": [
+          27,
+          32,
+          0
+        ],
+        "occupied_cells": 365,
+        "buildable_cells": 636,
+        "percent": 57.39,
+        "projected_cells": 165,
+        "radio_cells": 162,
+        "radio_percent": 25.47,
+        "radio_percent_of_occupied": 44.38
+      },
+      {
+        "platform": 18,
+        "part": "direct-root",
+        "foundation": "Foundation_1x1",
+        "position": [
+          28,
+          32,
+          0
+        ],
+        "occupied_cells": 269,
+        "buildable_cells": 636,
+        "percent": 42.3,
+        "projected_cells": 107,
+        "radio_cells": 162,
+        "radio_percent": 25.47,
+        "radio_percent_of_occupied": 60.22
+      },
+      {
+        "platform": 221,
+        "part": "direct-root",
+        "foundation": "Foundation_1x2",
+        "position": [
+          31,
+          33,
+          1
+        ],
+        "occupied_cells": 462,
+        "buildable_cells": 1500,
+        "percent": 30.8,
+        "projected_cells": 222,
+        "radio_cells": 324,
+        "radio_percent": 21.6,
+        "radio_percent_of_occupied": 70.13
+      },
+      {
+        "platform": 375,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x1",
+        "position": [
+          39,
+          0,
+          0
+        ],
+        "occupied_cells": 183,
+        "buildable_cells": 636,
+        "percent": 28.77,
+        "projected_cells": 93,
+        "radio_cells": 135,
+        "radio_percent": 21.23,
+        "radio_percent_of_occupied": 73.77
+      },
+      {
+        "platform": 376,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x1",
+        "position": [
+          39,
+          1,
+          0
+        ],
+        "occupied_cells": 183,
+        "buildable_cells": 636,
+        "percent": 28.77,
+        "projected_cells": 93,
+        "radio_cells": 135,
+        "radio_percent": 21.23,
+        "radio_percent_of_occupied": 73.77
+      },
+      {
+        "platform": 551,
+        "part": "controls",
+        "foundation": "Foundation_1x3",
+        "position": [
+          31,
+          36,
+          0
+        ],
+        "occupied_cells": 558,
+        "buildable_cells": 2364,
+        "percent": 23.6,
+        "projected_cells": 306,
+        "radio_cells": 378,
+        "radio_percent": 15.99,
+        "radio_percent_of_occupied": 67.74
+      },
+      {
+        "platform": 214,
+        "part": "direct-root",
+        "foundation": "Foundation_2x2",
+        "position": [
+          33,
+          2,
+          1
+        ],
+        "occupied_cells": 970,
+        "buildable_cells": 3564,
+        "percent": 27.22,
+        "projected_cells": 560,
+        "radio_cells": 540,
+        "radio_percent": 15.15,
+        "radio_percent_of_occupied": 55.67
+      },
+      {
+        "platform": 363,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          19,
+          36,
+          0
+        ],
+        "occupied_cells": 575,
+        "buildable_cells": 2364,
+        "percent": 24.32,
+        "projected_cells": 341,
+        "radio_cells": 351,
+        "radio_percent": 14.85,
+        "radio_percent_of_occupied": 61.04
+      },
+      {
+        "platform": 367,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          22,
+          36,
+          1
+        ],
+        "occupied_cells": 576,
+        "buildable_cells": 2364,
+        "percent": 24.37,
+        "projected_cells": 342,
+        "radio_cells": 351,
+        "radio_percent": 14.85,
+        "radio_percent_of_occupied": 60.94
+      },
+      {
+        "platform": 368,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          25,
+          36,
+          -1
+        ],
+        "occupied_cells": 576,
+        "buildable_cells": 2364,
+        "percent": 24.37,
+        "projected_cells": 342,
+        "radio_cells": 351,
+        "radio_percent": 14.85,
+        "radio_percent_of_occupied": 60.94
+      },
+      {
+        "platform": 219,
+        "part": "direct-root",
+        "foundation": "Foundation_2x2",
+        "position": [
+          38,
+          2,
+          1
+        ],
+        "occupied_cells": 924,
+        "buildable_cells": 3564,
+        "percent": 25.93,
+        "projected_cells": 489,
+        "radio_cells": 513,
+        "radio_percent": 14.39,
+        "radio_percent_of_occupied": 55.52
+      },
+      {
+        "platform": 21,
+        "part": "direct-root",
+        "foundation": "Foundation_1x1",
+        "position": [
+          27,
+          33,
+          1
+        ],
+        "occupied_cells": 105,
+        "buildable_cells": 636,
+        "percent": 16.51,
+        "projected_cells": 51,
+        "radio_cells": 81,
+        "radio_percent": 12.74,
+        "radio_percent_of_occupied": 77.14
+      },
+      {
+        "platform": 231,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          38,
+          33,
+          -1
+        ],
+        "occupied_cells": 353,
+        "buildable_cells": 1500,
+        "percent": 23.53,
+        "projected_cells": 227,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 53.54
+      },
+      {
+        "platform": 232,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          30,
+          34,
+          -1
+        ],
+        "occupied_cells": 353,
+        "buildable_cells": 1500,
+        "percent": 23.53,
+        "projected_cells": 227,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 53.54
+      },
+      {
+        "platform": 233,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          38,
+          34,
+          -1
+        ],
+        "occupied_cells": 353,
+        "buildable_cells": 1500,
+        "percent": 23.53,
+        "projected_cells": 227,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 53.54
+      },
+      {
+        "platform": 234,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          30,
+          36,
+          1
+        ],
+        "occupied_cells": 353,
+        "buildable_cells": 1500,
+        "percent": 23.53,
+        "projected_cells": 227,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 53.54
+      },
+      {
+        "platform": 235,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          32,
+          36,
+          1
+        ],
+        "occupied_cells": 324,
+        "buildable_cells": 1500,
+        "percent": 21.6,
+        "projected_cells": 198,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 58.33
+      }
+    ],
+    "radio_over_limit": [
+      {
+        "platform": 16,
+        "part": "direct-root",
+        "foundation": "Foundation_1x2",
+        "position": [
+          27,
+          32,
+          -1
+        ],
+        "occupied_cells": 877,
+        "buildable_cells": 1500,
+        "percent": 58.47,
+        "projected_cells": 383,
+        "radio_cells": 540,
+        "radio_percent": 36.0,
+        "radio_percent_of_occupied": 61.57
+      },
+      {
+        "platform": 20,
+        "part": "direct-root",
+        "foundation": "Foundation_1x2",
+        "position": [
+          27,
+          32,
+          1
+        ],
+        "occupied_cells": 877,
+        "buildable_cells": 1500,
+        "percent": 58.47,
+        "projected_cells": 383,
+        "radio_cells": 540,
+        "radio_percent": 36.0,
+        "radio_percent_of_occupied": 61.57
+      },
+      {
+        "platform": 19,
+        "part": "direct-root",
+        "foundation": "Foundation_1x1",
+        "position": [
+          27,
+          33,
+          0
+        ],
+        "occupied_cells": 419,
+        "buildable_cells": 636,
+        "percent": 65.88,
+        "projected_cells": 168,
+        "radio_cells": 216,
+        "radio_percent": 33.96,
+        "radio_percent_of_occupied": 51.55
+      },
+      {
+        "platform": 17,
+        "part": "direct-root",
+        "foundation": "Foundation_1x1",
+        "position": [
+          27,
+          32,
+          0
+        ],
+        "occupied_cells": 365,
+        "buildable_cells": 636,
+        "percent": 57.39,
+        "projected_cells": 165,
+        "radio_cells": 162,
+        "radio_percent": 25.47,
+        "radio_percent_of_occupied": 44.38
+      },
+      {
+        "platform": 18,
+        "part": "direct-root",
+        "foundation": "Foundation_1x1",
+        "position": [
+          28,
+          32,
+          0
+        ],
+        "occupied_cells": 269,
+        "buildable_cells": 636,
+        "percent": 42.3,
+        "projected_cells": 107,
+        "radio_cells": 162,
+        "radio_percent": 25.47,
+        "radio_percent_of_occupied": 60.22
+      },
+      {
+        "platform": 221,
+        "part": "direct-root",
+        "foundation": "Foundation_1x2",
+        "position": [
+          31,
+          33,
+          1
+        ],
+        "occupied_cells": 462,
+        "buildable_cells": 1500,
+        "percent": 30.8,
+        "projected_cells": 222,
+        "radio_cells": 324,
+        "radio_percent": 21.6,
+        "radio_percent_of_occupied": 70.13
+      },
+      {
+        "platform": 375,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x1",
+        "position": [
+          39,
+          0,
+          0
+        ],
+        "occupied_cells": 183,
+        "buildable_cells": 636,
+        "percent": 28.77,
+        "projected_cells": 93,
+        "radio_cells": 135,
+        "radio_percent": 21.23,
+        "radio_percent_of_occupied": 73.77
+      },
+      {
+        "platform": 376,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x1",
+        "position": [
+          39,
+          1,
+          0
+        ],
+        "occupied_cells": 183,
+        "buildable_cells": 636,
+        "percent": 28.77,
+        "projected_cells": 93,
+        "radio_cells": 135,
+        "radio_percent": 21.23,
+        "radio_percent_of_occupied": 73.77
+      },
+      {
+        "platform": 551,
+        "part": "controls",
+        "foundation": "Foundation_1x3",
+        "position": [
+          31,
+          36,
+          0
+        ],
+        "occupied_cells": 558,
+        "buildable_cells": 2364,
+        "percent": 23.6,
+        "projected_cells": 306,
+        "radio_cells": 378,
+        "radio_percent": 15.99,
+        "radio_percent_of_occupied": 67.74
+      },
+      {
+        "platform": 214,
+        "part": "direct-root",
+        "foundation": "Foundation_2x2",
+        "position": [
+          33,
+          2,
+          1
+        ],
+        "occupied_cells": 970,
+        "buildable_cells": 3564,
+        "percent": 27.22,
+        "projected_cells": 560,
+        "radio_cells": 540,
+        "radio_percent": 15.15,
+        "radio_percent_of_occupied": 55.67
+      },
+      {
+        "platform": 363,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          19,
+          36,
+          0
+        ],
+        "occupied_cells": 575,
+        "buildable_cells": 2364,
+        "percent": 24.32,
+        "projected_cells": 341,
+        "radio_cells": 351,
+        "radio_percent": 14.85,
+        "radio_percent_of_occupied": 61.04
+      },
+      {
+        "platform": 367,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          22,
+          36,
+          1
+        ],
+        "occupied_cells": 576,
+        "buildable_cells": 2364,
+        "percent": 24.37,
+        "projected_cells": 342,
+        "radio_cells": 351,
+        "radio_percent": 14.85,
+        "radio_percent_of_occupied": 60.94
+      },
+      {
+        "platform": 368,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          25,
+          36,
+          -1
+        ],
+        "occupied_cells": 576,
+        "buildable_cells": 2364,
+        "percent": 24.37,
+        "projected_cells": 342,
+        "radio_cells": 351,
+        "radio_percent": 14.85,
+        "radio_percent_of_occupied": 60.94
+      },
+      {
+        "platform": 219,
+        "part": "direct-root",
+        "foundation": "Foundation_2x2",
+        "position": [
+          38,
+          2,
+          1
+        ],
+        "occupied_cells": 924,
+        "buildable_cells": 3564,
+        "percent": 25.93,
+        "projected_cells": 489,
+        "radio_cells": 513,
+        "radio_percent": 14.39,
+        "radio_percent_of_occupied": 55.52
+      },
+      {
+        "platform": 21,
+        "part": "direct-root",
+        "foundation": "Foundation_1x1",
+        "position": [
+          27,
+          33,
+          1
+        ],
+        "occupied_cells": 105,
+        "buildable_cells": 636,
+        "percent": 16.51,
+        "projected_cells": 51,
+        "radio_cells": 81,
+        "radio_percent": 12.74,
+        "radio_percent_of_occupied": 77.14
+      },
+      {
+        "platform": 231,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          38,
+          33,
+          -1
+        ],
+        "occupied_cells": 353,
+        "buildable_cells": 1500,
+        "percent": 23.53,
+        "projected_cells": 227,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 53.54
+      },
+      {
+        "platform": 232,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          30,
+          34,
+          -1
+        ],
+        "occupied_cells": 353,
+        "buildable_cells": 1500,
+        "percent": 23.53,
+        "projected_cells": 227,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 53.54
+      },
+      {
+        "platform": 233,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          38,
+          34,
+          -1
+        ],
+        "occupied_cells": 353,
+        "buildable_cells": 1500,
+        "percent": 23.53,
+        "projected_cells": 227,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 53.54
+      },
+      {
+        "platform": 234,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          30,
+          36,
+          1
+        ],
+        "occupied_cells": 353,
+        "buildable_cells": 1500,
+        "percent": 23.53,
+        "projected_cells": 227,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 53.54
+      },
+      {
+        "platform": 235,
+        "part": "tail-frames-control",
+        "foundation": "Foundation_1x2",
+        "position": [
+          32,
+          36,
+          1
+        ],
+        "occupied_cells": 324,
+        "buildable_cells": 1500,
+        "percent": 21.6,
+        "projected_cells": 198,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 58.33
+      },
+      {
+        "platform": 374,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x2",
+        "position": [
+          33,
+          36,
+          -1
+        ],
+        "occupied_cells": 359,
+        "buildable_cells": 1500,
+        "percent": 23.93,
+        "projected_cells": 176,
+        "radio_cells": 189,
+        "radio_percent": 12.6,
+        "radio_percent_of_occupied": 52.65
+      },
+      {
+        "platform": 209,
+        "part": "direct-root",
+        "foundation": "Foundation_1x3",
+        "position": [
+          37,
+          35,
+          -1
+        ],
+        "occupied_cells": 517,
+        "buildable_cells": 2364,
+        "percent": 21.87,
+        "projected_cells": 319,
+        "radio_cells": 297,
+        "radio_percent": 12.56,
+        "radio_percent_of_occupied": 57.45
+      },
+      {
+        "platform": 213,
+        "part": "direct-root",
+        "foundation": "Foundation_1x3",
+        "position": [
+          1,
+          36,
+          1
+        ],
+        "occupied_cells": 522,
+        "buildable_cells": 2364,
+        "percent": 22.08,
+        "projected_cells": 324,
+        "radio_cells": 297,
+        "radio_percent": 12.56,
+        "radio_percent_of_occupied": 56.9
+      },
+      {
+        "platform": 215,
+        "part": "direct-root",
+        "foundation": "Foundation_1x3",
+        "position": [
+          4,
+          36,
+          -1
+        ],
+        "occupied_cells": 661,
+        "buildable_cells": 2364,
+        "percent": 27.96,
+        "projected_cells": 388,
+        "radio_cells": 297,
+        "radio_percent": 12.56,
+        "radio_percent_of_occupied": 44.93
+      },
+      {
+        "platform": 220,
+        "part": "direct-root",
+        "foundation": "Foundation_1x3",
+        "position": [
+          13,
+          36,
+          0
+        ],
+        "occupied_cells": 478,
+        "buildable_cells": 2364,
+        "percent": 20.22,
+        "projected_cells": 280,
+        "radio_cells": 297,
+        "radio_percent": 12.56,
+        "radio_percent_of_occupied": 62.13
+      },
+      {
+        "platform": 364,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          19,
+          36,
+          1
+        ],
+        "occupied_cells": 502,
+        "buildable_cells": 2364,
+        "percent": 21.24,
+        "projected_cells": 304,
+        "radio_cells": 297,
+        "radio_percent": 12.56,
+        "radio_percent_of_occupied": 59.16
+      },
+      {
+        "platform": 365,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          22,
+          36,
+          -1
+        ],
+        "occupied_cells": 473,
+        "buildable_cells": 2364,
+        "percent": 20.01,
+        "projected_cells": 275,
+        "radio_cells": 297,
+        "radio_percent": 12.56,
+        "radio_percent_of_occupied": 62.79
+      },
+      {
+        "platform": 366,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          22,
+          36,
+          0
+        ],
+        "occupied_cells": 496,
+        "buildable_cells": 2364,
+        "percent": 20.98,
+        "projected_cells": 298,
+        "radio_cells": 297,
+        "radio_percent": 12.56,
+        "radio_percent_of_occupied": 59.88
+      },
+      {
+        "platform": 484,
+        "part": "pin-cap-crystals",
+        "foundation": "Foundation_2x3",
+        "position": [
+          10,
+          35,
+          0
+        ],
+        "occupied_cells": 1377,
+        "buildable_cells": 5628,
+        "percent": 24.47,
+        "projected_cells": 708,
+        "radio_cells": 648,
+        "radio_percent": 11.51,
+        "radio_percent_of_occupied": 47.06
+      },
+      {
+        "platform": 217,
+        "part": "direct-root",
+        "foundation": "Foundation_1x3",
+        "position": [
+          4,
+          36,
+          1
+        ],
+        "occupied_cells": 677,
+        "buildable_cells": 2364,
+        "percent": 28.64,
+        "projected_cells": 387,
+        "radio_cells": 270,
+        "radio_percent": 11.42,
+        "radio_percent_of_occupied": 39.88
+      },
+      {
+        "platform": 218,
+        "part": "direct-root",
+        "foundation": "Foundation_1x3",
+        "position": [
+          13,
+          36,
+          -1
+        ],
+        "occupied_cells": 464,
+        "buildable_cells": 2364,
+        "percent": 19.63,
+        "projected_cells": 284,
+        "radio_cells": 270,
+        "radio_percent": 11.42,
+        "radio_percent_of_occupied": 58.19
+      },
+      {
+        "platform": 362,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          19,
+          36,
+          -1
+        ],
+        "occupied_cells": 440,
+        "buildable_cells": 2364,
+        "percent": 18.61,
+        "projected_cells": 260,
+        "radio_cells": 270,
+        "radio_percent": 11.42,
+        "radio_percent_of_occupied": 61.36
+      },
+      {
+        "platform": 369,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          25,
+          36,
+          0
+        ],
+        "occupied_cells": 634,
+        "buildable_cells": 2364,
+        "percent": 26.82,
+        "projected_cells": 329,
+        "radio_cells": 270,
+        "radio_percent": 11.42,
+        "radio_percent_of_occupied": 42.59
+      },
+      {
+        "platform": 370,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          25,
+          36,
+          1
+        ],
+        "occupied_cells": 634,
+        "buildable_cells": 2364,
+        "percent": 26.82,
+        "projected_cells": 329,
+        "radio_cells": 270,
+        "radio_percent": 11.42,
+        "radio_percent_of_occupied": 42.59
+      },
+      {
+        "platform": 371,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          28,
+          36,
+          -1
+        ],
+        "occupied_cells": 634,
+        "buildable_cells": 2364,
+        "percent": 26.82,
+        "projected_cells": 329,
+        "radio_cells": 270,
+        "radio_percent": 11.42,
+        "radio_percent_of_occupied": 42.59
+      },
+      {
+        "platform": 373,
+        "part": "tail-search-workers",
+        "foundation": "Foundation_1x3",
+        "position": [
+          28,
+          36,
+          1
+        ],
+        "occupied_cells": 433,
+        "buildable_cells": 2364,
+        "percent": 18.32,
+        "projected_cells": 253,
+        "radio_cells": 270,
+        "radio_percent": 11.42,
+        "radio_percent_of_occupied": 62.36
+      },
+      {
+        "platform": 210,
+        "part": "direct-root",
+        "foundation": "Foundation_2x2",
+        "position": [
+          38,
+          0,
+          1
+        ],
+        "occupied_cells": 891,
+        "buildable_cells": 3564,
+        "percent": 25.0,
+        "projected_cells": 554,
+        "radio_cells": 405,
+        "radio_percent": 11.36,
+        "radio_percent_of_occupied": 45.45
+      },
+      {
+        "platform": 450,
+        "part": "pin-rows-prefetch",
+        "foundation": "Foundation_3x3",
+        "position": [
+          37,
+          25,
+          -1
+        ],
+        "occupied_cells": 2536,
+        "buildable_cells": 8892,
+        "percent": 28.52,
+        "projected_cells": 1614,
+        "radio_cells": 999,
+        "radio_percent": 11.23,
+        "radio_percent_of_occupied": 39.39
+      },
+      {
+        "platform": 206,
+        "part": "direct-root",
+        "foundation": "Foundation_1x2",
+        "position": [
+          27,
+          33,
+          -1
+        ],
+        "occupied_cells": 276,
+        "buildable_cells": 1500,
+        "percent": 18.4,
+        "projected_cells": 168,
+        "radio_cells": 162,
+        "radio_percent": 10.8,
+        "radio_percent_of_occupied": 58.7
+      },
+      {
+        "platform": 212,
+        "part": "direct-root",
+        "foundation": "Foundation_1x3",
+        "position": [
+          1,
+          36,
+          0
+        ],
+        "occupied_cells": 483,
+        "buildable_cells": 2364,
+        "percent": 20.43,
+        "projected_cells": 263,
+        "radio_cells": 243,
+        "radio_percent": 10.28,
+        "radio_percent_of_occupied": 50.31
       }
     ]
   },
@@ -323,20 +1436,20 @@
     "5": "内部核对失败"
   },
   "parts": {
-    "direct-root": 219,
-    "tail-search": 7,
-    "tail-frames-control": 6,
-    "search-checkpoint": 18,
-    "tail-search-workers": 132,
-    "tail-node-inputs": 20,
-    "pin-column-sample": 34,
-    "pin-row-reader": 20,
-    "pin-rows-prefetch": 10,
-    "pin-layer-search": 9,
-    "pin-cap-plan": 15,
-    "pin-cap-crystals": 13,
-    "pin-landings": 66,
-    "controls": 3
+    "direct-root": 221,
+    "tail-search": 5,
+    "tail-frames-control": 9,
+    "search-checkpoint": 16,
+    "tail-search-workers": 126,
+    "tail-node-inputs": 19,
+    "pin-column-sample": 33,
+    "pin-row-reader": 17,
+    "pin-rows-prefetch": 7,
+    "pin-layer-search": 7,
+    "pin-cap-plan": 13,
+    "pin-cap-crystals": 11,
+    "pin-landings": 64,
+    "controls": 4
   },
   "external_inputs": [
     1600000,
@@ -363,18 +1476,18 @@
     1704431,
     1704432
   ],
-  "platforms": 572,
+  "platforms": 552,
   "platform_sizes": {
-    "Foundation_3x3": 527,
-    "Foundation_2x3": 25,
-    "Foundation_1x2": 4,
-    "Foundation_1x1": 5,
-    "Foundation_1x3": 9,
-    "Foundation_2x2": 2
+    "Foundation_3x3": 420,
+    "Foundation_2x3": 55,
+    "Foundation_1x2": 13,
+    "Foundation_1x1": 7,
+    "Foundation_1x3": 51,
+    "Foundation_2x2": 6
   },
   "footprint_chunks": [
-    42,
-    41
+    40,
+    37
   ],
   "island_levels": [
     -1,
@@ -382,7 +1495,7 @@
     1
   ],
   "short_range_links": 176,
-  "building_entries": 979775,
+  "building_entries": 919672,
   "global_transmitters": 1804,
   "global_receivers": 4168
 }

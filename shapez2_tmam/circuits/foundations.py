@@ -18,6 +18,12 @@ FOUNDATION_CHUNKS = {
 }
 
 
+# resources.assets 中的岛格偏移，以平台锚点为原点。
+IRREGULAR_FOUNDATIONS = {
+    "Foundation_L3": ((0, 0), (1, 0), (0, 1)),
+}
+
+
 def foundation_ground(width, height):
     x0 = -((width - 1) // 2) * TILE_SIZE
     y0 = -((height - 1) // 2) * TILE_SIZE
@@ -32,26 +38,50 @@ def foundation_ground(width, height):
     return ground
 
 
+@cache
+def foundation_origin(kind):
+    if kind in IRREGULAR_FOUNDATIONS:
+        return tuple(map(min, zip(*IRREGULAR_FOUNDATIONS[kind], strict=True)))
+    width, height = FOUNDATION_CHUNKS[kind]
+    return -((width - 1) // 2), -((height - 1) // 2)
+
+
+@cache
 def foundation_tiles(kind):
-    if kind == "Foundation_L3":
-        return ((0, 0), (1, 0), (0, 1))
+    if kind in IRREGULAR_FOUNDATIONS:
+        x, y = foundation_origin(kind)
+        return tuple((a - x, b - y) for a, b in IRREGULAR_FOUNDATIONS[kind])
     width, height = FOUNDATION_CHUNKS[kind]
     return tuple(product(range(width), range(height)))
 
 
 @cache
+def platform_interior(kind):
+    if kind not in IRREGULAR_FOUNDATIONS:
+        width, height = FOUNDATION_CHUNKS[kind]
+        x = EDGE_MARGIN - ((width - 1) // 2) * TILE_SIZE
+        y = EDGE_MARGIN - ((height - 1) // 2) * TILE_SIZE
+        return frozenset(product(range(x, x + width * TILE_SIZE - 2 * EDGE_MARGIN),
+                                 range(y, y + height * TILE_SIZE - 2 * EDGE_MARGIN)))
+    tiles = set(IRREGULAR_FOUNDATIONS[kind])
+    return frozenset((cx * TILE_SIZE + x, cy * TILE_SIZE + y) for cx, cy in tiles
+                     for x, y in product(range(TILE_SIZE), repeat=2)
+                     if _inside_chunk_edges(tiles, cx, cy, x, y))
+
+
+def _inside_chunk_edges(tiles, cx, cy, x, y):
+    dx = (x >= TILE_SIZE - EDGE_MARGIN) - (x < EDGE_MARGIN)
+    dy = (y >= TILE_SIZE - EDGE_MARGIN) - (y < EDGE_MARGIN)
+    return {(cx + dx, cy), (cx, cy + dy), (cx + dx, cy + dy)} <= tiles
+
+
+@cache
 def platform_ground(kind):
-    if kind != "Foundation_L3":
+    if kind not in IRREGULAR_FOUNDATIONS:
         return frozenset(foundation_ground(*FOUNDATION_CHUNKS[kind]))
-    tiles = set(foundation_tiles(kind))
-    ground = set()
+    tiles = set(IRREGULAR_FOUNDATIONS[kind])
+    ground = set(platform_interior(kind))
     for cx, cy in tiles:
-        for x, y in product(range(TILE_SIZE), repeat=2):
-            dx = (x >= TILE_SIZE - EDGE_MARGIN) - (x < EDGE_MARGIN)
-            dy = (y >= TILE_SIZE - EDGE_MARGIN) - (y < EDGE_MARGIN)
-            # 凹角的对角岛格也要存在，两个相邻边才都能铺到角上。
-            if {(cx + dx, cy), (cx, cy + dy), (cx + dx, cy + dy)} <= tiles:
-                ground.add((cx * TILE_SIZE + x, cy * TILE_SIZE + y))
         for (dx, dy), notch in (
             ((1, 0), product((17,), range(8, 12))),
             ((-1, 0), product((2,), range(8, 12))),

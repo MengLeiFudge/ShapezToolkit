@@ -38,9 +38,21 @@ def _append(document: dict, platforms: list[dict]) -> None:
 
 def _native_wiring(path: Path) -> Wiring:
     text = path.read_text(encoding="utf-8-sig").strip()
-    if not text.startswith("SHAPEZ2-4-") or not text.endswith("$"):
-        raise ValueError(f"{path.name} 需要 SHAPEZ2-4 原生蓝图")
-    bp = json.loads(gzip.decompress(base64.b64decode(text[10:-1], validate=True)))["BP"]
+    if not text.startswith(("SHAPEZ2-4-", "SHAPEZ2-5-")) or not text.endswith("$"):
+        raise ValueError(f"{path.name} 需要 SHAPEZ2-4 或 SHAPEZ2-5 原生蓝图")
+    body = text[10:-1]
+    if text.startswith("SHAPEZ2-5-"):
+        payload, marker, length = body.rpartition("_")
+        if not marker or not length.isascii() or not length.isdecimal() or not 0 < int(length) < len(payload):
+            raise ValueError(f"{path.name} 的蓝图元数据长度无效")
+        size = int(length)
+        tail = payload[-size:]
+        # 游戏按 UTF-16 代码单元记录元数据长度。
+        extra = len(tail.encode("utf-16-le")) // 2 - size
+        if not isinstance(json.loads(tail[extra:]), list):
+            raise ValueError(f"{path.name} 的蓝图元数据必须为列表")
+        body = payload[:len(payload) - size + extra]
+    bp = json.loads(gzip.decompress(base64.b64decode(body, validate=True)))["BP"]
     return Wiring(bp)
 
 

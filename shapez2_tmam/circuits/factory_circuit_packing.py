@@ -1,17 +1,19 @@
 """收紧稀疏电路板并将同一部件的线路装入共用平台。"""
 
 from dataclasses import dataclass
+from functools import cache
 
 from ..mari.blueprint import PORTS, _kind, _rotate
 from .export_wiring_review import _building_cells
 from .factory_short_layout import reroute_short_board
-from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, platform_ground
+from .factory_wire_compaction import compact_axis
+from .foundations import (EDGE_MARGIN, FOUNDATION_CHUNKS, IRREGULAR_FOUNDATIONS, TILE_SIZE,
+                          foundation_origin, platform_ground, platform_interior)
 
 
 _SIZE = 56
 _PLANE = _SIZE ** 2
-_FOUNDATIONS = sorted((name for name in FOUNDATION_CHUNKS if name != "Foundation_L3"),
-                      key=lambda name: len(platform_ground(name)))
+_FOUNDATIONS = sorted(FOUNDATION_CHUNKS, key=lambda name: len(platform_ground(name)))
 _SHORT = {"WireTransmitterSender", "WireTransmitterReceiver"}
 
 
@@ -88,8 +90,33 @@ def _contract(entries, axes=(0, 1)):
     return entries
 
 
+def _components(entries, cells):
+    owners = {pos: i for i, body in enumerate(cells) for pos in body}
+    parent = list(range(len(entries)))
+
+    def root(i):
+        while i != parent[i]:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    for (x, y, z), i in owners.items():
+        for neighbor in ((x + 1, y, z), (x, y + 1, z)):
+            j = owners.get(neighbor)
+            if j is not None and i != j:
+                parent[root(j)] = root(i)
+    groups = {}
+    for i, entry in enumerate(entries):
+        groups.setdefault(root(i), []).append(entry)
+    return groups.values()
+
+
 def _mask(cells):
-    return sum(1 << (z * _PLANE + y * _SIZE + x) for x, y, z in cells)
+    bits = bytearray((3 * _PLANE + 7) // 8)
+    for x, y, z in cells:
+        index = z * _PLANE + y * _SIZE + x
+        bits[index // 8] |= 1 << (index % 8)
+    return int.from_bytes(bits, 'little')
 
 
 @dataclass
@@ -98,22 +125,25 @@ class _Piece:
     cells: set
     width: int
     height: int
-    turns: int
+    levels: int
     mask: int
 
 
-def _variants(entries):
+def _variants(entries, turns_to_try=(0, 1)):
     cells = set(p for area in _cells(entries) for p in area)
-    for turns in (0, 1):
+    floor = min(z for _, _, z in cells)
+    levels = max(z for _, _, z in cells) - floor + 1
+    for turns in turns_to_try:
         rotated = {(*_rotate(x, y, turns), z) for x, y, z in cells}
         left = min(x for x, _, _ in rotated)
         top = min(y for _, y, _ in rotated)
-        body = {(x - left, y - top, z) for x, y, z in rotated}
+        body = {(x - left, y - top, z - floor) for x, y, z in rotated}
         shifted = []
         for entry in entries:
             x, y = _rotate(entry["X"], entry["Y"], turns)
-            shifted.append({**entry, "X": x - left, "Y": y - top, "R": (entry["R"] + turns) % 4})
-        yield _Piece(shifted, body, 1 + max(x for x, _, _ in body), 1 + max(y for _, y, _ in body), turns, _mask(body))
+            shifted.append({**entry, "X": x - left, "Y": y - top, "L": entry["L"] - floor,
+                            "R": (entry["R"] + turns) % 4})
+        yield _Piece(shifted, body, 1 + max(x for x, _, _ in body), 1 + max(y for _, y, _ in body), levels, _mask(body))
 
 
 @dataclass
@@ -124,52 +154,71 @@ class _Bin:
     width: int = 0
     height: int = 0
 
-    def origins(self):
-        # 先贴已有局部版块的边界，再考虑其间的空位。
-        points = {(0, 0), (self.width + 1, 0), (0, self.height + 1)}
-        points.update((x, y) for y in range(0, min(54, self.height + 1), 7)
-                      for x in range(0, min(54, self.width + 1), 7))
-        return points
+    @property
+    def capacity(self):
+        return _capacity(self.width, self.height) if self.entries else 0
 
-    def add(self, piece, x, y):
-        body = {(a + x, b + y, z) for a, b, z in piece.cells}
-        halo = {(a + dx, b + dy, z) for a, b, z in body for dx, dy in ((0, 0), (0, 1), (0, -1), (1, 0), (-1, 0))
-                if 0 <= a + dx < _SIZE and 0 <= b + dy < _SIZE}
-        self.entries.extend({**entry, "X": entry["X"] + x, "Y": entry["Y"] + y} for entry in piece.entries)
+    def add(self, piece, x, y, z):
+        body = {(a + x, b + y, c + z) for a, b, c in piece.cells}
+        self.entries.extend({**e, "X": e["X"] + x, "Y": e["Y"] + y, "L": e["L"] + z} for e in piece.entries)
         self.cells.update(body)
-        self.blocked |= _mask(halo)
+        mask = piece.mask << (z * _PLANE + y * _SIZE + x)
+        self.blocked |= mask | (mask >> 1) | (mask << 1) | (mask >> _SIZE) | (mask << _SIZE)
         self.width, self.height = max(self.width, x + piece.width), max(self.height, y + piece.height)
 
 
-def _fit(bin_, variants):
-    candidates = []
-    for piece in variants:
-        for x, y in bin_.origins():
-            width, height = max(bin_.width, x + piece.width), max(bin_.height, y + piece.height)
-            if width > 54 or height > 54:
+def _capacity(width, height):
+    cols, rows = (width + 25) // 20, (height + 25) // 20
+    return (20 * cols - 6) * (20 * rows - 6) + 8 * (cols + rows)
+
+
+def _fit(bin_, variants, limit):
+    current = bin_.capacity
+    for capacity, width, height in _packing_sizes(bin_.width, bin_.height):
+        if capacity - current > limit:
+            break
+        for piece in variants:
+            if piece.width > width or piece.height > height:
                 continue
-            score = ((width + 25) // 20) * ((height + 25) // 20), width * height, max(width, height)
-            candidates.append((score, piece.turns, y, x, piece))
-    for score, _, y, x, piece in sorted(candidates):
-        if not bin_.blocked & (piece.mask << (y * _SIZE + x)):
-            return score, piece, x, y
+            for z in range(4 - piece.levels):
+                for y in range(height - piece.height + 1):
+                    mask = piece.mask << (z * _PLANE + y * _SIZE)
+                    for x in range(width - piece.width + 1):
+                        if not bin_.blocked & (mask << x):
+                            w, h = max(bin_.width, x + piece.width), max(bin_.height, y + piece.height)
+                            return (capacity - current, w * h, max(w, h)), piece, x, y, z
     return None
+
+
+@cache
+def _packing_sizes(width, height):
+    return sorted((_capacity(w, h), w, h) for w in (14, 34, 54) for h in (14, 34, 54)
+                  if w >= width and h >= height)
 
 
 def _finish(bin_):
     base = {"$type": "Building", "BinaryVersion": 1137}
-    variants = tuple(_variants(bin_.entries))
+    variants = tuple(_variants(bin_.entries, range(4)))
     assert len(variants[0].cells) == len(bin_.cells)
     for foundation in _FOUNDATIONS:
-        ground = platform_ground(foundation)
+        ground = platform_interior(foundation)
         width, length = FOUNDATION_CHUNKS[foundation]
+        x, y = foundation_origin(foundation)
+        left, top = EDGE_MARGIN + x * TILE_SIZE, EDGE_MARGIN + y * TILE_SIZE
         for piece in variants:
-            if piece.width > 20 * width - 6 or piece.height > 20 * length - 6:
+            dx = width * TILE_SIZE - 2 * EDGE_MARGIN - piece.width
+            dy = length * TILE_SIZE - 2 * EDGE_MARGIN - piece.height
+            if dx < 0 or dy < 0:
                 continue
-            left, top = 3 - 20 * ((width - 1) // 2), 3 - 20 * ((length - 1) // 2)
-            assert all((x + left, y + top) in ground for x, y, _ in piece.cells)
-            entries = [{**e, "X": e["X"] + left, "Y": e["Y"] + top} for e in piece.entries]
-            return {"T": foundation, "B": {**base, "Entries": entries}}, len(piece.cells)
+            shifts = ((0, 0),)
+            if foundation in IRREGULAR_FOUNDATIONS:
+                shifts = tuple(dict.fromkeys((u, v) for u in (0, dx, dx // 2) for v in (0, dy, dy // 2)))
+            for u, v in shifts:
+                ox, oy = left + u, top + v
+                if not all((a + ox, b + oy) in ground for a, b, _ in piece.cells):
+                    continue
+                entries = [{**e, "X": e["X"] + ox, "Y": e["Y"] + oy} for e in piece.entries]
+                return {"T": foundation, "B": {**base, "Entries": entries}}, len(piece.cells)
     raise ValueError("压缩后的电路超出平台可建格")
 
 
@@ -199,21 +248,30 @@ def _shrink_short_board(board):
     for foundation in _FOUNDATIONS:
         if foundation == "Foundation_3x3":
             break
+        if foundation in IRREGULAR_FOUNDATIONS:
+            continue
         width, height = FOUNDATION_CHUNKS[foundation]
         ground = platform_ground(foundation)
+        interior = platform_interior(foundation)
         for x in range(old_x - 1 + (width - 1) // 2, old_x + 3 - width + (width - 1) // 2):
             for y in range(old_y - 1 + (height - 1) // 2, old_y + 3 - height + (height - 1) // 2):
                 dx = delta[0] + TILE_SIZE * (old_x - x)
                 dy = delta[1] + TILE_SIZE * (old_y - y)
                 if all((u + dx, v + dy) in ground for u, v in plane):
                     buildings = [{**e, "X": e["X"] + dx, "Y": e["Y"] + dy} for e in tight]
-                    return {**board, "T": foundation, "X": x, "Y": y, "B": {**board["B"], "Entries": buildings}}
+                    candidate = {**board, "T": foundation, "X": x, "Y": y, "B": {**board["B"], "Entries": buildings}}
+                    if _fits_ground(candidate, interior):
+                        return candidate
     return board
 
 
-def _fits_ground(board):
-    ground = platform_ground(board["T"])
-    return all((x, y) in ground for body in _cells(board["B"]["Entries"]) for x, y, _ in body)
+def _fits_ground(board, interior=None):
+    if interior is None:
+        interior = platform_interior(board["T"])
+    notches = platform_ground(board["T"]) - interior
+    entries = board["B"]["Entries"]
+    return all((x, y) in (notches if _kind(entry) in _SHORT else interior) and 0 <= z < 3
+               for entry, body in zip(entries, _cells(entries), strict=True) for x, y, z in body)
 
 
 def shrink_short_groups(platforms, groups, threshold):
@@ -259,31 +317,29 @@ def compact_platforms(platforms, threshold, *, baseline=None):
                 or any(_kind(entry) in _SHORT for entry in entries)):
             untouched.append((platform, count))
             continue
-        tight = _contract(entries)
-        variants = tuple(_variants(tight))
-        if max(variants[0].width, variants[0].height) > 54:
+        pieces = []
+        for group in _components(entries, cells):
+            tight = compact_axis(compact_axis(group, 0), 1)
+            if tight:
+                pieces.append(tuple(_variants(tight, range(4))))
+        if any(max(pair[0].width, pair[0].height) > 54 for pair in pieces):
             untouched.append((platform, count))
             continue
-        sparse.append((variants, count, index))
-    sparse.sort(key=lambda item: (-item[0][0].width * item[0][0].height, -item[1], item[2]))
+        sparse.extend(pieces)
+    sparse.sort(key=lambda pair: (-pair[0].width * pair[0].height, -len(pair[0].cells)))
     bins = []
-    for variants, _, _ in sparse:
-        best = None
-        # 只看最近的箱，限制大分册的布局时间。
-        for bin_ in reversed(bins[-8:]):
-            fit = _fit(bin_, variants)
-            if fit is not None and (best is None or fit[0] < best[0][0]):
-                best = fit, bin_
-        if best is None:
-            bin_ = _Bin([], set())
-            bins.append(bin_)
-            fit = _fit(bin_, variants)
-            if fit is None:
-                raise ValueError("稀疏板无法摆入空的 3×3 平台")
-        else:
-            fit, bin_ = best
-        _, piece, x, y = fit
-        bin_.add(piece, x, y)
+    for variants in sparse:
+        empty = _Bin([], set())
+        area = _capacity(variants[0].width, variants[0].height)
+        best, target = _fit(empty, variants, area), empty
+        for bin_ in reversed(bins[-12:]):
+            fit = _fit(bin_, variants, best[0][0])
+            if fit is not None and (fit[0][0] <= best[0][0] if target is empty else fit[0] < best[0]):
+                best, target = fit, bin_
+        if target is empty:
+            bins.append(target)
+        _, piece, x, y, z = best
+        target.add(piece, x, y, z)
     packed = [*untouched, *map(_finish, bins)]
     after = [(count, 3 * len(platform_ground(board["T"]))) for board, count in packed]
     return [p for p, _ in packed], before, after
