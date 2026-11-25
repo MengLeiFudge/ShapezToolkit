@@ -180,6 +180,7 @@ def _groups(board_count, short_pairs):
 
 def _place_platforms(platforms, short_pairs, leaf):
     # 有飞线的板一起平移。叶端和批次门控保持已审阅的三岛层位置关系。
+    # 游戏以鼠标所在岛层为原点，最低层从 Z=0 开始。
     pairs = list(short_pairs)
     pairs.extend(zip(leaf, leaf[1:]))
     groups = []
@@ -216,7 +217,7 @@ def _place_platforms(platforms, short_pairs, leaf):
         rows = max(rows, y + height)
         for i in indices:
             p = platforms[i]
-            p.update(X=p.get("X", 0) + x - x0, Y=p.get("Y", 0) + y - y0, Z=p.get("Z", 0) + z - 1 - z0)
+            p.update(X=p.get("X", 0) + x - x0, Y=p.get("Y", 0) + y - y0, Z=p.get("Z", 0) + z - z0)
 
 
 def _check_short_pairs(platforms, expected):

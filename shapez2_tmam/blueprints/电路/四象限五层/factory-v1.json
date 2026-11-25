@@ -44,7 +44,7 @@
         "position": [
           25,
           3,
-          0
+          1
         ],
         "occupied_cells": 300,
         "buildable_cells": 5628,
@@ -61,7 +61,7 @@
         "position": [
           4,
           6,
-          0
+          1
         ],
         "occupied_cells": 80,
         "buildable_cells": 1500,
@@ -78,7 +78,7 @@
         "position": [
           4,
           6,
-          -1
+          0
         ],
         "occupied_cells": 82,
         "buildable_cells": 1500,
@@ -95,7 +95,7 @@
         "position": [
           31,
           3,
-          0
+          1
         ],
         "occupied_cells": 138,
         "buildable_cells": 2364,
@@ -112,7 +112,7 @@
         "position": [
           22,
           3,
-          0
+          1
         ],
         "occupied_cells": 335,
         "buildable_cells": 5628,
@@ -129,7 +129,7 @@
         "position": [
           28,
           3,
-          -1
+          0
         ],
         "occupied_cells": 355,
         "buildable_cells": 5628,
@@ -146,7 +146,7 @@
         "position": [
           36,
           3,
-          -1
+          0
         ],
         "occupied_cells": 154,
         "buildable_cells": 2364,
@@ -163,7 +163,7 @@
         "position": [
           28,
           3,
-          0
+          1
         ],
         "occupied_cells": 372,
         "buildable_cells": 5628,
@@ -180,7 +180,7 @@
         "position": [
           19,
           3,
-          1
+          2
         ],
         "occupied_cells": 167,
         "buildable_cells": 2364,
@@ -197,7 +197,7 @@
         "position": [
           22,
           0,
-          -1
+          0
         ],
         "occupied_cells": 411,
         "buildable_cells": 5628,
@@ -214,7 +214,7 @@
         "position": [
           30,
           0,
-          1
+          2
         ],
         "occupied_cells": 310,
         "buildable_cells": 3564,
@@ -231,7 +231,7 @@
         "position": [
           19,
           3,
-          0
+          1
         ],
         "occupied_cells": 526,
         "buildable_cells": 5628,
@@ -248,7 +248,7 @@
         "position": [
           25,
           0,
-          -1
+          0
         ],
         "occupied_cells": 659,
         "buildable_cells": 5628,
@@ -265,7 +265,7 @@
         "position": [
           25,
           3,
-          1
+          2
         ],
         "occupied_cells": 1455,
         "buildable_cells": 8892,
@@ -282,7 +282,7 @@
         "position": [
           36,
           5,
-          1
+          2
         ],
         "occupied_cells": 105,
         "buildable_cells": 636,
@@ -299,7 +299,7 @@
         "position": [
           1,
           0,
-          -1
+          0
         ],
         "occupied_cells": 1039,
         "buildable_cells": 5628,
@@ -316,7 +316,7 @@
         "position": [
           22,
           3,
-          1
+          2
         ],
         "occupied_cells": 1097,
         "buildable_cells": 5628,
@@ -333,7 +333,7 @@
         "position": [
           19,
           1,
-          -1
+          0
         ],
         "occupied_cells": 1905,
         "buildable_cells": 8892,
@@ -350,7 +350,7 @@
         "position": [
           25,
           0,
-          1
+          2
         ],
         "occupied_cells": 1208,
         "buildable_cells": 5628,
@@ -367,7 +367,7 @@
         "position": [
           22,
           1,
-          1
+          2
         ],
         "occupied_cells": 1913,
         "buildable_cells": 8892,
@@ -386,7 +386,7 @@
         "position": [
           36,
           4,
-          -1
+          0
         ],
         "occupied_cells": 877,
         "buildable_cells": 1500,
@@ -403,7 +403,7 @@
         "position": [
           36,
           4,
-          1
+          2
         ],
         "occupied_cells": 877,
         "buildable_cells": 1500,
@@ -420,7 +420,7 @@
         "position": [
           36,
           5,
-          0
+          1
         ],
         "occupied_cells": 419,
         "buildable_cells": 636,
@@ -437,7 +437,7 @@
         "position": [
           13,
           33,
-          1
+          2
         ],
         "occupied_cells": 1166,
         "buildable_cells": 2364,
@@ -454,7 +454,7 @@
         "position": [
           30,
           2,
-          1
+          2
         ],
         "occupied_cells": 260,
         "buildable_cells": 636,
@@ -471,7 +471,7 @@
         "position": [
           13,
           25,
-          1
+          2
         ],
         "occupied_cells": 367,
         "buildable_cells": 636,
@@ -488,7 +488,7 @@
         "position": [
           16,
           25,
-          -1
+          0
         ],
         "occupied_cells": 367,
         "buildable_cells": 636,
@@ -505,7 +505,7 @@
         "position": [
           16,
           25,
-          0
+          1
         ],
         "occupied_cells": 381,
         "buildable_cells": 636,
@@ -522,7 +522,7 @@
         "position": [
           7,
           33,
-          1
+          2
         ],
         "occupied_cells": 671,
         "buildable_cells": 1500,
@@ -539,7 +539,7 @@
         "position": [
           19,
           25,
-          -1
+          0
         ],
         "occupied_cells": 671,
         "buildable_cells": 1500,
@@ -556,7 +556,7 @@
         "position": [
           36,
           4,
-          0
+          1
         ],
         "occupied_cells": 365,
         "buildable_cells": 636,
@@ -573,7 +573,7 @@
         "position": [
           37,
           4,
-          0
+          1
         ],
         "occupied_cells": 269,
         "buildable_cells": 636,
@@ -590,7 +590,7 @@
         "position": [
           10,
           33,
-          1
+          2
         ],
         "occupied_cells": 587,
         "buildable_cells": 1500,
@@ -607,7 +607,7 @@
         "position": [
           22,
           21,
-          -1
+          0
         ],
         "occupied_cells": 230,
         "buildable_cells": 636,
@@ -624,7 +624,7 @@
         "position": [
           7,
           10,
-          1
+          2
         ],
         "occupied_cells": 1778,
         "buildable_cells": 3564,
@@ -641,7 +641,7 @@
         "position": [
           7,
           33,
-          0
+          1
         ],
         "occupied_cells": 2226,
         "buildable_cells": 5628,
@@ -658,7 +658,7 @@
         "position": [
           16,
           13,
-          0
+          1
         ],
         "occupied_cells": 2947,
         "buildable_cells": 5628,
@@ -675,7 +675,7 @@
         "position": [
           4,
           29,
-          0
+          1
         ],
         "occupied_cells": 3010,
         "buildable_cells": 5628,
@@ -692,7 +692,7 @@
         "position": [
           19,
           13,
-          -1
+          0
         ],
         "occupied_cells": 1483,
         "buildable_cells": 3564,
@@ -709,7 +709,7 @@
         "position": [
           31,
           14,
-          0
+          1
         ],
         "occupied_cells": 2872,
         "buildable_cells": 5628,
@@ -728,7 +728,7 @@
         "position": [
           36,
           4,
-          -1
+          0
         ],
         "occupied_cells": 877,
         "buildable_cells": 1500,
@@ -745,7 +745,7 @@
         "position": [
           36,
           4,
-          1
+          2
         ],
         "occupied_cells": 877,
         "buildable_cells": 1500,
@@ -762,7 +762,7 @@
         "position": [
           36,
           5,
-          0
+          1
         ],
         "occupied_cells": 419,
         "buildable_cells": 636,
@@ -779,7 +779,7 @@
         "position": [
           13,
           33,
-          1
+          2
         ],
         "occupied_cells": 1166,
         "buildable_cells": 2364,
@@ -796,7 +796,7 @@
         "position": [
           30,
           2,
-          1
+          2
         ],
         "occupied_cells": 260,
         "buildable_cells": 636,
@@ -813,7 +813,7 @@
         "position": [
           13,
           25,
-          1
+          2
         ],
         "occupied_cells": 367,
         "buildable_cells": 636,
@@ -830,7 +830,7 @@
         "position": [
           16,
           25,
-          -1
+          0
         ],
         "occupied_cells": 367,
         "buildable_cells": 636,
@@ -847,7 +847,7 @@
         "position": [
           16,
           25,
-          0
+          1
         ],
         "occupied_cells": 381,
         "buildable_cells": 636,
@@ -864,7 +864,7 @@
         "position": [
           7,
           33,
-          1
+          2
         ],
         "occupied_cells": 671,
         "buildable_cells": 1500,
@@ -881,7 +881,7 @@
         "position": [
           19,
           25,
-          -1
+          0
         ],
         "occupied_cells": 671,
         "buildable_cells": 1500,
@@ -898,7 +898,7 @@
         "position": [
           36,
           4,
-          0
+          1
         ],
         "occupied_cells": 365,
         "buildable_cells": 636,
@@ -915,7 +915,7 @@
         "position": [
           37,
           4,
-          0
+          1
         ],
         "occupied_cells": 269,
         "buildable_cells": 636,
@@ -932,7 +932,7 @@
         "position": [
           10,
           33,
-          1
+          2
         ],
         "occupied_cells": 587,
         "buildable_cells": 1500,
@@ -949,7 +949,7 @@
         "position": [
           22,
           21,
-          -1
+          0
         ],
         "occupied_cells": 230,
         "buildable_cells": 636,
@@ -966,7 +966,7 @@
         "position": [
           7,
           10,
-          1
+          2
         ],
         "occupied_cells": 1778,
         "buildable_cells": 3564,
@@ -983,7 +983,7 @@
         "position": [
           7,
           33,
-          0
+          1
         ],
         "occupied_cells": 2226,
         "buildable_cells": 5628,
@@ -1000,7 +1000,7 @@
         "position": [
           16,
           13,
-          0
+          1
         ],
         "occupied_cells": 2947,
         "buildable_cells": 5628,
@@ -1017,7 +1017,7 @@
         "position": [
           4,
           29,
-          0
+          1
         ],
         "occupied_cells": 3010,
         "buildable_cells": 5628,
@@ -1034,7 +1034,7 @@
         "position": [
           19,
           13,
-          -1
+          0
         ],
         "occupied_cells": 1483,
         "buildable_cells": 3564,
@@ -1051,7 +1051,7 @@
         "position": [
           31,
           14,
-          0
+          1
         ],
         "occupied_cells": 2872,
         "buildable_cells": 5628,
@@ -1068,7 +1068,7 @@
         "position": [
           7,
           16,
-          -1
+          0
         ],
         "occupied_cells": 2601,
         "buildable_cells": 5628,
@@ -1085,7 +1085,7 @@
         "position": [
           13,
           4,
-          0
+          1
         ],
         "occupied_cells": 2600,
         "buildable_cells": 5628,
@@ -1102,7 +1102,7 @@
         "position": [
           25,
           9,
-          -1
+          0
         ],
         "occupied_cells": 2694,
         "buildable_cells": 5628,
@@ -1119,7 +1119,7 @@
         "position": [
           22,
           15,
-          -1
+          0
         ],
         "occupied_cells": 2706,
         "buildable_cells": 5628,
@@ -1136,7 +1136,7 @@
         "position": [
           28,
           24,
-          0
+          1
         ],
         "occupied_cells": 2666,
         "buildable_cells": 5628,
@@ -1153,7 +1153,7 @@
         "position": [
           4,
           28,
-          1
+          2
         ],
         "occupied_cells": 3148,
         "buildable_cells": 5628,
@@ -1170,7 +1170,7 @@
         "position": [
           1,
           29,
-          1
+          2
         ],
         "occupied_cells": 1502,
         "buildable_cells": 3564,
@@ -1187,7 +1187,7 @@
         "position": [
           4,
           29,
-          -1
+          0
         ],
         "occupied_cells": 1519,
         "buildable_cells": 3564,
@@ -1204,7 +1204,7 @@
         "position": [
           34,
           23,
-          0
+          1
         ],
         "occupied_cells": 2575,
         "buildable_cells": 5628,
@@ -1221,7 +1221,7 @@
         "position": [
           34,
           23,
-          1
+          2
         ],
         "occupied_cells": 2506,
         "buildable_cells": 5628,
@@ -1238,7 +1238,7 @@
         "position": [
           4,
           31,
-          1
+          2
         ],
         "occupied_cells": 2168,
         "buildable_cells": 5628,
@@ -1255,7 +1255,7 @@
         "position": [
           25,
           6,
-          0
+          1
         ],
         "occupied_cells": 2268,
         "buildable_cells": 5628,
@@ -1272,7 +1272,7 @@
         "position": [
           28,
           6,
-          -1
+          0
         ],
         "occupied_cells": 2268,
         "buildable_cells": 5628,
@@ -1289,7 +1289,7 @@
         "position": [
           1,
           22,
-          -1
+          0
         ],
         "occupied_cells": 2647,
         "buildable_cells": 5628,
@@ -1306,7 +1306,7 @@
         "position": [
           10,
           31,
-          -1
+          0
         ],
         "occupied_cells": 3387,
         "buildable_cells": 8892,
@@ -1323,7 +1323,7 @@
         "position": [
           16,
           4,
-          0
+          1
         ],
         "occupied_cells": 1957,
         "buildable_cells": 5628,
@@ -1340,7 +1340,7 @@
         "position": [
           19,
           12,
-          1
+          2
         ],
         "occupied_cells": 2886,
         "buildable_cells": 5628,
@@ -1357,7 +1357,7 @@
         "position": [
           19,
           6,
-          0
+          1
         ],
         "occupied_cells": 3929,
         "buildable_cells": 8892,
@@ -1374,7 +1374,7 @@
         "position": [
           4,
           13,
-          1
+          2
         ],
         "occupied_cells": 4138,
         "buildable_cells": 8892,
@@ -1391,7 +1391,7 @@
         "position": [
           22,
           21,
-          0
+          1
         ],
         "occupied_cells": 3278,
         "buildable_cells": 8892,
@@ -1408,7 +1408,7 @@
         "position": [
           33,
           0,
-          -1
+          0
         ],
         "occupied_cells": 487,
         "buildable_cells": 1500,
@@ -1425,7 +1425,7 @@
         "position": [
           16,
           10,
-          -1
+          0
         ],
         "occupied_cells": 3252,
         "buildable_cells": 8892,
@@ -1442,7 +1442,7 @@
         "position": [
           10,
           31,
-          0
+          1
         ],
         "occupied_cells": 3009,
         "buildable_cells": 8892,
@@ -1459,7 +1459,7 @@
         "position": [
           4,
           10,
-          1
+          2
         ],
         "occupied_cells": 3193,
         "buildable_cells": 8892,
@@ -1476,7 +1476,7 @@
         "position": [
           19,
           15,
-          0
+          1
         ],
         "occupied_cells": 3822,
         "buildable_cells": 8892,
@@ -1493,7 +1493,7 @@
         "position": [
           7,
           31,
-          -1
+          0
         ],
         "occupied_cells": 3088,
         "buildable_cells": 8892,
@@ -1510,7 +1510,7 @@
         "position": [
           13,
           10,
-          1
+          2
         ],
         "occupied_cells": 3630,
         "buildable_cells": 8892,
@@ -1527,7 +1527,7 @@
         "position": [
           22,
           30,
-          0
+          1
         ],
         "occupied_cells": 4356,
         "buildable_cells": 8892,
@@ -1544,7 +1544,7 @@
         "position": [
           10,
           22,
-          -1
+          0
         ],
         "occupied_cells": 3468,
         "buildable_cells": 8892,
@@ -1561,7 +1561,7 @@
         "position": [
           7,
           31,
-          0
+          1
         ],
         "occupied_cells": 1831,
         "buildable_cells": 5628,
@@ -1578,7 +1578,7 @@
         "position": [
           22,
           12,
-          0
+          1
         ],
         "occupied_cells": 3196,
         "buildable_cells": 5628,
@@ -1595,7 +1595,7 @@
         "position": [
           4,
           26,
-          -1
+          0
         ],
         "occupied_cells": 2679,
         "buildable_cells": 5628,
@@ -1612,7 +1612,7 @@
         "position": [
           1,
           25,
-          -1
+          0
         ],
         "occupied_cells": 2522,
         "buildable_cells": 5628,
@@ -1629,7 +1629,7 @@
         "position": [
           7,
           25,
-          -1
+          0
         ],
         "occupied_cells": 2557,
         "buildable_cells": 5628,
@@ -1646,7 +1646,7 @@
         "position": [
           1,
           32,
-          0
+          1
         ],
         "occupied_cells": 3938,
         "buildable_cells": 8892,
@@ -1663,7 +1663,7 @@
         "position": [
           16,
           31,
-          0
+          1
         ],
         "occupied_cells": 3224,
         "buildable_cells": 8892,
@@ -1680,7 +1680,7 @@
         "position": [
           19,
           32,
-          1
+          2
         ],
         "occupied_cells": 1333,
         "buildable_cells": 3564,
@@ -1697,7 +1697,7 @@
         "position": [
           22,
           32,
-          0
+          1
         ],
         "occupied_cells": 1333,
         "buildable_cells": 3564,
@@ -1714,7 +1714,7 @@
         "position": [
           25,
           32,
-          -1
+          0
         ],
         "occupied_cells": 1333,
         "buildable_cells": 3564,
@@ -1731,7 +1731,7 @@
         "position": [
           25,
           32,
-          1
+          2
         ],
         "occupied_cells": 1333,
         "buildable_cells": 3564,
@@ -1748,7 +1748,7 @@
         "position": [
           28,
           32,
-          0
+          1
         ],
         "occupied_cells": 1333,
         "buildable_cells": 3564,
@@ -1765,7 +1765,7 @@
         "position": [
           31,
           32,
-          0
+          1
         ],
         "occupied_cells": 2080,
         "buildable_cells": 5628,
@@ -1782,7 +1782,7 @@
         "position": [
           16,
           13,
-          -1
+          0
         ],
         "occupied_cells": 3263,
         "buildable_cells": 8892,
@@ -1799,7 +1799,7 @@
         "position": [
           4,
           32,
-          0
+          1
         ],
         "occupied_cells": 2854,
         "buildable_cells": 8892,
@@ -1816,7 +1816,7 @@
         "position": [
           19,
           6,
-          1
+          2
         ],
         "occupied_cells": 4601,
         "buildable_cells": 8892,
@@ -1833,7 +1833,7 @@
         "position": [
           7,
           22,
-          1
+          2
         ],
         "occupied_cells": 3487,
         "buildable_cells": 8892,
@@ -1850,7 +1850,7 @@
         "position": [
           28,
           24,
-          -1
+          0
         ],
         "occupied_cells": 4012,
         "buildable_cells": 8892,
@@ -1867,7 +1867,7 @@
         "position": [
           13,
           28,
-          -1
+          0
         ],
         "occupied_cells": 3540,
         "buildable_cells": 8892,
@@ -1884,7 +1884,7 @@
         "position": [
           19,
           10,
-          -1
+          0
         ],
         "occupied_cells": 2082,
         "buildable_cells": 5628,
@@ -1901,7 +1901,7 @@
         "position": [
           36,
           5,
-          1
+          2
         ],
         "occupied_cells": 105,
         "buildable_cells": 636,
@@ -1918,7 +1918,7 @@
         "position": [
           1,
           14,
-          0
+          1
         ],
         "occupied_cells": 1958,
         "buildable_cells": 5628,
@@ -1935,7 +1935,7 @@
         "position": [
           28,
           31,
-          1
+          2
         ],
         "occupied_cells": 1528,
         "buildable_cells": 5628,
@@ -1952,7 +1952,7 @@
         "position": [
           1,
           29,
-          0
+          1
         ],
         "occupied_cells": 3957,
         "buildable_cells": 8892,
@@ -1969,7 +1969,7 @@
         "position": [
           31,
           5,
-          1
+          2
         ],
         "occupied_cells": 3257,
         "buildable_cells": 8892,
@@ -1986,7 +1986,7 @@
         "position": [
           13,
           13,
-          0
+          1
         ],
         "occupied_cells": 3749,
         "buildable_cells": 8892,
@@ -2003,7 +2003,7 @@
         "position": [
           7,
           22,
-          0
+          1
         ],
         "occupied_cells": 3366,
         "buildable_cells": 8892,
@@ -2020,7 +2020,7 @@
         "position": [
           1,
           8,
-          0
+          1
         ],
         "occupied_cells": 1475,
         "buildable_cells": 3564,
@@ -2037,7 +2037,7 @@
         "position": [
           10,
           13,
-          0
+          1
         ],
         "occupied_cells": 1545,
         "buildable_cells": 3564,
@@ -2054,7 +2054,7 @@
         "position": [
           10,
           13,
-          1
+          2
         ],
         "occupied_cells": 1545,
         "buildable_cells": 3564,
@@ -2071,7 +2071,7 @@
         "position": [
           13,
           13,
-          -1
+          0
         ],
         "occupied_cells": 1545,
         "buildable_cells": 3564,
@@ -2088,7 +2088,7 @@
         "position": [
           31,
           8,
-          0
+          1
         ],
         "occupied_cells": 3800,
         "buildable_cells": 8892,
@@ -2105,7 +2105,7 @@
         "position": [
           7,
           10,
-          0
+          1
         ],
         "occupied_cells": 3377,
         "buildable_cells": 8892,
@@ -2122,7 +2122,7 @@
         "position": [
           31,
           29,
-          0
+          1
         ],
         "occupied_cells": 3252,
         "buildable_cells": 8892,
@@ -2139,7 +2139,7 @@
         "position": [
           31,
           32,
-          1
+          2
         ],
         "occupied_cells": 2579,
         "buildable_cells": 8892,
@@ -2156,7 +2156,7 @@
         "position": [
           10,
           25,
-          0
+          1
         ],
         "occupied_cells": 2327,
         "buildable_cells": 5628,
@@ -2173,7 +2173,7 @@
         "position": [
           13,
           25,
-          -1
+          0
         ],
         "occupied_cells": 2327,
         "buildable_cells": 5628,
@@ -2190,7 +2190,7 @@
         "position": [
           22,
           27,
-          1
+          2
         ],
         "occupied_cells": 986,
         "buildable_cells": 2364,
@@ -2207,7 +2207,7 @@
         "position": [
           10,
           10,
-          0
+          1
         ],
         "occupied_cells": 2711,
         "buildable_cells": 8892,
@@ -2224,7 +2224,7 @@
         "position": [
           34,
           8,
-          1
+          2
         ],
         "occupied_cells": 3491,
         "buildable_cells": 8892,
@@ -2241,7 +2241,7 @@
         "position": [
           22,
           15,
-          1
+          2
         ],
         "occupied_cells": 2848,
         "buildable_cells": 8892,
@@ -2258,7 +2258,7 @@
         "position": [
           10,
           16,
-          -1
+          0
         ],
         "occupied_cells": 2623,
         "buildable_cells": 5628,
@@ -2275,7 +2275,7 @@
         "position": [
           19,
           4,
-          -1
+          0
         ],
         "occupied_cells": 3134,
         "buildable_cells": 8892,
@@ -2292,7 +2292,7 @@
         "position": [
           10,
           10,
-          1
+          2
         ],
         "occupied_cells": 2806,
         "buildable_cells": 8892,
@@ -2309,7 +2309,7 @@
         "position": [
           13,
           10,
-          -1
+          0
         ],
         "occupied_cells": 2866,
         "buildable_cells": 8892,
@@ -2326,7 +2326,7 @@
         "position": [
           31,
           29,
-          1
+          2
         ],
         "occupied_cells": 2366,
         "buildable_cells": 8892,
@@ -2343,7 +2343,7 @@
         "position": [
           13,
           31,
-          0
+          1
         ],
         "occupied_cells": 3250,
         "buildable_cells": 8892,
@@ -2360,7 +2360,7 @@
         "position": [
           13,
           7,
-          0
+          1
         ],
         "occupied_cells": 1439,
         "buildable_cells": 3564,
@@ -2377,7 +2377,7 @@
         "position": [
           31,
           14,
-          1
+          2
         ],
         "occupied_cells": 1280,
         "buildable_cells": 3564,
@@ -2394,7 +2394,7 @@
         "position": [
           16,
           22,
-          -1
+          0
         ],
         "occupied_cells": 1251,
         "buildable_cells": 3564,
@@ -2411,7 +2411,7 @@
         "position": [
           19,
           27,
-          1
+          2
         ],
         "occupied_cells": 1398,
         "buildable_cells": 3564,
@@ -2428,7 +2428,7 @@
         "position": [
           19,
           15,
-          1
+          2
         ],
         "occupied_cells": 2551,
         "buildable_cells": 5628,
@@ -2445,7 +2445,7 @@
         "position": [
           34,
           26,
-          1
+          2
         ],
         "occupied_cells": 2646,
         "buildable_cells": 5628,
@@ -2462,7 +2462,7 @@
         "position": [
           19,
           30,
-          1
+          2
         ],
         "occupied_cells": 1786,
         "buildable_cells": 5628,
@@ -2479,7 +2479,7 @@
         "position": [
           16,
           10,
-          1
+          2
         ],
         "occupied_cells": 3873,
         "buildable_cells": 8892,
@@ -2496,7 +2496,7 @@
         "position": [
           25,
           9,
-          1
+          2
         ],
         "occupied_cells": 3873,
         "buildable_cells": 8892,
@@ -2597,9 +2597,9 @@
     35
   ],
   "island_levels": [
-    -1,
     0,
-    1
+    1,
+    2
   ],
   "short_range_links": 153,
   "building_entries": 567060,
