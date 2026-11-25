@@ -12,8 +12,9 @@ from .circuit import encode_document
 from .compile_factory_v1 import _check_short_pairs, _footprint, _groups, _measure_placement
 from .compiler_backend.method_sequence import _radio_channels
 from .compiler_backend.prefix_scan_wiring import _native_island, _report
-from .factory_dense_layout import SHORT_PAIR_CAPACITY, _SHORT, compact_native_board, compact_short_pair, fuse_native_boards
-from .foundations import FOUNDATION_CHUNKS, foundation_tiles
+from .factory_dense_layout import (SHORT_PAIR_CAPACITY, _SHORT, compact_fixed_short_board, compact_native_board,
+                                   compact_short_pair, fuse_native_boards, short_board_sites)
+from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_tiles
 
 
 def _eligible(board):
@@ -28,22 +29,31 @@ def _radio_delta(before, after):
     return sum(new_rx.values()) - sum(old_rx.values())
 
 
-def _compact_singles(platforms, attempted, count, workers):
-    choices = [i for i, board in enumerate(platforms) if i not in attempted and _eligible(board)]
-    choices.sort(key=lambda i: len(platforms[i]["B"]["Entries"]) / len(_footprint(platforms[i])))
-    choices = choices[:count]
+def _compact_singles(platforms, attempted, count, workers, *, fixed_ports=False):
+    choices = []
+    for i, board in enumerate(platforms):
+        if i in attempted:
+            continue
+        plain = _eligible(board)
+        sites = short_board_sites(board) if fixed_ports and not plain else []
+        if sites or plain:
+            area = len(_footprint(board))
+            choices.append((not sites, len(board["B"]["Entries"]) / area, i))
+    ordered = sorted(choices)[:count]
     changed = receiver_delta = 0
+    if not ordered:
+        return changed, receiver_delta
     with ProcessPoolExecutor(max_workers=workers) as pool:
-        results = pool.map(compact_native_board, (platforms[i] for i in choices))
-        for i, new in zip(choices, results, strict=True):
+        results = [pool.submit(compact_native_board if plain else compact_fixed_short_board, platforms[i])
+                   for plain, _, i in ordered]
+        for (plain, _, i), future in zip(ordered, results, strict=True):
             attempted.add(i)
-            old = platforms[i]
-            if new["T"] == old["T"]:
-                continue
-            board = {**old, "T": new["T"], "B": new["B"]}
-            if _footprint(board) < _footprint(old):
-                receiver_delta += _radio_delta(Wiring({"Entries": [old]}), Wiring({"Entries": [board]}))
-                platforms[i] = board
+            old, new = platforms[i], future.result()
+            if plain:
+                new = {**old, "T": new["T"], "B": new["B"]}
+            if _footprint(new) < _footprint(old):
+                receiver_delta += _radio_delta(Wiring({"Entries": [old]}), Wiring({"Entries": [new]}))
+                platforms[i] = new
                 changed += 1
     return changed, receiver_delta
 
@@ -177,6 +187,20 @@ def _short_wiring(platforms):
     return Wiring({"Entries": boards})
 
 
+def _fixed_pair_ids(before, after):
+    def sites(wiring):
+        return {(board, x + TILE_SIZE * p["X"], y + TILE_SIZE * p["Y"], z, p["Z"], e["T"], e["R"]): id(e)
+                for (board, e), (_, x, y, z) in zip(wiring.entries, wiring.sites, strict=True)
+                for p in (wiring.platforms[board],)}
+
+    original, updated = sites(before), sites(after)
+    if original.keys() != updated.keys():
+        raise ValueError("缩板改变了飞线端点的世界坐标或朝向")
+    replacements = {original[site]: updated[site] for site in original}
+    return {replacements[id(before.entries[rx][1])]: replacements[id(before.entries[tx][1])]
+            for rx, tx in before.short_ports.items()}
+
+
 def build(source: Path, *, count: int, workers: int, mode: str = "single", rounds: int = 1) -> tuple[dict, dict]:
     island = _native_island(source)
     report = _report(source)
@@ -215,7 +239,7 @@ def build(source: Path, *, count: int, workers: int, mode: str = "single", round
             names = [names[i] for i in kept]
             report["parts"] = dict(Counter(names))
         else:
-            updates, delta = _compact_singles(platforms, attempted, count, workers)
+            updates, delta = _compact_singles(platforms, attempted, count, workers, fixed_ports=True)
         if before == (len(attempted), len(pair_attempts), len(merge_attempts), len(shared_attempts)) and not updates:
             break
         changed += updates
@@ -223,6 +247,8 @@ def build(source: Path, *, count: int, workers: int, mode: str = "single", round
         if rounds > 1:
             area = sum(len(_footprint(board)) for board in platforms)
             print(f"第 {round_index + 1} 轮缩小 {updates} 处，当前 {area} 岛格", flush=True)
+    if mode == "single" and changed:
+        pairs = _fixed_pair_ids(wiring, _short_wiring(platforms))
     document = {"V": 1137, "BP": {**island, "Entries": platforms}}
     buildings = _check_short_pairs(platforms, pairs)
     footprints = tuple(map(_footprint, platforms))

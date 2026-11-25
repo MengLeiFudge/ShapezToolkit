@@ -295,19 +295,18 @@ def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, pre
     if edge_slots is not None:
         ports = [p for p in parts if _kind(p.entry) in _SHORT]
         notches = platform_ground(foundation) - board.ground
-        for part, (row, z, turn) in zip(ports, edge_slots, strict=True):
+        for part, (sx, sy, z, turn) in zip(ports, edge_slots, strict=True):
             outgoing = _kind(part.entry) == "WireTransmitterSender"
-            right = outgoing == (turn == 0)
-            x, pad_x, side = (board.width, board.width - 1, 0) if right else (-1, 0, 2)
-            y = row - board.origin_y
-            site = x + board.origin_x, row
-            if site not in notches or not 0 <= z < 3:
-                raise ValueError("飞线端点不在平台缺口内")
+            side = (turn + (2 if outgoing else 0)) % 4
+            dx, dy = DIRECTIONS[side]
+            x, y = sx - board.origin_x, sy - board.origin_y
+            if (sx, sy) not in notches or not 0 <= z < 3 or not board.on_ground(x + dx, y + dy):
+                raise ValueError("飞线端点或板内出口不在可建格内")
             net, _ = part.ports[int(outgoing)][0]
             reindex[part.index] = len(board.entries)
-            board.entries.append(_entry(part, *site, z, turn))
-            board.pin(net, x, y, z, (side + 2) % 4)
-            targets[net].append((pad_x, y, z))
+            board.entries.append(_entry(part, sx, sy, z, turn))
+            board.pin(net, x, y, z, side)
+            targets[net].append((x + dx, y + dy, z))
 
     # 先为无线和飞线留出端口，再按三层格点的实际余量排门。
     radios = [part for part in parts if _kind(part.entry) in _RADIOS]
@@ -345,6 +344,43 @@ def compact_native_board(platform):
                         if _island_offsets(kind) < existing)
     result = fuse_native_boards([platform], foundations) if foundations else None
     return result if result is not None else platform
+
+
+def short_board_sites(board):
+    ports = [e for e in board["B"]["Entries"] if _kind(e) in _SHORT]
+    if not ports or board.get("R", 0):
+        return []
+    old = _island_offsets(board["T"])
+    candidates = []
+    for foundation in FOUNDATION_CHUNKS:
+        offsets = _island_offsets(foundation)
+        if len(offsets) >= len(old):
+            continue
+        notches = platform_ground(foundation) - platform_interior(foundation)
+        ax, ay = foundation_origin(foundation)
+        for cx, cy in sorted(old):
+            dx, dy = cx - ax, cy - ay
+            if not {(x + dx, y + dy) for x, y in offsets} <= old:
+                continue
+            slots = [(e["X"] - TILE_SIZE * dx, e["Y"] - TILE_SIZE * dy, e["L"], e["R"]) for e in ports]
+            if all((x, y) in notches for x, y, _, _ in slots):
+                candidates.append((len(offsets), foundation, dx, dy, slots))
+    return sorted(candidates)
+
+
+def compact_fixed_short_board(platform):
+    netlist = _netlist([platform], keep_ports=True)
+    if netlist is None:
+        return platform
+    for _, foundation, dx, dy, slots in short_board_sites(platform):
+        for pitch in (4, 3, 5):
+            try:
+                result = _place_on(netlist, foundation, pitch, edge_slots=slots, stagger=pitch == 4,
+                                   prefer_short=True, direct=True)
+            except ValueError:
+                continue
+            return {**platform, **result, "X": platform["X"] + dx, "Y": platform["Y"] + dy}
+    return platform
 
 
 def fuse_native_boards(platforms, foundations, *, compare_pitches=False):
@@ -390,9 +426,12 @@ def compact_short_pair(platforms):
             return None
         assigned[rx] = assigned[tx] = row, z, turn
         expected.add(((b, row, z), (a, row, z)))
-    netlists = [_netlist([board], keep_ports=True) for board in platforms]
-    if any(netlist is None for netlist in netlists):
-        return None
+    netlists = []
+    for platform in platforms:
+        netlist = _netlist([platform], keep_ports=True)
+        if netlist is None:
+            return None
+        netlists.append(netlist)
     layouts = [[assigned[i] for i in ports if wiring.sites[i][0] == board] for board in range(2)]
     result = []
     left = west.get("X", 0) + foundation_origin(west["T"])[0]
@@ -402,7 +441,14 @@ def compact_short_pair(platforms):
             prefer_short = foundation in small
             pitch = 4 if prefer_short or i == 1 else 5
             try:
-                board = _place_on(netlist, foundation, pitch, edge_slots=layouts[i],
+                left_edge = min(x for x, _ in _island_offsets(foundation)) * TILE_SIZE + 2
+                right_edge = left_edge + FOUNDATION_CHUNKS[foundation][0] * TILE_SIZE - 5
+                slots = []
+                for port, (row, z, turn) in zip((p for p in netlist[1] if _kind(p.entry) in _SHORT),
+                                                 layouts[i], strict=True):
+                    outgoing = _kind(port.entry) == "WireTransmitterSender"
+                    slots.append((right_edge if outgoing == (turn == 0) else left_edge, row, z, turn))
+                board = _place_on(netlist, foundation, pitch, edge_slots=slots,
                                   stagger=pitch == 4, prefer_short=prefer_short)
             except ValueError:
                 continue

@@ -2,7 +2,7 @@
 
 导入 `factory-v1.spz2bp`。这一份含目标读取、直接闭包、顶针逆推、成功路径回放和六字段装单。蓝图尺寸、频道及各部件数量见 `factory-v1.json`。同一组频道只放一份主控。
 
-本册蓝图占 2,253 个 1×1 岛格，共 313 块平台、567,060 个建筑，外框为 38×35，使用三个岛层。
+本册蓝图占 2,208 个 1×1 岛格，共 313 块平台、560,969 个建筑，外框为 38×35，使用三个岛层。
 
 ## 放置
 
@@ -49,12 +49,14 @@ python -m shapez2_tmam.circuits.compile_factory_v1 --output factory-v1.spz2bp
 
 同名 JSON 的 `island_cells` 是实际岛格总数，3×3 计 9 格，各岛层分别累计。`platforms` 是平台件数。`occupancy` 给出占格和无线数据，`sparsest_platforms` 和 `radio_over_limit` 用于定位还值得缩板的位置。坐标相对蓝图原点。计算口径见[电路走线与压缩](../../电路走线与压缩.md)。
 
-已有整厂蓝图和同名接口表时，可以分批缩板，每批的输出可继续作为下一批的输入。默认重布无飞线的单板，`--pairs` 重布同层横向相邻且独立成组的双板，`--merge` 将同一部件内无飞线的独立板合到一个平台。程序逐端口核对驱动来源和频道，保留每对原有飞线的方向和跨板信号级数。只采用实际岛格减少的替换件。
+已有整厂蓝图和同名接口表时，可以分批缩板，每批的输出可继续作为下一批的输入。默认重布单板，优先收紧能保留飞线端点世界坐标的板。先按原岛格范围和凹口筛选较小的平台，再重排板内线路。`--pairs` 一起重布同层横向相邻的独立双板，`--merge` 将同一部件内无飞线的独立板合到一个平台。每次重布逐端口核对驱动和频道，整图重导前核对飞线配对。只采用实际岛格减少的替换件。
 
 合板优先试排预计能放得下、又能共用输入频道的组合。预估把每个全局收发器按 27 格算。逻辑门只有在类型、配置和每个输入的驱动来源都一致，且各自独立驱动输出线时才合并。新板优先使用原位置，也可利用原外框内的空位。
 
 ```bash
 python -m shapez2_tmam.circuits.compile_factory_dense factory-v1.spz2bp \
+  --count 12 --output factory-narrow.spz2bp
+python -m shapez2_tmam.circuits.compile_factory_dense factory-narrow.spz2bp \
   --pairs --count 2 --workers 2 --output factory-compact.spz2bp
 python -m shapez2_tmam.circuits.compile_factory_dense factory-compact.spz2bp \
   --merge --count 6 --workers 6 --output factory-merged.spz2bp
