@@ -1,14 +1,21 @@
 """将指定的 Python 方法或命名字段编译成游戏原生电路蓝图。"""
 
 import argparse
+from collections import Counter
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
-from .compiler_backend import export_program
-from .compiler_backend.fields import export_fields
+from ..mari.blueprint import Wiring, _kind
+from .compiler_backend import _write_blueprint, compile_program
+from .compiler_backend.fields import compile_fields
 from .compiler_frontend import FrontendError, compile_field_methods, compile_method
+from .factory_dense_layout import compact_combination
+from .factory_local_flywire import shorten_local_wires, signal_depth
+from .foundations import foundation_origin, foundation_tiles
 
 
-def _named_options(parser, option, entries, convert=str):
+def _named_options(parser, option, entries, convert: Callable[[str], Any] = str):
     items = {}
     for entry in entries:
         name, equal, value = entry.partition("=")
@@ -23,6 +30,34 @@ def _named_options(parser, option, entries, convert=str):
     return items
 
 
+def _compact(document, report):
+    packed = compact_combination(document)
+    compact, depth = shorten_local_wires(packed)
+    platforms = compact["BP"]["Entries"]
+    report["island_cells"] = sum(len(foundation_tiles(board["T"])) for board in platforms)
+    if compact is document:
+        return compact, report
+    entries = [entry for board in platforms for entry in board["B"]["Entries"]]
+    sizes = Counter(board["T"] for board in platforms)
+    tiles = []
+    for board in platforms:
+        ox, oy = foundation_origin(board["T"])
+        x, y = board.get("X", 0) + ox, board.get("Y", 0) + oy
+        tiles.extend((x + dx, y + dy) for dx, dy in foundation_tiles(board["T"]))
+    footprint = [max(axis) - min(axis) + 1 for axis in zip(*tiles)]
+    report.update(platforms=len(platforms), platform_type=next(iter(sizes)) if len(sizes) == 1 else "mixed",
+                  platform_sizes=dict(sizes), island_footprint_chunks=footprint, building_entries=len(entries),
+                  buildings_by_layer=[sum(entry.get("L", 0) == z for entry in entries) for z in range(3)],
+                  global_receivers=sum(_kind(entry) == "ControlledSignalReceiver" for entry in entries),
+                  global_transmitters=sum(_kind(entry) == "ControlledSignalTransmitter" for entry in entries),
+                  short_range_links=sum(_kind(entry) == "WireTransmitterSender" for entry in entries))
+    if depth is None:
+        depth = signal_depth(Wiring(compact["BP"]))
+    ticks = 64 * (depth + 2)
+    report["settling"].update(max_gate_depth=depth, hold_signal_ticks=ticks, hold_simulation_seconds=ticks / 12)
+    return compact, report
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="按源码文件和顶层方法生成 Shapez 2 电路蓝图")
     parser.add_argument("source", type=Path, help="Python 源码文件")
@@ -34,6 +69,7 @@ def main() -> int:
     parser.add_argument("--publish-when", action="append", default=[], metavar="字段=方法", help="指定字段的布尔发布方法，可重复")
     parser.add_argument("--output", required=True, type=Path, help="原生 .spz2bp 输出路径")
     args = parser.parse_intermixed_args()
+    fields, inputs, outputs, publish = {}, {}, {}, {}
     if args.field:
         if args.method is not None or args.channel_base is not None:
             parser.error("--field 不能和单方法名或 --channel-base 一起使用")
@@ -53,17 +89,19 @@ def main() -> int:
     try:
         if args.field:
             programs, conditions = compile_field_methods(args.source, fields, publish_when=publish)
-            report = export_fields(programs, args.output, input_channels=inputs, output_channels=outputs,
-                                   publish_when=conditions)
+            document, report = compile_fields(programs, input_channels=inputs, output_channels=outputs,
+                                              publish_when=conditions)
         else:
+            assert args.method is not None and args.channel_base is not None
             source = args.source.read_text(encoding="utf-8")
             program = compile_method(source, args.method, filename=str(args.source))
-            report = export_program(program, args.channel_base, args.output)
+            document, report = compile_program(program, args.channel_base)
+        report = _write_blueprint(*_compact(document, report), args.output)
     except FrontendError as error:
         parser.exit(2, f"{error.filename}:{error.lineno}:{error.offset} {error.msg}\n")
     except (OSError, SyntaxError, ValueError) as error:
         parser.exit(2, f"编译 {target} 失败。{error}\n")
-    print(f"已导出 {args.output}，共 {report['platforms']} 块平台。")
+    print(f"已导出 {args.output}，占 {report['island_cells']} 岛格，{report['building_entries']} 个建筑条目。")
     return 0
 
 

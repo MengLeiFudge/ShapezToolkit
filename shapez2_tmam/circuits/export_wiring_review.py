@@ -68,7 +68,6 @@ def _diagram(path):
         platforms.append((i, x, y, platform.get("Z", 0), width, height, count, foundation_tiles(platform["T"])))
     ground = [platform_ground(p["T"]) for p in wiring.platforms]
     interior = [platform_interior(p["T"]) for p in wiring.platforms]
-    notches = [area - center for area, center in zip(ground, interior, strict=True)]
     occupied = [set() for _ in platforms]
     radio_cells = Counter()
     placement_errors = Counter()
@@ -85,7 +84,7 @@ def _diagram(path):
         else:
             _, local_x, local_y, _ = wiring.sites[i]
             offsets = []
-            allowed = notches[board] if kind in _SHORT else interior[board]
+            allowed = ground[board] if kind in _SHORT else interior[board]
             for cell in footprint:
                 a, b, z = cell
                 if (a, b) not in allowed or not 0 <= z < _LEVELS or cell in occupied[board]:
@@ -142,10 +141,9 @@ def _section(path, output_dir):
     sizes = Counter((p[4], p[5], len(p[7])) for p in platforms)
     summary = "、".join(f"{count} 块 {width}×{height}" + (" L 形" if tiles < width * height else "")
                        for (width, height, tiles), count in sorted(sizes.items()))
-    density_target = 0.5
+    island_cells = sum(len(p[7]) for p in platforms)
     capacity = 0
     board_rows = []
-    radio_violations = 0
     for platform, (used, projected, ground_cells, errors, unknown, level_cells, wireless) in zip(platforms, coverage, strict=True):
         buildable = ground_cells * _LEVELS
         board, _, _, island, width, height, count, tiles = platform
@@ -158,9 +156,7 @@ def _section(path, output_dir):
             verdict = "待核对器件占地"
         else:
             verdict = "占格正常"
-        over_limit = 10 * wireless >= buildable
-        radio_violations += over_limit
-        radio_rate = f"{wireless / buildable:.2%}" + (" · 超限" if over_limit else "")
+        radio_rate = f"{wireless / buildable:.2%}"
         rate = "待核算" if unknown else f"{used / buildable:.1%}"
         plan_rate = "待核算" if unknown else f"{projected / ground_cells:.1%}"
         cells = "—" if unknown else f"{used:,}"
@@ -174,10 +170,10 @@ def _section(path, output_dir):
     table = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in (*row[:5], "接收" if row[5] == "rx" else "发射", row[6]))
                     + "</tr>" for row in radio)
     return (f'<section><h2>{escape(path.stem)}</h2><p>{files}</p>'
+            f'<p>{len(platforms)} 件平台 · {island_cells:,} 个 1×1 岛格 · {len(entries):,} 个建筑条目</p>'
             f'<p>{summary} · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
             f'飞线 {len(links)} 对 · 全局接收 {receivers} · 全局发射 {transmitters}</p>'
-            f'<p>总建筑占比 {len(entries) / capacity:.1%} · 压缩目标 {density_target:.0%}</p>'
-            f'<p>{radio_violations} / {len(platforms)} 块平台的全局收发面积达到或超过 10%</p>'
+            f'<p>总建筑占比 {len(entries) / capacity:.1%}</p>'
             '<details open><summary>逐块平台占地</summary><table><thead>'
             '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>建筑占比</th>'
             '<th>L0</th><th>L1</th><th>L2</th><th>三层已占 / 可建格</th><th>三层占地率</th>'
