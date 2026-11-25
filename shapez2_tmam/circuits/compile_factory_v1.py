@@ -308,7 +308,11 @@ def _measure_placement(platforms, counts, xs, ys):
     occupied = sum(r["occupied_cells"] for r in records)
     radio_order = sorted(records, key=lambda r: -r["radio_cells"] / r["buildable_cells"])
     radio_over_limit = [r for r in radio_order if 10 * r["radio_cells"] >= r["buildable_cells"]]
-    return {"top_projected_cells": projected, "top_buildable_cells": available,
+    return {"after": {"occupied_cells": occupied, "buildable_cells": capacity,
+                      "percent": round(100 * occupied / capacity, 2),
+                      "below_5_percent": sum(20 * r["occupied_cells"] < r["buildable_cells"] for r in records),
+                      "below_10_percent": sum(10 * r["occupied_cells"] < r["buildable_cells"] for r in records)},
+            "top_projected_cells": projected, "top_buildable_cells": available,
             "top_percent": round(100 * projected / available, 2),
             "top_outline_percent": round(100 * projected / area, 2),
             "platform_top_percent": round(300 * sum(r["projected_cells"] for r in records) / capacity, 2),
@@ -437,12 +441,10 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
     if len(tiles) != sum(map(len, footprints)):
         raise ValueError("整厂电路平台占地重叠")
     xs, ys, zs = (set(coords) for coords in zip(*tiles, strict=True))
-    usage = {}
-    for label, rows in (("before", before), ("after", after)):
-        used, capacity = map(sum, zip(*rows, strict=True))
-        usage[label] = {"occupied_cells": used, "buildable_cells": capacity, "percent": round(100 * used / capacity, 2),
-                        "below_5_percent": sum(20 * a < b for a, b in rows),
-                        "below_10_percent": sum(10 * a < b for a, b in rows)}
+    used, capacity = map(sum, zip(*before, strict=True))
+    usage = {"before": {"occupied_cells": used, "buildable_cells": capacity, "percent": round(100 * used / capacity, 2),
+                        "below_5_percent": sum(20 * a < b for a, b in before),
+                        "below_10_percent": sum(10 * a < b for a, b in before)}}
     usage.update(_measure_placement(platforms, counts, xs, ys))
     return document, {"inputs": order, "outputs": outputs, "occupancy": usage,
                       "factory": {"receives": shop_commands, "sends": shop_replies},

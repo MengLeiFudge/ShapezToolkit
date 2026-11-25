@@ -41,6 +41,17 @@ python -m shapez2_tmam.circuits.compile_factory_v1 --output factory-v1.spz2bp
 
 同名 JSON 的 `island_cells` 是实际岛格总数，3×3 计 9 格，各岛层分别累计。`platforms` 是平台件数。`occupancy` 给出占格和无线数据，`sparsest_platforms` 和 `radio_over_limit` 用于定位还值得缩板的位置。坐标相对蓝图原点。计算口径见[电路走线与压缩](../../电路走线与压缩.md)。
 
+已有整厂蓝图和同名接口表时，可以分批缩板，每批的输出可继续作为下一批的输入。默认重布无飞线的单板，`--pairs` 重布同层横向相邻且独立成组的双板，`--merge` 将同一部件内无飞线的独立板合到一个平台。程序逐端口核对驱动来源和频道，保留每对原有飞线的方向和跨板信号级数。只采用实际岛格减少的替换件。
+
+```bash
+python -m shapez2_tmam.circuits.compile_factory_dense factory-v1.spz2bp \
+  --pairs --count 2 --workers 2 --output factory-compact.spz2bp
+python -m shapez2_tmam.circuits.compile_factory_dense factory-compact.spz2bp \
+  --merge --count 6 --workers 6 --output factory-merged.spz2bp
+```
+
+每次运行只重布选中的小部分板，其余板直接保留。接口表的 `dense_layout` 记录已经尝试的位置。候选排布失败时原板继续使用。
+
 单独修改叶端锁存后，从仓库根目录重导合装所用的直接路线。
 
 ```bash

@@ -7,12 +7,14 @@ from itertools import product
 from ..mari.blueprint import DIRECTIONS, PORTS, Wiring, _kind, _rotate
 from .compiler_backend._snapshot_router import connect_bus
 from .export_wiring_review import _building_cells
-from .foundations import FOUNDATION_CHUNKS, foundation_origin, foundation_tiles, platform_ground, platform_interior
+from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_origin, foundation_tiles, platform_ground, platform_interior
 from .wired_module import _Board
 
 
 _RADIOS = {"ControlledSignalReceiver", "ControlledSignalTransmitter", "WireGlobalTransmitterReceiver"}
 _SHORT = {"WireTransmitterSender", "WireTransmitterReceiver"}
+_PAIR_NOTCH_ROWS = (9, 10, 8, 11, 29, 30, 28, 31)
+SHORT_PAIR_CAPACITY = 3 * len(_PAIR_NOTCH_ROWS)
 
 
 @dataclass(frozen=True)
@@ -165,13 +167,11 @@ def _radios(board, parts, used):
             raise ValueError("平台边缘空间不足")
 
 
-def _logic_sites(board, part, used, *, pitch, stagger):
-    # 门位留出紧邻端口的导线格，错开格点时给上下层留不同的直通路。
-    sides = [(x, y) for x in range(2, board.width - 1, pitch) for y in range(2, board.height - 1, pitch)]
+def _logic_sites(board, part, used, lattice):
     preferred = part.origin[2]
-    for x, y in sides:
+    for column in lattice:
         for z in (preferred, (preferred + 1) % 3, (preferred + 2) % 3):
-            a, b = (x + z % 2, y + z // 2) if stagger else (x, y)
+            a, b = column[z]
             if (a, b, z) in board.occupied or (a, b, z) in board.traces:
                 continue
             for turn in range(4):
@@ -261,26 +261,36 @@ def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, pre
 
     if edge_slots is not None:
         ports = [p for p in parts if _kind(p.entry) in _SHORT]
-        for part, (row, z) in zip(ports, edge_slots, strict=True):
+        notches = platform_ground(foundation) - board.ground
+        for part, (row, z, turn) in zip(ports, edge_slots, strict=True):
             outgoing = _kind(part.entry) == "WireTransmitterSender"
-            x, pad_x, side = (board.width, board.width - 1, 0) if outgoing else (-1, 0, 2)
+            right = outgoing == (turn == 0)
+            x, pad_x, side = (board.width, board.width - 1, 0) if right else (-1, 0, 2)
             y = row - board.origin_y
             site = x + board.origin_x, row
-            if site not in platform_ground(foundation) - board.ground or not 0 <= z < 3:
+            if site not in notches or not 0 <= z < 3:
                 raise ValueError("飞线端点不在平台缺口内")
             net, _ = part.ports[int(outgoing)][0]
             reindex[part.index] = len(board.entries)
-            board.entries.append(_entry(part, *site, z, 0))
+            board.entries.append(_entry(part, *site, z, turn))
             board.pin(net, x, y, z, (side + 2) % 4)
             targets[net].append((pad_x, y, z))
 
+    # 先为无线和飞线留出端口，再按三层格点的实际余量排门。
     radios = [part for part in parts if _kind(part.entry) in _RADIOS]
+    gates = [part for part in parts if _kind(part.entry) not in _RADIOS | _SHORT]
     if len(radios) * 28 + len(parts) - len(radios) > 3 * len(board.ground):
         raise ValueError("器件最低占格超出平台容量")
     for part, trial in _radios(board, radios, used):
         add(part, trial)
-    for part in (p for p in parts if _kind(p.entry) not in _RADIOS | _SHORT):
-        sites = _logic_sites(board, part, used, pitch=pitch, stagger=stagger)
+    lattice = tuple(tuple((x + z % 2, y + z // 2) if stagger else (x, y) for z in range(3))
+                    for x, y in product(range(2, board.width - 1, pitch), range(2, board.height - 1, pitch)))
+    capacity = sum(board.on_ground(x, y) and (x, y, z) not in board.occupied and (x, y, z) not in board.traces
+                   for column in lattice for z, (x, y) in enumerate(column))
+    if len(gates) > capacity:
+        raise ValueError("门数超出本次排布的格点容量")
+    for part in gates:
+        sites = _logic_sites(board, part, used, lattice)
         trial = min(sites, key=lambda item: _distance(item, targets), default=None)
         if trial is None:
             raise ValueError("门位或端口空间不足")
@@ -298,7 +308,7 @@ def _island_offsets(foundation):
 def compact_native_board(platform):
     existing = _island_offsets(platform["T"])
     foundations = tuple(kind for kind in ("Foundation_1x1", "Foundation_1x2", "Foundation_1x3",
-                                          "Foundation_2x2", "Foundation_2x3")
+                                          "Foundation_L3", "Foundation_2x2", "Foundation_2x3")
                         if _island_offsets(kind) < existing)
     result = fuse_native_boards([platform], foundations) if foundations else None
     return result if result is not None else platform
@@ -308,13 +318,15 @@ def fuse_native_boards(platforms, foundations, *, compare_pitches=False):
     netlist = _netlist(platforms)
     if netlist is None:
         return None
+    merged = len(platforms) > 1
     for foundation in sorted(foundations, key=lambda kind: len(foundation_tiles(kind))):
         pitch = 3 if foundation in ("Foundation_1x1", "Foundation_1x2", "Foundation_1x3") else 4
-        pitches = (4, 5) if compare_pitches else (pitch,)
+        pitches = (5,) if merged else (4, 5) if compare_pitches else (pitch,)
         candidates = []
         for pitch in pitches:
             try:
-                candidates.append(_place_on(netlist, foundation, pitch, prefer_short=foundation == "Foundation_L3"))
+                short = merged or foundation == "Foundation_L3"
+                candidates.append(_place_on(netlist, foundation, pitch, prefer_short=short))
             except ValueError:
                 continue
         if candidates:
@@ -322,7 +334,7 @@ def fuse_native_boards(platforms, foundations, *, compare_pitches=False):
     return None
 
 
-def _compact_pair(platforms):
+def compact_short_pair(platforms):
     west, east = platforms
     if (any(p["T"] != "Foundation_3x3" or p.get("R", 0) for p in platforms)
             or east.get("X", 0) - west.get("X", 0) != 3
@@ -331,18 +343,24 @@ def _compact_pair(platforms):
     wiring = Wiring({"Entries": platforms})
     links = sorted(wiring.short_ports.items(), key=lambda pair: pair[1])
     ports = [i for i, (_, e) in enumerate(wiring.entries) if _kind(e) in _SHORT]
-    slots = tuple(product((9, 10, 8, 11), range(3)))
-    if not links or len(links) > len(slots) or len(ports) != 2 * len(links):
+    slots = product(_PAIR_NOTCH_ROWS, range(3))
+    if not links or len(links) > SHORT_PAIR_CAPACITY or len(ports) != 2 * len(links):
         return None
-    if any(wiring.sites[tx][0] != 0 or wiring.sites[rx][0] != 1
-           or any(wiring.entries[i][1].get("R", 0) for i in (rx, tx)) for rx, tx in links):
-        return None
-    assigned = {i: slot for pair, slot in zip(links, slots) for i in pair}
+    assigned, expected = {}, set()
+    for (rx, tx), (row, z) in zip(links, slots):
+        a, ax, ay, az = wiring.sites[tx]
+        b, bx, by, bz = wiring.sites[rx]
+        turn = 2 * a
+        gap = bx - ax + 3 * TILE_SIZE * (b - a)
+        if (a == b or (ay, az) != (by, bz) or gap != 5 * (b - a)
+                or any(wiring.entries[i][1].get("R", 0) != turn for i in (rx, tx))):
+            return None
+        assigned[rx] = assigned[tx] = row, z, turn
+        expected.add(((b, row, z), (a, row, z)))
     netlists = [_netlist([board], keep_ports=True) for board in platforms]
     if any(netlist is None for netlist in netlists):
         return None
     layouts = [[assigned[i] for i in ports if wiring.sites[i][0] == board] for board in range(2)]
-    expected = {((1, y, z), (0, y, z)) for y, z in assigned.values()}
     result = []
     left = west.get("X", 0) + foundation_origin(west["T"])[0]
     for i, netlist in enumerate(netlists):
@@ -376,7 +394,7 @@ def _compact_pair(platforms):
 def compact_combination(document):
     platforms = document["BP"]["Entries"]
     if len(platforms) == 2:
-        packed = _compact_pair(platforms)
+        packed = compact_short_pair(platforms)
         return {**document, "BP": {**document["BP"], "Entries": packed}} if packed else document
     if len(platforms) != 1:
         return document

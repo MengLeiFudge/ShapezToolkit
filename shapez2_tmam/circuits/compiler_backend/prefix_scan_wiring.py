@@ -36,7 +36,7 @@ def _append(document: dict, platforms: list[dict]) -> None:
     entries.extend({**p, "X": p.get("X", 0) + shift} for p in platforms)
 
 
-def _native_wiring(path: Path) -> Wiring:
+def _native_island(path: Path) -> dict:
     text = path.read_text(encoding="utf-8-sig").strip()
     if not text.startswith(("SHAPEZ2-4-", "SHAPEZ2-5-")) or not text.endswith("$"):
         raise ValueError(f"{path.name} 需要 SHAPEZ2-4 或 SHAPEZ2-5 原生蓝图")
@@ -52,8 +52,11 @@ def _native_wiring(path: Path) -> Wiring:
         if not isinstance(json.loads(tail[extra:]), list):
             raise ValueError(f"{path.name} 的蓝图元数据必须为列表")
         body = payload[:len(payload) - size + extra]
-    bp = json.loads(gzip.decompress(base64.b64decode(body, validate=True)))["BP"]
-    return Wiring(bp)
+    return json.loads(gzip.decompress(base64.b64decode(body, validate=True)))["BP"]
+
+
+def _native_wiring(path: Path) -> Wiring:
+    return Wiring(_native_island(path))
 
 
 def _pack_ports(path: Path) -> tuple[dict, list[dict]]:
