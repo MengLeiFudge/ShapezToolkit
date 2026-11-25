@@ -43,7 +43,16 @@ def _netlist(platforms, *, keep_ports=False):
         sending = local_net(wiring.pins[tx][1][0])
         if receiving != sending:
             aliases[receiving] = sending
-    receivers, replaced = {}, {}
+
+    replaced = {}
+    def merge_output(index, first, pin, target):
+        replaced[index] = first
+        skip.add(index)
+        net, shared = local_net(pin), local_net(target)
+        if net != shared:
+            aliases[net] = shared
+
+    receivers = {}
     for index, (_, entry) in enumerate(wiring.entries):
         if _kind(entry) != "ControlledSignalReceiver":
             continue
@@ -60,11 +69,35 @@ def _netlist(platforms, *, keep_ports=False):
         key = entry["T"], entry.get("C"), config["C"]
         first, target = receivers.setdefault(key, (index, pin))
         if first != index:
-            replaced[index] = first
-            skip.add(index)
-            net, shared = local_net(pin), local_net(target)
-            if net != shared:
-                aliases[net] = shared
+            merge_output(index, first, pin, target)
+    if len(platforms) > 1 and not keep_ports:
+        # 唯一驱动且每个输入的来源相同，才能共用同一逻辑门。
+        gates = {}
+        for index, (_, entry) in enumerate(wiring.entries):
+            if not _kind(entry).startswith("LogicGate"):
+                continue
+            pin, = wiring.pins[index][0]
+            if wiring.drivers[wiring._find(pin)] != [(index, 0)]:
+                continue
+            inputs = []
+            for port in range(len(wiring.pins[index][1])):
+                drivers = sources_at(index, port)
+                if len(drivers) > 1:
+                    break
+                if not drivers:
+                    inputs.append(None)
+                    continue
+                driver, output = drivers[0]
+                source = wiring.entries[driver][1]
+                if _kind(source) == "ConstantSignal":
+                    inputs.append(("constant", source["C"]))
+                else:
+                    inputs.append((replaced.get(driver, driver), output))
+            else:
+                key = entry["T"], entry.get("C"), tuple(inputs)
+                first, target = gates.setdefault(key, (index, pin))
+                if first != index:
+                    merge_output(index, first, pin, target)
     parts = []
     active = set()
     for index, (_, entry) in enumerate(wiring.entries):
@@ -211,7 +244,7 @@ def _verify(old, new, reindex, replaced, *, keep_ports):
                 raise ValueError(f"重布线路后端口 {i}/{port} 的来源改变")
 
 
-def _route_buses(board, prefer_short=False):
+def _route_buses(board, prefer_short=False, *, direct=False):
     terminals = defaultdict(set)
     for (net, _), points in board.terminals.items():
         terminals[net].update(points)
@@ -237,7 +270,7 @@ def _route_buses(board, prefer_short=False):
         board.traces = defaultdict(dict, {p: {net: set(ports) for net, ports in nets.items()} for p, nets in pads.items()})
         for net in order:
             try:
-                connect_bus(board, net, seed)
+                connect_bus(board, net, seed, direct=direct)
             except ValueError:
                 order.remove(net)
                 order.insert(0, net)
@@ -247,7 +280,7 @@ def _route_buses(board, prefer_short=False):
     raise ValueError(f"紧凑母线 {order[0]} 无法接通")
 
 
-def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, prefer_short=False):
+def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, prefer_short=False, direct=False):
     wiring, parts, used, replaced = netlist
     board = _Board(foundation=foundation)
     board.ground = platform_interior(foundation)
@@ -295,7 +328,7 @@ def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, pre
         if trial is None:
             raise ValueError("门位或端口空间不足")
         add(part, trial)
-    new = _route_buses(board, prefer_short)
+    new = _route_buses(board, prefer_short, direct=direct)
     _verify(wiring, new, reindex, replaced, keep_ports=edge_slots is not None)
     return new
 
@@ -326,7 +359,7 @@ def fuse_native_boards(platforms, foundations, *, compare_pitches=False):
         for pitch in pitches:
             try:
                 short = merged or foundation == "Foundation_L3"
-                candidates.append(_place_on(netlist, foundation, pitch, prefer_short=short))
+                candidates.append(_place_on(netlist, foundation, pitch, prefer_short=short, direct=merged))
             except ValueError:
                 continue
         if candidates:

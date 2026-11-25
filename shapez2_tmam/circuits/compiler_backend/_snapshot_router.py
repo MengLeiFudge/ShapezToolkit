@@ -1,6 +1,7 @@
 """按真实端口联合试摆、布线，给紧凑锁存板选择门位。"""
 
 from collections import Counter, deque
+from collections.abc import Callable
 from heapq import heappop, heappush
 from itertools import count, product
 from random import Random
@@ -15,12 +16,12 @@ def _available(board, site):
     return site not in board.occupied and board.on_ground(*site[:2])
 
 
-def _path(board, net, start, targets, facing):
+def _path(board, net, start, targets, facing, estimate):
     if start in targets:
         return True
     sequence = count()
-    queue = [(0, next(sequence), start)]
-    previous = {start: None}
+    queue = [(0, next(sequence), start, 0)]
+    previous: dict[tuple, tuple | None] = {start: None}
     distances = {start: 0}
     traces = board.traces
 
@@ -29,10 +30,11 @@ def _path(board, net, start, targets, facing):
         if distance < distances.get(site, float("inf")):
             distances[site] = distance
             previous[site] = point, direction, via
-            heappush(queue, (distance, next(sequence), site))
+            priority = distance + estimate(site) if estimate is not None else distance
+            heappush(queue, (priority, next(sequence), site, distance))
 
     while queue:
-        distance, _, point = heappop(queue)
+        _, _, point, distance = heappop(queue)
         if distance != distances[point]:
             continue
         if point in targets:
@@ -68,7 +70,7 @@ def _path(board, net, start, targets, facing):
                         via = f"WireDefault{hi - lo}Up{kind}", a, b, lo, rotation, hi - lo + 1, exit_
                         reach(site, 7 + hi - lo, direction, via)
     else:
-        return False
+        return None
 
     # 寻路状态只记当前位置。回查换层段，避免这条路径与自身重叠。
     path, occupied = [], set()
@@ -101,20 +103,40 @@ def _path(board, net, start, targets, facing):
     return True
 
 
-def _join(board, net, site, tree):
-    return any(_path(board, net, site, tree, direction) for direction in range(4))
+def _join(board, net, site, tree, *, direct=False):
+    estimate: Callable[[tuple[int, int, int]], int] | None = None
+    if direct:
+        xs, ys, levels = zip(*tree)
+        left, right = min(xs), max(xs)
+        top, bottom = min(ys), max(ys)
+        low, high = min(levels), max(levels)
+
+        def distance_to_box(point):
+            x, y, z = point
+            return max(left - x, x - right, 0) + max(top - y, y - bottom, 0) + max(low - z, z - high, 0)
+
+        estimate = distance_to_box
+
+    for direction in range(4):
+        result = _path(board, net, site, tree, direction, estimate)
+        # 换方向只改变同代价的选路顺序，搜索穷尽后无需重试。
+        if result is None:
+            return False
+        if result:
+            return True
+    return False
 
 
 def _track(board, net):
     return {site for site, wires in board.traces.items() if len(wires) == 1 and len(wires.get(net, ())) > 1}
 
 
-def connect_bus(board, net, seed):
+def connect_bus(board, net, seed, *, direct=False):
     pads = sorted({p for (name, _), sites in board.terminals.items() if name == net for p in sites})
     Random(seed).shuffle(pads)
     tree = {pads.pop()}
     for site in pads:
-        if not _join(board, net, site, tree):
+        if not _join(board, net, site, tree, direct=direct):
             raise ValueError(f"锁存板母线 {net} 无法接通")
         tree.add(site)
         tree.update(_track(board, net))

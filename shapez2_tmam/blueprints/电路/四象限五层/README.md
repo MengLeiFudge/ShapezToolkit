@@ -43,6 +43,8 @@ python -m shapez2_tmam.circuits.compile_factory_v1 --output factory-v1.spz2bp
 
 已有整厂蓝图和同名接口表时，可以分批缩板，每批的输出可继续作为下一批的输入。默认重布无飞线的单板，`--pairs` 重布同层横向相邻且独立成组的双板，`--merge` 将同一部件内无飞线的独立板合到一个平台。程序逐端口核对驱动来源和频道，保留每对原有飞线的方向和跨板信号级数。只采用实际岛格减少的替换件。
 
+合板时，同频道的重复接收器可以共用。逻辑门只有在类型、配置和每个输入的驱动来源都一致，且各自独立驱动输出线时才合并。新板优先使用原位置，也可利用原外框内的空位。
+
 ```bash
 python -m shapez2_tmam.circuits.compile_factory_dense factory-v1.spz2bp \
   --pairs --count 2 --workers 2 --output factory-compact.spz2bp
@@ -50,7 +52,7 @@ python -m shapez2_tmam.circuits.compile_factory_dense factory-compact.spz2bp \
   --merge --count 6 --workers 6 --output factory-merged.spz2bp
 ```
 
-每次运行只重布选中的小部分板，其余板直接保留。接口表的 `dense_layout` 记录已经尝试的位置。候选排布失败时原板继续使用。
+每轮只重布选中的小部分板，其余板直接保留。用 `--rounds` 在内存中连续尝试多轮，最后统一核对整图并生成一份蓝图和接口表。接口表的 `dense_layout` 记录已经尝试的位置。候选排布失败时原板继续使用。
 
 单独修改叶端锁存后，从仓库根目录重导合装所用的直接路线。
 

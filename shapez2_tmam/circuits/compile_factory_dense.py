@@ -152,31 +152,47 @@ def _compact_pairs(wiring, platforms, attempted, count, workers):
     return pairs, changed, receiver_delta, len(choices)
 
 
-def build(source: Path, *, count: int, workers: int, mode: str = "single") -> tuple[dict, dict]:
+def _short_wiring(platforms):
+    boards = [{**board, "B": {"Entries": [entry for entry in board["B"]["Entries"] if _kind(entry) in _SHORT]}}
+              for board in platforms]
+    return Wiring({"Entries": boards})
+
+
+def build(source: Path, *, count: int, workers: int, mode: str = "single", rounds: int = 1) -> tuple[dict, dict]:
     island = _native_island(source)
     report = _report(source)
     platforms = list(island["Entries"])
-    ports = [{**board, "B": {"Entries": [entry for entry in board["B"]["Entries"] if _kind(entry) in _SHORT]}}
-             for board in platforms]
-    wiring = Wiring({**island, "Entries": ports})
+    wiring = _short_wiring(platforms)
     history = report.get("dense_layout", {})
     attempted = set(history.get("attempted", ()))
     pair_attempts = set(history.get("pair_attempted", ()))
     merge_attempts = set(history.get("merge_site_attempted", ()))
     pairs = {id(wiring.entries[rx][1]): id(wiring.entries[tx][1]) for rx, tx in wiring.short_ports.items()}
-    pair_count = 0
-    if mode == "pairs":
-        pairs, changed, receiver_delta, pair_count = _compact_pairs(wiring, platforms, pair_attempts, count, workers)
-    elif mode == "merge":
-        retired, rebuilt, receiver_delta = _compact_detached(platforms, report["parts"], merge_attempts, count, workers)
-        changed = len(retired)
-        kept = [i for i in range(len(platforms)) if i not in retired]
-        attempted = {j for j, i in enumerate(kept) if i in attempted and i not in rebuilt}
-        pair_attempts = {j for j, i in enumerate(kept) if i in pair_attempts}
-        merge_attempts = {j for j, i in enumerate(kept) if i in merge_attempts}
-        platforms = [platforms[i] for i in kept]
-    else:
-        changed, receiver_delta = _compact_singles(platforms, attempted, count, workers)
+    changed = receiver_delta = pair_count = 0
+    for round_index in range(rounds):
+        before = len(attempted), len(pair_attempts), len(merge_attempts)
+        if mode == "pairs":
+            if round_index:
+                wiring = _short_wiring(platforms)
+            pairs, updates, delta, tried = _compact_pairs(wiring, platforms, pair_attempts, count, workers)
+            pair_count += tried
+        elif mode == "merge":
+            retired, rebuilt, delta = _compact_detached(platforms, report["parts"], merge_attempts, count, workers)
+            updates = len(retired)
+            kept = [i for i in range(len(platforms)) if i not in retired]
+            attempted = {j for j, i in enumerate(kept) if i in attempted and i not in rebuilt}
+            pair_attempts = {j for j, i in enumerate(kept) if i in pair_attempts}
+            merge_attempts = {j for j, i in enumerate(kept) if i in merge_attempts}
+            platforms = [platforms[i] for i in kept]
+        else:
+            updates, delta = _compact_singles(platforms, attempted, count, workers)
+        if before == (len(attempted), len(pair_attempts), len(merge_attempts)) and not updates:
+            break
+        changed += updates
+        receiver_delta += delta
+        if rounds > 1:
+            area = sum(len(_footprint(board)) for board in platforms)
+            print(f"第 {round_index + 1} 轮缩小 {updates} 处，当前 {area} 岛格", flush=True)
     document = {"V": 1137, "BP": {**island, "Entries": platforms}}
     buildings = _check_short_pairs(platforms, pairs)
     footprints = tuple(map(_footprint, platforms))
@@ -204,25 +220,26 @@ def main() -> int:
     parser.add_argument("source", type=Path, help="原生整厂蓝图及其同名接口表")
     parser.add_argument("--count", type=int, default=24, help="本批最多尝试的单板或双板组数")
     parser.add_argument("--workers", type=int, default=6, help="并行布线进程数")
+    parser.add_argument("--rounds", type=int, default=1, help="在内存中连续布线的轮数，末轮后统一验线并导出")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--pairs", action="store_const", dest="mode", const="pairs", help="重布相邻双板，保留跨板飞线")
     mode.add_argument("--merge", action="store_const", dest="mode", const="merge", help="合并同一部件内的独立板")
     parser.set_defaults(mode="single")
     parser.add_argument("--output", type=Path, required=True, help="输出原生 .spz2bp 文件")
     args = parser.parse_args()
-    if args.count < 1 or not 1 <= args.workers <= 16 or args.output.suffix != ".spz2bp":
-        parser.error("批次数须为正，并行进程数须为 1 至 16，输出须使用 .spz2bp 后缀")
+    if min(args.rounds, args.count) < 1 or not 1 <= args.workers <= 16 or args.output.suffix != ".spz2bp":
+        parser.error("轮数和每批数量须为正，并行进程数须为 1 至 16，输出须使用 .spz2bp 后缀")
     if args.source.resolve() == args.output.resolve():
         parser.error("请为重布结果指定单独的输出路径")
     try:
-        document, report = build(args.source, count=args.count, workers=args.workers, mode=args.mode)
+        document, report = build(args.source, count=args.count, workers=args.workers, mode=args.mode, rounds=args.rounds)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(encode_document(document, format_version=5), encoding="utf-8")
         args.output.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     except (ValueError, OSError) as error:
         parser.error(str(error))
     unit = "块平台" if args.mode == "single" else "组双板"
-    print(f"本批缩小 {report['dense_layout']['changed']} {unit}，总占地 {report['island_cells']} 岛格")
+    print(f"缩小 {report['dense_layout']['changed']} {unit}，总占地 {report['island_cells']} 岛格")
     return 0
 
 
