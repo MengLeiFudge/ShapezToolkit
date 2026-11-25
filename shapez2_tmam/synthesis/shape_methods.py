@@ -67,16 +67,38 @@ def _cut_ground_corner(row: Shape | None) -> Shape | None:
     return rotate_ccw(cut_front(rotate_cw(cut_front(row))))
 
 
-def read_labeled_corner(row: Shape | None) -> Shape | None:
-    """读取原单层 q0 的一格，保留形状和颜色。"""
-    if unstack_lower(row) is not None:
-        return None
+def _label_single_row(row: Shape | None) -> Shape | None:
     if analyze_part(row) == shape_literal("cu------"):
         color = analyze_color(row)
         if color is None or color == "u":
             return shape_literal("cu------")
         row = crystal(shape_literal("--CuCuCu"), color)
     return _cut_ground_corner(row)
+
+
+def read_labeled_corner(row: Shape | None) -> Shape | None:
+    """读取原单层 q0 的一格，保留形状和颜色。"""
+    if unstack_lower(row) is not None:
+        return None
+    return _label_single_row(row)
+
+
+def read_labeled_corner_q1(row: Shape | None) -> Shape | None:
+    if unstack_lower(row) is not None:
+        return None
+    return _label_single_row(rotate_ccw(row))
+
+
+def read_labeled_corner_q2(row: Shape | None) -> Shape | None:
+    if unstack_lower(row) is not None:
+        return None
+    return _label_single_row(rotate_ccw(rotate_ccw(row)))
+
+
+def read_labeled_corner_q3(row: Shape | None) -> Shape | None:
+    if unstack_lower(row) is not None:
+        return None
+    return _label_single_row(rotate_cw(row))
 
 
 def read_prefix_corner(row: Shape | None, row_height: int, prefix_height: int) -> Shape | None:

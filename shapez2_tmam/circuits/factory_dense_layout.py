@@ -130,7 +130,7 @@ def _entry(part, x, y, z, turn):
     return {**part.entry, "X": x, "Y": y, "L": z, "R": turn}
 
 
-def _candidate(board, part, site, used):
+def _candidate(board, part, site, used, *, direct=None):
     x, y, z, turn = site
     entry = _entry(part, *site)
     kind = _kind(entry)
@@ -138,9 +138,11 @@ def _candidate(board, part, site, used):
     if cells is None:
         return None
     body = set(cells)
-    if any(p in board.occupied or p in board.traces or not board.on_ground(*p[:2]) or not 0 <= p[2] < 3 for p in body):
+    if any(p in board.occupied or (p in board.traces and (p != (x, y, z) or direct is None))
+           or not board.on_ground(*p[:2]) or not 0 <= p[2] < 3 for p in body):
         return None
     pads, literals = {}, {}
+    joined = False
     for category, (ports, nets) in enumerate(zip(PORTS[kind], part.ports)):
         for i, ((d, dx, dy, dz), (net, value)) in enumerate(zip(ports, nets, strict=True)):
             if category == 0 and net not in used or category == 1 and net not in used and value is None:
@@ -151,6 +153,9 @@ def _candidate(board, part, site, used):
             side = (d + turn) % 4
             ax, ay = DIRECTIONS[side]
             pad = (x + dx + ax, y + dy + ay, z + dz)
+            if direct == (net, side) and (dx, dy, dz) == (0, 0, 0) and pad in board.occupied:
+                joined = True
+                continue
             if not board.on_ground(*pad[:2]) or pad in body or pad in board.occupied or pad in literals or pad in pads:
                 return None
             if value is not None:
@@ -161,6 +166,8 @@ def _candidate(board, part, site, used):
                 if board.traces.get(pad, {}).keys() - {net}:
                     return None
                 pads[pad] = (net, (side + 2) % 4)
+    if direct is not None and not joined:
+        return None
     for (a, b, level), (net, side) in pads.items():
         if not any((neighbor := (a + dx, b + dy, level)) not in board.occupied
                    and neighbor not in body and neighbor not in literals
@@ -182,7 +189,7 @@ def _place(board, trial):
         board.terminals[net, z].add((x, y, z))
 
 
-def _radios(board, parts, used):
+def _radios(board, parts, used, *, left_rail=False):
     width, height = board.width, board.height
     rows = tuple(range(2, height - 1, 4))
     cols = tuple(range(4, width - 3, 4))
@@ -191,7 +198,11 @@ def _radios(board, parts, used):
     right = ([(width - 2, y, 0, 0) for y in rows] + [(x, height - 2, 0, 1) for x in reversed(cols)]
              + [(x, 1, 0, 3) for x in reversed(cols)] + [(1, y, 0, 2) for y in rows])
     for part in parts:
-        sites = right if _kind(part.entry) == "ControlledSignalTransmitter" else left
+        sends = _kind(part.entry) == "ControlledSignalTransmitter"
+        if left_rail:
+            sites = ((1 + 6 * column, y, 0, 2 if sends else 0) for column in range(4) for y in rows)
+        else:
+            sites = right if sends else left
         for site in sites:
             trial = _candidate(board, part, site, used)
             if trial is not None:
@@ -283,7 +294,7 @@ def _route_buses(board, prefer_short=False, *, direct=False):
 
 
 def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, prefer_short=False, direct=False,
-              input_ports=None):
+              input_ports=None, left_rail=False):
     wiring, parts, used, replaced = netlist
     board = _Board(foundation=foundation)
     board.ground = platform_interior(foundation)
@@ -317,7 +328,7 @@ def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, pre
     gates = [part for part in parts if _kind(part.entry) not in _RADIOS | _SHORT]
     if len(radios) * 28 + len(parts) - len(radios) > 3 * len(board.ground):
         raise ValueError("器件最低占格超出平台容量")
-    for part, trial in _radios(board, radios, used):
+    for part, trial in _radios(board, radios, used, left_rail=left_rail):
         add(part, trial)
     lattice = tuple(tuple((x + z % 2, y + z // 2) if stagger else (x, y) for z in range(3))
                     for x, y in product(range(2, board.width - 1, pitch), range(2, board.height - 1, pitch)))
@@ -387,7 +398,7 @@ def compact_fixed_short_board(platform):
     return platform
 
 
-def fuse_native_boards(platforms, foundations, *, compare_pitches=False):
+def fuse_native_boards(platforms, foundations, *, compare_pitches=False, left_rail=False):
     netlist = _netlist(platforms)
     if netlist is None:
         return None
@@ -398,8 +409,9 @@ def fuse_native_boards(platforms, foundations, *, compare_pitches=False):
         candidates = []
         for pitch in pitches:
             try:
-                short = merged or foundation == "Foundation_L3"
-                candidates.append(_place_on(netlist, foundation, pitch, prefer_short=short, direct=merged))
+                short = merged or foundation == "Foundation_L3" or left_rail
+                candidates.append(_place_on(netlist, foundation, pitch, prefer_short=short,
+                                            direct=merged or left_rail, left_rail=left_rail))
             except ValueError:
                 continue
         if candidates:
@@ -474,8 +486,10 @@ def compact_short_pair(platforms):
     return result if actual == expected else None
 
 
-def compact_combination(document):
+def compact_combination(document, *, left_rail=False):
     platforms = document["BP"]["Entries"]
+    if left_rail and len(platforms) != 1:
+        raise ValueError("单侧收发编排需要单板组合网表")
     if len(platforms) == 2:
         packed = compact_short_pair(platforms)
         return {**document, "BP": {**document["BP"], "Entries": packed}} if packed else document
@@ -487,8 +501,10 @@ def compact_combination(document):
     choices = ("Foundation_1x1", "Foundation_1x2", "Foundation_1x3", "Foundation_L3",
                "Foundation_2x2", "Foundation_2x3", "Foundation_3x3")
     foundations = tuple(kind for kind in choices if len(foundation_tiles(kind)) <= islands)
-    board = fuse_native_boards(platforms, foundations, compare_pitches=True)
+    board = fuse_native_boards(platforms, foundations, compare_pitches=True, left_rail=left_rail)
     if board is None:
+        if left_rail:
+            raise ValueError("所选组合方法无法在原占地内接通单侧收发布局")
         return document
     score = len(foundation_tiles(board["T"])), len(board["B"]["Entries"])
     if score >= (islands, entries):

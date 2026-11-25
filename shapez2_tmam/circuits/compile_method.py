@@ -30,8 +30,8 @@ def _named_options(parser, option, entries, convert: Callable[[str], Any] = str)
     return items
 
 
-def _compact(document, report):
-    packed = compact_combination(document)
+def _compact(document, report, *, left_rail=False):
+    packed = compact_combination(document, left_rail=left_rail)
     compact, depth = shorten_local_wires(packed)
     platforms = compact["BP"]["Entries"]
     report["island_cells"] = sum(len(foundation_tiles(board["T"])) for board in platforms)
@@ -67,6 +67,7 @@ def main() -> int:
     parser.add_argument("--input-channel", action="append", default=[], metavar="参数=频道", help="指定输入参数的频道，可重复")
     parser.add_argument("--output-channel", action="append", default=[], metavar="字段=频道", help="指定输出字段的频道，可重复")
     parser.add_argument("--publish-when", action="append", default=[], metavar="字段=方法", help="指定字段的布尔发布方法，可重复")
+    parser.add_argument("--left-rail", action="store_true", help="将单板组合方法的无线口沿左侧竖排")
     parser.add_argument("--output", required=True, type=Path, help="原生 .spz2bp 输出路径")
     args = parser.parse_intermixed_args()
     fields, inputs, outputs, publish = {}, {}, {}, {}
@@ -96,7 +97,7 @@ def main() -> int:
             source = args.source.read_text(encoding="utf-8")
             program = compile_method(source, args.method, filename=str(args.source))
             document, report = compile_program(program, args.channel_base)
-        report = _write_blueprint(*_compact(document, report), args.output)
+        report = _write_blueprint(*_compact(document, report, left_rail=args.left_rail), args.output)
     except FrontendError as error:
         parser.exit(2, f"{error.filename}:{error.lineno}:{error.offset} {error.msg}\n")
     except (OSError, SyntaxError, ValueError) as error:
