@@ -323,6 +323,21 @@ def _measure_placement(platforms, counts, xs, ys):
             "highest_radio_platforms": radio_order[:20], "radio_over_limit": radio_over_limit}
 
 
+def _without_frame_store(wiring):
+    channels = {1704205, *range(1704220, 1704230), *range(1704240, 1704273)}
+    internal = {1704280, 1704281}
+    senders = defaultdict(set)
+    for board, tx, channel, _ in _radio_ports(wiring):
+        if tx:
+            senders[board].add(channel)
+    removed = {board for board, outputs in senders.items() if channels & outputs}
+    outputs = set().union(*(senders[board] for board in removed))
+    fly_boards = {wiring.entries[entry][0] for pair in wiring.short_ports.items() for entry in pair}
+    if not channels <= outputs <= channels | internal or removed & fly_boards:
+        raise ValueError("根路线内置父帧存储与独立分册的替换边界不符")
+    return Wiring({"Entries": [board for i, board in enumerate(wiring.platforms) if i not in removed]})
+
+
 def build(pieces: Path | None = None, *, direct_root: Path | None = None, density_threshold: int = 60,
           retain_leaf: bool = False) -> tuple[dict, dict]:
     if retain_leaf and (pieces is not None or direct_root is not None):
@@ -346,8 +361,10 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
     )
     folder = pieces or _BOOK / "顶针逆推"
     locations = {"tail-search-workers": _CIRCUITS / "compiler_backend", "tail-node-inputs": _CIRCUITS / "compiler_frontend"}
-    if direct_root is None and pieces is None:
+    use_frame_book = direct_root is None and pieces is None
+    if use_frame_book:
         direct_root = folder / "direct-root-stacked.spz2bp"
+        parts += (("tail-frames", {}, {}),)
     counts, platforms, pairs = {}, [], {}
     received, sent = Counter(), Counter()
     leaf = []
@@ -366,6 +383,8 @@ def build(pieces: Path | None = None, *, direct_root: Path | None = None, densit
             wiring = _native_wiring(path)
             if retain_leaf and name == "tail-search":
                 wiring = _retain_tail_leaf(wiring)
+        if use_frame_book and name == "direct-root":
+            wiring = _without_frame_store(wiring)
         base = len(platforms)
         rx, tx = _rewrite(wiring, receivers, transmitters, _TAIL_RELAYS if retain_leaf else None)
         received.update(rx)

@@ -67,33 +67,34 @@ def _merge_site(board, originals, occupied, bounds):
     return None
 
 
-def _compact_detached(platforms, parts, attempted, count, workers):
+def _compact_detached(platforms, names, attempted, count, workers, *, across_parts=False):
     choices = []
     footprints = tuple(map(_footprint, platforms))
     areas = list(map(len, footprints))
     occupied = set().union(*footprints)
     bounds = tuple(range(min(axis), max(axis) + 1) for axis in zip(*occupied, strict=True))
     costs = [len(board["B"]["Entries"]) for board in platforms]
-    start = 0
-    for name, size in parts.items():
-        eligible = [i for i in range(start, start + size) if i not in attempted
-                    and areas[i] >= 3 and _eligible(platforms[i])]
-        inputs = {}
-        for i in eligible:
-            rx, tx = _radio_channels(Wiring({"Entries": [platforms[i]]}))
-            inputs[i] = set(rx)
-            costs[i] += 26 * (rx.total() + tx.total())
-        for a, b in combinations(eligible, 2):
-            shared = len(inputs[a] & inputs[b])
-            estimated = costs[a] + costs[b] - 27 * shared
-            choices.append((estimated / max(areas[a], areas[b]), -shared, estimated, name, a, b))
-        start += size
+    eligible = [i for i, board in enumerate(platforms)
+                if (across_parts or i not in attempted) and areas[i] >= 3 and _eligible(board)]
+    inputs = {}
+    for i in eligible:
+        rx, tx = _radio_channels(Wiring({"Entries": [platforms[i]]}))
+        inputs[i] = set(rx)
+        costs[i] += 26 * (rx.total() + tx.total())
+    for a, b in combinations(eligible, 2):
+        if (names[a] != names[b]) != across_parts or (across_parts and (a, b) in attempted):
+            continue
+        shared = len(inputs[a] & inputs[b])
+        if across_parts and not shared:
+            continue
+        estimated = costs[a] + costs[b] - 27 * shared
+        choices.append((estimated / max(areas[a], areas[b]), -shared, estimated, a, b))
     ranked = sorted(choices)
     choices, used = [], set()
-    for _, _, _, name, a, b in ranked:
+    for _, _, _, a, b in ranked:
         if a in used or b in used:
             continue
-        choices.append((name, a, b))
+        choices.append((a, b))
         used.update((a, b))
         if len(choices) == count:
             break
@@ -101,9 +102,12 @@ def _compact_detached(platforms, parts, attempted, count, workers):
     rebuilt = set()
     receiver_delta = 0
     with ProcessPoolExecutor(max_workers=workers) as pool:
-        groups = ([platforms[a], platforms[b]] for _, a, b in choices)
-        for (name, a, b), board in zip(choices, pool.map(_merge_singles, groups), strict=True):
-            attempted.update((a, b))
+        groups = ([platforms[a], platforms[b]] for a, b in choices)
+        for (a, b), board in zip(choices, pool.map(_merge_singles, groups), strict=True):
+            if across_parts:
+                attempted.add((a, b))
+            else:
+                attempted.update((a, b))
             if board is None:
                 continue
             old = [platforms[a], platforms[b]]
@@ -118,7 +122,8 @@ def _compact_detached(platforms, parts, attempted, count, workers):
             receiver_delta += _radio_delta(Wiring({"Entries": old}), Wiring({"Entries": [platforms[a]]}))
             rebuilt.add(a)
             retired.add(b)
-            parts[name] -= 1
+            if across_parts:
+                names[a] = "shared-space"
     return retired, rebuilt, receiver_delta
 
 
@@ -181,26 +186,37 @@ def build(source: Path, *, count: int, workers: int, mode: str = "single", round
     attempted = set(history.get("attempted", ()))
     pair_attempts = set(history.get("pair_attempted", ()))
     merge_attempts = set(history.get("merge_channel_attempted", ()))
+    shared_attempts = {tuple(pair) for pair in history.get("merge_shared_pairs", ())}
+    names = [part for part, size in report["parts"].items() for _ in range(size)]
     pairs = {id(wiring.entries[rx][1]): id(wiring.entries[tx][1]) for rx, tx in wiring.short_ports.items()}
     changed = receiver_delta = pair_count = 0
     for round_index in range(rounds):
-        before = len(attempted), len(pair_attempts), len(merge_attempts)
+        before = len(attempted), len(pair_attempts), len(merge_attempts), len(shared_attempts)
         if mode == "pairs":
             if round_index:
                 wiring = _short_wiring(platforms)
             pairs, updates, delta, tried = _compact_pairs(wiring, platforms, pair_attempts, count, workers)
             pair_count += tried
-        elif mode == "merge":
-            retired, rebuilt, delta = _compact_detached(platforms, report["parts"], merge_attempts, count, workers)
+        elif mode in ("merge", "merge-shared"):
+            across_parts = mode == "merge-shared"
+            trial = shared_attempts if across_parts else merge_attempts
+            retired, rebuilt, delta = _compact_detached(platforms, names, trial, count, workers, across_parts=across_parts)
             updates = len(retired)
             kept = [i for i in range(len(platforms)) if i not in retired]
+            part_order = {part: i for i, part in enumerate(report["parts"])}
+            kept.sort(key=lambda i: part_order.get(names[i], len(part_order)))
             attempted = {j for j, i in enumerate(kept) if i in attempted and i not in rebuilt}
             pair_attempts = {j for j, i in enumerate(kept) if i in pair_attempts}
-            merge_attempts = {j for j, i in enumerate(kept) if i in merge_attempts}
+            merge_attempts = {j for j, i in enumerate(kept) if i in merge_attempts and (not across_parts or i not in rebuilt)}
+            reindex = {i: j for j, i in enumerate(kept) if i not in rebuilt}
+            shared_attempts = {tuple(sorted((reindex[a], reindex[b]))) for a, b in shared_attempts
+                               if a in reindex and b in reindex}
             platforms = [platforms[i] for i in kept]
+            names = [names[i] for i in kept]
+            report["parts"] = dict(Counter(names))
         else:
             updates, delta = _compact_singles(platforms, attempted, count, workers)
-        if before == (len(attempted), len(pair_attempts), len(merge_attempts)) and not updates:
+        if before == (len(attempted), len(pair_attempts), len(merge_attempts), len(shared_attempts)) and not updates:
             break
         changed += updates
         receiver_delta += delta
@@ -225,6 +241,7 @@ def build(source: Path, *, count: int, workers: int, mode: str = "single", round
                                 "remaining": sum(i not in attempted and _eligible(b) for i, b in enumerate(platforms)),
                                 "pair_attempted": sorted(pair_attempts),
                                 "merge_channel_attempted": sorted(merge_attempts),
+                                "merge_shared_pairs": sorted(shared_attempts),
                                 "pair_groups_tried": pair_count})
     return document, report
 
@@ -238,6 +255,8 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--pairs", action="store_const", dest="mode", const="pairs", help="重布相邻双板，保留跨板飞线")
     mode.add_argument("--merge", action="store_const", dest="mode", const="merge", help="合并同一部件内的独立板")
+    mode.add_argument("--merge-shared", action="store_const", dest="mode", const="merge-shared",
+                      help="合并不同部件内无飞线且有共同输入的独立板")
     parser.set_defaults(mode="single")
     parser.add_argument("--output", type=Path, required=True, help="输出原生 .spz2bp 文件")
     args = parser.parse_args()

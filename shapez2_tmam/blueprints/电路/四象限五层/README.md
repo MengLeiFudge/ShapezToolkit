@@ -2,6 +2,8 @@
 
 导入 `factory-v1.spz2bp`。这一份含目标读取、直接闭包、顶针逆推、成功路径回放和六字段装单。需要解锁三个岛层。蓝图尺寸、频道及各部件数量见 `factory-v1.json`。同一组频道只放一份主控。
 
+本册蓝图占 2,253 个 1×1 岛格，共 313 块平台、567,060 个建筑，外框为 38×35，使用三个岛层。
+
 ## 开单与读数
 
 1. 接上[六槽工道和共用控制](../../验收/实体/通用486道/compact_book.md)。电路把第一遍配方送入虚拟六槽，成品完全等于目标后才进入第二遍装单。实体的地址、请求、复位、确认、入库和清空信号按工道控制接口回传。
@@ -52,7 +54,15 @@ python -m shapez2_tmam.circuits.compile_factory_dense factory-compact.spz2bp \
   --merge --count 6 --workers 6 --output factory-merged.spz2bp
 ```
 
-每轮只重布选中的小部分板，其余板直接保留。用 `--rounds` 在内存中连续尝试多轮，最后统一核对整图并生成一份蓝图和接口表。接口表的 `dense_layout` 记录已经尝试的位置。候选排布失败时原板继续使用。
+每轮只重布选中的小部分板，其余板直接保留。用 `--rounds` 在内存中连续尝试多轮，最后统一核对整图并生成一份蓝图和接口表。接口表的 `dense_layout` 记录已经尝试的位置。候选排布失败时原板继续使用。`--merge-shared` 可尝试合并不同部件中读取相同频道且没有飞线的板，合成板计入 `shared-space`。
+
+部件接口一致时可先只重导该部件，再替换现有整厂中的旧版。准备完整蓝图及新、旧两份部件蓝图，分别附同名 JSON。替换器按频道从共用板去掉旧部件，核对其他建筑的输入驱动和短距端口，只重布受影响平台。它按实际岛格和建筑数选优。
+
+```bash
+python -m shapez2_tmam.circuits.replace_factory_part factory-v1.spz2bp \
+  old/pin-landings.spz2bp new/pin-landings.spz2bp \
+  --part pin-landings --output factory-updated.spz2bp
+```
 
 单独修改叶端锁存后，从仓库根目录重导合装所用的直接路线。
 

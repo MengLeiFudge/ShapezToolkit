@@ -87,8 +87,8 @@
   },
   "timing": {
     "channel_signal_ticks": 12,
-    "settling_budget_ticks": 14464
+    "settling_budget_ticks": 19092
   },
-  "platforms": 79,
-  "building_entries": 148178
+  "platforms": 46,
+  "building_entries": 75580
 }

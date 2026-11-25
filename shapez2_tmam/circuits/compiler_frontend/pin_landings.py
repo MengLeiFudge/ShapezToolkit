@@ -9,7 +9,8 @@ from ...synthesis.physics import Shape
 from ...synthesis.shape_methods import analyze_color, analyze_part, rotate_ccw, shape_literal
 from ..compiler_backend import _write_blueprint
 from ..compiler_backend.fields import compile_fields
-from ..compiler_backend.module_caller import _any, _compare, _gate, _local_wiring, _wait_digit, _WAIT_RADIX
+from ..compiler_backend.module_caller import (_WAIT_RADIX, _advance, _any, _compare, _gate, _local_wiring,
+                                               _wait_digit, _wait_timer)
 from ..local_module import Module
 from .pin_candidate_closure import _radio_ports, _rewire
 from .pin_candidate_row import _RADIO, _read_report
@@ -48,10 +49,18 @@ def target_q3(row: Shape | None) -> int:
     return _kind(rotate_ccw(rotate_ccw(rotate_ccw(row))))
 
 
-def _land(level: int, ceiling: int, barrier: int) -> int:
-    if (level > ceiling) | (level < barrier):
-        return -2
-    return level
+def _next_target(cursor: int, c0: int, c1: int, c2: int, c3: int, c4: int) -> int:
+    if (cursor < 0) & (c0 == 1):
+        return 0
+    if (cursor < 1) & ((c1 == 1) | (c1 == 2)):
+        return 1
+    if (cursor < 2) & ((c2 == 1) | (c2 == 2)):
+        return 2
+    if (cursor < 3) & ((c3 == 1) | (c3 == 2)):
+        return 3
+    if (cursor < 4) & ((c4 == 1) | (c4 == 2)):
+        return 4
+    return -2
 
 
 def next_landing(material: int, cursor: int, height: int, c0: int, c1: int, c2: int, c3: int, c4: int) -> int:
@@ -59,26 +68,14 @@ def next_landing(material: int, cursor: int, height: int, c0: int, c1: int, c2: 
         return -2
     if (material != 1) & (material != 2):
         return cursor
-    barrier = 0
-    if c1 == 3:
-        barrier = 1
-    if (c2 == 3) & (height >= 2):
-        barrier = 2
-    if (c3 == 3) & (height >= 3):
-        barrier = 3
-    if (c4 == 3) & (height >= 4):
-        barrier = 4
-    if (cursor < 0) & (c0 == 1):
-        return _land(0, height, barrier)
-    if (cursor < 1) & ((c1 == 1) | (c1 == 2)):
-        return _land(1, height, barrier)
-    if (cursor < 2) & ((c2 == 1) | (c2 == 2)):
-        return _land(2, height, barrier)
-    if (cursor < 3) & ((c3 == 1) | (c3 == 2)):
-        return _land(3, height, barrier)
-    if (cursor < 4) & ((c4 == 1) | (c4 == 2)):
-        return _land(4, height, barrier)
-    return -2
+    landing = _next_target(cursor, c0, c1, c2, c3, c4)
+    blocked = (((landing < 1) & (c1 == 3))
+               | ((landing < 2) & (c2 == 3) & (height >= 2))
+               | ((landing < 3) & (c3 == 3) & (height >= 3))
+               | ((landing < 4) & (c4 == 3) & (height >= 4)))
+    if (landing > height) | blocked:
+        return -2
+    return landing
 
 
 def _row_at(z: int, t0: Shape | None, t1: Shape | None, t2: Shape | None,
@@ -162,10 +159,47 @@ def _place_kernel(groups, kernel, channels):
     groups.append(_rewire(wiring, dict(zip(ports, channels, strict=True))))
 
 
-def _constants(before, heights):
-    board = Module({})
-    for value, output in zip((-1, 1, 2, 3, 4), (before, *heights), strict=True):
-        board.outputs[_gate(board, "If", f"value{value}", value, 1)] = output
+def _select_layer(board, r, bounds):
+    first, _, last = bounds
+    started = _compare(board, f"started{r}", "stage", first, "Ag==")
+    within = _compare(board, f"within{r}", "stage", last, "BQ==")
+    return _gate(board, "And", f"layer{r}", started, within)
+
+
+def _row_inputs(source, stage, phases, outputs):
+    row, height, done = outputs
+    board = Module({"stage": stage, **{f"row{r}": channel for r, channel in enumerate(source)}})
+    for r, bounds in enumerate(phases):
+        selected = _select_layer(board, r, bounds)
+        _gate(board, "If", "row", f"row{r}", selected)
+        _gate(board, "If", "height", r + 1, selected)
+    _compare(board, "done", "stage", phases[-1][-1] + 1)
+    board.outputs = {"row": row, "height": height, "done": done}
+    return board
+
+
+def _column_inputs(materials, cursors, stage, phases, outputs):
+    material, previous = outputs
+    board = Module({"stage": stage, **{f"mat{r}": ch for r, ch in enumerate(materials)},
+                    **{f"prev{r + 1}": ch for r, ch in enumerate(cursors[:-1])}})
+    for r, bounds in enumerate(phases):
+        selected = _select_layer(board, r, bounds)
+        _gate(board, "If", "material", f"mat{r}", selected)
+        _gate(board, "If", "previous", -1 if r == 0 else f"prev{r}", selected)
+    board.outputs = {"material": material, "previous": previous}
+    return board
+
+
+def _store_cursors(stage, result, phases, cursors):
+    board = Module({"stage": stage, "result": result,
+                    **{f"old{r}": channel for r, channel in enumerate(cursors)}})
+    active = _compare(board, "active", "stage", 0, "Aw==")
+    for r, (_, _, sample) in enumerate(phases):
+        capture = _compare(board, f"capture{r}", "stage", sample)
+        keep = _gate(board, "And", f"keep{r}", active, _gate(board, "Not", f"held{r}", capture))
+        _gate(board, "If", f"cursor{r}", "result", capture)
+        _gate(board, "If", f"cursor{r}", f"old{r}", keep)
+        board.outputs[f"cursor{r}"] = cursors[r]
     return board
 
 
@@ -188,8 +222,9 @@ def _column_check(classes, first, cursor, output):
     return board
 
 
-def _support(material, landing, raised, classes, output):
-    board = Module({"material": material, "landing": landing, **{f"below{z}": ch for z, ch in enumerate(classes[:4])}})
+def _support(material, landing, height, classes, output):
+    board = Module({"material": material, "landing": landing, "height": height,
+                    **{f"below{z}": ch for z, ch in enumerate(classes[:4])}})
     anchors = [_compare(board, "ground", "landing", 0)]
     for z in range(4):
         at = _compare(board, f"at{z}", "landing", z + 1)
@@ -197,7 +232,7 @@ def _support(material, landing, raised, classes, output):
         anchors.append(_gate(board, "And", f"has_below{z}", at, occupied))
     stable = _any(board, "supported", tuple(anchors))
     loose = _gate(board, "Not", "loose", stable)
-    moving = _compare(board, "moving", "landing", raised, "BA==")
+    moving = _compare(board, "moving", "landing", "height", "BA==")
     for value, base in ((1, 1), (2, 3)):
         kind = _compare(board, f"kind{value}", "material", value)
         present = _gate(board, "And", f"moving{value}", moving, kind)
@@ -216,6 +251,24 @@ def _checks(inputs, output):
     for i in range(1, len(inputs)):
         valid = _gate(board, "And", f"checked{i}", valid, f"ok{i}")
     board.outputs[valid] = output
+    return board
+
+
+def _store_support(stage, result, phases, failed, output):
+    board = Module({"stage": stage, "result": result, "old_failure": failed})
+    captures = tuple(_compare(board, f"sample{r}", "stage", sample)
+                     for r, (_, _, sample) in enumerate(phases))
+    sample = _any(board, "sample", captures)
+    active = _compare(board, "active", "stage", 0, "Aw==")
+    failure = _compare(board, "failure", "result", 1, "Aw==")
+    failed_now = _gate(board, "And", "failed_now", sample, failure)
+    had_failed = _compare(board, "had_failed", "old_failure", 1)
+    any_failure = _gate(board, "Or", "any_failure", had_failed, failed_now)
+    clear = _compare(board, "clear", "stage", phases[0][0])
+    keep = _gate(board, "And", "keep", active, _gate(board, "Not", "started", clear))
+    board.outputs[_gate(board, "And", "failed", any_failure, keep)] = failed
+    finished = _compare(board, "finished", "stage", phases[-1][-1] + 1)
+    board.outputs[_gate(board, "And", "ok", finished, _gate(board, "Not", "all_passed", had_failed))] = output
     return board
 
 
@@ -269,38 +322,50 @@ def build(crystals: dict, channel_base: int = _BASE) -> tuple[dict, dict]:
         return tuple(next(channels) for _ in range(n))
 
     rest_ready, rest_ok, rest_request, local_ready, local_ok, phase, want, stored = take(8)
-    before, *heights = take(5)
+    stage, row_input, height, done, failed = take(5)
     classes = tuple(take(4) for _ in range(5))
-    choices = tuple(take(4) for _ in range(4))
+    lanes = tuple(take(4) for _ in range(4))
     cursors = tuple(take(4) for _ in range(4))
-    states = tuple(take(4) for _ in range(4))
-    columns, supported = take(4), take(4)
-    columns_ok, support_ok = take(2)
+    states, columns = take(4), take(4)
+    supported = take(1)[0]
+    columns_ok, support_ok = channel_base + 89, channel_base + 90
     classes_kernel = _compile({f"q{i}": f"target_q{i}" for i in range(4)}, ("row",))
     pick = _compile({"landing": "next_landing"}, ("material", "cursor", "height", "c0", "c1", "c2", "c3", "c4"))
     labels = tuple(_compile({"cursor": f"label_q{q}"}, ("source", "t0", "t1", "t2", "t3", "t4", "material", "landing"))
                    for q in range(4))
     support = _compile({"ok": "moving_blocks_supported"}, ("a", "b", "c", "d", "la", "lb", "lc", "ld"))
-    settle = classes_kernel[2] + 4 * (pick[2] + max(kernel[2] for kernel in labels)) + support[2] + 1536
-    timers, elapsed = _timers(phase, take, settle)
-    modules = [_start(request, rows_ready, phase), _constants(before, heights), *timers,
-               _checks(columns, columns_ok), _checks(supported, support_ok),
+    phases = tuple((r * 3 + 1, r * 3 + 2, r * 3 + 3) for r in range(4))
+    # 后三轮沿用已稳定的目标分类，只等当前层的组合计算。
+    row_ticks = pick[2] + max(kernel[2] for kernel in labels) + support[2] + 96
+    row_wait = (row_ticks + _RADIO - 1) // _RADIO + 8
+    first_wait = row_wait + (classes_kernel[2] + _RADIO - 1) // _RADIO
+    if first_wait >= _WAIT_RADIX ** 2:
+        raise ValueError("落点计算的保持时间超过逐层计数器范围")
+    row_timers, row_tap, _ = _wait_timer(stage, take(5), row_wait, row_wait, first_reset_steps=first_wait)
+    end_wait = 12 * _RADIO
+    end_timers, elapsed = _timers(done, take, end_wait)
+    settle = (first_wait + 3 * row_wait + 32) * _RADIO + end_wait
+    modules = [_start(request, rows_ready, phase), _advance(phase, stage, None, row_tap, row_tap, phases),
+               _row_inputs(source, stage, phases, (row_input, height, done)), *row_timers, *end_timers,
+               _checks(columns, columns_ok), _store_support(stage, supported, phases, failed, support_ok),
                _local_reply(phase, elapsed, (columns_ok, support_ok), local_ready, local_ok),
                _forward_mode(request, local_ready, local_ok, want), _relay(want, stored, rest_ready, rest_request),
                _reply(request, local_ready, local_ok, rest_request, rest_ready, rest_ok, ready, ok)]
     for q, column in enumerate(zip(*classes, strict=True)):
+        material, previous, landing, result = lanes[q]
+        saved = tuple(row[q] for row in cursors)
+        modules.append(_column_inputs(tuple(row[q] for row in mats), saved, stage, phases, (material, previous)))
+        modules.append(_store_cursors(stage, result, phases, saved))
         modules.append(_column_check(column, mats[0][q], cursors[-1][q], columns[q]))
-        for r in range(4):
-            modules.append(_support(mats[r][q], cursors[r][q], r + 1, column, states[r][q]))
+        modules.append(_support(material, result, height, column, states[q]))
     platforms = [module.layout()["BP"]["Entries"] for module in modules]
     for channel, row in zip(target, classes, strict=True):
         _place_kernel(platforms, classes_kernel, (channel, *row))
-    for r, channel in enumerate(source):
-        for q, column in enumerate(zip(*classes, strict=True)):
-            previous = before if r == 0 else cursors[r - 1][q]
-            _place_kernel(platforms, pick, (mats[r][q], previous, heights[r], *column, choices[r][q]))
-            _place_kernel(platforms, labels[q], (channel, *target, mats[r][q], choices[r][q], cursors[r][q]))
-        _place_kernel(platforms, support, (*states[r], *cursors[r], supported[r]))
+    for q, column in enumerate(zip(*classes, strict=True)):
+        material, previous, landing, result = lanes[q]
+        _place_kernel(platforms, pick, (material, previous, height, *column, landing))
+        _place_kernel(platforms, labels[q], (row_input, *target, material, landing, result))
+    _place_kernel(platforms, support, (*states, *(lane[-1] for lane in lanes), supported))
     entries = []
     for i, group in enumerate(platforms):
         x = min(board.get("X", 0) for board in group)
@@ -312,8 +377,11 @@ def build(crystals: dict, channel_base: int = _BASE) -> tuple[dict, dict]:
     senders = [ch for _, tx, ch, _ in _radio_ports(wiring) if tx]
     receivers = {ch for _, tx, ch, _ in _radio_ports(wiring) if not tx}
     external.update((rest_ready, rest_ok))
+    outputs = {ready, ok, rest_request, local_ready, local_ok, columns_ok, support_ok,
+               *(ch for row in cursors for ch in row)}
     if (len(senders) != len(set(senders)) or set(senders) & external
-            or receivers - set(senders) != external or set(senders) - set(window) != {ready, ok}):
+            or receivers - set(senders) != external or set(senders) - set(window) != {ready, ok}
+            or not outputs <= set(senders)):
         raise ValueError("落点板的原生收发频道与接口表不符")
     return document, {
         "inputs": {"request": request, "rows_ready": rows_ready, "source_rows": source, "target_rows": target,

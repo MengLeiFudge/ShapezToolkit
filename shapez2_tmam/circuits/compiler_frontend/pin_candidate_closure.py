@@ -26,7 +26,7 @@ _SOURCE_SENDERS = {
 }
 
 
-def _radio_ports(wiring):
+def _radio_ports(wiring, *, by_entry=False):
     for i, (platform, entry) in enumerate(wiring.entries):
         kind = _kind(entry)
         if kind in ("ControlledSignalReceiver", "ControlledSignalTransmitter"):
@@ -34,7 +34,7 @@ def _radio_ports(wiring):
             driver = wiring.entries[source][1]
             if _kind(driver) != "ConstantSignal" or port != 0:
                 raise ValueError("无线频道须由独立常量指定")
-            yield platform, kind == "ControlledSignalTransmitter", decode_constant(driver["C"]), driver
+            yield (i if by_entry else platform), kind == "ControlledSignalTransmitter", decode_constant(driver["C"]), driver
 
 
 def _cut_sources(wiring, part_counts):
