@@ -40,7 +40,7 @@
 
 [Python 模型](../synthesis/README.md)支持明确参数下的局部操作与制造证书。[具体例子](../examples/README.md)保留短代码和逐步产物。[外部资料核对](proofs/09-sources.md)区分已吸收的列构造、局部公式与仍缺全文的上界主张。
 
-游戏源码入口为 `D:\project\shapez\DecompiledSource\Game.Content.Features` 的 `ShapeLogic` 与 `ShapeOperationStack/PushPin/SwapHalves/Rotate`；来源指纹见[卷 01](proofs/01-foundations.md#s01-09-h18)。具体 Mod 仍须核对操作规则，不能只替换 `n/H`。
+游戏逻辑从 `Game.Content.Features` 下的 `ShapeLogic` 与 `ShapeOperationStack/PushPin/SwapHalves/Rotate` 查起。具体 Mod 仍须核对操作规则和 `n/H`。本地目录与导出命令见[更新 Shapez 2 反编译源码](README.md#更新-shapez-2-反编译源码)，来源指纹见[卷 01](proofs/01-foundations.md#s01-09-h18)。
 
 后续证明直接更新对应参考卷，稳定章节锚点保持不变；[来源映射](proofs/sources.json)保留旧文件定位。理论正文、参考卷和工程资料分别维护。
 

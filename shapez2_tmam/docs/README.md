@@ -18,3 +18,31 @@
 | `assets/` | 证明与示例引用的示意图（SVG / PNG）及长短代码文本 |
 
 主线阅读建议从 [研究汇编与结论导航](papers/README.md) 开始；工程实现与蓝图资料返回 [二代 TMAM 总目录](../README.md)。
+
+## 更新 Shapez 2 反编译源码
+
+本机反编译源码位于 `D:\project\shapez\DecompiledSource`，与 `ShapezToolkit` 同级。每个程序集对应一个子目录，例如 `Game.Content.Features\ShapeLogic.cs`。Steam 更新游戏后，在 Git Bash 中用 `ilspycmd` 从安装目录重新导出。已验证的 `ilspycmd` 版本为 `9.1.0.7988`。如果 Steam 库在其他位置，调整 `managed`。
+
+```bash
+(
+  set -e
+  shopt -s nullglob
+  managed='D:/Steam/steamapps/common/shapez 2/shapez 2_Data/Managed'
+  stage='D:/project/shapez/DecompiledSource.refresh'
+  dlls=("$managed"/*.dll)
+  if ((${#dlls[@]} == 0)); then
+    printf '在 %s 找不到程序集\n' "$managed" >&2
+    exit 1
+  fi
+
+  mkdir -- "$stage"
+  for dll in "${dlls[@]}"; do
+    name=${dll##*/}
+    name=${name%.dll}
+    ilspycmd --disable-updatecheck -p -r "$managed" -o "$stage/$name" "$dll"
+    test -s "$stage/$name/$name.csproj"
+  done
+)
+```
+
+命令成功后，将旧 `DecompiledSource` 移到 `.codex/trash/`，再把 `DecompiledSource.refresh` 改名为 `DecompiledSource`。将旧目录中的 `_TextAssets` 移回新目录，其中存放单独从 `resources.assets` 提取的 JSON。查阅新版本的游戏逻辑时，按需记录游戏 `version`、Steam `buildid` 和相关 DLL 的 SHA-256，格式见[卷 01 的来源记录](proofs/01-foundations.md#s01-09-h18)。
