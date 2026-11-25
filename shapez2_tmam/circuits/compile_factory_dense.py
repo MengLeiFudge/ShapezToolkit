@@ -5,7 +5,7 @@ import json
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from itertools import chain, product
+from itertools import chain, combinations, product
 
 from ..mari.blueprint import Wiring, _kind
 from .circuit import encode_document
@@ -73,16 +73,30 @@ def _compact_detached(platforms, parts, attempted, count, workers):
     areas = list(map(len, footprints))
     occupied = set().union(*footprints)
     bounds = tuple(range(min(axis), max(axis) + 1) for axis in zip(*occupied, strict=True))
-    entries = [len(board["B"]["Entries"]) for board in platforms]
+    costs = [len(board["B"]["Entries"]) for board in platforms]
     start = 0
     for name, size in parts.items():
         eligible = [i for i in range(start, start + size) if i not in attempted
                     and areas[i] >= 3 and _eligible(platforms[i])]
-        eligible.sort(key=lambda i: (entries[i] / areas[i], i))
-        choices.extend((name, a, b) for a, b in zip(eligible[::2], eligible[1::2]))
+        inputs = {}
+        for i in eligible:
+            rx, tx = _radio_channels(Wiring({"Entries": [platforms[i]]}))
+            inputs[i] = set(rx)
+            costs[i] += 26 * (rx.total() + tx.total())
+        for a, b in combinations(eligible, 2):
+            shared = len(inputs[a] & inputs[b])
+            estimated = costs[a] + costs[b] - 27 * shared
+            choices.append((estimated / max(areas[a], areas[b]), -shared, estimated, name, a, b))
         start += size
-    choices.sort(key=lambda choice: sum(entries[i] for i in choice[1:]))
-    choices = choices[:count]
+    ranked = sorted(choices)
+    choices, used = [], set()
+    for _, _, _, name, a, b in ranked:
+        if a in used or b in used:
+            continue
+        choices.append((name, a, b))
+        used.update((a, b))
+        if len(choices) == count:
+            break
     retired = set()
     rebuilt = set()
     receiver_delta = 0
@@ -166,7 +180,7 @@ def build(source: Path, *, count: int, workers: int, mode: str = "single", round
     history = report.get("dense_layout", {})
     attempted = set(history.get("attempted", ()))
     pair_attempts = set(history.get("pair_attempted", ()))
-    merge_attempts = set(history.get("merge_site_attempted", ()))
+    merge_attempts = set(history.get("merge_channel_attempted", ()))
     pairs = {id(wiring.entries[rx][1]): id(wiring.entries[tx][1]) for rx, tx in wiring.short_ports.items()}
     changed = receiver_delta = pair_count = 0
     for round_index in range(rounds):
@@ -210,7 +224,7 @@ def build(source: Path, *, count: int, workers: int, mode: str = "single", round
                   dense_layout={"attempted": sorted(attempted), "changed": changed,
                                 "remaining": sum(i not in attempted and _eligible(b) for i, b in enumerate(platforms)),
                                 "pair_attempted": sorted(pair_attempts),
-                                "merge_site_attempted": sorted(merge_attempts),
+                                "merge_channel_attempted": sorted(merge_attempts),
                                 "pair_groups_tried": pair_count})
     return document, report
 
