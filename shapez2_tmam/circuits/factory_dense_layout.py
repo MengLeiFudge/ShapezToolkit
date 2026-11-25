@@ -25,7 +25,7 @@ class _Part:
     origin: tuple
 
 
-def _netlist(platforms, *, keep_ports=False):
+def _netlist(platforms, *, keep_ports=False, merge_receivers=True):
     wiring = Wiring({"Entries": platforms})
     sources_at = wiring._direct_sources if keep_ports else wiring.sources
     pairs = {} if keep_ports else wiring.short_ports
@@ -52,24 +52,25 @@ def _netlist(platforms, *, keep_ports=False):
         if net != shared:
             aliases[net] = shared
 
-    receivers = {}
-    for index, (_, entry) in enumerate(wiring.entries):
-        if _kind(entry) != "ControlledSignalReceiver":
-            continue
-        sources = sources_at(index, 0)
-        if len(sources) != 1:
-            continue
-        config = wiring.entries[sources[0][0]][1]
-        if _kind(config) != "ConstantSignal":
-            continue
-        pin = wiring.pins[index][0][0]
-        root = wiring._find(pin)
-        if wiring.drivers[root] != [(index, 0)]:
-            continue
-        key = entry["T"], entry.get("C"), config["C"]
-        first, target = receivers.setdefault(key, (index, pin))
-        if first != index:
-            merge_output(index, first, pin, target)
+    if merge_receivers:
+        receivers = {}
+        for index, (_, entry) in enumerate(wiring.entries):
+            if _kind(entry) != "ControlledSignalReceiver":
+                continue
+            sources = sources_at(index, 0)
+            if len(sources) != 1:
+                continue
+            config = wiring.entries[sources[0][0]][1]
+            if _kind(config) != "ConstantSignal":
+                continue
+            pin = wiring.pins[index][0][0]
+            root = wiring._find(pin)
+            if wiring.drivers[root] != [(index, 0)]:
+                continue
+            key = entry["T"], entry.get("C"), config["C"]
+            first, target = receivers.setdefault(key, (index, pin))
+            if first != index:
+                merge_output(index, first, pin, target)
     if len(platforms) > 1 and not keep_ports:
         # 唯一驱动且每个输入的来源相同，才能共用同一逻辑门。
         gates = {}
@@ -224,7 +225,7 @@ def _distance(trial, targets):
     return cost
 
 
-def _verify(old, new, reindex, replaced, *, keep_ports):
+def _verify(old, new, reindex, replaced, *, keep_ports, input_ports=None):
     after = Wiring({"Entries": [new]})
     inverse = {j: i for i, j in reindex.items()}
 
@@ -237,11 +238,12 @@ def _verify(old, new, reindex, replaced, *, keep_ports):
     old_ids = {i: i for i in reindex} | replaced
     sources_at = old._direct_sources if keep_ports else old.sources
     for i, j in reindex.items():
-        for port in range(len(old.pins[i][1])):
-            expected = {source(old, k, p, old_ids) for k, p in sources_at(i, port)}
-            actual = {source(after, k, p, inverse) for k, p in after._direct_sources(j, port)}
+        ports = range(len(old.pins[i][1])) if input_ports is None or i not in input_ports else input_ports[i]
+        for new_port, old_port in enumerate(ports):
+            expected = {source(old, k, p, old_ids) for k, p in sources_at(i, old_port)}
+            actual = {source(after, k, p, inverse) for k, p in after._direct_sources(j, new_port)}
             if actual != expected:
-                raise ValueError(f"重布线路后端口 {i}/{port} 的来源改变")
+                raise ValueError(f"重布线路后端口 {i}/{old_port} 的来源改变")
 
 
 def _route_buses(board, prefer_short=False, *, direct=False):
@@ -280,7 +282,8 @@ def _route_buses(board, prefer_short=False, *, direct=False):
     raise ValueError(f"紧凑母线 {order[0]} 无法接通")
 
 
-def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, prefer_short=False, direct=False):
+def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, prefer_short=False, direct=False,
+              input_ports=None):
     wiring, parts, used, replaced = netlist
     board = _Board(foundation=foundation)
     board.ground = platform_interior(foundation)
@@ -305,6 +308,7 @@ def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, pre
             net, _ = part.ports[int(outgoing)][0]
             reindex[part.index] = len(board.entries)
             board.entries.append(_entry(part, sx, sy, z, turn))
+            board.occupied.add((x, y, z))
             board.pin(net, x, y, z, side)
             targets[net].append((x + dx, y + dy, z))
 
@@ -328,7 +332,7 @@ def _place_on(netlist, foundation, pitch, *, edge_slots=None, stagger=False, pre
             raise ValueError("门位或端口空间不足")
         add(part, trial)
     new = _route_buses(board, prefer_short, direct=direct)
-    _verify(wiring, new, reindex, replaced, keep_ports=edge_slots is not None)
+    _verify(wiring, new, reindex, replaced, keep_ports=edge_slots is not None, input_ports=input_ports)
     return new
 
 
