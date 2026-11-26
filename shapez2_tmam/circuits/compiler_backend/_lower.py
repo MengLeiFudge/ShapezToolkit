@@ -135,9 +135,7 @@ class Lowering:
         inverse = _EQUALITY_INVERSE.get(config or "") if kind == "LogicGateCompare" else None
         opposite = self.predicates.get((kind, args, inverse)) if inverse else None
         if opposite is not None:
-            mask = self._truth(opposite)
-            if mask is not None:
-                table = _TRUTH_MASK ^ mask
+            return self._not(opposite)
         if kind == "LogicGateNot":
             a = self._truth(args[0])
             if a is not None:
@@ -150,9 +148,6 @@ class Lowering:
             return self.truth_nets[table]
         ref = self.circuit.add(kind, *args, config=config)
         self.predicates[key] = ref
-        if opposite is not None:
-            self.negations[ref] = opposite
-            self.negations[opposite] = ref
         if table is not None:
             self.truth[ref] = table
             self.truth_nets[table] = ref
@@ -181,9 +176,6 @@ class Lowering:
             return _FALSE if value == _TRUE else _TRUE
         if value in self.negations:
             return self.negations[value]
-        gate = self.circuit.gates[value.node]
-        if gate.kind == "LogicGateCompare" and gate.config in _EQUALITY_INVERSE:
-            return self._predicate(gate.kind, *gate.inputs, config=_EQUALITY_INVERSE[gate.config])
         result = self._predicate("LogicGateNot", value)
         self.negations[value] = result
         self.negations[result] = value

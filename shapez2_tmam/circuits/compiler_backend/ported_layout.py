@@ -6,13 +6,14 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from graphlib import TopologicalSorter
 from pathlib import Path
+from time import perf_counter
 
 from ...mari.blueprint import DIRECTIONS, Wiring, _kind, _rotate
 from ...mari.ports import OUT, PORTS, WEST
 from ..circuit import Gate, Literal, Ref, constant
 from ..compiler_contract import Program
 from ..compiler_frontend import FrontendError, compile_field_methods
-from ..foundations import EDGE_MARGIN, FOUNDATION_CHUNKS, TILE_SIZE, platform_ground, platform_interior
+from ..foundations import EDGE_MARGIN, FOUNDATION_CHUNKS, TILE_SIZE, foundation_tiles, platform_ground, platform_interior
 from ..wired_module import _Board
 from . import _write_blueprint
 from ._lower import Lowering, _Value
@@ -28,10 +29,28 @@ _FOUNDATIONS = (
     "Foundation_1x3",
     "Foundation_2x2",
     "Foundation_1x4",
+    "Foundation_L3",
     "Foundation_2x3",
     "Foundation_2x4",
     "Foundation_3x3",
 )
+_SIDES = "ESWN"
+_Site = tuple[int, int, int]
+
+
+@dataclass(frozen=True)
+class Notch:
+    """平台建筑坐标和朝外的一侧。"""
+
+    x: int
+    y: int
+    level: int
+    side: str
+
+    def rotation(self, receiver: bool) -> int:
+        if self.side not in tuple(_SIDES) or not 0 <= self.level <= 2:
+            raise ValueError(f"无效凹口 {self}")
+        return (_SIDES.index(self.side) + 2 * receiver) % 4
 
 
 @dataclass(frozen=True)
@@ -40,6 +59,10 @@ class _Unit:
     parents: frozenset[int]
     column: int
     lane: float
+    tapped: bool = False
+
+    def offset(self, index: int) -> int:
+        return index + int(self.tapped and index != 0)
 
 
 class _Netlist:
@@ -111,11 +134,19 @@ class _Netlist:
                 continue
             chain = [node]
             first = self.gates[node]
-            if _straight(first):
+            tapped = False
+            if _straight(first) or first.kind == "LogicGateCompare":
                 while True:
                     tail = chain[-1]
                     net = self.nets[Ref(tail)]
                     next_nodes = self.readers[net]
+                    if (len(chain) == 1 and first.kind == "LogicGateCompare"
+                            and (len(next_nodes) > 1 or net in self.outputs.values())):
+                        inverse = next((n for n in next_nodes if self.gates[n].kind == "LogicGateNot"), None)
+                        if inverse is not None:
+                            chain.append(inverse)
+                            tapped = True
+                            break
                     if (
                         len(next_nodes) != 1
                         or self.writers[net] != {tail}
@@ -127,7 +158,7 @@ class _Netlist:
             parents = frozenset(owner[w] for w in dependencies[node])
             column = max((columns[parent] for parent in parents), default=0)
             lane = sum(lanes[node]) / max(1, len(lanes[node]))
-            unit = _Unit(tuple(chain), parents, column, lane)
+            unit = _Unit(tuple(chain), parents, column, lane, tapped)
             units.append(unit)
             columns[node] = column + len(chain)
             owner.update((n, node) for n in chain)
@@ -167,7 +198,7 @@ class _Netlist:
             if not heads or any(n not in by_head for n in heads):
                 continue
             group = tuple(by_head[n] for n in heads)
-            if len({len(u.nodes) for u in group}) != 1:
+            if len({(len(u.nodes), u.tapped) for u in group}) != 1:
                 continue
             if any(matches.get(nodes[0]) != nodes for nodes in zip(*(u.nodes for u in group), strict=True)):
                 continue
@@ -179,42 +210,90 @@ def _straight(gate: Gate) -> bool:
     return PORTS[gate.kind][:2] == (OUT, WEST) and isinstance(gate.inputs[0], Ref)
 
 
-def _copy_board(board):
-    trial = _Board(foundation=board.foundation)
-    trial.origin_x, trial.origin_y = board.origin_x, board.origin_y
-    trial.ground = board.ground
-    trial.occupied = board.occupied.copy()
-    trial.entries = board.entries.copy()
-    trial.traces = defaultdict(
-        dict, {site: {net: sides.copy() for net, sides in nets.items()} for site, nets in board.traces.items()}
-    )
-    trial.terminals = defaultdict(set, {key: points.copy() for key, points in board.terminals.items()})
-    return trial
+class _RoutingBoard(_Board):
+    def __init__(self, *, foundation):
+        super().__init__(foundation=foundation)
+        self.short_sites = {_TX: set(), _RX: set()}
+        self._owned = set()
+        self._tracks = defaultdict(set)
+        self.pad_sites = set()
+        self.fixed_entries: list[dict] = []
+        self.fixed_cells: set[_Site] = set()
+        self.reroutes = 0
+        self.pads = {}
+
+    def fork(self):
+        trial = _RoutingBoard(foundation=self.foundation)
+        trial.origin_x, trial.origin_y = self.origin_x, self.origin_y
+        trial.ground = self.ground
+        trial.occupied = self.occupied.copy()
+        trial.entries = self.entries.copy()
+        trial.traces = self.traces.copy()
+        trial._tracks = self._tracks.copy()
+        trial.pad_sites = self.pad_sites.copy()
+        trial.fixed_entries = self.fixed_entries.copy()
+        trial.fixed_cells = self.fixed_cells.copy()
+        trial.reroutes = self.reroutes
+        trial.pads = self.pads.copy()
+        trial.short_sites = {kind: sites.copy() for kind, sites in self.short_sites.items()}
+        self._owned.clear()
+        return trial
+
+    def place(self, kind, x, y, level, rotation=0, config=None, *, radius=0, height=1):
+        index = super().place(kind, x, y, level, rotation, config, radius=radius, height=height)
+        if kind in self.short_sites:
+            self.short_sites[kind].add((x, y, level, rotation))
+        return index
+
+    def wire(self, site, net, side):
+        if site not in self._owned:
+            self.traces[site] = {key: sides.copy() for key, sides in self.traces.get(site, {}).items()}
+            self._owned.add(site)
+        traces = self.traces[site]
+        if net not in traces:
+            if not traces:
+                self._tracks[net] = self._tracks[net] | {site}
+            elif len(traces) == 1:
+                prior = next(iter(traces))
+                self._tracks[prior] = self._tracks[prior] - {site}
+            traces[net] = set()
+        traces[net].add(side)
+
+    def pad(self, site, net, side, sink):
+        self.wire(site, net, side)
+        self.pad_sites.add(site)
+        self.pads[site, side] = net, sink
+
+    def tracks(self, net):
+        return self._tracks.get(net, set())
 
 
-def _tracks(board):
-    points = defaultdict(set)
-    for site, nets in board.traces.items():
-        if len(nets) == 1:
-            points[next(iter(nets))].add(site)
-    return points
-
-
-def _edge(board, kind, coordinate, net):
-    x, y, z = coordinate
-    board.entries.append({"T": kind + "InternalVariant", "X": x, "Y": y, "L": z, "R": 0})
-    x, y = x - board.origin_x, y - board.origin_y
-    side = 0 if kind == _RX else 2
-    board.occupied.add((x, y, z))
-    board.pin(net, x, y, z, side)
-    return x + (1 if kind == _RX else -1), y, z
+def _edge(board, kind, notch, net, ground):
+    x, y, z = notch.x, notch.y, notch.level
+    rotation = notch.rotation(kind == _RX)
+    inward = rotation if kind == _RX else (rotation + 2) % 4
+    dx, dy = DIRECTIONS[inward]
+    if (x, y) not in ground - board.ground or (x + dx, y + dy) not in board.ground:
+        raise ValueError(f"坐标未对准平台凹口 {notch}")
+    site = x - board.origin_x, y - board.origin_y, z
+    pad = site[0] + dx, site[1] + dy, z
+    if site in board.occupied or pad in board.pad_sites:
+        raise ValueError(f"端口重复占用凹口 {notch}")
+    entry = {"T": kind + "InternalVariant", "X": x, "Y": y, "L": z, "R": rotation}
+    board.entries.append(entry)
+    board.fixed_entries.append(entry)
+    board.fixed_cells.add(site)
+    board.occupied.add(site)
+    board.short_sites[kind].add((*site, rotation))
+    board.pad(pad, net, (inward + 2) % 4, kind == _TX)
+    return pad
 
 
 def _input_spine(board, net, entry, exits):
     """在西边留一条直通母线，让各行从相邻位置取输入。"""
-    _, row, z = entry
-    y = row - board.origin_y
-    rows = [y, *(position[1] - board.origin_y for position in exits)]
+    z = entry.level
+    y = entry.y - board.origin_y
+    rows = [y, *(position.y - board.origin_y for position in exits if position.level == z)]
     top, bottom = min(rows), max(rows)
     for v in range(top, bottom + 1):
         sides = set()
@@ -222,29 +301,33 @@ def _input_spine(board, net, entry, exits):
             sides.add(3)
         if v < bottom:
             sides.add(1)
-        board.traces[1, v, z].setdefault(net, set()).update(sides)
-    board.traces[0, y, z][net].add(0)
-    board.traces[1, y, z][net].add(2)
+        for side in sides:
+            board.wire((1, v, z), net, side)
+    board.wire((0, y, z), net, 0)
+    board.wire((1, y, z), net, 2)
 
 
-def _slots(ground, interior, x, count):
-    side = 1 if x < min(a for a, _ in interior) else -1
-    rows = sorted(y for a, y in ground - interior if a == x and (a + side, y) in interior)
-    if count > 3 * len(rows):
-        raise ValueError(f"平台边缘最多容纳 {3 * len(rows)} 路飞线端口")
-    rows_by_height = [(x, y, z) for z in range(3) for y in rows]
-    if count <= len(rows):
-        return tuple(rows_by_height[(2 * i + 1) * len(rows) // (2 * count)] for i in range(count))
-    return tuple(rows_by_height[:count])
+def _input_slots(ground, interior, x, count, used):
+    rows = sorted(y for a, y in ground - interior if a == x and (a + 1, y) in interior)
+    choices = (Notch(x, y, z, "W") for z in range(3) for y in rows)
+    slots = [port for port in choices if port not in used]
+    if count > len(slots):
+        raise ValueError(f"西侧只剩 {len(slots)} 个可用凹口")
+    first_layer = [p for p in slots if p.level == 0]
+    if count <= len(first_layer):
+        return tuple(first_layer[(2 * i + 1) * len(first_layer) // (2 * count)] for i in range(count))
+    return tuple(slots[:count])
 
 
 def _proposal(board, model, unit, x, y, z, turn):
+    if not 0 <= z <= 2:
+        return None
     chain = unit.nodes
-    body = {(x + i, y, z) for i in range(len(chain))}
+    body = {(x + unit.offset(i), y, z) for i in range(len(chain))}
     for i, node in enumerate(chain):
         if model.gates[node].kind == "VirtualHalvesSwapper":
             dx, dy = _rotate(0, -1, turn)
-            body.add((x + i + dx, y + dy, z))
+            body.add((x + unit.offset(i) + dx, y + dy, z))
     if any(not board.on_ground(a, b) or p in board.occupied or board.traces.get(p) for p in body for a, b, _ in (p,)):
         return None
     pads = {}
@@ -252,7 +335,7 @@ def _proposal(board, model, unit, x, y, z, turn):
     for i, node in enumerate(chain):
         gate = model.gates[node]
         for category, ports in enumerate(PORTS[gate.kind][:2]):
-            if (category == 0 and i != len(chain) - 1) or (category == 1 and i != 0):
+            if (category == 0 and i != len(chain) - 1 and not unit.tapped) or (category == 1 and i != 0):
                 continue
             for port, (facing, a, b, level) in enumerate(ports):
                 arg = gate.inputs[port] if category else Ref(node, port)
@@ -262,7 +345,7 @@ def _proposal(board, model, unit, x, y, z, turn):
                 side = (facing + turn) % 4
                 dx, dy = DIRECTIONS[side]
                 a, b = _rotate(a, b, turn)
-                p = x + i + a + dx, y + b + dy, z + level
+                p = x + unit.offset(i) + a + dx, y + b + dy, z + level
                 if p in body or p in pads or p in literals or p in board.occupied or not board.on_ground(*p[:2]):
                     return None
                 wires = board.traces.get(p, {})
@@ -277,90 +360,177 @@ def _proposal(board, model, unit, x, y, z, turn):
     return body, pads, literals
 
 
-def _attach(board, model, unit, site, plan, tracks, driven):
-    trial = _copy_board(board)
+def _reroute(board, model, failed):
+    """保留器件和凹口，先接失败网，再按历史拥塞代价重布。"""
+    terminals = defaultdict(dict)
+    for (site, _), (net, sink) in board.pads.items():
+        contacts = terminals[net]
+        contacts[site] = contacts.get(site, True) and sink
+    history = Counter()
+    previous = board
+    order = sorted(terminals, key=lambda n: (n != failed, -len(terminals[n]), n))
+    for _ in range(3):
+        for site in previous.tracks(failed) - board.pad_sites:
+            history[site] += 1
+        trial = _RoutingBoard(foundation=board.foundation)
+        trial.origin_x, trial.origin_y = board.origin_x, board.origin_y
+        trial.ground = board.ground
+        trial.fixed_entries = board.fixed_entries.copy()
+        trial.fixed_cells = board.fixed_cells.copy()
+        trial.entries = trial.fixed_entries.copy()
+        trial.occupied = trial.fixed_cells.copy()
+        for entry in trial.entries:
+            kind = _kind(entry)
+            if kind in trial.short_sites:
+                trial.short_sites[kind].add((entry['X'] - trial.origin_x, entry['Y'] - trial.origin_y,
+                                             entry['L'], entry['R']))
+        for (site, side), (net, sink) in board.pads.items():
+            trial.pad(site, net, side, sink)
+        for net in order:
+            pins = sorted(terminals[net], key=lambda p: (terminals[net][p], p))
+            tree = {pins[0]}
+            unique = len(model.writers[net]) + int(net in model.inputs.values()) == 1
+            for site in pins[1:]:
+                flywire = unique and not terminals[net][pins[0]] and terminals[net][site]
+                if not _join(trial, net, site, tree, direct=True, flywire=flywire,
+                             protect_pads=True, history=history):
+                    break
+                tree.add(site)
+                tree.update(p for p in trial.tracks(net) if p not in terminals[net])
+            else:
+                continue
+            failed = net
+            previous = trial
+            order = [net, *(other for other in order if other != net)]
+            break
+        else:
+            trial.reroutes = board.reroutes + 1
+            return trial
+    return None
+
+
+def _escape(board):
+    for site in board.pad_sites:
+        nets = board.traces[site]
+        if len(nets) != 1:
+            continue
+        net, sides = next(iter(nets.items()))
+        if len(sides) != 1:
+            continue
+        x, y, level = site
+        for dx, dy in DIRECTIONS:
+            dest = (x + dx, y + dy, level)
+            if (board.on_ground(*dest[:2]) and dest not in board.occupied
+                    and not board.traces.get(dest, {}).keys() - {net}):
+                break
+        else:
+            return False
+    return True
+
+
+def _attach(board, model, unit, site, plan, driven, *, reroute=False):
+    trial = board.fork()
+    entry_start = len(trial.entries)
     x, y, z, turn = site
     body, pads, literals = plan
     for i, node in enumerate(unit.nodes):
         gate = model.gates[node]
-        trial.place(gate.kind, x + i, y, z, turn, gate.config)
+        trial.place(gate.kind, x + unit.offset(i), y, z, turn, gate.config)
     trial.occupied.update(body)
     for p, (config, facing) in literals.items():
         a, b, level = p
         trial.place("ConstantSignal", a, b, level, facing, config)
-    own = defaultdict(set)
-    for p, (net, side, _) in pads.items():
-        trial.traces[p].setdefault(net, set()).add(side)
-        trial.terminals[net, p[2]].add(p)
-    for p, (net, _, sink) in pads.items():
-        tree = tracks[net] | own[net]
-        unique_source = len(model.writers[net]) + int(net in model.inputs.values()) == 1
-        flywire = sink and unique_source and net in driven
-        if tree and not _join(trial, net, p, tree, direct=True, flywire=flywire, protect_pads=True):
-            return None
-        own[net].add(p)
-    return trial
+    trial.fixed_entries.extend(trial.entries[entry_start:])
+    trial.fixed_cells.update(body | literals.keys())
+    tapped = (x + 1, y, z) if unit.tapped else None
+    trees = {net: trial.tracks(net) for net, _, _ in pads.values()}
+    for p, (net, side, sink) in pads.items():
+        if p == tapped:
+            trial.pad(p, net, 0, True)
+        trial.pad(p, net, side, sink)
+    for p, (net, _, sink) in sorted(pads.items(), key=lambda item: (not item[1][2], len(trees[item[1][0]]))):
+        tree = trees[net]
+        unique = len(model.writers[net]) + int(net in model.inputs.values()) == 1
+        if tree and not _join(trial, net, p, tree, direct=True, flywire=sink and unique and net in driven,
+                              protect_pads=True):
+            return _reroute(trial, model, net) if reroute else None
+        trees[net] = tree | {p}
+    return trial if _escape(trial) else None
 
 
 def _put_group(board, model, group, ideal, driven):
-    unit, _ = group[0]
-    tracks = _tracks(board)
+    unit, _, _ = group[0]
+    offsets = tuple((dy, dz) for _, dy, dz in group)
+    tracks = board.tracks
     tx, ty, preferred_layer = ideal
     xs = sorted({a - board.origin_x for a, _ in board.ground}, key=lambda x: (abs(x - tx), x))
     ys = sorted({b - board.origin_y for _, b in board.ground}, key=lambda y: (abs(y - ty), y))
     candidates = []
     distance = {}
+    levels = range(-min(dz for _, dz in offsets), 3 - max(dz for _, dz in offsets))
     for x in xs[:9]:
         for y in ys[:9]:
-            for z in range(3):
+            for z in levels:
                 for turn in (0,) if len(unit.nodes) > 1 else (0, 1, 3, 2):
                     plan = _proposal(board, model, unit, x, y, z, turn)
                     if plan is None:
                         continue
+                    if any(_proposal(board, model, replica, x, y + dy, z + dz, turn) is None
+                           for replica, dy, dz in group[1:]):
+                        continue
                     score = 0
                     for p, (net, _, _) in plan[1].items():
-                        if not tracks[net]:
+                        if not tracks(net):
                             continue
                         key = net, p
                         if key not in distance:
                             a, b, c = p
-                            distance[key] = min(abs(a - u) + abs(b - v) + 4 * abs(c - w) for u, v, w in tracks[net])
+                            distance[key] = min(abs(a - u) + abs(b - v) + 4 * abs(c - w) for u, v, w in tracks(net))
                         score += distance[key]
-                    align = 2 * abs(x - tx) + 3 * abs(y - ty) + 3 * abs(z - preferred_layer)
+                    align = 2 * abs(x - tx) + 3 * abs(y - ty) + 8 * abs(z - preferred_layer)
                     candidates.append(((score + align, align, turn != 0), (x, y, z, turn), plan))
-    best = None
-    limit = 24 if len(group) > 1 else 14
-    for rank, site, plan in sorted(candidates)[:limit]:
-        trial = _attach(board, model, unit, site, plan, tracks, driven)
-        if trial is None:
-            continue
-        x, y, z, turn = site
-        sites = [site]
-        for replica, dy in group[1:]:
-            shifted = (x, y + dy, z, turn)
-            replica_plan = _proposal(trial, model, replica, *shifted)
-            if replica_plan is None:
+    ranked = sorted(candidates)
+    # 同一低层候选连续堵塞时，给其余层保留少量试摆机会。
+    alternatives = [c for c in ranked if c[1][2] != preferred_layer][:12]
+    ranked = list(dict.fromkeys(c[1] for c in ranked[:24] + alternatives + ranked[24:]))
+    geometry = {site: (rank, site, plan) for rank, site, plan in candidates}
+    ranked = [geometry[site] for site in ranked]
+    for reroute, limit in ((False, 36), (True, 5)):
+        best = None
+        successes = 0
+        for rank, site, plan in ranked[:limit]:
+            trial = _attach(board, model, unit, site, plan, driven, reroute=reroute)
+            if trial is None:
+                continue
+            x, y, z, turn = site
+            sites = [site]
+            for replica, dy, dz in group[1:]:
+                shifted = (x, y + dy, z + dz, turn)
+                replica_plan = _proposal(trial, model, replica, *shifted)
+                if replica_plan is None:
+                    break
+                trial = _attach(trial, model, replica, shifted, replica_plan, driven, reroute=reroute)
+                if trial is None:
+                    break
+                sites.append(shifted)
+            if trial is None or len(sites) != len(group):
+                continue
+            growth = len(trial.entries) + len(trial.traces) - len(board.entries) - len(board.traces)
+            score = growth + rank[1], rank
+            if best is None or score < best[0]:
+                best = score, trial, sites
+            successes += 1
+            if successes == 3 or reroute:
                 break
-            routed = _attach(trial, model, replica, shifted, replica_plan, _tracks(trial), driven)
-            if routed is None:
-                break
-            trial = routed
-            sites.append(shifted)
-        if len(sites) != len(group):
-            continue
-        growth = len(trial.entries) + len(trial.traces) - len(board.entries) - len(board.traces)
-        score = growth + rank[1], rank
-        if best is None or score < best[0]:
-            best = score, trial, sites
-        if best and growth <= len(unit.nodes) + len(plan[2]) + 2:
-            break
-    if best is None:
-        raise ValueError(f"逻辑器件 {unit.nodes} 在列 {unit.column} 无法摆放并接通，有 {len(candidates)} 个候选")
-    return best[1:]
+        if best is not None:
+            return best[1:]
+    raise ValueError(f"逻辑器件 {unit.nodes} 在列 {unit.column} 无法摆放并接通，有 {len(candidates)} 个候选")
 
 
-def _verify(island, model, coordinates, input_indices, output_indices):
+def _verify(island, model, coordinates, inputs, outputs):
     wiring = Wiring(island)
+    input_indices = {name: wiring.lookup[0, p.x, p.y, p.level] for name, p in inputs.items()}
+    output_indices = {name: wiring.lookup[0, p.x, p.y, p.level] for name, p in outputs.items()}
     open_ports = set(input_indices.values()) | set(output_indices.values())
     paired = set(wiring.short_ports) | set(wiring.short_ports.values())
     if open_ports & paired:
@@ -419,7 +589,8 @@ def _crossings(board, wiring):
         obstacles = [
             (sx + i * dx, sy + i * dy, z)
             for i in range(1, gap)
-            if (sx + i * dx - board.origin_x, sy + i * dy - board.origin_y, z) in board.occupied
+            if (p := (sx + i * dx - board.origin_x, sy + i * dy - board.origin_y, z)) in board.occupied
+            or p in board.traces
         ]
         if not obstacles:
             raise ValueError(f"短距跳线 {(sx, sy, z)} 未越过占用格")
@@ -427,32 +598,45 @@ def _crossings(board, wiring):
     return crossings
 
 
-def _layout(model, units, foundation, rotation, stride, *, spine=False, repeat=1):
-    board = _Board(foundation=foundation)
+def _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports):
+    board = _RoutingBoard(foundation=foundation)
     ground = platform_ground(foundation, rotation)
     board.ground = platform_interior(foundation, rotation)
     left, right = min(x for x, _ in ground), max(x for x, _ in ground)
-    top, bottom = min(y for _, y in board.ground), max(y for _, y in board.ground)
+    top = min(y for _, y in board.ground)
     board.origin_x, board.origin_y = left + 1, top
-    inputs = dict(zip(model.inputs, _slots(ground, board.ground, left, len(model.inputs)), strict=True))
-    outputs = dict(zip(model.outputs, _slots(ground, board.ground, right, len(model.outputs)), strict=True))
-    input_indices = {}
-    output_indices = {}
+    dots = sorted(y for x, y in ground - board.ground if x == right and (x - 1, y) in board.ground)
+    used = set(output_ports.values()) | set(input_ports.values())
+    outputs = dict(output_ports)
+    for name, (y, z) in zip(model.outputs, lanes, strict=True):
+        if name in outputs:
+            continue
+        free = (Notch(right, r, level, "E") for r in dots for level in range(3))
+        choices = [port for port in free if port not in used]
+        if not choices:
+            raise ValueError("东侧没有可用输出凹口")
+        port = min(choices, key=lambda p: (abs(p.y - top - y) + 4 * abs(z - p.level), abs(z - p.level), p.y))
+        outputs[name] = port
+        used.add(port)
+    missing = [name for name in model.inputs if name not in input_ports]
+    slots = _input_slots(ground, board.ground, left, len(missing), used)
+    inputs = dict(zip(missing, slots, strict=True))
+    inputs.update(input_ports)
+    outputs = {name: outputs[name] for name in model.outputs}
     edge_pads = defaultdict(set)
     for name, site in inputs.items():
-        input_indices[name] = len(board.entries)
         net = model.inputs[name]
-        pad = _edge(board, _RX, site, net)
+        pad = _edge(board, _RX, site, net, ground)
         edge_pads[net].add(pad)
     for name, site in outputs.items():
-        output_indices[name] = len(board.entries)
         net = model.outputs[name]
-        pad = _edge(board, _TX, site, net)
+        pad = _edge(board, _TX, site, net, ground)
         if edge_pads[net] and not _join(board, net, pad, edge_pads[net], direct=True, protect_pads=True):
             raise ValueError(f"无法连接共用信号的输出端口 {name}")
         edge_pads[net].add(pad)
 
-    if spine and len(model.inputs) == 1 and len(outputs) > 1:
+    spine = len(inputs) == 1 and len(outputs) > 1 and not (input_ports or output_ports) and foundation != "Foundation_L3"
+    if spine:
         (net,) = model.inputs.values()
         _input_spine(board, net, next(iter(inputs.values())), tuple(outputs.values()))
 
@@ -460,15 +644,20 @@ def _layout(model, units, foundation, rotation, stride, *, spine=False, repeat=1
     driven = set(model.inputs.values())
     extent = max((unit.column + len(unit.nodes) for unit in units), default=1)
     span = right - left - 4
-    height = bottom - top + 1
-    repeated = model.repeated_units(units) if repeat and len(outputs) > 1 else {}
-    repeated = {head: group for head, group in repeated.items() if len(group[0].nodes) >= repeat}
+    repeated = model.repeated_units(units) if len(outputs) > 1 else {}
     pending = sorted(units, key=lambda u: (u.column, u.lane, u.nodes[0]))
     placed = set()
     replicated = []
 
-    def lane_row(unit):
-        return round((unit.lane + 0.5) * height / len(outputs))
+    def lane_site(unit):
+        lower = int(unit.lane)
+        y, z = lanes[lower]
+        if unit.lane != lower:
+            upper_y, upper_z = lanes[lower + 1]
+            if z == upper_z:
+                return (y + upper_y) // 2, z
+            return (y + upper_y) // 2, 2
+        return y, z
 
     while pending:
         ready = [unit for unit in pending if unit.parents <= placed]
@@ -479,100 +668,107 @@ def _layout(model, units, foundation, rotation, stride, *, spine=False, repeat=1
         group = repeated.get(unit.nodes[0], (unit,))
         if not ready_set.issuperset(group):
             group = (unit,)
-        y = lane_row(group[0])
+        y, z = lane_site(group[0])
         column = max(u.column for u in group)
         x = 2 + min(span * column // extent, stride * column)
-        replicas = tuple((u, lane_row(u) - y) for u in group)
-        try:
-            board, sites = _put_group(board, model, replicas, (x, y, 0), driven)
-        except ValueError:
-            if len(group) == 1:
-                raise
-            group = (unit,)
-            x = 2 + min(span * unit.column // extent, stride * unit.column)
-            board, sites = _put_group(board, model, ((unit, 0),), (x, lane_row(unit), 0), driven)
+        replicas = tuple((u, ay - y, az - z) for u in group for ay, az in (lane_site(u),))
+        board, sites = _put_group(board, model, replicas, (x, y, z), driven)
         if len(group) > 1:
             replicated.append([u.nodes[0] for u in group])
         for u, (x, y, z, _) in zip(group, sites, strict=True):
             placed.add(u.nodes[0])
             pending.remove(u)
             for i, node in enumerate(u.nodes):
-                coordinates[node] = x + i + board.origin_x, y + board.origin_y, z
+                coordinates[node] = x + u.offset(i) + board.origin_x, y + board.origin_y, z
                 driven.update(model.nets[Ref(node, port)] for port in range(len(PORTS[model.gates[node].kind][0])))
     island = board.finish()
     if rotation:
         island["Entries"][0]["R"] = rotation
-    wiring = _verify(island, model, coordinates, input_indices, output_indices)
+    wiring = _verify(island, model, coordinates, inputs, outputs)
     return {"V": 1137, "BP": island}, {
         "methods": model.methods,
         "foundation": foundation,
         "rotation": rotation,
-        "island_tiles": FOUNDATION_CHUNKS[foundation][0] * FOUNDATION_CHUNKS[foundation][1],
-        "input_spine": spine and len(model.inputs) == 1 and len(outputs) > 1,
+        "island_tiles": len(foundation_tiles(foundation, rotation)),
+        "input_spine": spine,
+        "ripups": board.reroutes,
         "logic_gates": len(model.gates),
         "building_entries": len(wiring.entries),
         "global_radios": 0,
         "local_flywires": len(wiring.short_ports),
         "flywire_crossings": _crossings(board, wiring),
-        "inputs": {name: dict(zip(("X", "Y", "L"), site, strict=True), R=0) for name, site in inputs.items()},
-        "outputs": {name: dict(zip(("X", "Y", "L"), site, strict=True), R=0) for name, site in outputs.items()},
+        "inputs": {name: {"X": p.x, "Y": p.y, "L": p.level, "R": p.rotation(True)} for name, p in inputs.items()},
+        "outputs": {name: {"X": p.x, "Y": p.y, "L": p.level, "R": p.rotation(False)} for name, p in outputs.items()},
         "replicated_units": [[coordinates[node] for node in group] for group in replicated],
-        "direct_macros": [[coordinates[node] for node in unit.nodes] for unit in units if len(unit.nodes) > 1],
+        "direct_macros": [[coordinates[node] for node in unit.nodes]
+                          for unit in units if len(unit.nodes) > 1 and not unit.tapped],
+        "tapped_macros": [[coordinates[node] for node in unit.nodes] for unit in units if unit.tapped],
     }
 
 
-def build(programs: Mapping[str, Program], *, platform: tuple[str, int] | None = None) -> tuple[dict, dict]:
+def _lane_options(height, count):
+    for step in ((8, 6, 5) if height < 22 else (6, 8, 5)):
+        for per_layer in (count, (count + 1) // 2, (count + 2) // 3):
+            used = 4 + (per_layer - 1) * step
+            if used <= height:
+                start = max(2, (min(height, 24) - used) // 2 + 2)
+                yield tuple((start + i % per_layer * step, i // per_layer) for i in range(count))
+
+
+def build(
+    programs: Mapping[str, Program],
+    *,
+    platform: tuple[str, int] | None = None,
+    input_ports: Mapping[str, Notch] | None = None,
+    output_ports: Mapping[str, Notch] | None = None,
+) -> tuple[dict, dict]:
+    start = perf_counter()
     model = _Netlist(programs)
     units = model.units()
-    platforms = []
-    if platform is not None:
-        platforms.append(platform)
-    else:
-        for foundation in _FOUNDATIONS:
-            width, height = FOUNDATION_CHUNKS[foundation]
-            rotations = (0, 1) if width != height else (0,)
-            platforms.extend((foundation, rotation) for rotation in rotations)
-    # 先为串联链留转接格，为各行留分支空间，再按岛格比较。
-    width_hint = max((unit.column + len(unit.nodes) for unit in units), default=1) + 4
-    height_hint = 5 * len(model.outputs)
+    input_ports = {} if input_ports is None else input_ports
+    output_ports = {} if output_ports is None else output_ports
+    if input_ports.keys() - model.inputs.keys() or output_ports.keys() - model.outputs.keys():
+        raise ValueError("指定了未知的输入或输出端口")
+    platforms = [platform] if platform is not None else [
+        (kind, r)
+        for kind in _FOUNDATIONS
+        for r in range(2 if len(set(FOUNDATION_CHUNKS[kind])) > 1 else 1)
+    ]
+    depth = max((unit.column + len(unit.nodes) for unit in units), default=1)
 
-    def platform_rank(candidate):
+    def rank(candidate):
         kind, rotation = candidate
-        w, h = FOUNDATION_CHUNKS[kind]
-        if rotation % 2:
-            w, h = h, w
-        narrow = w * TILE_SIZE - 2 * EDGE_MARGIN < width_hint or h * TILE_SIZE - 2 * EDGE_MARGIN < height_hint
-        return narrow, w * h
+        tiles = foundation_tiles(kind, rotation)
+        w = (1 + max(x for x, _ in tiles)) * TILE_SIZE - 2 * EDGE_MARGIN
+        h = (1 + max(y for _, y in tiles)) * TILE_SIZE - 2 * EDGE_MARGIN
+        return max(depth + 4 - w, 0) > 0, len(tiles), h
 
     errors = []
-    best = None
-    best_rank = (True, float("inf"))
-    for foundation, rotation in sorted(platforms, key=platform_rank):
-        width, height = FOUNDATION_CHUNKS[foundation]
-        rank = platform_rank((foundation, rotation))
-        if best is not None and rank > best_rank:
-            break
-        if len(model.outputs) > 1:
-            spine = len(model.inputs) == 1
-            if min(width, height) >= 2 and max(width, height) >= 3:
-                options = ((3, spine, 1), (2, spine, 2), (2, spine, 0))
-            else:
-                options = ((2, spine, 2), (2, spine, 0), (3, spine, 0))
-        else:
-            options = ((2, False, 0), (3, False, 0))
-        for stride, spine, repeat in options:
-            try:
-                candidate = _layout(model, units, foundation, rotation, stride, spine=spine, repeat=repeat)
-            except ValueError as error:
-                errors.append(f"{foundation}/{rotation}/{stride}/{int(spine)}/{repeat} {error}")
-                continue
-            if best is None or candidate[1]["building_entries"] < best[1]["building_entries"]:
-                best = candidate
-                best_rank = rank
-            break
-    if best is None:
-        raise ValueError("有线布局失败。" + "；".join(errors))
-    return best
+    for foundation, rotation in sorted(platforms, key=rank):
+        _, _, height = rank((foundation, rotation))
+        profiles = tuple(dict.fromkeys(_lane_options(height, len(model.outputs))))
+        for lanes in profiles:
+            for stride in (2, 1, 3):
+                try:
+                    bp, report = _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports)
+                except ValueError as error:
+                    errors.append(f"{foundation}/{rotation}/{stride} {error}")
+                    continue
+                report["layout_seconds"] = round(perf_counter() - start, 4)
+                report["lane_centers"] = lanes
+                return bp, report
+    raise ValueError("有线布局失败。" + "；".join(errors[-8:]))
+
+
+def _notches(items):
+    ports = {}
+    for item in items:
+        name, value = item.split("=", 1)
+        x, y, level, side = value.split(",")
+        if name in ports:
+            raise ValueError(f"重复指定端口 {name}")
+        ports[name] = Notch(int(x), int(y), int(level), side.upper())
+    return ports
 
 
 def main() -> int:
@@ -586,6 +782,8 @@ def main() -> int:
         choices=[f"{s.removeprefix('Foundation_')}/{r}" for s in _FOUNDATIONS for r in range(4)],
         help="限定平台和朝向，例如 1x4/1",
     )
+    parser.add_argument("--input-notch", action="append", default=[], metavar="名称=X,Y,L,N", help="指定输入凹口")
+    parser.add_argument("--output-notch", action="append", default=[], metavar="名称=X,Y,L,E", help="指定输出凹口")
     parser.add_argument("--output", type=Path, required=True, help="原生 .spz2bp 输出路径")
     args = parser.parse_args()
     try:
@@ -597,7 +795,9 @@ def main() -> int:
         if args.platform:
             shape, rotation = args.platform.split("/")
             platform = "Foundation_" + shape, int(rotation)
-        _write_blueprint(*build(programs, platform=platform), args.output)
+        bp, report = build(programs, platform=platform, input_ports=_notches(args.input_notch),
+                           output_ports=_notches(args.output_notch))
+        _write_blueprint(bp, report, args.output)
     except (OSError, FrontendError, ValueError) as error:
         parser.error(str(error))
     return 0

@@ -119,8 +119,32 @@ def _diagram(path):
     return platforms, entries, links, radio, coverage
 
 
-def _section(path, output_dir):
+def _section(path, output_dir, audit):
     platforms, entries, links, radio, coverage = _diagram(path)
+    wiring = _native_wiring(path)
+    local, across = Counter(), Counter()
+    for receiver, sender in wiring.short_ports.items():
+        a, b = (wiring.sites[i][0] + 1 for i in (receiver, sender))
+        if a == b:
+            local[a] += 1
+        else:
+            across.update((a, b))
+    vias = Counter(board + 1 for board, entry in wiring.entries if "Up" in _kind(entry))
+    evidence = ""
+    if audit:
+        samples = audit["simulation"]
+        time = audit["compile_seconds"]
+        gates = f'{audit["logic_gates"]} 个逻辑门 · ' if "logic_gates" in audit else ""
+        rows = []
+        for sample in samples:
+            values = " · ".join(f"{name}={value if value is not None else '∅'}"
+                                for name, value in sample["outputs"].items())
+            code = sample['input'] if sample['input'] is not None else '∅'
+            rows.append(f"<tr><td>{escape(code)}</td><td>{escape(values)}</td></tr>")
+        evidence = (f"<p>{gates}编译并导出 {time:.3f} 秒 · 门级对照 {len(samples)}/{len(samples)}</p>"
+                    f'<details><summary>门级对照记录</summary><table>'
+                    f'<thead><tr><th>输入短代码</th><th>原生输出</th></tr></thead>'
+                    f'<tbody>{"".join(rows)}</tbody></table></details>')
     native = output_dir / path.name
     if path.resolve() != native.resolve():
         copyfile(path, native)
@@ -166,19 +190,22 @@ def _section(path, output_dir):
             layer_columns = "<td>—</td>" * _LEVELS
         board_rows.append(f"<tr><td>P{board}</td><td>Z{island}</td><td>{width}×{height}</td><td>{count:,}</td>"
                           f"<td>{occupancy:.1%}</td>{layer_columns}<td>{cells} / {buildable:,}</td>"
-                          f"<td>{rate}</td><td>{plan_rate}</td><td>{radio_rate}</td><td>{verdict}</td></tr>")
+                          f"<td>{rate}</td><td>{plan_rate}</td><td>{radio_rate}</td><td>{vias[board]}</td>"
+                          f"<td>{local[board]}</td><td>{across[board]}</td><td>{verdict}</td></tr>")
     data = json.dumps({"platforms": platforms, "entries": entries, "links": links}, ensure_ascii=True)
     table = "".join("<tr>" + "".join(f"<td>{v}</td>" for v in (*row[:5], "接收" if row[5] == "rx" else "发射", row[6]))
                     + "</tr>" for row in radio)
     return (f'<section><h2>{escape(path.stem)}</h2><p>{files}</p>'
             f'<p>{len(platforms)} 件平台 · {island_cells:,} 个 1×1 岛格 · {len(entries):,} 个建筑条目</p>'
             f'<p>{summary} · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
-            f'飞线 {len(links)} 对 · 全局接收 {receivers} · 全局发射 {transmitters}</p>'
+            f'板内飞线 {sum(local.values())} 对 · 跨板飞线 {sum(across.values()) // 2} 对 · '
+            f'全局接收 {receivers} · 全局发射 {transmitters}</p>'
             f'<p>总建筑占比 {len(entries) / capacity:.1%}</p>'
+            f'{evidence}'
             '<details open><summary>逐块平台占地</summary><table><thead>'
             '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>建筑占比</th>'
             '<th>L0</th><th>L1</th><th>L2</th><th>三层已占 / 可建格</th><th>三层占地率</th>'
-            '<th>俯视占地率</th><th>全局收发占地</th><th>放置检查</th></tr>'
+            '<th>俯视占地率</th><th>全局收发占地</th><th>换层件</th><th>板内飞线</th><th>跨板端点</th><th>放置检查</th></tr>'
             f'</thead><tbody>{"".join(board_rows)}</tbody></table></details>'
             '<table><thead><tr><th>建筑层</th><th>器件</th><th>线缆件</th></tr></thead>'
             f'<tbody>{layers}</tbody></table>'
@@ -294,12 +321,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="从已有原生电路生成逐层布置图和实际收发器清单")
     parser.add_argument("blueprints", nargs="+", type=Path, help="原生电路蓝图文件")
     parser.add_argument("--output-dir", required=True, type=Path, help="审阅图和原生蓝图的输出目录")
+    parser.add_argument("--audit", type=Path, help="按蓝图文件名索引的门级回放记录 JSON")
     args = parser.parse_args()
     if len({path.name.casefold() for path in args.blueprints}) != len(args.blueprints):
         parser.error("输入蓝图文件名须互不重复")
     try:
         args.output_dir.mkdir(parents=True, exist_ok=True)
-        sections = [_section(path, args.output_dir) for path in args.blueprints]
+        audit = json.loads(args.audit.read_text(encoding="utf-8")) if args.audit else {}
+        sections = [_section(path, args.output_dir, audit.get(path.stem)) for path in args.blueprints]
         index = args.output_dir / "index.html"
         index.write_text(_HEADER + "\n".join(sections) + _SCRIPT, encoding="utf-8")
     except (OSError, ValueError, KeyError) as error:

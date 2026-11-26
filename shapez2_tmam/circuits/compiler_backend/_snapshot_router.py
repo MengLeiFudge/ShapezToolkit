@@ -19,7 +19,18 @@ def _available(board, site):
     return site not in board.occupied and board.on_ground(*site[:2])
 
 
+def _paint(board, site, net, side):
+    edit = getattr(board, "wire", None)
+    if edit is not None:
+        edit(site, net, side)
+    else:
+        board.traces[site].setdefault(net, set()).add(side)
+
+
 def _short_sites(board):
+    indexed = getattr(board, "short_sites", None)
+    if indexed is not None:
+        return indexed
     endpoints = {_SENDER: set(), _RECEIVER: set()}
     for entry in board.entries:
         kind = _kind(entry)
@@ -37,7 +48,7 @@ def _free_pair(endpoints, sender, receiver, turn):
     return not any((x + i * dx, y + i * dy, z, turn) in endpoints[_RECEIVER] for i in _SHORT_RANGE)
 
 
-def _path(board, net, start, targets, facing, estimate, flywire, pads):
+def _path(board, net, start, targets, facing, estimate, flywire, pads, history):
     if start in targets:
         return True
     sequence = count()
@@ -48,7 +59,7 @@ def _path(board, net, start, targets, facing, estimate, flywire, pads):
     endpoints = _short_sites(board) if flywire else None
 
     def reach(site, cost, direction, via=None):
-        distance = distances[point] + cost
+        distance = distances[point] + cost + history.get(site, 0)
         if distance < distances.get(site, float("inf")):
             distances[site] = distance
             previous[site] = point, direction, via
@@ -110,6 +121,8 @@ def _path(board, net, start, targets, facing, estimate, flywire, pads):
     else:
         return None
 
+    if endpoints is not None:
+        endpoints = {kind: sites.copy() for kind, sites in endpoints.items()}
     # 寻路状态只记当前位置。回查换层段，避免这条路径与自身重叠。
     path, occupied = [], set()
     while (edge := previous[point]) is not None:
@@ -141,24 +154,60 @@ def _path(board, net, start, targets, facing, estimate, flywire, pads):
             sender, receiver, turn = via
             board.place(_SENDER, *sender, turn)
             board.place(_RECEIVER, *receiver, turn)
-            traces[point].setdefault(net, set()).add(turn)
-            traces[origin].setdefault(net, set()).add(direction)
+            _paint(board, point, net, turn)
+            _paint(board, origin, net, direction)
         elif via:
             kind, a, b, lo, rotation, height, exit_ = via
             board.place(kind, a, b, lo, rotation, height=height)
-            traces[point].setdefault(net, set()).add((exit_ + 2) % 4)
-            traces[origin].setdefault(net, set()).add(direction)
+            _paint(board, point, net, (exit_ + 2) % 4)
+            _paint(board, origin, net, direction)
         else:
             dx, dy = DIRECTIONS[direction]
             while point != origin:
-                traces[point].setdefault(net, set()).add((direction + 2) % 4)
+                _paint(board, point, net, (direction + 2) % 4)
                 point = point[0] - dx, point[1] - dy, point[2]
-                traces[point].setdefault(net, set()).add(direction)
+                _paint(board, point, net, direction)
     return True
 
 
-def _join(board, net, site, tree, *, direct=False, flywire=False, protect_pads=False):
-    pads = set().union(*board.terminals.values()) if protect_pads else set()
+def _straight_join(board, net, start, tree):
+    if start in tree:
+        return True
+    x, y, z = start
+    same_layer = (p for p in tree if p[2] == z)
+    nearby = sorted(same_layer, key=lambda p: (abs(p[0] - x) + abs(p[1] - y), p))[:3]
+    for target in nearby:
+        for bend in ((target[0], y, z), (x, target[1], z)):
+            edges = []
+            point = start
+            for end in (bend, target):
+                while point != end:
+                    a, b, _ = point
+                    direction = 0 if end[0] > a else 2 if end[0] < a else 1 if end[1] > b else 3
+                    dx, dy = DIRECTIONS[direction]
+                    neighbour = a + dx, b + dy, z
+                    if not _available(board, neighbour) or board.traces.get(neighbour, {}).keys() - {net}:
+                        break
+                    edges.append((point, neighbour, direction))
+                    point = neighbour
+                if point != end:
+                    break
+            if point == target:
+                for source, dest, direction in edges:
+                    _paint(board, source, net, direction)
+                    _paint(board, dest, net, (direction + 2) % 4)
+                return True
+    return False
+
+
+def _join(board, net, site, tree, *, direct=False, flywire=False, protect_pads=False, history=None):
+    pads = getattr(board, "pad_sites", None) if protect_pads else set()
+    if pads is None:
+        pads = set().union(*board.terminals.values())
+    if history is None:
+        history = {}
+    if direct and not history and hasattr(board, "short_sites") and _straight_join(board, net, site, tree):
+        return True
     estimate: Callable[[tuple[int, int, int]], int] | None = None
     if direct:
         xs, ys, levels = zip(*tree)
@@ -174,7 +223,7 @@ def _join(board, net, site, tree, *, direct=False, flywire=False, protect_pads=F
         estimate = distance_to_box
 
     for direction in range(4):
-        result = _path(board, net, site, tree, direction, estimate, flywire, pads)
+        result = _path(board, net, site, tree, direction, estimate, flywire, pads, history)
         # 换方向只改变同代价的选路顺序，搜索穷尽后无需重试。
         if result is None:
             return False
