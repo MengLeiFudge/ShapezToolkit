@@ -4,7 +4,7 @@ from graphlib import TopologicalSorter
 from heapq import heapify, heappop, heappush
 
 from ...mari.ports import PORTS
-from ..circuit import Circuit, Gate, Ref
+from ..circuit import Circuit, Gate, Literal, Ref
 
 
 _ROTATION = {"VirtualRotator": 1, "VirtualRotatorCCW": -1}
@@ -16,6 +16,44 @@ def _gate_key(gate: Gate) -> tuple:
     if gate.kind in _COMMUTATIVE or (gate.kind == "LogicGateCompare" and gate.config in _EQUALITY_INVERSE):
         return gate.kind, gate.config, frozenset(gate.inputs)
     return gate.kind, gate.config, gate.inputs
+
+
+def simplify_null_guards(circuit: Circuit) -> None:
+    """形状为空时，原生堆叠和选择的结果已经为空。"""
+    def nonempty(value):
+        if not isinstance(value, Ref):
+            return None
+        gate = circuit.gates[value.node]
+        inverted = gate.kind == 'LogicGateNot'
+        if inverted:
+            source = gate.inputs[0]
+            if not isinstance(source, Ref):
+                return None
+            gate = circuit.gates[source.node]
+        if gate.kind == 'LogicGateCompare' and gate.config == ('AQ==' if inverted else 'Bg=='):
+            a, b = gate.inputs
+            return a if b == Literal(None) else b if a == Literal(None) else None
+        return None
+
+    aliases = {ref for group in circuit.aliases for ref in group}
+    for i, gate in enumerate(circuit.gates):
+        if gate.kind != 'LogicGateIf':
+            continue
+        value, condition = gate.inputs
+        if not isinstance(value, Ref) or not isinstance(condition, Ref):
+            continue
+        check = circuit.gates[condition.node]
+        terms = check.inputs if check.kind == 'LogicGateAnd' else (condition,)
+        data = circuit.gates[value.node]
+        if (value.port == 0 and value not in aliases and data.kind == 'VirtualStacker'
+                and set(map(nonempty, terms)) == set(data.inputs)):
+            circuit.gates[i] = data
+        elif len(terms) == 2:
+            a, b = terms
+            if nonempty(a) == value:
+                circuit.gates[i] = Gate(gate.kind, (value, b))
+            elif nonempty(b) == value:
+                circuit.gates[i] = Gate(gate.kind, (value, a))
 
 
 def _fold_single_polarity(circuit: Circuit, outputs: dict[int, Ref]) -> bool:

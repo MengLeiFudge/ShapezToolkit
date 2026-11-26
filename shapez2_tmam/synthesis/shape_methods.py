@@ -215,6 +215,50 @@ def original_row_4(target: Shape | None) -> Shape | None:
     return _read_original_row(target, 5)
 
 
+def _row_at_bound(target: Shape | None, height: int) -> Shape | None:
+    if _has_row_at_bound(target, height):
+        return unstack_upper(target)
+    return None
+
+
+def _remaining_after_bound(target: Shape | None, height: int) -> Shape | None:
+    if _has_row_at_bound(target, height):
+        return unstack_lower(target)
+    return target
+
+
+def remaining_after_row4(target: Shape | None) -> Shape | None:
+    return _remaining_after_bound(target, 5)
+
+
+def read_bound_row3(target: Shape | None) -> Shape | None:
+    return _row_at_bound(target, 4)
+
+
+def remaining_after_row3(target: Shape | None) -> Shape | None:
+    return _remaining_after_bound(target, 4)
+
+
+def read_bound_row2(target: Shape | None) -> Shape | None:
+    return _row_at_bound(target, 3)
+
+
+def remaining_after_row2(target: Shape | None) -> Shape | None:
+    return _remaining_after_bound(target, 3)
+
+
+def read_bound_row1(target: Shape | None) -> Shape | None:
+    return _row_at_bound(target, 2)
+
+
+def remaining_after_row1(target: Shape | None) -> Shape | None:
+    return _remaining_after_bound(target, 2)
+
+
+def read_bound_row0(target: Shape | None) -> Shape | None:
+    return unstack_upper(target)
+
+
 def bottom_material(target: Shape | None) -> int:
     """底层 q0 按空、普通格、针、晶体分别返回 0、1、2、3。"""
     part = analyze_part(target)
@@ -236,7 +280,7 @@ def _pack_support_corner(row: Shape | None, below: Shape | None, ground: bool,
         if keep_crystal:
             return shape_literal("P-------")
         return None
-    supported = ground or analyze_part(below) is not None
+    supported = ground | (analyze_part(below) is not None)
     if part == shape_literal("P-------"):
         if supported:
             return shape_literal("Wu------")

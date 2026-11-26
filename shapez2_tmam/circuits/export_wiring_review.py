@@ -141,7 +141,12 @@ def _section(path, output_dir, audit):
                                 for name, value in sample["outputs"].items())
             code = sample['input'] if sample['input'] is not None else '∅'
             rows.append(f"<tr><td>{escape(code)}</td><td>{escape(values)}</td></tr>")
-        evidence = (f"<p>{gates}编译并导出 {time:.3f} 秒 · 门级对照 {len(samples)}/{len(samples)}</p>"
+        ripups = (f' · 采用重布 {audit["ripups"]} 次（尝试 {audit["ripup_attempts"]} 次）'
+                  if 'ripups' in audit else '')
+        baseline = audit.get('comparison', '')
+        comparison = f'<p>{escape(baseline)}</p>' if baseline else ''
+        evidence = (f"<p>{gates}编译并导出 {time:.3f} 秒 · 门级对照 {len(samples)}/{len(samples)}{ripups}</p>"
+                    f'{comparison}'
                     f'<details><summary>门级对照记录</summary><table>'
                     f'<thead><tr><th>输入短代码</th><th>原生输出</th></tr></thead>'
                     f'<tbody>{"".join(rows)}</tbody></table></details>')
@@ -200,7 +205,8 @@ def _section(path, output_dir, audit):
             f'<p>{summary} · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
             f'板内飞线 {sum(local.values())} 对 · 跨板飞线 {sum(across.values()) // 2} 对 · '
             f'全局接收 {receivers} · 全局发射 {transmitters}</p>'
-            f'<p>总建筑占比 {len(entries) / capacity:.1%}</p>'
+            f'<p>总建筑占比 {len(entries) / capacity:.1%} · 三维占地率 '
+            f'{sum(r[0] for r in coverage) / (_LEVELS * sum(r[2] for r in coverage)):.1%}</p>'
             f'{evidence}'
             '<details open><summary>逐块平台占地</summary><table><thead>'
             '<tr><th>平台</th><th>岛层</th><th>尺寸</th><th>建筑条目</th><th>建筑占比</th>'

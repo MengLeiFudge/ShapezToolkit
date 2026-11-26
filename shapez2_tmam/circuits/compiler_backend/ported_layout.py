@@ -17,7 +17,7 @@ from ..foundations import EDGE_MARGIN, FOUNDATION_CHUNKS, TILE_SIZE, foundation_
 from ..wired_module import _Board
 from . import _write_blueprint
 from ._lower import Lowering, _Value
-from ._optimize import compact
+from ._optimize import compact, simplify_null_guards
 from ._snapshot_router import _join
 
 
@@ -91,6 +91,7 @@ class _Netlist:
 
         # 输入占位与普通常量即使值相同也必须成不同的网。
         circuit, refs = compact(circuit, outputs, distinct=tuple(inputs.values()))
+        simplify_null_guards(circuit)
         circuit.retain_outputs(tuple(refs.values()))
         assert circuit.retained_nodes is not None
         self.nets = circuit.channel_map()
@@ -111,6 +112,52 @@ class _Netlist:
                     self.readers[self.nets[arg]].append(node)
         self.live = set(self.readers) | set(self.outputs.values())
         self.methods = {name: method.name for name, method in methods.items()}
+        roots = tuple(self.outputs.values())
+        if len(roots) == 1:
+            parallel = defaultdict(list)
+            for net in sorted(self.live):
+                drivers = tuple(self.gates[n] for n in sorted(self.writers[net]))
+                if len(drivers) < 2 or not all(g.kind == "LogicGateIf" and isinstance(g.inputs[0], Literal)
+                                               for g in drivers):
+                    continue
+                signature = frozenset(g.inputs[0] for g in drivers)
+                parallel[signature].append(net)
+            branches = max(parallel.values(), key=len, default=[])
+            if len(branches) > 1:
+                roots = tuple(branches)
+            elif len(self.gates) > 40:
+                roots = self.parallel_frontier(roots)
+        self.lane_nets = roots
+
+    def parallel_frontier(self, roots):
+        """沿汇聚图向上寻找宽度合适的条带根；共享上游仍由各条带共用。"""
+        best = roots
+        seen = set(roots)
+        for _ in range(6):
+            upstream = tuple(dict.fromkeys(self.nets[arg] for net in roots for node in sorted(self.writers[net])
+                                           for arg in self.gates[node].inputs if isinstance(arg, Ref)
+                                           and self.writers[self.nets[arg]]))
+            if not upstream or set(upstream) <= seen:
+                break
+            if len(best) < len(upstream) <= 4:
+                best = upstream
+            seen.update(upstream)
+            roots = upstream
+        return best
+
+    def slice(self, nodes, inputs, outputs):
+        part = object.__new__(_Netlist)
+        part.nets = self.nets
+        part.gates = {n: self.gates[n] for n in sorted(nodes)}
+        part.inputs, part.outputs = inputs, outputs
+        part.writers = defaultdict(set, {net: self.writers[net] & nodes for net in self.writers})
+        part.readers = defaultdict(list, {net: [n for n in readers if n in nodes]
+                                         for net, readers in self.readers.items()})
+        part.live = {net for net in part.readers if part.readers[net]} | set(outputs.values())
+        part.lane_nets = tuple(outputs.values())
+        part.methods = dict.fromkeys(outputs, "网表分区")
+        return part
+
 
     def units(self) -> tuple[_Unit, ...]:
         dependencies = {
@@ -119,7 +166,7 @@ class _Netlist:
         }
         order = tuple(TopologicalSorter(dependencies).static_order())
         lanes: dict[int, set[int]] = defaultdict(set)
-        for lane, net in enumerate(self.outputs.values()):
+        for lane, net in enumerate(self.lane_nets):
             for node in self.writers[net]:
                 lanes[node].add(lane)
         for node in reversed(order):
@@ -157,7 +204,7 @@ class _Netlist:
                     chain.append(next_nodes[0])
             parents = frozenset(owner[w] for w in dependencies[node])
             column = max((columns[parent] for parent in parents), default=0)
-            lane = sum(lanes[node]) / max(1, len(lanes[node]))
+            lane = sum(lanes[node]) / len(lanes[node]) if lanes[node] else (len(self.lane_nets) - 1) / 2
             unit = _Unit(tuple(chain), parents, column, lane, tapped)
             units.append(unit)
             columns[node] = column + len(chain)
@@ -166,7 +213,7 @@ class _Netlist:
 
     def repeated_units(self, units):
         """从各输出向上匹配同构后缀。共用网络与朝向预处理留给各行外部。"""
-        pending = [tuple(self.outputs.values())]
+        pending = [tuple(self.lane_nets)]
         seen = set()
         matches = {}
         while pending:
@@ -220,6 +267,8 @@ class _RoutingBoard(_Board):
         self.fixed_entries: list[dict] = []
         self.fixed_cells: set[_Site] = set()
         self.reroutes = 0
+        self.route_stats = Counter()
+        self.route_budget: int | None = None
         self.pads = {}
 
     def fork(self):
@@ -234,6 +283,8 @@ class _RoutingBoard(_Board):
         trial.fixed_entries = self.fixed_entries.copy()
         trial.fixed_cells = self.fixed_cells.copy()
         trial.reroutes = self.reroutes
+        trial.route_stats = self.route_stats
+        trial.route_budget = self.route_budget
         trial.pads = self.pads.copy()
         trial.short_sites = {kind: sites.copy() for kind, sites in self.short_sites.items()}
         self._owned.clear()
@@ -360,8 +411,33 @@ def _proposal(board, model, unit, x, y, z, turn):
     return body, pads, literals
 
 
+def _bare_board(board):
+    trial = _RoutingBoard(foundation=board.foundation)
+    trial.origin_x, trial.origin_y = board.origin_x, board.origin_y
+    trial.ground = board.ground
+    trial.fixed_entries = board.fixed_entries.copy()
+    trial.fixed_cells = board.fixed_cells.copy()
+    trial.entries = trial.fixed_entries.copy()
+    trial.occupied = trial.fixed_cells.copy()
+    trial.reroutes = board.reroutes
+    trial.route_stats = board.route_stats
+    trial.route_budget = None if board.route_budget is None else 800
+    for entry in trial.entries:
+        kind = _kind(entry)
+        if kind in trial.short_sites:
+            trial.short_sites[kind].add((entry['X'] - trial.origin_x, entry['Y'] - trial.origin_y,
+                                         entry['L'], entry['R']))
+    for (site, side), (net, sink) in board.pads.items():
+        trial.pad(site, net, side, sink)
+    return trial
+
+
 def _reroute(board, model, failed):
     """保留器件和凹口，先接失败网，再按历史拥塞代价重布。"""
+    board.route_stats['ripup_attempts'] += 1
+    bare = _bare_board(board)
+    if _blocked_net(bare) is not None:
+        return None
     terminals = defaultdict(dict)
     for (site, _), (net, sink) in board.pads.items():
         contacts = terminals[net]
@@ -372,20 +448,7 @@ def _reroute(board, model, failed):
     for _ in range(3):
         for site in previous.tracks(failed) - board.pad_sites:
             history[site] += 1
-        trial = _RoutingBoard(foundation=board.foundation)
-        trial.origin_x, trial.origin_y = board.origin_x, board.origin_y
-        trial.ground = board.ground
-        trial.fixed_entries = board.fixed_entries.copy()
-        trial.fixed_cells = board.fixed_cells.copy()
-        trial.entries = trial.fixed_entries.copy()
-        trial.occupied = trial.fixed_cells.copy()
-        for entry in trial.entries:
-            kind = _kind(entry)
-            if kind in trial.short_sites:
-                trial.short_sites[kind].add((entry['X'] - trial.origin_x, entry['Y'] - trial.origin_y,
-                                             entry['L'], entry['R']))
-        for (site, side), (net, sink) in board.pads.items():
-            trial.pad(site, net, side, sink)
+        trial = bare.fork()
         for net in order:
             pins = sorted(terminals[net], key=lambda p: (terminals[net][p], p))
             tree = {pins[0]}
@@ -404,12 +467,18 @@ def _reroute(board, model, failed):
             order = [net, *(other for other in order if other != net)]
             break
         else:
-            trial.reroutes = board.reroutes + 1
-            return trial
+            stuck = _blocked_net(trial)
+            if stuck is None:
+                trial.reroutes = board.reroutes + 1
+                return trial
+            for site in trial.traces.keys() - board.pad_sites:
+                if any((site[0] + dx, site[1] + dy, site[2]) in board.pad_sites for dx, dy in DIRECTIONS):
+                    history[site] += 1
+            previous = trial
     return None
 
 
-def _escape(board):
+def _blocked_net(board, *, extend=False):
     for site in board.pad_sites:
         nets = board.traces[site]
         if len(nets) != 1:
@@ -418,17 +487,31 @@ def _escape(board):
         if len(sides) != 1:
             continue
         x, y, level = site
-        for dx, dy in DIRECTIONS:
-            dest = (x + dx, y + dy, level)
-            if (board.on_ground(*dest[:2]) and dest not in board.occupied
-                    and not board.traces.get(dest, {}).keys() - {net}):
-                break
-        else:
-            return False
-    return True
+        def free(point):
+            return (board.on_ground(*point[:2]) and point not in board.occupied
+                    and not board.traces.get(point, {}).keys() - {net})
+
+        exits = []
+        for direction, (dx, dy) in enumerate(DIRECTIONS):
+            dest = x + dx, y + dy, level
+            if not free(dest):
+                continue
+            room = sum(free((dest[0] + a, dest[1] + b, level))
+                       for j, (a, b) in enumerate(DIRECTIONS) if j != (direction + 2) % 4)
+            room += sum((dest[0], dest[1], z) not in board.occupied and not board.traces.get((dest[0], dest[1], z))
+                        for z in (level - 1, level + 1) if 0 <= z < 3)
+            exits.append((room, direction, dest))
+        if exits:
+            if extend:
+                _, direction, dest = max(exits)
+                board.wire(site, net, direction)
+                board.wire(dest, net, (direction + 2) % 4)
+            continue
+        return net
+    return None
 
 
-def _attach(board, model, unit, site, plan, driven, *, reroute=False):
+def _attach(board, model, unit, site, plan, driven, *, reroute=False, rebuild=False):
     trial = board.fork()
     entry_start = len(trial.entries)
     x, y, z, turn = site
@@ -448,6 +531,8 @@ def _attach(board, model, unit, site, plan, driven, *, reroute=False):
         if p == tapped:
             trial.pad(p, net, 0, True)
         trial.pad(p, net, side, sink)
+    if rebuild:
+        return _reroute(trial, model, None)
     for p, (net, _, sink) in sorted(pads.items(), key=lambda item: (not item[1][2], len(trees[item[1][0]]))):
         tree = trees[net]
         unique = len(model.writers[net]) + int(net in model.inputs.values()) == 1
@@ -455,10 +540,20 @@ def _attach(board, model, unit, site, plan, driven, *, reroute=False):
                               protect_pads=True):
             return _reroute(trial, model, net) if reroute else None
         trees[net] = tree | {p}
-    return trial if _escape(trial) else None
+    blocked = _blocked_net(trial, extend=trial.route_budget is not None)
+    if blocked is None:
+        return trial
+    if reroute:
+        trial.route_stats['blocked_pad_ripups'] += 1
+        return _reroute(trial, model, blocked)
+    return None
 
 
-def _put_group(board, model, group, ideal, driven):
+class _PlacementError(ValueError):
+    pass
+
+
+def _put_group(board, model, group, ideal, driven, *, rebuild=False):
     unit, _, _ = group[0]
     offsets = tuple((dy, dz) for _, dy, dz in group)
     tracks = board.tracks
@@ -468,8 +563,15 @@ def _put_group(board, model, group, ideal, driven):
     candidates = []
     distance = {}
     levels = range(-min(dz for _, dz in offsets), 3 - max(dz for _, dz in offsets))
-    for x in xs[:9]:
-        for y in ys[:9]:
+    if board.route_budget is None:
+        x_sites, y_sites = xs[:9], ys[:9]
+    elif rebuild or len(group) == 1:
+        x_sites, y_sites = xs[:17], ys[:17]
+    else:
+        x_sites = [x for x in xs if x % 3 == tx % 3][:9]
+        y_sites = ys[::2][:7]
+    for x in x_sites:
+        for y in y_sites:
             for z in levels:
                 for turn in (0,) if len(unit.nodes) > 1 else (0, 1, 3, 2):
                     plan = _proposal(board, model, unit, x, y, z, turn)
@@ -488,6 +590,11 @@ def _put_group(board, model, group, ideal, driven):
                             distance[key] = min(abs(a - u) + abs(b - v) + 4 * abs(c - w) for u, v, w in tracks(net))
                         score += distance[key]
                     align = 2 * abs(x - tx) + 3 * abs(y - ty) + 8 * abs(z - preferred_layer)
+                    if board.route_budget is not None:
+                        # 给长条带的端口留出局部转向空隙。
+                        occupied = board.occupied
+                        align += 6 * sum((x + dx, y + dy, z) in occupied
+                                         for dx, dy in ((2, 0), (-2, 0), (0, 2), (0, -2)))
                     candidates.append(((score + align, align, turn != 0), (x, y, z, turn), plan))
     ranked = sorted(candidates)
     # 同一低层候选连续堵塞时，给其余层保留少量试摆机会。
@@ -495,11 +602,17 @@ def _put_group(board, model, group, ideal, driven):
     ranked = list(dict.fromkeys(c[1] for c in ranked[:24] + alternatives + ranked[24:]))
     geometry = {site: (rank, site, plan) for rank, site, plan in candidates}
     ranked = [geometry[site] for site in ranked]
-    for reroute, limit in ((False, 36), (True, 5)):
+    if rebuild:
+        budgets = ((True, 4),)
+    elif len(group) > 1 and len(model.outputs) == 1:
+        budgets = ((False, 10),)
+    else:
+        budgets = ((False, 36), (True, 2))
+    for reroute, limit in budgets:
         best = None
         successes = 0
         for rank, site, plan in ranked[:limit]:
-            trial = _attach(board, model, unit, site, plan, driven, reroute=reroute)
+            trial = _attach(board, model, unit, site, plan, driven, reroute=reroute, rebuild=rebuild)
             if trial is None:
                 continue
             x, y, z, turn = site
@@ -520,11 +633,13 @@ def _put_group(board, model, group, ideal, driven):
             if best is None or score < best[0]:
                 best = score, trial, sites
             successes += 1
-            if successes == 3 or reroute:
+            if successes == (1 if len(model.gates) > 100 else 3) or reroute:
                 break
         if best is not None:
             return best[1:]
-    raise ValueError(f"逻辑器件 {unit.nodes} 在列 {unit.column} 无法摆放并接通，有 {len(candidates)} 个候选")
+    if len(group) == 1 and not rebuild and len(model.gates) > 50:
+        return _put_group(_bare_board(board), model, group, ideal, driven, rebuild=True)
+    raise _PlacementError(f"逻辑器件 {unit.nodes} 在列 {unit.column} 无法摆放并接通，有 {len(candidates)} 个候选")
 
 
 def _verify(island, model, coordinates, inputs, outputs):
@@ -598,8 +713,11 @@ def _crossings(board, wiring):
     return crossings
 
 
-def _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports):
+def _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports, *, front=2):
     board = _RoutingBoard(foundation=foundation)
+    parallel = len(model.lane_nets) > len(model.outputs)
+    if parallel or len(input_ports) + len(output_ports) >= 9:
+        board.route_budget = 220
     ground = platform_ground(foundation, rotation)
     board.ground = platform_interior(foundation, rotation)
     left, right = min(x for x, _ in ground), max(x for x, _ in ground)
@@ -608,7 +726,8 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
     dots = sorted(y for x, y in ground - board.ground if x == right and (x - 1, y) in board.ground)
     used = set(output_ports.values()) | set(input_ports.values())
     outputs = dict(output_ports)
-    for name, (y, z) in zip(model.outputs, lanes, strict=True):
+    output_lanes = lanes if len(model.outputs) == len(lanes) else (lanes[-1],)
+    for name, (y, z) in zip(model.outputs, output_lanes, strict=True):
         if name in outputs:
             continue
         free = (Notch(right, r, level, "E") for r in dots for level in range(3))
@@ -644,7 +763,7 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
     driven = set(model.inputs.values())
     extent = max((unit.column + len(unit.nodes) for unit in units), default=1)
     span = right - left - 4
-    repeated = model.repeated_units(units) if len(outputs) > 1 else {}
+    repeated = model.repeated_units(units) if len(model.lane_nets) > 1 else {}
     pending = sorted(units, key=lambda u: (u.column, u.lane, u.nodes[0]))
     placed = set()
     replicated = []
@@ -659,6 +778,24 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
             return (y + upper_y) // 2, 2
         return y, z
 
+    def ideal(group):
+        first = group[0]
+        y, z = lane_site(first)
+        column = max(u.column for u in group)
+        x = front + min(span * column // extent, stride * column)
+        if parallel:
+            x = 5 + (span - 9) * column // extent
+        if len(inputs) + len(outputs) >= 9:
+            signals = {model.nets[arg] for n in first.nodes for arg in model.gates[n].inputs if isinstance(arg, Ref)}
+            points = [min(board.tracks(net), key=lambda p: abs(p[0] - x) + abs(p[1] - y) + 5 * abs(p[2] - z))
+                      for net in sorted(signals) if board.tracks(net)]
+            if points:
+                x = sum(p[0] for p in points) // len(points) + 2
+                y = sum(p[1] for p in points) // len(points)
+                z = sum(p[2] for p in points) // len(points)
+        return x, y, z
+
+
     while pending:
         ready = [unit for unit in pending if unit.parents <= placed]
         ready_set = set(ready)
@@ -668,11 +805,16 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
         group = repeated.get(unit.nodes[0], (unit,))
         if not ready_set.issuperset(group):
             group = (unit,)
-        y, z = lane_site(group[0])
-        column = max(u.column for u in group)
-        x = 2 + min(span * column // extent, stride * column)
-        replicas = tuple((u, ay - y, az - z) for u in group for ay, az in (lane_site(u),))
-        board, sites = _put_group(board, model, replicas, (x, y, z), driven)
+        x, y, z = ideal(group)
+        row, level = lane_site(group[0])
+        replicas = tuple((u, ay - row, az - level) for u in group for ay, az in (lane_site(u),))
+        try:
+            board, sites = _put_group(board, model, replicas, (x, y, z), driven)
+        except _PlacementError:
+            if len(group) == 1:
+                raise
+            group = (unit,)
+            board, sites = _put_group(board, model, ((unit, 0, 0),), ideal(group), driven)
         if len(group) > 1:
             replicated.append([u.nodes[0] for u in group])
         for u, (x, y, z, _) in zip(group, sites, strict=True):
@@ -692,6 +834,8 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
         "island_tiles": len(foundation_tiles(foundation, rotation)),
         "input_spine": spine,
         "ripups": board.reroutes,
+        "ripup_attempts": board.route_stats['ripup_attempts'],
+        "blocked_pad_ripups": board.route_stats['blocked_pad_ripups'],
         "logic_gates": len(model.gates),
         "building_entries": len(wiring.entries),
         "global_radios": 0,
@@ -744,20 +888,53 @@ def build(
         return max(depth + 4 - w, 0) > 0, len(tiles), h
 
     errors = []
+    if platform is None and not (input_ports or output_ports) and len(model.lane_nets) == 4 and len(model.outputs) == 1:
+        from .ported_partition import build_partition
+        try:
+            bp, report = build_partition(model)
+        except ValueError as error:
+            errors.append(str(error))
+        else:
+            report['layout_seconds'] = round(perf_counter() - start, 4)
+            return bp, report
+    best = None
     for foundation, rotation in sorted(platforms, key=rank):
-        _, _, height = rank((foundation, rotation))
-        profiles = tuple(dict.fromkeys(_lane_options(height, len(model.outputs))))
-        for lanes in profiles:
-            for stride in (2, 1, 3):
+        _, islands, height = rank((foundation, rotation))
+        if best is not None and islands > best[1]['island_tiles']:
+            break
+        profiles = list(dict.fromkeys(_lane_options(height, len(model.lane_nets))))
+        if profiles and output_ports and len(model.outputs) == len(model.lane_nets):
+            top = min(y for _, y in platform_interior(foundation, rotation))
+            preferred = profiles[0]
+            aligned = tuple((output_ports[name].y - top, output_ports[name].level) if name in output_ports else site
+                            for name, site in zip(model.outputs, preferred, strict=True))
+            if aligned:
+                profiles.insert(0, aligned)
+        small = len(units) < 28 and len(model.lane_nets) == 1
+        plans = [(lanes, 2) for lanes in profiles]
+        if small:
+            plans = [(((y + dy, level),), front) for (y, level), in profiles
+                     for dy, front in ((1, 0), (0, 2), (1, 2), (-1, 2), (0, 0))]
+        found = 0
+        for lanes, front in plans:
+            for stride in ((2, 1, 3) if found == 0 else (2,)):
                 try:
-                    bp, report = _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports)
+                    bp, report = _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports,
+                                         front=front)
                 except ValueError as error:
                     errors.append(f"{foundation}/{rotation}/{stride} {error}")
                     continue
-                report["layout_seconds"] = round(perf_counter() - start, 4)
-                report["lane_centers"] = lanes
-                return bp, report
-    raise ValueError("有线布局失败。" + "；".join(errors[-8:]))
+                report['lane_centers'] = lanes
+                found += 1
+                if best is None or (islands, report['building_entries']) < (best[1]['island_tiles'], best[1]['building_entries']):
+                    best = bp, report
+                break
+            if found >= (3 if small else 1):
+                break
+    if best is None:
+        raise ValueError("有线布局失败。" + "；".join(errors[-8:]))
+    best[1]['layout_seconds'] = round(perf_counter() - start, 4)
+    return best
 
 
 def _notches(items):

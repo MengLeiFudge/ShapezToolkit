@@ -55,6 +55,7 @@ def _path(board, net, start, targets, facing, estimate, flywire, pads, history):
     queue = [(0, next(sequence), start, 0)]
     previous: dict[tuple, tuple | None] = {start: None}
     distances = {start: 0}
+    expansions = getattr(board, "route_budget", None)
     traces = board.traces
     endpoints = _short_sites(board) if flywire else None
 
@@ -72,6 +73,10 @@ def _path(board, net, start, targets, facing, estimate, flywire, pads, history):
             continue
         if point in targets:
             break
+        if expansions is not None:
+            if expansions == 0:
+                return None
+            expansions -= 1
         x, y, level = point
         for step in range(4):
             direction = (facing + step) % 4
@@ -218,6 +223,8 @@ def _join(board, net, site, tree, *, direct=False, flywire=False, protect_pads=F
         def distance_to_box(point):
             x, y, z = point
             span = max(left - x, x - right, 0) + max(top - y, y - bottom, 0) + max(low - z, z - high, 0)
+            if getattr(board, "route_budget", None) is not None:
+                return 2 * span
             return span // 2 if flywire else span
 
         estimate = distance_to_box
