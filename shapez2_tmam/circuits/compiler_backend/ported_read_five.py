@@ -23,16 +23,18 @@ def five_rows():
     reader, _ = compile_field_methods(_SOURCE, {f'q{q}': name for q, name in enumerate(_CORNERS)})
     modules = {}
     links = []
-    for z in reversed(range(5)):
+    for z in reversed(range(1, 5)):
         fields = {'row': 'original_row_4' if z == 4 else f'read_bound_row{z}'}
-        if z:
-            fields['remaining'] = f'remaining_after_row{z}'
+        fields['remaining' if z > 1 else 'bottom'] = (f'remaining_after_row{z}' if z > 1
+                                                       else 'read_bound_row0_after_row1')
         stage, _ = compile_field_methods(_SOURCE, fields)
         modules[f'layer{z}'] = Module(stage, ('Foundation_1x1', 0))
         modules[f'row{z}'] = Module(reader, ('Foundation_1x2', 0))
         links.append(((f'layer{z}', 'row'), (f'row{z}', 'row')))
-        if z:
+        if z > 1:
             links.append(((f'layer{z}', 'remaining'), (f'layer{z - 1}', 'target')))
+    modules['row0'] = Module(reader, ('Foundation_1x2', 1))
+    links.append((('layer1', 'bottom'), ('row0', 'row')))
     return assemble(modules, tuple(links))
 
 

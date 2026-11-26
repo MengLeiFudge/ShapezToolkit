@@ -1,4 +1,4 @@
-"""把共用输入、四个并行计算锥和汇聚器分别放在相邻平台。"""
+"""把并行分支与公共分发、汇聚电路分别放在相邻平台。"""
 
 from collections import Counter
 from copy import deepcopy
@@ -9,7 +9,7 @@ from ...mari.ports import PORTS
 from ..circuit import Ref
 from .ported_layout import Notch, _layout
 
-_HUB = 'Foundation_1x2'
+_ROTATORS = ('VirtualRotator', 'VirtualRotatorCCW')
 _LEAF = 'Foundation_1x1'
 
 
@@ -22,6 +22,12 @@ class _Cone:
 
 def _cones(model):
     members = []
+    distributed = set(model.inputs.values())
+    pre_rotations = set()
+    for node, gate in model.gates.items():
+        if gate.kind in _ROTATORS and model.nets.get(gate.inputs[0]) in distributed:
+            pre_rotations.add(node)
+            distributed.add(model.nets[Ref(node)])
     for root in model.lane_nets:
         todo = [root]
         seen = set()
@@ -29,7 +35,7 @@ def _cones(model):
             net = todo.pop()
             for node in sorted(model.writers[net]):
                 gate = model.gates[node]
-                if node in seen or gate.kind in ('VirtualRotator', 'VirtualRotatorCCW'):
+                if node in seen or node in pre_rotations:
                     continue
                 seen.add(node)
                 todo.extend(model.nets[arg] for arg in gate.inputs if isinstance(arg, Ref))
@@ -72,7 +78,7 @@ def _turn(entry):
 
 
 def build_partition(model):
-    """把一组独立分支和共用的分发、汇聚逻辑装成六岛格。"""
+    """把两个或四个独立分支接到同一块分发汇聚板。"""
     cones = _cones(model)
     hub_inputs, hub_outputs = model.inputs.copy(), model.outputs.copy()
     hub_in_ports = {}
@@ -81,10 +87,12 @@ def build_partition(model):
     links = []
     leaf_reports = []
     cache = {}
+    width = len(cones) // 2
+    foundation = 'Foundation_1x1' if width == 1 else 'Foundation_1x2'
     for lane, cone in enumerate(cones):
         name = f'lane{lane}'
-        side_n = lane < 2
-        loc_x = lane % 2
+        side_n = lane < width
+        loc_x = lane % width
         hub_y, hub_side = (2, 'N') if side_n else (17, 'S')
         offset = 20 * loc_x
         def facing_hub(x):
@@ -94,7 +102,7 @@ def build_partition(model):
         for i, net in enumerate(cone.incoming):
             u, v = f'i{i}', f'{name}.i{i}'
             # 最中间的凹口留输出，输入从左到右分层排列。
-            x, level = (8 + i // 3, i % 3)
+            x, level = (8, 9, 11)[i // 3], i % 3
             leaf_in[u] = Notch(x, 17, level, 'S')
             hub_out_ports[v] = Notch(facing_hub(x), hub_y, level, hub_side)
             nets[u] = net
@@ -141,7 +149,7 @@ def build_partition(model):
                     for name in hub_outputs)
     for stride in (2, 3, 1):
         try:
-            bp, report = _layout(hub, hub.units(), _HUB, 0, stride, centers, hub_in_ports, hub_out_ports)
+            bp, report = _layout(hub, hub.units(), foundation, 0, stride, centers, hub_in_ports, hub_out_ports)
             break
         except ValueError as error:
             last = error

@@ -89,6 +89,18 @@ class _Netlist:
                 circuit.add("ConstantSignal", config=constant(result.value)) if isinstance(result, Literal) else result
             )
 
+        self._load(circuit, inputs, {name: outputs[i] for i, name in enumerate(methods)},
+                   {name: method.name for name, method in methods.items()})
+
+    @classmethod
+    def from_circuit(cls, circuit, inputs, outputs):
+        model = cls.__new__(cls)
+        model._load(circuit, inputs, outputs, dict.fromkeys(outputs, '原生网表'))
+        return model
+
+    def _load(self, circuit, inputs, outputs, methods):
+        names = tuple(outputs)
+        outputs = dict(enumerate(outputs.values()))
         # 输入占位与普通常量即使值相同也必须成不同的网。
         circuit, refs = compact(circuit, outputs, distinct=tuple(inputs.values()))
         simplify_null_guards(circuit)
@@ -101,7 +113,7 @@ class _Netlist:
             if node in circuit.retained_nodes and node not in {ref.node for ref in inputs.values()}
         }
         self.inputs = {name: self.nets[ref] for name, ref in inputs.items()}
-        self.outputs = {name: self.nets[refs[i]] for i, name in enumerate(methods)}
+        self.outputs = {name: self.nets[refs[i]] for i, name in enumerate(names)}
         self.writers = defaultdict(set)
         self.readers = defaultdict(list)
         for node, gate in self.gates.items():
@@ -111,7 +123,7 @@ class _Netlist:
                 if isinstance(arg, Ref):
                     self.readers[self.nets[arg]].append(node)
         self.live = set(self.readers) | set(self.outputs.values())
-        self.methods = {name: method.name for name, method in methods.items()}
+        self.methods = methods
         roots = tuple(self.outputs.values())
         if len(roots) == 1:
             parallel = defaultdict(list)
@@ -126,8 +138,32 @@ class _Netlist:
             if len(branches) > 1:
                 roots = tuple(branches)
             elif len(self.gates) > 40:
-                roots = self.parallel_frontier(roots)
+                merged = self.stack_branches(roots[0])
+                roots = merged if 2 <= len(merged) <= 4 else self.parallel_frontier(roots)
         self.lane_nets = roots
+
+    def stack_branches(self, net):
+        """沿左右拼合树找支路，旋转仍由公共分发或汇聚侧完成。"""
+        pending = [net]
+        leaves = []
+        while pending:
+            if len(pending) + len(leaves) > 4:
+                return ()
+            root = pending.pop()
+            writers = [self.gates[n] for n in self.writers[root]]
+            if len(writers) == 1 and writers[0].kind in ('VirtualRotator', 'VirtualRotatorCCW'):
+                arg = writers[0].inputs[0]
+                if isinstance(arg, Ref):
+                    pending.append(self.nets[arg])
+                    continue
+            stack = [g for g in writers if g.kind == 'VirtualStacker']
+            if len(stack) == 1 and all(g.kind in ('VirtualStacker', 'LogicGateIf') for g in writers):
+                left, right = stack[0].inputs
+                if isinstance(left, Ref) and isinstance(right, Ref):
+                    pending.extend((self.nets[right], self.nets[left]))
+                    continue
+            leaves.append(root)
+        return tuple(dict.fromkeys(leaves))
 
     def parallel_frontier(self, roots):
         """沿汇聚图向上寻找宽度合适的条带根；共享上游仍由各条带共用。"""
@@ -268,7 +304,8 @@ class _RoutingBoard(_Board):
         self.fixed_cells: set[_Site] = set()
         self.reroutes = 0
         self.route_stats = Counter()
-        self.route_budget: int | None = None
+        self.route_budget = 140
+        self.wide = False
         self.pads = {}
 
     def fork(self):
@@ -285,6 +322,7 @@ class _RoutingBoard(_Board):
         trial.reroutes = self.reroutes
         trial.route_stats = self.route_stats
         trial.route_budget = self.route_budget
+        trial.wide = self.wide
         trial.pads = self.pads.copy()
         trial.short_sites = {kind: sites.copy() for kind, sites in self.short_sites.items()}
         self._owned.clear()
@@ -421,7 +459,8 @@ def _bare_board(board):
     trial.occupied = trial.fixed_cells.copy()
     trial.reroutes = board.reroutes
     trial.route_stats = board.route_stats
-    trial.route_budget = None if board.route_budget is None else 800
+    trial.route_budget = 800 if board.wide else 300
+    trial.wide = board.wide
     for entry in trial.entries:
         kind = _kind(entry)
         if kind in trial.short_sites:
@@ -540,7 +579,7 @@ def _attach(board, model, unit, site, plan, driven, *, reroute=False, rebuild=Fa
                               protect_pads=True):
             return _reroute(trial, model, net) if reroute else None
         trees[net] = tree | {p}
-    blocked = _blocked_net(trial, extend=trial.route_budget is not None)
+    blocked = _blocked_net(trial, extend=trial.wide)
     if blocked is None:
         return trial
     if reroute:
@@ -563,7 +602,7 @@ def _put_group(board, model, group, ideal, driven, *, rebuild=False):
     candidates = []
     distance = {}
     levels = range(-min(dz for _, dz in offsets), 3 - max(dz for _, dz in offsets))
-    if board.route_budget is None:
+    if not board.wide:
         x_sites, y_sites = xs[:9], ys[:9]
     elif rebuild or len(group) == 1:
         x_sites, y_sites = xs[:17], ys[:17]
@@ -590,7 +629,7 @@ def _put_group(board, model, group, ideal, driven, *, rebuild=False):
                             distance[key] = min(abs(a - u) + abs(b - v) + 4 * abs(c - w) for u, v, w in tracks(net))
                         score += distance[key]
                     align = 2 * abs(x - tx) + 3 * abs(y - ty) + 8 * abs(z - preferred_layer)
-                    if board.route_budget is not None:
+                    if board.wide:
                         # 给长条带的端口留出局部转向空隙。
                         occupied = board.occupied
                         align += 6 * sum((x + dx, y + dy, z) in occupied
@@ -717,6 +756,7 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
     board = _RoutingBoard(foundation=foundation)
     parallel = len(model.lane_nets) > len(model.outputs)
     if parallel or len(input_ports) + len(output_ports) >= 9:
+        board.wide = True
         board.route_budget = 220
     ground = platform_ground(foundation, rotation)
     board.ground = platform_interior(foundation, rotation)
@@ -867,7 +907,13 @@ def build(
     output_ports: Mapping[str, Notch] | None = None,
 ) -> tuple[dict, dict]:
     start = perf_counter()
-    model = _Netlist(programs)
+    return _build_netlist(_Netlist(programs), platform=platform, input_ports=input_ports, output_ports=output_ports,
+                          start=start)
+
+
+def _build_netlist(model, *, platform, input_ports, output_ports, start=None):
+    if start is None:
+        start = perf_counter()
     units = model.units()
     input_ports = {} if input_ports is None else input_ports
     output_ports = {} if output_ports is None else output_ports
@@ -888,7 +934,7 @@ def build(
         return max(depth + 4 - w, 0) > 0, len(tiles), h
 
     errors = []
-    if platform is None and not (input_ports or output_ports) and len(model.lane_nets) == 4 and len(model.outputs) == 1:
+    if platform is None and not (input_ports or output_ports) and len(model.lane_nets) in (2, 4) and len(model.outputs) == 1:
         from .ported_partition import build_partition
         try:
             bp, report = build_partition(model)

@@ -259,6 +259,10 @@ def read_bound_row0(target: Shape | None) -> Shape | None:
     return unstack_upper(target)
 
 
+def read_bound_row0_after_row1(target: Shape | None) -> Shape | None:
+    return read_bound_row0(remaining_after_row1(target))
+
+
 def bottom_material(target: Shape | None) -> int:
     """底层 q0 按空、普通格、针、晶体分别返回 0、1、2、3。"""
     part = analyze_part(target)
@@ -332,12 +336,10 @@ def pack_prefix_row(row: Shape | None, below: Shape | None, ground: bool) -> Sha
 
 
 def _tail_stack_corner(row: Shape | None, level: int, prefix: int) -> Shape | None:
-    if level < prefix:
-        return None
     part = analyze_part(row)
-    if part is None or part == shape_literal("cu------"):
-        return None
-    return _cut_ground_corner(row)
+    if (level >= prefix) & (part is not None) & (part != shape_literal("cu------")):
+        return _cut_ground_corner(row)
+    return None
 
 
 def tail_stack_half(row: Shape | None, level: int, left_prefix: int, right_prefix: int) -> Shape | None:

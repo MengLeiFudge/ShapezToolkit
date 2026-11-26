@@ -145,10 +145,22 @@ def _section(path, output_dir, audit):
                   if 'ripups' in audit else '')
         baseline = audit.get('comparison', '')
         comparison = f'<p>{escape(baseline)}</p>' if baseline else ''
-        evidence = (f"<p>{gates}编译并导出 {time:.3f} 秒 · 门级对照 {len(samples)}/{len(samples)}{ripups}</p>"
-                    f'{comparison}'
-                    f'<details><summary>门级对照记录</summary><table>'
-                    f'<thead><tr><th>输入短代码</th><th>原生输出</th></tr></thead>'
+        label = escape(audit.get('label', '门级对照'))
+        attachments = []
+        for filename, title in audit.get('attachments', {}).items():
+            local_file = Path(filename)
+            if local_file.drive or local_file.name != filename or local_file.suffix != '.json':
+                raise ValueError(f'审阅附件须为同目录的 JSON 文件：{filename}')
+            source = path.parent / local_file
+            destination = output_dir / local_file
+            if source.resolve() != destination.resolve():
+                copyfile(source, destination)
+            attachments.append(f'<a href="{escape(filename)}">{escape(title)}</a>')
+        links = '<p>' + ' · '.join(attachments) + '</p>' if attachments else ''
+        evidence = (f"<p>{gates}编译并导出 {time:.3f} 秒 · {label} {len(samples)}/{len(samples)}{ripups}</p>"
+                    f'{comparison}{links}'
+                    f'<details><summary>{label}记录</summary><table>'
+                    f'<thead><tr><th>输入</th><th>原生输出</th></tr></thead>'
                     f'<tbody>{"".join(rows)}</tbody></table></details>')
     native = output_dir / path.name
     if path.resolve() != native.resolve():
