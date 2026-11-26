@@ -66,6 +66,8 @@ class _Unit:
 
 
 class _Netlist:
+    feedback_units: tuple[_Unit, ...] | None = None
+
     def __init__(self, programs: Mapping[str, Program]):
         if not programs:
             raise ValueError("至少需要一个输出方法")
@@ -93,9 +95,20 @@ class _Netlist:
                    {name: method.name for name, method in methods.items()})
 
     @classmethod
-    def from_circuit(cls, circuit, inputs, outputs):
+    def from_circuit(cls, circuit, inputs, outputs, *, feedback=None):
         model = cls.__new__(cls)
         model._load(circuit, inputs, outputs, dict.fromkeys(outputs, '原生网表'))
+        if feedback:
+            # 开环网表决定试摆顺序，最终走线和验线共用闭环网。
+            model.lane_nets = tuple(net for name, net in model.outputs.items() if name not in feedback.values())
+            model.feedback_units = model.units()
+            for input_, output in feedback.items():
+                old = model.inputs.pop(input_)
+                new = model.outputs.pop(output)
+                model.nets = {ref: new if net == old else net for ref, net in model.nets.items()}
+                model.readers[new].extend(model.readers.pop(old))
+                model.live.discard(old)
+                model.live.add(new)
         return model
 
     def _load(self, circuit, inputs, outputs, methods):
@@ -766,7 +779,7 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
     dots = sorted(y for x, y in ground - board.ground if x == right and (x - 1, y) in board.ground)
     used = set(output_ports.values()) | set(input_ports.values())
     outputs = dict(output_ports)
-    output_lanes = lanes if len(model.outputs) == len(lanes) else (lanes[-1],)
+    output_lanes = (lanes[-1],) if len(model.outputs) == 1 else lanes[:len(model.outputs)]
     for name, (y, z) in zip(model.outputs, output_lanes, strict=True):
         if name in outputs:
             continue
@@ -914,7 +927,9 @@ def build(
 def _build_netlist(model, *, platform, input_ports, output_ports, start=None):
     if start is None:
         start = perf_counter()
-    units = model.units()
+    units = model.feedback_units
+    if units is None:
+        units = model.units()
     input_ports = {} if input_ports is None else input_ports
     output_ports = {} if output_ports is None else output_ports
     if input_ports.keys() - model.inputs.keys() or output_ports.keys() - model.outputs.keys():

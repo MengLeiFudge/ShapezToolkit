@@ -150,13 +150,28 @@ class TickReplay:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='导出外部相位驱动的零无线有线循环扫描器')
+    from time import perf_counter
+
+    from .ported_auto_scan import CLOCK_CHANNEL, build_autonomous, build_clock
+
+    parser = argparse.ArgumentParser(description='导出自主有线循环扫描器')
     parser.add_argument('--output', type=Path, required=True, help='原生蓝图输出路径')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--external-phases', action='store_true', help='导出旧的外部相位驱动样件')
+    mode.add_argument('--clock-only', action='store_true', help='单独导出可供多路扫描共用的主时钟')
+    parser.add_argument('--clock-channel', type=int, default=CLOCK_CHANNEL, help='主时钟第一条私有频道')
     args = parser.parse_args()
     try:
-        bp, report = build_scan_loop()
+        start = perf_counter()
+        if args.external_phases:
+            bp, report = build_scan_loop()
+        elif args.clock_only:
+            bp, report = build_clock(args.clock_channel)
+        else:
+            bp, report = build_autonomous(args.clock_channel)
+        report['layout_seconds'] = round(perf_counter() - start, 4)
         _write_blueprint(bp, report, args.output)
-    except ValueError as error:
+    except (OSError, ValueError) as error:
         parser.error(str(error))
     return 0
 

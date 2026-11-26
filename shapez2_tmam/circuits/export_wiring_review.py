@@ -180,6 +180,7 @@ def _section(path, output_dir, audit):
     transmitters = len(radio) - receivers
     outer = tuple(max(p[i] + p[i + 3] for p in platforms) - min(p[i] for p in platforms) for i in (1, 2))
     footprint = len({(x + dx, y + dy) for _, x, y, _, _, _, _, tiles in platforms for dx, dy in tiles})
+    outline_fill = footprint / (outer[0] * outer[1])
     sizes = Counter((p[4], p[5], len(p[7])) for p in platforms)
     summary = "、".join(f"{count} 块 {width}×{height}" + (" L 形" if tiles < width * height else "")
                        for (width, height, tiles), count in sorted(sizes.items()))
@@ -215,6 +216,7 @@ def _section(path, output_dir, audit):
     return (f'<section><h2>{escape(path.stem)}</h2><p>{files}</p>'
             f'<p>{len(platforms)} 件平台 · {island_cells:,} 个 1×1 岛格 · {len(entries):,} 个建筑条目</p>'
             f'<p>{summary} · 投影占 {footprint} 岛格 · 外框 {outer[0]}×{outer[1]} 岛格 · '
+            f'外框填充率 {outline_fill:.1%} · '
             f'板内飞线 {sum(local.values())} 对 · 跨板飞线 {sum(across.values()) // 2} 对 · '
             f'全局接收 {receivers} · 全局发射 {transmitters}</p>'
             f'<p>总建筑占比 {len(entries) / capacity:.1%} · 三维占地率 '
@@ -339,7 +341,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="从已有原生电路生成逐层布置图和实际收发器清单")
     parser.add_argument("blueprints", nargs="+", type=Path, help="原生电路蓝图文件")
     parser.add_argument("--output-dir", required=True, type=Path, help="审阅图和原生蓝图的输出目录")
-    parser.add_argument("--audit", type=Path, help="按蓝图文件名索引的门级回放记录 JSON")
+    parser.add_argument("--audit", type=Path, help="按蓝图去扩展名后的文件名索引的门级回放记录 JSON")
     args = parser.parse_args()
     if len({path.name.casefold() for path in args.blueprints}) != len(args.blueprints):
         parser.error("输入蓝图文件名须互不重复")

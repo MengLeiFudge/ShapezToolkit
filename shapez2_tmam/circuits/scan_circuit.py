@@ -20,7 +20,7 @@ class ScannedLayer:
     valid: Ref
 
 
-def scan_step(circuit: Circuit, target: Ref, enable: Ref) -> ScannedLayer:
+def scan_step(circuit: Circuit, target: Ref, enable: Ref | Literal) -> ScannedLayer:
     """添加一次拆层测高的数据通路，供组合部件与循环控制器共用。"""
     split = circuit.add("VirtualUnstacker", target)
     upper = Ref(split.node, 1)
