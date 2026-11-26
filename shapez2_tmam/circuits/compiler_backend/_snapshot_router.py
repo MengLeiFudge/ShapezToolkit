@@ -6,17 +6,38 @@ from heapq import heappop, heappush
 from itertools import count, product
 from random import Random
 
-from ...mari.blueprint import DIRECTIONS, PORTS
+from ...mari.blueprint import DIRECTIONS, PORTS, _kind
 
 
 _VIAS = (("Backward", 2), ("Forward", 0), ("Left", 3))
+_SHORT_RANGE = range(2, 6)
+_SENDER = "WireTransmitterSender"
+_RECEIVER = "WireTransmitterReceiver"
 
 
 def _available(board, site):
     return site not in board.occupied and board.on_ground(*site[:2])
 
 
-def _path(board, net, start, targets, facing, estimate):
+def _short_sites(board):
+    endpoints = {_SENDER: set(), _RECEIVER: set()}
+    for entry in board.entries:
+        kind = _kind(entry)
+        if kind in endpoints:
+            endpoints[kind].add((entry["X"] - board.origin_x, entry["Y"] - board.origin_y, entry["L"], entry["R"]))
+    return endpoints
+
+
+def _free_pair(endpoints, sender, receiver, turn):
+    dx, dy = DIRECTIONS[turn]
+    x, y, z = receiver
+    if any((x - i * dx, y - i * dy, z, turn) in endpoints[_SENDER] for i in _SHORT_RANGE):
+        return False
+    x, y, z = sender
+    return not any((x + i * dx, y + i * dy, z, turn) in endpoints[_RECEIVER] for i in _SHORT_RANGE)
+
+
+def _path(board, net, start, targets, facing, estimate, flywire, pads):
     if start in targets:
         return True
     sequence = count()
@@ -24,6 +45,7 @@ def _path(board, net, start, targets, facing, estimate):
     previous: dict[tuple, tuple | None] = {start: None}
     distances = {start: 0}
     traces = board.traces
+    endpoints = _short_sites(board) if flywire else None
 
     def reach(site, cost, direction, via=None):
         distance = distances[point] + cost
@@ -51,11 +73,27 @@ def _path(board, net, start, targets, facing, estimate):
                     if len(wires) <= 1:
                         reach(site, abs(site[0] - x) + abs(site[1] - y), direction)
                     break
-                if len(wires) != 1 or next(iter(wires.values())) != {(direction + 1) % 4, (direction + 3) % 4}:
+                if (site in pads or len(wires) != 1
+                        or next(iter(wires.values())) != {(direction + 1) % 4, (direction + 3) % 4}):
                     break
                 site = site[0] + dx, site[1] + dy, level
             if not _available(board, (a, b, level)) or traces.get((a, b, level)):
                 continue
+            if endpoints is not None:
+                # 搜索从新接收端回到已驱动线网，因此原生飞线朝向与搜索相反。
+                turn = (direction + 2) % 4
+                receiver = a, b, level
+                for gap in _SHORT_RANGE:
+                    sender = a + gap * dx, b + gap * dy, level
+                    site = sender[0] + dx, sender[1] + dy, level
+                    if (not _available(board, sender) or traces.get(sender) or not _available(board, site)
+                            or traces.get(site, {}).keys() - {net}):
+                        continue
+                    crossed = ((a + i * dx, b + i * dy, level) for i in range(1, gap))
+                    if not any(p in board.occupied or traces.get(p, {}).keys() - {net} for p in crossed):
+                        continue
+                    if _free_pair(endpoints, sender, receiver, turn):
+                        reach(site, 4, direction, (sender, receiver, turn))
             for other in sorted((z for z in range(3) if z != level), key=lambda z: abs(z - level)):
                 lo, hi = sorted((level, other))
                 if any((a, b, z) in board.occupied or traces.get((a, b, z)) for z in range(lo, hi + 1)):
@@ -76,9 +114,17 @@ def _path(board, net, start, targets, facing, estimate):
     path, occupied = [], set()
     while (edge := previous[point]) is not None:
         origin, direction, via = edge
-        if via:
+        if via and len(via) == 3:
+            sender, receiver, turn = via
+            assert endpoints is not None
+            if not _free_pair(endpoints, sender, receiver, turn):
+                return False
+            endpoints[_SENDER].add((*sender, turn))
+            endpoints[_RECEIVER].add((*receiver, turn))
+            cells = {point, sender, receiver}
+        elif via:
             _, a, b, lo, _, height, _ = via
-            cells = {(a, b, z) for z in range(lo, lo + height)}
+            cells = {point, *((a, b, z) for z in range(lo, lo + height))}
         else:
             dx, dy = DIRECTIONS[direction]
             length = abs(point[0] - origin[0]) + abs(point[1] - origin[1])
@@ -88,8 +134,16 @@ def _path(board, net, start, targets, facing, estimate):
         occupied.update(cells)
         path.append((point, origin, direction, via))
         point = origin
+    if start in occupied:
+        return False
     for point, origin, direction, via in path:
-        if via:
+        if via and len(via) == 3:
+            sender, receiver, turn = via
+            board.place(_SENDER, *sender, turn)
+            board.place(_RECEIVER, *receiver, turn)
+            traces[point].setdefault(net, set()).add(turn)
+            traces[origin].setdefault(net, set()).add(direction)
+        elif via:
             kind, a, b, lo, rotation, height, exit_ = via
             board.place(kind, a, b, lo, rotation, height=height)
             traces[point].setdefault(net, set()).add((exit_ + 2) % 4)
@@ -103,7 +157,8 @@ def _path(board, net, start, targets, facing, estimate):
     return True
 
 
-def _join(board, net, site, tree, *, direct=False):
+def _join(board, net, site, tree, *, direct=False, flywire=False, protect_pads=False):
+    pads = set().union(*board.terminals.values()) if protect_pads else set()
     estimate: Callable[[tuple[int, int, int]], int] | None = None
     if direct:
         xs, ys, levels = zip(*tree)
@@ -113,12 +168,13 @@ def _join(board, net, site, tree, *, direct=False):
 
         def distance_to_box(point):
             x, y, z = point
-            return max(left - x, x - right, 0) + max(top - y, y - bottom, 0) + max(low - z, z - high, 0)
+            span = max(left - x, x - right, 0) + max(top - y, y - bottom, 0) + max(low - z, z - high, 0)
+            return span // 2 if flywire else span
 
         estimate = distance_to_box
 
     for direction in range(4):
-        result = _path(board, net, site, tree, direction, estimate)
+        result = _path(board, net, site, tree, direction, estimate, flywire, pads)
         # 换方向只改变同代价的选路顺序，搜索穷尽后无需重试。
         if result is None:
             return False

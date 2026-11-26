@@ -57,17 +57,18 @@ def _diagram(path):
         raise ValueError(f"{path.name} 没有电路平台")
     platforms = []
     for i, platform in enumerate(wiring.platforms, 1):
-        chunks = FOUNDATION_CHUNKS.get(platform["T"])
-        if chunks is None or platform.get("R", 0):
+        kind, rotation = platform["T"], platform.get("R", 0)
+        if kind not in FOUNDATION_CHUNKS or rotation not in range(4):
             raise ValueError(f"{path.name} 的 P{i} 使用不支持的电路平台或朝向")
-        width, height = chunks
-        dx, dy = foundation_origin(platform["T"])
+        tiles = foundation_tiles(kind, rotation)
+        width, height = (max(axis) + 1 for axis in zip(*tiles, strict=True))
+        dx, dy = foundation_origin(kind, rotation)
         x = platform.get("X", 0) + dx
         y = platform.get("Y", 0) + dy
         count = len(platform["B"]["Entries"])
-        platforms.append((i, x, y, platform.get("Z", 0), width, height, count, foundation_tiles(platform["T"])))
-    ground = [platform_ground(p["T"]) for p in wiring.platforms]
-    interior = [platform_interior(p["T"]) for p in wiring.platforms]
+        platforms.append((i, x, y, platform.get("Z", 0), width, height, count, tiles))
+    ground = [platform_ground(p["T"], p.get("R", 0)) for p in wiring.platforms]
+    interior = [platform_interior(p["T"], p.get("R", 0)) for p in wiring.platforms]
     occupied = [set() for _ in platforms]
     radio_cells = Counter()
     placement_errors = Counter()

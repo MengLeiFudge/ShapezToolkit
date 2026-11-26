@@ -21,6 +21,7 @@ _MAX_TRUTH_ATOMS = 12
 _MAX_INT_PAIRS = 256
 _TRUTH_MASK = (1 << (1 << _MAX_TRUTH_ATOMS)) - 1
 _COMPARE = {"eq": ("AQ==", eq), "ne": ("Bg==", ne), "lt": ("BA==", lt), "le": ("BQ==", le)}
+_EQUALITY_INVERSE = {_COMPARE["eq"][0]: _COMPARE["ne"][0], _COMPARE["ne"][0]: _COMPARE["eq"][0]}
 _NATIVE = {
     "not": "LogicGateNot", "and": "LogicGateAnd", "or": "LogicGateOr",
     "rotate_cw": "VirtualRotator", "rotate_ccw": "VirtualRotatorCCW",
@@ -109,6 +110,7 @@ class Lowering:
         self.stack: list[str] = []
         self.expanded_blocks: Counter[str] = Counter()
         self.predicates: dict[tuple[str, tuple[Signal, ...], str | None], Ref] = {}
+        self.negations: dict[Signal, Signal] = {}
         self.truth: dict[Signal, int] = {_FALSE: 0, _TRUE: _TRUTH_MASK}
         self.truth_nets: dict[int, Signal] = {0: _FALSE, _TRUTH_MASK: _TRUE}
         self.truth_atoms = 0
@@ -130,6 +132,12 @@ class Lowering:
         if key in self.predicates:
             return self.predicates[key]
         table = None
+        inverse = _EQUALITY_INVERSE.get(config or "") if kind == "LogicGateCompare" else None
+        opposite = self.predicates.get((kind, args, inverse)) if inverse else None
+        if opposite is not None:
+            mask = self._truth(opposite)
+            if mask is not None:
+                table = _TRUTH_MASK ^ mask
         if kind == "LogicGateNot":
             a = self._truth(args[0])
             if a is not None:
@@ -142,6 +150,9 @@ class Lowering:
             return self.truth_nets[table]
         ref = self.circuit.add(kind, *args, config=config)
         self.predicates[key] = ref
+        if opposite is not None:
+            self.negations[ref] = opposite
+            self.negations[opposite] = ref
         if table is not None:
             self.truth[ref] = table
             self.truth_nets[table] = ref
@@ -168,10 +179,15 @@ class Lowering:
     def _not(self, value: Signal) -> Signal:
         if isinstance(value, Literal):
             return _FALSE if value == _TRUE else _TRUE
+        if value in self.negations:
+            return self.negations[value]
         gate = self.circuit.gates[value.node]
-        if gate.kind == "LogicGateNot":
-            return gate.inputs[0]
-        return self._predicate("LogicGateNot", value)
+        if gate.kind == "LogicGateCompare" and gate.config in _EQUALITY_INVERSE:
+            return self._predicate(gate.kind, *gate.inputs, config=_EQUALITY_INVERSE[gate.config])
+        result = self._predicate("LogicGateNot", value)
+        self.negations[value] = result
+        self.negations[result] = value
+        return result
 
     def _bool_pair(self, kind: str, a: Signal, b: Signal) -> Signal:
         identity, absorbing = (_TRUE, _FALSE) if kind == "LogicGateAnd" else (_FALSE, _TRUE)
@@ -182,8 +198,7 @@ class Lowering:
         if b == identity or a == b:
             return a
         assert isinstance(a, Ref) and isinstance(b, Ref)
-        if (self.predicates.get(("LogicGateNot", (a,), None)) == b
-                or self.predicates.get(("LogicGateNot", (b,), None)) == a):
+        if self.negations.get(a) == b:
             return absorbing
         if b.node < a.node:
             a, b = b, a

@@ -11,8 +11,10 @@ FOUNDATION_CHUNKS = {
     "Foundation_1x1": (1, 1),
     "Foundation_1x2": (2, 1),
     "Foundation_1x3": (3, 1),
+    "Foundation_1x4": (4, 1),
     "Foundation_2x2": (2, 2),
     "Foundation_2x3": (3, 2),
+    "Foundation_2x4": (4, 2),
     "Foundation_3x3": (3, 3),
     "Foundation_L3": (2, 2),
 }
@@ -38,25 +40,42 @@ def foundation_ground(width, height):
     return ground
 
 
-@cache
-def foundation_origin(kind):
-    if kind in IRREGULAR_FOUNDATIONS:
-        return tuple(map(min, zip(*IRREGULAR_FOUNDATIONS[kind], strict=True)))
-    width, height = FOUNDATION_CHUNKS[kind]
-    return -((width - 1) // 2), -((height - 1) // 2)
+def _rotate(x, y, rotation):
+    return ((x, y), (-y, x), (-x, -y), (y, -x))[rotation]
+
+
+def rotate_cell(x, y, rotation):
+    """围绕锚点岛格中心旋转建筑坐标。"""
+    offset_x, offset_y = _rotate(TILE_SIZE - 1, TILE_SIZE - 1, rotation)
+    x, y = _rotate(x, y, rotation)
+    return x + (TILE_SIZE - 1 - offset_x) // 2, y + (TILE_SIZE - 1 - offset_y) // 2
 
 
 @cache
-def foundation_tiles(kind):
-    if kind in IRREGULAR_FOUNDATIONS:
-        x, y = foundation_origin(kind)
-        return tuple((a - x, b - y) for a, b in IRREGULAR_FOUNDATIONS[kind])
-    width, height = FOUNDATION_CHUNKS[kind]
-    return tuple(product(range(width), range(height)))
+def _island_offsets(kind, rotation):
+    tiles = IRREGULAR_FOUNDATIONS.get(kind)
+    if tiles is None:
+        w, h = FOUNDATION_CHUNKS[kind]
+        x, y = (w - 1) // 2, (h - 1) // 2
+        tiles = tuple(product(range(-x, w - x), range(-y, h - y)))
+    return tuple(_rotate(x, y, rotation) for x, y in tiles)
 
 
 @cache
-def platform_interior(kind):
+def foundation_origin(kind, rotation=0):
+    return tuple(map(min, zip(*_island_offsets(kind, rotation), strict=True)))
+
+
+@cache
+def foundation_tiles(kind, rotation=0):
+    x, y = foundation_origin(kind, rotation)
+    return tuple((a - x, b - y) for a, b in _island_offsets(kind, rotation))
+
+
+@cache
+def platform_interior(kind, rotation=0):
+    if rotation:
+        return frozenset(rotate_cell(x, y, rotation) for x, y in platform_interior(kind))
     if kind not in IRREGULAR_FOUNDATIONS:
         width, height = FOUNDATION_CHUNKS[kind]
         x = EDGE_MARGIN - ((width - 1) // 2) * TILE_SIZE
@@ -76,7 +95,9 @@ def _inside_chunk_edges(tiles, cx, cy, x, y):
 
 
 @cache
-def platform_ground(kind):
+def platform_ground(kind, rotation=0):
+    if rotation:
+        return frozenset(rotate_cell(x, y, rotation) for x, y in platform_ground(kind))
     if kind not in IRREGULAR_FOUNDATIONS:
         return frozenset(foundation_ground(*FOUNDATION_CHUNKS[kind]))
     tiles = set(IRREGULAR_FOUNDATIONS[kind])

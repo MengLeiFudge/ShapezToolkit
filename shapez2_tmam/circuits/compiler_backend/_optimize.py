@@ -17,7 +17,7 @@ def _gate_key(gate: Gate) -> tuple:
     return gate.kind, gate.config, gate.inputs
 
 
-def compact(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[Circuit, dict[int, Ref]]:
+def compact(circuit: Circuit, outputs: dict[int, Ref], *, distinct: tuple[Ref, ...] = ()) -> tuple[Circuit, dict[int, Ref]]:
     """只合并同一计算或整组等价的互斥驱动，保留原生多出口索引。"""
     owners = list(range(len(circuit.gates)))
     aliases = {}
@@ -55,9 +55,10 @@ def compact(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[Circuit, dict[in
             key = frozenset(unique)
             if key not in buses:
                 drivers = tuple(result.add(gate.kind, *gate.inputs, config=gate.config) for gate in unique)
+                assert drivers
                 if len(drivers) > 1:
                     result.aliases.append(drivers)
-                buses[key] = drivers[0]
+                buses[key] = next(iter(drivers))
             for node in nodes:
                 refs[Ref(node)] = buses[key]
             continue
@@ -74,7 +75,7 @@ def compact(circuit: Circuit, outputs: dict[int, Ref]) -> tuple[Circuit, dict[in
             if rotation in rotated:
                 refs[Ref(owner)] = rotated[rotation]
                 continue
-        key = _gate_key(gate)
+        key = (owner,) if Ref(owner) in distinct else _gate_key(gate)
         if key not in gates:
             gates[key] = result.add(gate.kind, *gate.inputs, config=gate.config)
         ref = gates[key]

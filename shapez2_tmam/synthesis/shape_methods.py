@@ -68,11 +68,14 @@ def _cut_ground_corner(row: Shape | None) -> Shape | None:
 
 
 def _label_single_row(row: Shape | None) -> Shape | None:
-    if analyze_part(row) == shape_literal("cu------"):
-        color = analyze_color(row)
-        if color is None or color == "u":
-            return shape_literal("cu------")
-        row = crystal(shape_literal("--CuCuCu"), color)
+    uncolored_crystal = shape_literal("cu------")
+    is_crystal = analyze_part(row) == uncolored_crystal
+    color = analyze_color(row)
+    if is_crystal:
+        # 形状分析已读到晶体，该角一定带颜色。
+        row = crystal(shape_literal("--CuCuCu"), color)  # pyright: ignore[reportArgumentType]
+    if is_crystal & (color == "u"):
+        return uncolored_crystal
     return _cut_ground_corner(row)
 
 
