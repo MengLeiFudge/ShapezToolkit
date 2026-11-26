@@ -1,6 +1,6 @@
 # 一代模组
 
-从 mod.io 批量同步一代模组，整理本地版本，并通过 QQBot 同步指定群文件夹。网站下载不需要谜题 token。
+从 mod.io 批量同步一代模组，整理本地版本，并通过 QQBot 同步指定群文件夹。
 
 ## 文件位置
 
@@ -34,6 +34,8 @@ python main.py mods clean
 其他 Python 程序可导入 `shapez1_mods.mods.sync_mods(destination, progress=print)`、`shapez1_mods.mod_library.clean_mods(destination, progress=print)` 和 `shapez1_mods.mod_publish.publish_mods(destination)`。导入本身不会联网或写文件。
 
 ## 下载与版本
+
+`download` 和 `update` 从环境变量 `SHAPEZ1_MODIO_API_KEY` 读取 mod.io **API access** 的 Key。列表、当前文件及下载地址通过 `https://u-32147295.modapi.io/v1` 查询，ZIP 使用 API 返回的下载地址获取。
 
 模组 ID 标识模组，文件 ID 标识网站上的上传文件。两者写入清单，不加到 ZIP 文件名中。最新版本取网站的当前文件指针，不按作者填写的版本号排序。
 

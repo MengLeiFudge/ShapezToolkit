@@ -1,28 +1,35 @@
-"""按 mod.io 网站的匿名浏览流程同步一代模组及本地清单。"""
+"""通过 mod.io API 同步一代模组及本地清单。"""
 
 from __future__ import annotations
 
+import os
 import re
 import time
 from collections.abc import Callable, Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, TypeVar
-from urllib.parse import quote, urlencode
+from urllib.parse import urlencode
 
 from common.io import RequestError, download_file, file_matches, request_json, save_json
 from .mod_library import clean_library, load_catalog, mod_filename, retirement_reason
 
-WEBSITE_API = "https://mod.io/v1/games/@shapez/mods"
-WEBSITE_HEADERS = {
-    "Accept": "application/json",
-    "X-Modio-Origin": "web",
-    "Referer": "https://mod.io/g/shapez",
-}
-
+MODS_API = "https://u-32147295.modapi.io/v1/games/2978/mods"
 
 T = TypeVar("T")
 MAX_ATTEMPTS = 4
+
+
+def _api_key() -> str:
+    key = os.environ.get("SHAPEZ1_MODIO_API_KEY", "").strip()
+    if not key:
+        raise RequestError("请设置 SHAPEZ1_MODIO_API_KEY 后再查询或下载模组。")
+    return key
+
+
+def _request_mods(route: str = "", **filters: int | str) -> dict[str, Any]:
+    query = urlencode({**filters, "api_key": _api_key()})
+    return request_json(f"{MODS_API}{route}?{query}", {"Accept": "application/json"})
 
 
 def with_retries(operation: Callable[[], T], label: str, progress: Callable[[str], None]) -> T:
@@ -45,9 +52,8 @@ def iter_mods(progress: Callable[[str], None] = print) -> Iterator[dict[str, Any
     offset = 0
     seen: set[int] = set()
     while True:
-        query = urlencode({"_offset": offset, "_limit": 100, "_sort": "id"})
         page = with_retries(
-            lambda: request_json(f"{WEBSITE_API}?{query}", WEBSITE_HEADERS),
+            lambda: _request_mods(_offset=offset, _limit=100, _sort="id"),
             f"获取模组列表（offset={offset}）", progress,
         )
         items = page.get("data")
@@ -72,11 +78,7 @@ def get_modfile(mod: dict[str, Any]) -> dict[str, Any]:
     """返回当前发布文件，必要时从模组详情补全下载元数据。"""
     file = mod.get("modfile")
     if file is None:
-        name = mod.get("name_id")
-        if not isinstance(name, str) or not name:
-            raise RequestError("模组缺少网站名称，无法读取文件详情。")
-        detail = request_json(f"{WEBSITE_API}/@{quote(name, safe='')}", WEBSITE_HEADERS)
-        file = detail.get("modfile")
+        file = _request_mods(f"/{mod['id']}").get("modfile")
     if not isinstance(file, dict):
         raise RequestError("该模组没有可下载的当前发布文件。")
     return file
@@ -99,10 +101,7 @@ def file_metadata(file: dict[str, Any]) -> tuple[int, int, str, str]:
 
 def fresh_download_url(mod: dict[str, Any], file_id: int) -> str:
     """从网站文件详情获取指定文件的新下载地址，保持校验对象不变。"""
-    name = mod.get("name_id")
-    if not isinstance(name, str) or not name:
-        raise RequestError("模组缺少网站名称，无法更新下载地址。")
-    file = request_json(f"{WEBSITE_API}/@{quote(name, safe='')}/files/{file_id}", WEBSITE_HEADERS)
+    file = _request_mods(f"/{mod['id']}/files/{file_id}")
     actual_id, _, _, url = file_metadata(file)
     if actual_id != file_id:
         raise RequestError("网站返回了不同的模组文件，已停止本项下载。")
@@ -123,7 +122,7 @@ def sync_mod(mod: dict[str, Any], destination: Path, previous: dict[str, Any] | 
         if old_path.parent == (destination / "downloads").resolve():
             old_size = previous.get("local_bytes", previous.get("bytes"))
             old_md5 = previous.get("local_md5", previous.get("md5"))
-            if file_matches(old_path, old_size, old_md5):
+            if isinstance(old_size, int) and isinstance(old_md5, str) and file_matches(old_path, old_size, old_md5):
                 path, reused, local_size, local_md5 = old_path, True, old_size, old_md5
     if not reused and path.exists():
         # 同名不同内容不能覆盖；新文件完整落地后由本地整理移走旧版。
@@ -158,6 +157,7 @@ def sync_mod(mod: dict[str, Any], destination: Path, previous: dict[str, Any] | 
 
 def sync_mods(destination: Path, progress: Callable[[str], None] = print) -> dict[str, Any]:
     """下载全部公开模组的当前文件，逐项保存结果；列表失败时保留已完成记录。"""
+    _api_key()
     destination = destination.resolve()
     state_file = destination / "catalog" / "download-state.json"
     state = load_catalog(destination)
