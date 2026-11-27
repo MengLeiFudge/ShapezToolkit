@@ -14,6 +14,8 @@ python -m shapez2_tmam.circuits.compiler_backend append_five --channel-base 1700
 
 单整数输入、整数返回的方法在常规布线失败时可尝试区间译码。后端只重建由输入与整数字面量比较、布尔组合和互斥常量选择构成的门网。比较端点将有符号 32 位输入划分为最多 128 个区间。相邻区间返回相同值时合并，较大的选择表分组接入索引和结果线，减小单根线的扇出和合流。越界路径沿用原方法的返回值。
 
+常规摆法和适用的区间译码都未布通时，组合编译会沿依赖深度从输入侧到输出侧分列。同一列按上游门所在的行排列，再把门分散到三个建筑层。它使用相同的端口、布线和核对规则。
+
 导出前按实际建筑端口逐一核对来源。采样保持期按最终接线的依赖深度保守计算，适用条件遵循[信号传播说明](../../docs/proofs/08-circuits.md#s08-34)。接口表也列出公开频道、建筑层用量和全局收发器数量。
 
 ## 相邻平台的原生飞线
@@ -162,6 +164,19 @@ python -m shapez2_tmam.circuits.compiler_backend.prefix_scan_wiring \
   --output prefix-scan-wiring.spz2bp
 ```
 
+### 尾料回放双完工启动
+
+`paired_tail_start` 与 `mask-paired-tail`、`join-oriented-halves` 和 `replay-paired-tail` 合用。批次开关仍为 `1700930`。闭包完成 `1700765=1` 后，掩码支路等 1860 tick。主控半形就绪 `1701279=1` 后，拼接支路等 1032 tick。两路分别计时，各自覆盖组合稳定和尾料板复位。两路都到时后，启动板拉高 `1701194`。
+
+换单或换向时，将批次开关置 `0` 并撤销上一轮半形就绪。保持复位至少 384 tick，再启动下一轮。从半形就绪起保持半形成品和切向不变，直到按尾料接口等满采样时间并读到 `1701197=1`。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend.paired_tail_start \
+  --circuits shapez2_tmam/blueprints/验收/电路/双半形 \
+  --halves-ready 1701279 --channel-base 1701280 \
+  --output paired-tail-start.spz2bp
+```
+
 ### 稳定后按地址确认并提交状态
 
 `confirmed_call.build` 复用组合状态板。每轮先保持旧状态和输入。`opcode` 为空则直接进入下一状态计算，非空则锁存待写地址。旧同址确认撤去后，控制器发布 `request_address`。发布期间保持该地址的六字段，写入端回报对应整数地址并保持到请求撤去。整数地址 `0` 可用。
@@ -214,15 +229,3 @@ python -m shapez2_tmam.circuits.compiler_backend.auto_prefix_scan \
 四初值进入 `1701570`–`1701573`，第五层编码进入 `1701574`。`1701575=0` 时闭包照常扫描第五层，置 `1` 时由适配板单独处理第五层支撑，闭包首轮收到空信号。五轮闭包在行编码和预处理均完成后等待 2124 信号 tick 再启动。四列读取器的固定高度使用专用频道 `1701605`，选中列的结果仍由总校验发到 `1700816`。
 
 `1701584=1` 时可读取当前切向 `1700871` 及四列高度 `1700766`–`1700769`。`1701585=1` 表示两次都未找到可用前缀，主控可进入顶针逆推。单层 `CuCuCuCu` 可检查首切成功，`----crP-:--Cucrcr:--CuCuP-` 可检查首切失败后换向成功。`CuP-P-Cu:crcrP-cr:crCuCu--:cr--cr--:--CucrCu` 在普通模式下两切向均失败，在可选顶格模式下首切成功。
-### 尾料回放双完工启动
-
-`paired_tail_start` 与 `mask-paired-tail`、`join-oriented-halves` 和 `replay-paired-tail` 合用。批次开关仍为 `1700930`。闭包完成 `1700765=1` 后，掩码支路等 1860 tick。主控半形就绪 `1701279=1` 后，拼接支路等 1032 tick。两路分别计时，各自覆盖组合稳定和尾料板复位。两路都到时后，启动板拉高 `1701194`。
-
-换单或换向时，将批次开关置 `0` 并撤销上一轮半形就绪。保持复位至少 384 tick，再启动下一轮。从半形就绪起保持半形成品和切向不变，直到按尾料接口等满采样时间并读到 `1701197=1`。
-
-```bash
-python -m shapez2_tmam.circuits.compiler_backend.paired_tail_start \
-  --circuits shapez2_tmam/blueprints/验收/电路/双半形 \
-  --halves-ready 1701279 --channel-base 1701280 \
-  --output paired-tail-start.spz2bp
-```

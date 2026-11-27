@@ -19,8 +19,11 @@ def make_platform(section):
                    "Pipe2UpForward": ((0,0,0),(0,0,1),(0,0,2))}
         for dx, dy, dz in offsets.get(kind, ((0,0,0),)):
             tile = x+dx, y+dy, z+dz
-            notch = x+dx in (-18,37) and (y+dy)%20 in (8,9,10,11)
-            if tile in occupied or not (0 <= z+dz < 3 and -17 <= y+dy <= 36 and (-17 <= x+dx <= 36 or notch)):
+            xx, yy, zz = tile
+            inside = -17 <= xx <= 36 and -17 <= yy <= 36
+            notch = ((xx in (-18, 37) and -12 <= yy <= 31 and 8 <= yy % 20 <= 11) or
+                     (yy in (-18, 37) and -12 <= xx <= 31 and 8 <= xx % 20 <= 11))
+            if tile in occupied or not (0 <= zz < 3 and (inside or notch)):
                 raise ValueError(f"单层工道占地冲突或越界 {tile}")
             occupied.add(tile)
         entry = {"T":kind+"InternalVariant"+("Mirrored" if mirror else ""), "X":x,"Y":y,"L":z,"R":rotation}
@@ -34,28 +37,9 @@ def make_platform(section):
             put((machines or {}).get(x,"PipeForward" if pipe else "BeltDefaultForward"), x,y,z)
 
     if section == "quarters":
-        # 先拼 q0/q1、q2/q3。交换机南线为操作数a，北线为b。
-        for y in range(8,12):
-            inlet(y,0,0)
-        for y in (9,11):
-            put("HalvesSwapperDefault",0,y)
-            put("TrashDefault",1,y-1)
-            put("RotatorOneQuadCCW",1,y)
-        for x in range(2,10):
-            put("BeltDefaultForward",x,11)
-            if x < 6:
-                put("BeltDefaultForward",x,9)
-            elif x == 6:
-                put("BeltDefaultLeft",x,9,mirror=True)
-                put("BeltDefaultLeft",x,10,rotation=1)
-            else:
-                put("BeltDefaultForward",x,10)
-        put("HalvesSwapperDefault",10,11)
-        put("TrashDefault",11,10)
-        for x in range(11,37):
-            put("BeltDefaultForward",x,11)
-        put("BeltPortSender",37,11)
-    elif section == "palette":
+        from .quarter_join import quarter_join
+        return {"V":1137,"BP":{"$type":"Island","BinaryVersion":1137,"Entries":[quarter_join()]}}
+    if section == "palette":
         # 西侧保持混合车的 R/G/B 层序。每条管固定颜色，第一台混色器占前方三格。
         def supply(y, source, dest, stop):
             inlet(y,source,-5,pipe=True)

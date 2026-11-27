@@ -16,12 +16,16 @@ REPORT_DIR = PACKAGE_ROOT / "reports"
 
 # 名称 -> (模块名, 默认参数列表)
 BLUEPRINT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "stage-writer-4q5l": ("stage_writer", ()),
     "workcell-4q5l": ("local_workcell", ()),
+    "angle-rom-4q5l": ("angle_reader", ()),
     "cell-at-4q5l": ("cell_at", ()),
     "column-scan-4q5l": ("column_step", ("--scan",)),
     "column-step-4q5l": ("column_step", ()),
     "quarter-order-4q5l": ("quarter_order", ()),
     "layer-recipe-4q5l": ("layer_recipe", ()),
+    "layer-program-4q5l": ("layer_packet", ()),
+    "layer-controller-4q5l": ("layer_controller", ()),
     "operation-core-4q5l": ("operation_core", ("--quadrants", "4", "--channel-base", "1000000")),
     "operation-core-6q5l": ("operation_core", ("--quadrants", "6", "--channel-base", "1001000")),
     "noncrystal-4q5l": ("noncrystal_circuit", ("--quadrants", "4", "--channel-base", "1002000")),
@@ -44,6 +48,9 @@ BLUEPRINT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
     "pin-image-4q5l": ("pin_image_circuit", ("--channel-base", "1144000")),
     "tagged-leaf-4q5l": ("startpoint_circuit", ("--tagged-goal", "--channel-base", "1161000")),
     "pin-source-4q5l": ("pin_source_circuit", ("--channel-base", "1194000")),
+    "pin-column-book-4q5l": ("pin_column_book", ()),
+    "pin-source-table-4q5l": ("pin_source_table", ()),
+    "pin-source-cell-4q5l": ("pin_source_cell", ()),
     "full-tail-4q5l": ("full_solver_circuit", ("--channel-base", "1211000")),
     "full-tail-packed-4q5l": ("full_solver_circuit", ("--pack",)),
     "factory-control-4q5l": ("full_solver_circuit", ("--pack", "--factory")),
@@ -51,15 +58,16 @@ BLUEPRINT_TARGETS: dict[str, tuple[str, tuple[str, ...]]] = {
 
 # 按游戏蓝图库的目录分册。同一模块的四、六象限版本放在一起。
 CIRCUIT_BOOKS = {
+    "配方写入": ("stage_writer",),
     "配方加工": ("local_workcell",),
     "目标取格": ("cell_at",),
     "列判据": ("column_step",),
     "基础料订单": ("quarter_order",),
-    "逐层配方": ("layer_recipe",),
+    "逐层配方": ("layer_recipe", "layer_packet", "layer_controller"),
     "完整主控": ("full_solver_circuit",),
     "扫描与时序": ("scan_circuit", "iterative_scanner", "register_circuit", "sequential_circuit", "decoder_circuit"),
-    "起点与半形": ("half_circuit", "material_half_circuit", "half_synthesizer", "startpoint_circuit", "noncrystal_circuit"),
-    "顶针逆推": ("pin_column_circuit", "pin_column_iterator", "pin_image_circuit", "pin_source_circuit", "tagged_goal_circuit"),
+    "起点与半形": ("angle_reader", "half_circuit", "material_half_circuit", "half_synthesizer", "startpoint_circuit", "noncrystal_circuit"),
+    "顶针逆推": ("pin_column_book", "pin_source_cell", "pin_source_table", "pin_column_circuit", "pin_column_iterator", "pin_image_circuit", "pin_source_circuit", "tagged_goal_circuit"),
     "加工与指令": ("operation_core", "recipe_processor"),
 }
 BOOK_BY_MODULE = {module: Path("电路", book) for book, modules in CIRCUIT_BOOKS.items() for module in modules}
@@ -69,6 +77,24 @@ for section, books in (("实体", WORKSHOP_BOOK), ("火车", TRAIN_BOOK)):
     for name, book in books.items():
         BLUEPRINT_TARGETS[name] = ("factory_book", (name,))
         BOOK_BY_TARGET[name] = Path(section, book)
+
+for name, module, book, options in (
+        ("production-stage-4q5l", "production_stage", "指令工道", ()),
+        ("work-lane-4q5l", "work_lane", "指令工道", ()),
+        ("production-line-2", "production_line", "指令工道", ("--count", "2")),
+        ("fed-stage-4q5l", "assembled_stage", "指令工道", ()),
+        ("train-fed-stage-4q5l", "freight_stage", "指令工道", ("stage",)),
+        ("layer-factory-4q5l", "layer_factory", "逐层生产线", ()),
+        ("layer-supply-4q5l", "layer_supply", "基础单层", ())):
+    BLUEPRINT_TARGETS[name] = (module, options)
+    BOOK_BY_TARGET[name] = Path("实体", book)
+
+BLUEPRINT_TARGETS['mixed-stage-depot'] = ('freight_stage', ('depot',))
+BOOK_BY_TARGET['mixed-stage-depot'] = Path('配料', '工段供货')
+for cargo in 'CRSWrgb':
+    name = f'fill-stage-{cargo}' if cargo.isupper() else f'fill-stage-dye-{cargo}'
+    BLUEPRINT_TARGETS[name] = ('freight_loader', (cargo,))
+    BOOK_BY_TARGET[name] = Path('配料', '工段供货')
 
 for cargo, book in (("shapes", "图形"), ("fluids", "染料")):
     for role in ("depot", "load", "unload"):

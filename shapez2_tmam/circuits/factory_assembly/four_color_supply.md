@@ -48,7 +48,7 @@
 python -m shapez2_tmam.circuits.factory_assembly.books physical --four-color --belt-rate 2 --measurements measurements.json --output-dir four-color-capacity
 ```
 
-省略 `--measurements` 可先导出待测清单。仓库的 [2 件/秒待测清单](../../blueprints/验收/实体/四色含晶/four-color-capacity.json) 来自此命令生成的 `physical.json`。`--belt-rate` 填验收带速，示例按 `2` 件/秒。沿用实体分册的 `rates` 和 `deliveries`。在 `rates.output_belt` 填末端带实际持续出货率。在 `deliveries` 按 `stage`、`station` 填实际到站间隔 `interval_seconds`，并按 `wagon`、`layer`、`row` 填每趟卸入缓冲的 `amount`。图形用件数，流体用升。加工机、内部带和管仍分别在 `rates` 录入持续速率。
+省略 `--measurements` 可先导出待测清单。仓库的 [2 件/秒待测清单](four-color-capacity.json) 来自此命令生成的 `physical.json`。`--belt-rate` 填验收带速，示例按 `2` 件/秒。沿用实体分册的 `rates` 和 `deliveries`。在 `rates.output_belt` 填末端带实际持续出货率。在 `deliveries` 按 `stage`、`station` 填实际到站间隔 `interval_seconds`，并按 `wagon`、`layer`、`row` 填每趟卸入缓冲的 `amount`。图形用件数，流体用升。加工机、内部带和管仍分别在 `rates` 录入持续速率。
 
 `physical.json` 的 `capacity` 分别列出 40 道和 41 道订单。`paths` 包含地址、车厢层、卸货行、实际卸量、间隔、供给率和最小每趟卸量。`usage=pin` 标记制针红管，`usage=crystal` 标记独立结晶原色。`output` 单独列出成品带坐标与实测供给率。`status` 可为 `meets_target`、`insufficient` 或 `unmeasured`。已有一项低于目标时，整单状态为 `insufficient`，缺项仍保留在 `unknown_capacity_checks`。成品带缺测或低于目标时，`parallel_lines` 留空。带速、管速和到货量都应取稳定段的实测值。
 

@@ -9,6 +9,7 @@ from ..compiler_contract import INT, Program
 from ._layout import LayoutCapacityError, layout, logic_gates
 from ._lower import Lowering, _Value
 from ._optimize import compact
+from ._placement import layout_by_depth
 from ._split import layout_two_platforms
 from ._table import interval_table
 
@@ -53,6 +54,13 @@ def compile_program(program: Program, channel_base: int) -> tuple[dict, dict]:
             reduced_outputs = {output_channel: table_output}
             try:
                 document, depth = layout(reduced, reduced_outputs)
+            except LayoutCapacityError as error:
+                failures.append(error)
+            else:
+                failures.clear()
+        if failures:
+            try:
+                document, depth = layout_by_depth(reduced, reduced_outputs)
             except LayoutCapacityError as error:
                 failures.append(error)
             else:

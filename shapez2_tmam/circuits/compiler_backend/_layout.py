@@ -182,13 +182,12 @@ def _layout_platform(circuit: Circuit, channels: dict[Ref, int], live: set[int],
     if len(gates) > 50:
         order, sites = _spread_sites(circuit, channels, radios, gates, outputs)
         arrangements.append((order, sites, False))
-        if links is not None:
-            # 错开各层门位，让高扇出网络在门阵列之间有换层空间。
-            shifts = (
-                [(x + z, y + (2 * z) % 3, z) for x, y in row_sites for z in levels],
-                [(x + z, y + (2 * z) % 3, z) for x, y in col_sites for z in levels],
-            )
-            shapes = (*shifts, *shapes)
+        # 错开各层门位，让高扇出网络在门阵列之间有换层空间。
+        shifts = (
+            [(x + z, y + (2 * z) % 3, z) for x, y in row_sites for z in levels],
+            [(x + z, y + (2 * z) % 3, z) for x, y in col_sites for z in levels],
+        )
+        shapes = (*shifts, *shapes)
     last_error = None
     arrangements.extend((gates, sites, False) for sites in shapes)
     if len(gates) > 50:
@@ -211,6 +210,11 @@ class LayoutCapacityError(ValueError):
 
 class _RoutingError(ValueError):
     pass
+
+
+def _place(circuit: Circuit, channels: dict[Ref, int], groups: tuple[list[int], list[int]], used: set[int],
+           sites: list[tuple[int, int, int]], outputs: dict[int, Ref]) -> tuple[dict, int]:
+    return _assemble([_render(circuit, channels, groups, used, sites, outputs)])
 
 
 def _render(circuit: Circuit, channels: dict[Ref, int], groups: tuple[list[int], list[int]], used: set[int],

@@ -32,7 +32,7 @@ def _crystallize(slot: int, color: str) -> dict:
 
 
 def dense_column_instructions(rows: Sequence[str | None], *, destination: int,
-                              scratch_slot: int) -> tuple[dict, ...]:
+                              scratch_slot: int, retain_filler: bool = False) -> tuple[dict, ...]:
     output, scratch = _slot(destination), _slot(scratch_slot)
     if output == scratch:
         raise ValueError('紧柱结果和上料需要不同的槽')
@@ -56,7 +56,8 @@ def dense_column_instructions(rows: Sequence[str | None], *, destination: int,
             packets.append(_packet(7, output, scratch))
     if pending is not None:
         packets.append(_crystallize(output, pending))
-    packets.extend((_packet(4, output), _packet(1, output), _packet(4, output), _packet(2, output)))
+    if not retain_filler:
+        packets.extend((_packet(4, output), _packet(1, output), _packet(4, output), _packet(2, output)))
     return tuple(packets)
 
 

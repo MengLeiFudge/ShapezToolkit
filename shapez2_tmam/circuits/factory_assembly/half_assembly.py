@@ -6,7 +6,8 @@ from ...synthesis.physics import Rules
 from .recipe import BASE, _base_shape, _packet, _slot
 
 
-def _join_slots(first: int | None, second: int | None, destination: int | None) -> tuple[int | None, ...]:
+def _join_slots(first: int | None, second: int | None, destination: int | None
+                ) -> tuple[int | None, int | None, int | None]:
     first = _slot(first) if first is not None else None
     second = _slot(second) if second is not None else None
     if first is not None and first == second:
@@ -32,22 +33,18 @@ def join_corner_half_instructions(left_slot: int | None, right_slot: int | None,
 def join_built_halves_instructions(front_slot: int | None, back_slot: int | None, *, alternate: bool,
                                    destination: int | None = None) -> tuple[dict, ...]:
     front, back, target = _join_slots(front_slot, back_slot, destination)
-    if front is None and back is None:
-        return ()
-    if alternate:
-        # 反向切口需把拼合结果转回原方向。
-        if front is None:
-            return (_packet(2, back, destination=target),)
-        if back is None:
-            return (_packet(1, front, destination=target),)
-        return (_packet(3, back), _packet(8, front, back), _packet(1, front, destination=target))
     if front is None:
-        return (_packet(3, back, destination=target),)
-    if back is not None:
-        return (_packet(3, back), _packet(8, front, back, destination=target))
-    if target == front:
-        return ()
-    return (_packet(3, front), _packet(3, front, destination=target))
+        return () if back is None else (_packet(2 if alternate else 3, back, destination=target),)
+    if back is None:
+        if alternate:
+            return (_packet(1, front, destination=target),)
+        if target == front:
+            return ()
+        # 没有直通搬槽指令，两次半转保持原方向。
+        return (_packet(3, front), _packet(3, front, destination=target))
+    if alternate:
+        return (_packet(3, back), _packet(8, front, back), _packet(1, front, destination=target))
+    return (_packet(3, back), _packet(8, front, back, destination=target))
 
 
 def append_five_instructions(rows: Sequence[str | None], *, has_lower: bool,

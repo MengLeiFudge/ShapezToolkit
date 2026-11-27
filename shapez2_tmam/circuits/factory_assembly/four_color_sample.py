@@ -10,7 +10,7 @@ def _half(left_rows: tuple[str, str], right_rows: tuple[str, str], *, destinatio
     right = dense_column_instructions(right_rows, destination=4, scratch_slot=1)
     # 两刀后的紧柱已在 q1。左列就地使用，右列顺转到 q2，再交换拼合。
     return (*left[:-1], *right[:-1], _packet(1, 4), _packet(8, 0, 4),
-            _packet(2, 0, destination=destination))
+            _packet(2, 0), _packet(4, 0, destination=destination))
 
 
 def orders() -> dict:
