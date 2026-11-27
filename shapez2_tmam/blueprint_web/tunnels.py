@@ -33,12 +33,18 @@ SPACE_NODE_IDS = frozenset({"Layout_SpaceBeltNode", "Layout_SpacePipeNode"})
 DIRECTION_VECTOR = {0: (1, 0), 1: (0, 1), 2: (-1, 0), 3: (0, -1)}
 DIRECTION_AFFIX = {0: "Forward", 1: "Right", 2: "Backward", 3: "Left"}
 
+# 1106 才引入三层坐标；更早的蓝图只有地面一层，z=1 必然空闲。
+LAYER_GATE = 1106
 
-def migrate_tunnels(entries: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str]]:
+
+def migrate_tunnels(
+    entries: list[dict[str, Any]], version: int | None = None
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[str]]:
     """把隧道入口 / 出口换成升降段与太空段。
 
     返回 ``(新条目, 每条改写的说明, 未处理原因)``。原列表不被修改。
     找不到配对、轴向不直、跨度为零或目标区块已被占用时，保持原样并给出原因。
+    ``version`` 早于 1106 时按单层蓝图处理，z=1 的空闲不必再核对。
     """
     tunnels = [entry for entry in entries if entry.get("T") in TUNNEL_IDS]
     if not tunnels:
@@ -51,6 +57,12 @@ def migrate_tunnels(entries: list[dict[str, Any]]) -> tuple[list[dict[str, Any]]
     replacements: list[dict[str, Any]] = []
     problems: list[str] = []
     used: set[int] = set()
+
+    single_layer = version is not None and version < LAYER_GATE
+    if single_layer:
+        raised = [entry for entry in entries if isinstance(entry.get("Z"), int) and entry["Z"] > 0]
+        if raised:
+            problems.append(f"蓝图标注 V{version} 属于单层版本，却已有 {len(raised)} 个上层条目，按多层处理")
 
     for index, entrance in enumerate(tunnels):
         if index in used:
@@ -68,7 +80,7 @@ def migrate_tunnels(entries: list[dict[str, Any]]) -> tuple[list[dict[str, Any]]
 
         exit_index, exit_entry, direction, span = match
         plan = _route(prefix, entrance, exit_entry, direction, span)
-        blocked = [coord for coord in plan["occupied"] if coord in occupied]
+        blocked = [coord for coord in plan["occupied"] if coord in occupied and not (single_layer and coord[2] > 0)]
         if blocked:
             problems.append(
                 f"入口 ({entrance.get('X')}, {entrance.get('Y')}) 的替代走线要占用的区块已被其他岛占用：{blocked[:3]}"

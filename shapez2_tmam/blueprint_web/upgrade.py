@@ -77,7 +77,7 @@ def upgrade(source: Blueprint) -> tuple[Blueprint, UpgradeReport]:
     renamed: Counter[str] = Counter()
     custom_data = _migrate_icon(source, body, counters)
     _migrate_entries(body, source.version, counters, renamed)
-    _migrate_space_tunnels(body, report)
+    _migrate_space_tunnels(body, source.version, report)
     _stamp_versions(body)
     document["V"] = TARGET_VERSION
     _report_steps(source, custom_data, counters, renamed, report)
@@ -133,7 +133,7 @@ def _migrate_entries(
             _migrate_entries(nested, version, counters, renamed, island_level=False)
 
 
-def _migrate_space_tunnels(body: dict[str, Any], report: UpgradeReport) -> None:
+def _migrate_space_tunnels(body: dict[str, Any], version: int, report: UpgradeReport) -> None:
     """把旧版太空地下隧道换成 1.2 的三层太空走线。"""
     converted = 0
     problems: list[str] = []
@@ -141,7 +141,7 @@ def _migrate_space_tunnels(body: dict[str, Any], report: UpgradeReport) -> None:
         entries = _entries(node)
         if not any(entry.get("T") in tunnels.TUNNEL_IDS for entry in entries):
             continue
-        replaced, replacements, issues = tunnels.migrate_tunnels(entries)
+        replaced, replacements, issues = tunnels.migrate_tunnels(entries, version)
         node["Entries"] = replaced
         converted += len(replacements)
         problems.extend(issues)
