@@ -40,7 +40,23 @@ SHAPES: dict[str, frozenset[int]] = {
     "_TripleSplitter": frozenset({2, 3, 0, 1}),
     "_TripleMerger": frozenset({2, 3, 1, 0}),
 }
-# 同一连接面既可能是分流也可能是汇合，旧数据看不出流向，统一按分流处理。
+# 每座岛在本地坐标系下的 (输入面, 输出面) 集合：东 0、南 1、西 2、北 3。
+# 旧节点的 `C` 里正好按「从哪侧进、往哪侧出」记录，所以可以直接对表，不必猜流向。
+PAIR_SHAPES: dict[str, frozenset[tuple[int, int]]] = {
+    "_Forward": frozenset({(2, 0)}),
+    "_LeftTurn": frozenset({(2, 3)}),
+    "_RightTurn": frozenset({(2, 1)}),
+    "_LeftFwdSplitter": frozenset({(2, 3), (2, 0)}),
+    "_RightFwdSplitter": frozenset({(2, 0), (2, 1)}),
+    "_YSplitter": frozenset({(2, 3), (2, 1)}),
+    "_LeftFwdMerger": frozenset({(2, 0), (1, 0)}),
+    "_RightFwdMerger": frozenset({(2, 0), (3, 0)}),
+    "_YMerger": frozenset({(3, 0), (1, 0)}),
+    "_TripleSplitter": frozenset({(2, 3), (2, 0), (2, 1)}),
+    "_TripleMerger": frozenset({(2, 0), (3, 0), (1, 0)}),
+}
+# 没有连线数据时只能按连接面兜底，这时分流与汇合无从区分，统一取分流。
+
 SHAPE_PREFERENCE = (
     "_Forward",
     "_LeftTurn",
@@ -53,9 +69,11 @@ SHAPE_PREFERENCE = (
     "_TripleSplitter",
 )
 DIRECTION_STEP = {0: (1, 0), 1: (0, 1), 2: (-1, 0), 3: (0, -1)}
+PAIR_ORDER = tuple(PAIR_SHAPES)
 
 SPACE_PATH_CONFIG_FLAG = 20
 RAIL_CONFIG_FLAG = 10
+RAIL_COLOR_COUNT = 7
 PRODUCER_PREFIX = "Layout_TrainProducer_"
 PRODUCER_OFFSET_GATE = 1117
 STATE_DROP_GATE = 1138
@@ -84,24 +102,42 @@ def migrate_nodes(
             result.append(entry)
             continue
         prefix, layer = family
-        sides = _connection_sides(entry) or _neighbour_sides(entry, entries, prefix)
+        pairs = _connection_pairs(entry)
+        sides = frozenset(side for pair in pairs for side in pair) or _neighbour_sides(entry, entries, prefix)
         if not sides:
             problems.append(f"孤立节点 ({entry.get('X')}, {entry.get('Y')}) 没有同网邻居，已丢弃")
             continue
-        shape = _match_shape(sides)
+        shape = _match_pairs(pairs) if pairs else None
         if shape is None:
-            problems.append(f"节点 ({entry.get('X')}, {entry.get('Y')}) 的连接面 {sorted(sides)} 无法对应 1.2 的岛")
-            result.append(entry)
-            counters["node_kept"] += 1
+            shape = _match_shape(sides)
+        if shape is None:
+            problems.append(
+                f"节点 ({entry.get('X')}, {entry.get('Y')}) 的连线 {sorted(pairs) if pairs else sorted(sides)} "
+                "在 1.2 没有对应岛，已丢弃"
+            )
             continue
         name, rotation = shape
-        result.append(
-            {"X": _coord(entry, "X"), "Y": _coord(entry, "Y"), "Z": layer, "R": rotation, "T": f"{prefix}{name}"}
-        )
+        converted: dict[str, Any] = {
+            "X": _coord(entry, "X"),
+            "Y": _coord(entry, "Y"),
+            "Z": layer,
+            "R": rotation,
+            "T": f"{prefix}{name}",
+        }
+        if prefix == "Rail":
+            converted["C"] = _rail_config(len(sides))
+        result.append(converted)
         counters["node"] += 1
-        if len(sides) >= 3:
-            notes.append(f"({entry.get('X')}, {entry.get('Y')}) 按分流方向生成，需实机确认流向")
+        if not pairs:
+            notes.append(f"({entry.get('X')}, {entry.get('Y')}) 没有连线数据，按相邻面推的岛型，需实机确认")
     return result, notes, problems
+
+
+def _rail_config(connections: int) -> str:
+    """轨道节点没解出颜色过滤，统一按全色通行写配置。"""
+    all_colors = (1 << RAIL_COLOR_COUNT) - 1
+    payload = bytes([connections]) + all_colors.to_bytes(BLOB_INT_BYTES, "little") * connections
+    return _encode(payload)
 
 
 def _coord(entry: dict[str, Any], key: str) -> int:
@@ -110,19 +146,27 @@ def _coord(entry: dict[str, Any], key: str) -> int:
     return value if isinstance(value, int) else 0
 
 
-def _connection_sides(entry: dict[str, Any]) -> frozenset[int]:
-    """旧节点的 `C` 里记着每条连线的进出口方向，优先用它判断连接面。"""
+def _connection_pairs(entry: dict[str, Any]) -> frozenset[tuple[int, int]]:
+    """旧节点的 `C` 里记着每条连线的进出口方向，解成 (输入面, 输出面) 集合。"""
     payload = _decode(entry.get("C"))
     if not payload or payload[0] != SPACE_PATH_CONFIG_FLAG:
         return frozenset()
     count = payload[1]
     if len(payload) != 2 + 2 * count:
         return frozenset()
-    sides = set()
-    for index in range(count):
-        sides.add(payload[2 + 2 * index])
-        sides.add(payload[3 + 2 * index])
-    return frozenset(sides)
+    return frozenset((payload[2 + 2 * index], payload[3 + 2 * index]) for index in range(count))
+
+
+def _match_pairs(pairs: frozenset[tuple[int, int]]) -> tuple[str, int] | None:
+    """按连线对找岛，顺带定出流向与旋转。"""
+    for suffix in PAIR_ORDER:
+        pattern = PAIR_SHAPES[suffix]
+        if len(pattern) != len(pairs):
+            continue
+        for rotation in range(4):
+            if frozenset(((side + rotation) % 4, (out + rotation) % 4) for side, out in pattern) == pairs:
+                return suffix, rotation
+    return None
 
 
 def _neighbour_sides(entry: dict[str, Any], entries: list[dict[str, Any]], prefix: str) -> frozenset[int]:
