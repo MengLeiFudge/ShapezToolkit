@@ -50,3 +50,7 @@ Ruff 按 `pyproject.toml` 检查 Python 3.10 语法、无效控制流和未定�
 
 * **一代 TMAM**：按机器分别归类，通用拆解思路见 [XianYu 拆解思路](shapez1_tmam/xianyu_20221129/logic.md)（原 `XianYu2` 现名 `XianYu-20221129`，原 `CTMAM` 现名 `BugFix-20210622`）。BugFix 漏解清单和存档差异见 [BugFix 说明](shapez1_tmam/bugfix_20210622/README.md)。
 * **二代 TMAM**：理论与九卷完整证明汇总于 [二代理论与证明库](shapez2_tmam/docs/README.md)。针对外部 Mari 主控，已建立 51 路组合方程模型并找到 [整层空隙反例](shapez2_tmam/docs/proofs/09-sources.md#s09-03)，证明原包默认配置不全覆盖；虚拟匹配不代表实体成品，详见 [Mari 模型说明](shapez2_tmam/mari/README.md)。
+
+## 许可证
+
+本项目采用 [MIT 许可证](LICENSE)。
