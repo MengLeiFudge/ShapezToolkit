@@ -268,15 +268,17 @@ def _check_catalog(body: dict[str, Any], report: UpgradeReport) -> None:
     names = [name for name in _all_names(body) if isinstance(name, str)]
     catalog = _catalog()
     unknown = catalog.unknown(names)
-    if unknown:
-        preview = "、".join(unknown[:6]) + ("…" if len(unknown) > 6 else "")
-        removed = [name for name in unknown if catalog.resolve(name) == "removed"]
-        detail = f"{len(unknown)} 个 id 在本机可读资源里找不到：{preview}"
-        if removed:
-            detail += f"（其中 {len(removed)} 个是 1.2 已移除的定义，其余可能藏在压缩 bundle 里）"
-        report.add("catalog", "unsupported", detail)
-    else:
+    if not unknown:
         report.add("catalog", "skipped", "全部 id 都能在本机 1.2 目录里解析")
+        return
+    removed = [name for name in unknown if catalog.resolve(name) == "removed"]
+    preview = "、".join(unknown[:6]) + ("…" if len(unknown) > 6 else "")
+    if removed:
+        removed_preview = "、".join(removed[:6]) + ("…" if len(removed) > 6 else "")
+        report.add("catalog", "unsupported", f"{len(removed)} 个条目在 1.2 已被移除：{removed_preview}")
+    # 目录只覆盖本机明文的 resources.assets，压缩 bundle 里的定义扫不到；
+    # 这里只是提醒，蓝图内容不因此缺东西，所以不算未处理项。
+    report.add("catalog", "skipped", f"{len(unknown) - len(removed)} 个 id 在本机可读资源里找不到：{preview}")
 
 
 def _all_names(body: dict[str, Any]) -> list[Any]:

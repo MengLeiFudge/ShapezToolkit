@@ -68,12 +68,29 @@ SHAPE_PREFERENCE = (
     "_YMerger",
     "_TripleSplitter",
 )
+# 1.2 轨道岛的连接器按「先去重的输入面、再去重的输出面」排列
+# （`TrainNavigationIslandDefinitionFactory.ComputeConnections`），
+# 颜色掩码就按这个顺序写。本地方向：东 0、南 1、西 2、北 3。
+RAIL_CONNECTOR_ORDER: dict[str, tuple[int, ...]] = {
+    "_Forward": (2, 0),
+    "_LeftTurn": (2, 3),
+    "_RightTurn": (2, 1),
+    "_LeftFwdSplitter": (2, 0, 3),
+    "_RightFwdSplitter": (2, 0, 1),
+    "_YSplitter": (2, 1, 3),
+    "_LeftFwdMerger": (2, 3, 0),
+    "_RightFwdMerger": (2, 1, 0),
+    "_YMerger": (3, 1, 0),
+    "_TripleSplitter": (2, 0, 1, 3),
+    "_TripleMerger": (1, 2, 3, 0),
+}
 DIRECTION_STEP = {0: (1, 0), 1: (0, 1), 2: (-1, 0), 3: (0, -1)}
 PAIR_ORDER = tuple(PAIR_SHAPES)
 
 SPACE_PATH_CONFIG_FLAG = 20
 RAIL_CONFIG_FLAG = 10
 RAIL_COLOR_COUNT = 7
+ALL_RAIL_COLORS = (1 << RAIL_COLOR_COUNT) - 1
 PRODUCER_PREFIX = "Layout_TrainProducer_"
 PRODUCER_OFFSET_GATE = 1117
 STATE_DROP_GATE = 1138
@@ -95,6 +112,7 @@ def migrate_nodes(
 
     notes: list[str] = []
     problems: list[str] = []
+    occupied = _occupied_cells(entries)
     result: list[dict[str, Any]] = []
     for entry in entries:
         family = NODE_FAMILIES.get(entry.get("T"))
@@ -102,13 +120,14 @@ def migrate_nodes(
             result.append(entry)
             continue
         prefix, layer = family
-        pairs = _connection_pairs(entry)
+        connections = _connections(entry)
+        pairs = frozenset((src, dst) for src, dst, _ in connections)
         sides = frozenset(side for pair in pairs for side in pair) or _neighbour_sides(entry, entries, prefix)
         if not sides:
             problems.append(f"孤立节点 ({entry.get('X')}, {entry.get('Y')}) 没有同网邻居，已丢弃")
             continue
         shape = _match_pairs(pairs) if pairs else None
-        if shape is None:
+        if shape is None and not pairs:
             shape = _match_shape(sides)
         if shape is None:
             problems.append(
@@ -117,6 +136,9 @@ def migrate_nodes(
             )
             continue
         name, rotation = shape
+        if (_coord(entry, "X"), _coord(entry, "Y"), layer) in occupied:
+            problems.append(f"节点 ({entry.get('X')}, {entry.get('Y')}) 的目标区块已被其他条目占用，已丢弃")
+            continue
         converted: dict[str, Any] = {
             "X": _coord(entry, "X"),
             "Y": _coord(entry, "Y"),
@@ -125,7 +147,7 @@ def migrate_nodes(
             "T": f"{prefix}{name}",
         }
         if prefix == "Rail":
-            converted["C"] = _rail_config(len(sides))
+            converted["C"] = _rail_config(name, rotation, connections)
         result.append(converted)
         counters["node"] += 1
         if not pairs:
@@ -133,11 +155,35 @@ def migrate_nodes(
     return result, notes, problems
 
 
-def _rail_config(connections: int) -> str:
-    """轨道节点没解出颜色过滤，统一按全色通行写配置。"""
-    all_colors = (1 << RAIL_COLOR_COUNT) - 1
-    payload = bytes([connections]) + all_colors.to_bytes(BLOB_INT_BYTES, "little") * connections
+def _rail_config(name: str, rotation: int, connections: list[tuple[int, int, int | None]]) -> str:
+    """按岛连接器顺序写颜色掩码，掩码取原来经过这一侧的连线的并集。
+
+    旧数据是「每条连线一个掩码」，1.2 是「每个连接器一个掩码」；连线两端的掩码语义一致，
+    同侧有多条连线时取并集，取不到就按全色放行。
+    """
+    masks = []
+    for side in RAIL_CONNECTOR_ORDER[name]:
+        source = (side + rotation) % 4
+        mask = 0
+        for src, dst, src_mask in connections:
+            if src_mask and source in (src, dst):
+                mask |= src_mask
+        masks.append(mask or ALL_RAIL_COLORS)
+    payload = bytes([len(masks)]) + b"".join(mask.to_bytes(BLOB_INT_BYTES, "little") for mask in masks)
     return _encode(payload)
+
+
+def _occupied_cells(entries: list[dict[str, Any]]) -> set[tuple[int, int, int]]:
+    """非节点条目占掉的区块；升降段跨两层，上下各留一格。"""
+    occupied: set[tuple[int, int, int]] = set()
+    for entry in entries:
+        if entry.get("T") in NODE_FAMILIES:
+            continue
+        cell = (_coord(entry, "X"), _coord(entry, "Y"), _coord(entry, "Z"))
+        occupied.add(cell)
+        if "_Lift" in str(entry.get("T")):
+            occupied.update({(cell[0], cell[1], cell[2] + 1), (cell[0], cell[1], cell[2] - 1)})
+    return occupied
 
 
 def _coord(entry: dict[str, Any], key: str) -> int:
@@ -146,22 +192,30 @@ def _coord(entry: dict[str, Any], key: str) -> int:
     return value if isinstance(value, int) else 0
 
 
-def _connection_pairs(entry: dict[str, Any]) -> frozenset[tuple[int, int]]:
-    """旧节点的 `C` 里记着每条连线的进出口方向，解成 (输入面, 输出面) 集合。
+def _connections(entry: dict[str, Any]) -> list[tuple[int, int, int | None]]:
+    """旧节点的 `C` 记着每条连线的进出口方向，解成 (输入面, 输出面, 颜色掩码) 列表。
 
-    太空节点每条连线 2 字节，轨道节点每条 2 字节方向加 4 字节颜色掩码。
+    太空节点每条连线 2 字节，轨道节点每条 2 字节方向加 4 字节颜色掩码；解不出来就返回空表。
     """
     payload = _decode(entry.get("C"))
-    if not payload:
-        return frozenset()
+    if payload is None or len(payload) < 2:
+        return []
     flag = payload[0]
-    if flag not in (SPACE_PATH_CONFIG_FLAG, RAIL_CONFIG_FLAG) or len(payload) < 2:
-        return frozenset()
-    stride = 2 if flag == SPACE_PATH_CONFIG_FLAG else 2 + BLOB_INT_BYTES
+    if flag == SPACE_PATH_CONFIG_FLAG:
+        stride, has_mask = 2, False
+    elif flag == RAIL_CONFIG_FLAG:
+        stride, has_mask = 2 + BLOB_INT_BYTES, True
+    else:
+        return []
     count = payload[1]
     if len(payload) != 2 + stride * count:
-        return frozenset()
-    return frozenset((payload[2 + stride * index], payload[3 + stride * index]) for index in range(count))
+        return []
+    result = []
+    for index in range(count):
+        base = 2 + stride * index
+        mask = int.from_bytes(payload[base + 2 : base + 2 + BLOB_INT_BYTES], "little") if has_mask else None
+        result.append((payload[base], payload[base + 1], mask))
+    return result
 
 
 def _match_pairs(pairs: frozenset[tuple[int, int]]) -> tuple[str, int] | None:
