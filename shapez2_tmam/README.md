@@ -19,6 +19,7 @@
 | [synthesis/](synthesis/README.md) | 代码包 | 通用偶数象限物理模型、角与脚手架构造、有界逆推与制造证书导出 |
 | [circuits/](circuits/README.md) | 代码包 | 原生二代信号门网表、3×3 大平台装箱、时序控制、实体工道和单节货运站场的蓝图编译器 |
 | [mari/](mari/README.md) | 代码包 | Mari 主控接线提取、组合方程与六候选求值模型 |
+| [blueprint_web/](blueprint_web/README.md) | 代码包 | 二代蓝图封装 1..5 编解码、版本升级与后续单文件网页工具的规则库 |
 | [docs/](docs/README.md) | 理论与证明 | 范围导览（`4q5l` / `6q5l` / `general`）、`papers/`（六篇学术版 PDF 与研究索引）、`theory/`（论文 Markdown 源码与编写规范）、`proofs/`（九卷完整证明与来源映射）及 `assets/`（配图与长短代码） |
 | [blueprints/](blueprints/README.md) | 导出产物 | 游戏 `SHAPEZ2-4` 蓝图册，按电路、实体、配料、通用火车分册，电路附频道与时序说明 |
 | [examples/](examples/README.md) | 导出产物 | 代表图形与特殊机制的逐步文字配方（`.md`）、`json/`（机器可读步骤与六槽指令）及 `18q17l-cascade/` 分页图 |
@@ -37,6 +38,10 @@ python main.py tmam2 synth --complete --production --instructions -- "CuCu----:C
 # 查看或重新编译原生电路蓝图及网表报告
 python main.py tmam2 blueprint --list
 python main.py tmam2 blueprint --reports
+
+# 解析、升级与批量核对二代蓝图
+python main.py tmam2 web --decode 蓝图.spz2bp
+python main.py tmam2 web --verify .codex/sources/blueprints
 
 # Mari 六候选主控模型求值
 python main.py tmam2 mari CuCuCuCu

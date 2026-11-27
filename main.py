@@ -40,7 +40,13 @@ def build_parser() -> argparse.ArgumentParser:
     verify = tmam_commands.add_parser("verify", help="按游戏 tick 规则穷举指定 TMAM 存档")
     verify.add_argument("--saves", type=Path, required=True, help="包含所选 TMAM 原始存档的目录")
     verify.add_argument("--output", type=Path, help="自定义报告根目录，按机器分目录；默认写到各机器的 verification 下")
-    verify.add_argument("--machine", nargs="+", choices=("XianYu-20221129", "BugFix-20210622", "CTMAM"), default=("XianYu-20221129", "BugFix-20210622"), help="选择存档，默认 XianYu-20221129 BugFix-20210622；CTMAM 为 BugFix 旧名")
+    verify.add_argument(
+        "--machine",
+        nargs="+",
+        choices=("XianYu-20221129", "BugFix-20210622", "CTMAM"),
+        default=("XianYu-20221129", "BugFix-20210622"),
+        help="选择存档，默认 XianYu-20221129 BugFix-20210622；CTMAM 为 BugFix 旧名",
+    )
     verify.add_argument("--workers", type=int, default=8, help="并行进程数，1..32，默认 8")
     verify.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数；超时单独报告")
     nabi = tmam_commands.add_parser("verify-v7f", help="审计 Nabi v7f 的全部结构、逐 tick 指令和缓存")
@@ -48,7 +54,9 @@ def build_parser() -> argparse.ArgumentParser:
     nabi.add_argument("--output", type=Path, help="新的报告目录；默认保存到 Nabi 目录的 verification 下")
     nabi.add_argument("--workers", type=int, default=8, help="并行进程数，1..32，默认 8")
     nabi.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数，默认 4096")
-    solve = tmam_commands.add_parser("solve", help="用 XianYu-20221129 的逻辑拆解结构，输出部件与加工树，不查图形数据库")
+    solve = tmam_commands.add_parser(
+        "solve", help="用 XianYu-20221129 的逻辑拆解结构，输出部件与加工树，不查图形数据库"
+    )
     solve.add_argument("shape", type=int, help="16 位结构编号，1..65535，低四位为底层")
     solve.add_argument("--events", action="store_true", help="同时输出指令、模式和重试信号的变化 tick")
     solve.add_argument("--max-ticks", type=int, default=4096, help="每阶段最大 tick 数，默认 4096")
@@ -61,7 +69,9 @@ def build_parser() -> argparse.ArgumentParser:
     synth2.add_argument("--complete", action="store_true", help="启用完整四象限五层尾部搜索")
     synth2.add_argument("--instructions", action="store_true", help="另导出四/六象限五层的六寄存器消费式指令")
     synth2.add_argument("--production", action="store_true", help="另导出四象限五层制作厂的用料和基础单层订单")
-    mari2 = tmam2_commands.add_parser("mari", aliases=["solve"], help="按 Mari 六候选逻辑计算虚拟重建和工厂指令（兼容旧名 solve）")
+    mari2 = tmam2_commands.add_parser(
+        "mari", aliases=["solve"], help="按 Mari 六候选逻辑计算虚拟重建和工厂指令（兼容旧名 solve）"
+    )
     mari2.add_argument("shape", help="四象限、最多五层的完整图形短代码")
     mari2.add_argument("--iteration", type=int, choices=range(1, 7), help="只计算指定候选；默认依次选择最小匹配编号")
     bp2 = tmam2_commands.add_parser("blueprint", help="编译二代电路、实体与货运蓝图或导出静态网表报告")
@@ -74,6 +84,12 @@ def build_parser() -> argparse.ArgumentParser:
     paper2.add_argument("--source", type=Path, help="理论 Markdown 源文件路径")
     paper2.add_argument("--output", type=Path, help="导出 PDF 路径")
     paper2.add_argument("--all", action="store_true", help="重新排版全部六篇理论论文")
+    web2 = tmam2_commands.add_parser("web", help="解析、升级与核对二代蓝图（.spz2bp）")
+    web2.add_argument("paths", nargs="+", type=Path, metavar="PATH", help="蓝图文件或包含蓝图的目录")
+    web2.add_argument("--decode", action="store_true", help="打印解析后的文档 JSON，不写文件")
+    web2.add_argument("--upgrade", action="store_true", help="升级到本机最新游戏版本并另存")
+    web2.add_argument("--verify", action="store_true", help="批量核对目录内蓝图的解析、往返与升级")
+    web2.add_argument("--output-dir", type=Path, help="升级结果目录；默认写到输入文件旁的 upgraded/")
     return parser
 
 
@@ -84,6 +100,7 @@ def main() -> int:
         if args.tool == "tmam2":
             if args.command == "synth":
                 from shapez2_tmam.synthesis.__main__ import main as synth_main
+
                 argv = ["--quadrants", str(args.quadrants), "--height", str(args.height)]
                 if args.complete:
                     argv.append("--complete")
@@ -95,6 +112,7 @@ def main() -> int:
                 return synth_main(argv)
             if args.command == "blueprint":
                 from shapez2_tmam.circuits.__main__ import BLUEPRINT_DIR, main as circuits_main
+
                 argv = []
                 if args.list:
                     argv.append("--list")
@@ -110,6 +128,7 @@ def main() -> int:
                 return circuits_main(argv)
             if args.command == "paper":
                 import importlib.util
+
                 pdf_script = Path(__file__).resolve().parent / "shapez2_tmam/docs/papers/build_paper_pdf.py"
                 spec = importlib.util.spec_from_file_location("build_paper_pdf", pdf_script)
                 assert spec is not None and spec.loader is not None
@@ -123,7 +142,22 @@ def main() -> int:
                 if args.output is not None:
                     argv.extend(["--output", str(args.output)])
                 return module.main(argv)
+            if args.command == "web":
+                from shapez2_tmam.blueprint_web.cli import main as web_main
+
+                argv = []
+                if args.decode:
+                    argv.append("--decode")
+                if args.upgrade:
+                    argv.append("--upgrade")
+                if args.verify:
+                    argv.append("--verify")
+                if args.output_dir is not None:
+                    argv.extend(["--output-dir", str(args.output_dir)])
+                argv.extend(str(path) for path in args.paths)
+                return web_main(argv)
             from shapez2_tmam.mari import Mari, Shape
+
             machine = Mari()
             target = Shape.from_key(args.shape)
             candidate = machine.candidate(target, args.iteration) if args.iteration else machine.solve(target)
@@ -134,12 +168,14 @@ def main() -> int:
         if args.tool == "tmam":
             if args.command == "verify-v7f":
                 from shapez1_tmam.nabi_20221128.verify_v7f import verify_v7f
+
                 report = verify_v7f(args.save, args.output, args.workers, args.max_ticks)
                 print(json.dumps(report, ensure_ascii=False, indent=2))
                 print("审计完成；候选堆叠结果不代表完整指令语义已经验证通过。")
                 return 0
             if args.command == "solve":
                 from shapez1_tmam.xianyu_20221129.solver import XianYu20221129
+
                 report = XianYu20221129(args.max_ticks).solve(args.shape, include_events=args.events)
                 print(json.dumps(report, ensure_ascii=False, indent=2))
                 return int(not report["success"])
@@ -147,25 +183,37 @@ def main() -> int:
             print(json.dumps(report, ensure_ascii=False, indent=2))
             for name, path in report["output_directories"].items():
                 print(f"{name} 逐项验证结果：{path}")
-            return int(any(machine["counts"].get(key, 0) for machine in report["machines"].values() for key in ("false_positive", "false_negative", "timeout")))
+            return int(
+                any(
+                    machine["counts"].get(key, 0)
+                    for machine in report["machines"].values()
+                    for key in ("false_positive", "false_negative", "timeout")
+                )
+            )
         if args.tool == "mods":
             if args.command == "clean":
                 report = clean_mods(MOD_DIR)
-                print(f"整理完成；重复 {report['duplicates']}，旧版 {report['obsolete']}，废弃 {report['retired']}，改名 {report['renamed']}。")
+                print(
+                    f"整理完成；重复 {report['duplicates']}，旧版 {report['obsolete']}，废弃 {report['retired']}，改名 {report['renamed']}。"
+                )
                 return 0
             failed = 0
             if args.command in ("download", "update"):
                 print(f"正在批量同步一代模组，保存位置：{MOD_DIR}")
                 report = sync_mods(MOD_DIR)
                 failed = report["failed"]
-                print(f"下载 {report['downloaded']} 个，已有 {report['skipped']} 个，失败 {failed} 个，跳过废弃 {report['retired']} 个。")
+                print(
+                    f"下载 {report['downloaded']} 个，已有 {report['skipped']} 个，失败 {failed} 个，跳过废弃 {report['retired']} 个。"
+                )
                 print(f"下载清单：{MOD_DIR / 'catalog' / 'download-state.json'}")
             else:
                 clean_mods(MOD_DIR)
             if args.command in ("update", "publish"):
                 print("正在同步群 1163635014 / s1-MOD-官方模组网站。")
                 published = publish_mods(MOD_DIR)
-                print(f"群文件同步完成：上传 {published['uploaded']}，未变化 {published['skipped']}，删除旧包 {published['deleted']}。")
+                print(
+                    f"群文件同步完成：上传 {published['uploaded']}，未变化 {published['skipped']}，删除旧包 {published['deleted']}。"
+                )
             return 1 if failed else 0
 
         if args.command == "show":
