@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from . import catalog as catalog_module
 from .codec import Blueprint, BlueprintError, build_custom_data, read_custom_data
 
 DATA_PATH = Path(__file__).resolve().parent / "data" / "migration.json"
@@ -21,6 +22,7 @@ RULES: dict[str, Any] = json.loads(DATA_PATH.read_text(encoding="utf-8"))
 TARGET_VERSION: int = int(RULES["target"]["document_version"])
 TARGET_FORMAT: int = int(RULES["target"]["format_version"])
 ICON_TYPE: str = str(RULES["icon"]["type"])
+_CATALOG: catalog_module.Catalog | None = None
 
 
 @dataclass(frozen=True)
@@ -78,6 +80,7 @@ def upgrade(source: Blueprint) -> tuple[Blueprint, UpgradeReport]:
     document["V"] = TARGET_VERSION
     _report_steps(source, custom_data, counters, renamed, report)
     _report_gaps(body, source.version, counters, report, source.kind == "Island")
+    _check_catalog(body, report)
     return Blueprint(document=document, format_version=TARGET_FORMAT, custom_data=custom_data), report
 
 
@@ -192,6 +195,33 @@ def _report_gaps(
     ]
     if pending and counters["configs"]:
         report.add("data_branches", "unsupported", "待实现的字节串分叉：" + "、".join(pending))
+
+
+def _check_catalog(body: dict[str, Any], report: UpgradeReport) -> None:
+    """用本机 1.2 的 id 目录核对条目，解析不到的 id 单列出来。"""
+    names = [name for name in _all_names(body) if isinstance(name, str)]
+    unknown = _catalog().unknown(names)
+    if unknown:
+        preview = "、".join(unknown[:6]) + ("…" if len(unknown) > 6 else "")
+        report.add("catalog", "unsupported", f"{len(unknown)} 个 id 不在本机 1.2 目录里：{preview}")
+    else:
+        report.add("catalog", "skipped", "全部 id 都能在本机 1.2 目录里解析")
+
+
+def _all_names(body: dict[str, Any]) -> list[Any]:
+    """收集本层与内嵌建筑蓝图的全部 T。"""
+    names: list[Any] = []
+    for node in _bodies(body):
+        names.extend(entry.get("T") for entry in _entries(node))
+    return names
+
+
+def _catalog() -> catalog_module.Catalog:
+    """惰性读取 id 目录，避免每次升级重复解析 JSON。"""
+    global _CATALOG
+    if _CATALOG is None:
+        _CATALOG = catalog_module.load()
+    return _CATALOG
 
 
 def _entries(body: dict[str, Any]) -> list[dict[str, Any]]:

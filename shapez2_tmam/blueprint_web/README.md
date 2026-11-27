@@ -2,7 +2,7 @@
 
 离线解析、升级并编辑二代蓝图（`.spz2bp`），最终交付单文件 HTML，双击即用。
 
-当前完成阶段 1：编解码与升级骨架，命令行可用；3D 预览与建筑级编辑在后续阶段。
+当前完成阶段 1 与建筑规则整理：编解码、升级骨架和 id 目录均可用，命令行能跑；3D 预览与建筑级编辑在后续阶段。
 
 ## 命令
 
@@ -13,8 +13,15 @@
 | 查看结构与统计 | `python main.py tmam2 web --decode 蓝图.spz2bp` |
 | 升级到本机最新版本 | `python main.py tmam2 web --upgrade 蓝图.spz2bp --output-dir 输出目录` |
 | 批量核对解析、往返与升级 | `python main.py tmam2 web --verify .codex/sources/blueprints` |
+| 从安装版重建 id 目录 | `python main.py tmam2 web --sync-catalog "D:/Steam/steamapps/common/shapez 2"` |
 
 `--upgrade` 不给 `--output-dir` 时写到输入文件旁的 `upgraded/`，逐文件打印报告行。
+
+## id 目录
+
+`catalog.py` 从本机安装版的 `resources.assets` 抽出明文 id，再按 1.2 的工厂命名规则生成轨道、太空带、太空管与升降段的 id，结果写在 `data/buildings.json`。升级时用它核对每条 `T`，解析不到的 id 在报告里单列。
+
+压缩过的 addressable bundle 里的定义扫不到，要补全得引 UnityPy 解包。建筑与 id 的变化细节见[建筑变化与迁移规则](建筑变化与迁移规则.md)。
 
 ## 覆盖范围
 

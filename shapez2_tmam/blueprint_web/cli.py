@@ -10,6 +10,7 @@ import argparse
 import json
 from pathlib import Path
 
+from . import catalog as catalog_module
 from .codec import Blueprint, BlueprintError, decode, encode, summarize
 from .upgrade import TARGET_FORMAT, TARGET_VERSION, UpgradeReport, upgrade
 
@@ -19,14 +20,21 @@ BLUEPRINT_SUFFIX = ".spz2bp"
 def main(argv: list[str] | None = None) -> int:
     """按子模式分派；蓝图损坏时逐条报告并返回非零退出码。"""
     parser = argparse.ArgumentParser(prog="tmam2 web", description="解析、升级与核对二代蓝图（.spz2bp）。")
-    parser.add_argument("paths", nargs="+", type=Path, metavar="PATH", help="蓝图文件或包含蓝图的目录")
+    parser.add_argument("paths", nargs="*", type=Path, metavar="PATH", help="蓝图文件或包含蓝图的目录")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--decode", action="store_true", help="打印解析后的文档 JSON")
     mode.add_argument("--upgrade", action="store_true", help="升级到本机最新游戏版本并另存")
     mode.add_argument("--verify", action="store_true", help="批量核对目录内蓝图的解析、往返与升级")
     parser.add_argument("--output-dir", type=Path, help="升级结果目录；默认写到输入文件旁的 upgraded/")
+    parser.add_argument(
+        "--sync-catalog", type=Path, metavar="GAME", help="从安装版重建 id 目录，可指向游戏根目录或 resources.assets"
+    )
     args = parser.parse_args(argv)
 
+    if args.sync_catalog is not None:
+        return sync_catalog(args.sync_catalog)
+    if not args.paths:
+        parser.error("需要至少一个蓝图路径")
     try:
         files = expand(args.paths)
     except OSError as exc:
@@ -40,6 +48,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.decode:
         return show(files)
     return run_upgrade(files, args.output_dir)
+
+
+def sync_catalog(game_dir: Path) -> int:
+    """从安装版重建 id 目录，打印抽到的数量。"""
+    try:
+        catalog = catalog_module.sync(game_dir)
+    except (OSError, ValueError) as exc:
+        print(f"无法读取安装版资源：{exc}")
+        return 1
+    print(
+        f"id 目录已更新：资产明文 {len(catalog.asset_ids)} 个，工厂生成 {len(catalog.generated_ids)} 个，"
+        f"版本 {catalog.game_version or '未知'}；写入 {catalog_module.DATA_PATH}"
+    )
+    return 0
 
 
 def expand(paths: list[Path]) -> list[Path]:

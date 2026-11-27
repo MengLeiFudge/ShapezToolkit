@@ -85,11 +85,14 @@ def build_parser() -> argparse.ArgumentParser:
     paper2.add_argument("--output", type=Path, help="导出 PDF 路径")
     paper2.add_argument("--all", action="store_true", help="重新排版全部六篇理论论文")
     web2 = tmam2_commands.add_parser("web", help="解析、升级与核对二代蓝图（.spz2bp）")
-    web2.add_argument("paths", nargs="+", type=Path, metavar="PATH", help="蓝图文件或包含蓝图的目录")
+    web2.add_argument("paths", nargs="*", type=Path, metavar="PATH", help="蓝图文件或包含蓝图的目录")
     web2.add_argument("--decode", action="store_true", help="打印解析后的文档 JSON，不写文件")
     web2.add_argument("--upgrade", action="store_true", help="升级到本机最新游戏版本并另存")
     web2.add_argument("--verify", action="store_true", help="批量核对目录内蓝图的解析、往返与升级")
     web2.add_argument("--output-dir", type=Path, help="升级结果目录；默认写到输入文件旁的 upgraded/")
+    web2.add_argument(
+        "--sync-catalog", type=Path, metavar="GAME", help="从安装版重建 id 目录，可指向游戏根目录或 resources.assets"
+    )
     return parser
 
 
@@ -154,6 +157,8 @@ def main() -> int:
                     argv.append("--verify")
                 if args.output_dir is not None:
                     argv.extend(["--output-dir", str(args.output_dir)])
+                if args.sync_catalog is not None:
+                    argv.extend(["--sync-catalog", str(args.sync_catalog)])
                 argv.extend(str(path) for path in args.paths)
                 return web_main(argv)
             from shapez2_tmam.mari import Mari, Shape
