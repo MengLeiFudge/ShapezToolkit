@@ -1,0 +1,5 @@
+# 蓝图是压缩交付物，搜索接口及布局时读取同名 JSON 和生成源码。
+*.spz2bp
+
+# 方程由原包生成，搜索接线规则与求值入口时读取 mari/ 下的 Python 和 README。
+/shapez2_tmam/mari/equations.json
