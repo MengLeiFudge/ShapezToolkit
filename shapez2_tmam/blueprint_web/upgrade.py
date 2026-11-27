@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from . import catalog as catalog_module
+from . import tunnels
 from .codec import Blueprint, BlueprintError, build_custom_data, read_custom_data
 
 DATA_PATH = Path(__file__).resolve().parent / "data" / "migration.json"
@@ -76,6 +77,7 @@ def upgrade(source: Blueprint) -> tuple[Blueprint, UpgradeReport]:
     renamed: Counter[str] = Counter()
     custom_data = _migrate_icon(source, body, counters)
     _migrate_entries(body, source.version, counters, renamed)
+    _migrate_space_tunnels(body, report)
     _stamp_versions(body)
     document["V"] = TARGET_VERSION
     _report_steps(source, custom_data, counters, renamed, report)
@@ -129,6 +131,34 @@ def _migrate_entries(
         nested = entry.get("B")
         if isinstance(nested, dict):
             _migrate_entries(nested, version, counters, renamed, island_level=False)
+
+
+def _migrate_space_tunnels(body: dict[str, Any], report: UpgradeReport) -> None:
+    """把旧版太空地下隧道换成 1.2 的三层太空走线。"""
+    converted = 0
+    problems: list[str] = []
+    for node in _bodies(body):
+        entries = _entries(node)
+        if not any(entry.get("T") in tunnels.TUNNEL_IDS for entry in entries):
+            continue
+        replaced, replacements, issues = tunnels.migrate_tunnels(entries)
+        node["Entries"] = replaced
+        converted += len(replacements)
+        problems.extend(issues)
+    nodes: list[tuple[Any, Any]] = []
+    for node in _bodies(body):
+        nodes.extend(tunnels.find_space_nodes(_entries(node)))
+    if converted:
+        report.add("space_tunnel", "applied", f"{converted} 处地下隧道改成升降段与 z=1 太空段")
+    if problems:
+        report.add("space_tunnel", "unsupported", "；".join(problems[:4]))
+    if nodes:
+        preview = "、".join(f"({x}, {y})" for x, y in nodes[:4])
+        report.add(
+            "space_nodes", "unsupported", f"{len(nodes)} 个 0.0.9 太空节点（{preview}）要按连线重建为 SpaceBelt_* 岛"
+        )
+    if not converted and not problems and not nodes:
+        report.add("space_tunnel", "skipped", "没有旧版地下隧道与太空节点")
 
 
 def _stamp_versions(body: dict[str, Any]) -> None:
