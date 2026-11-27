@@ -1,0 +1,24 @@
+{
+  "column_word": 1655035,
+  "first_address": 1655042,
+  "read_address": 1655043,
+  "next_address": 1655045,
+  "header": 1655046,
+  "base_template": 1655047,
+  "dye_template": 1655048,
+  "end": "CuCuCuCu",
+  "packet": {
+    "opcode": 1655053,
+    "a": 1655054,
+    "b": 1655055,
+    "destination": 1655056,
+    "base": 1655051,
+    "color": 1655052
+  },
+  "columns": 475,
+  "program_states": 3102,
+  "platforms": 16,
+  "orientation": "主角 q0，助手 q3。使用槽 0 至 3。首地址由五层材料字查出。",
+  "fields": "header 的四角依次编码操作号、a、b、目标槽。Cu/Cr/Cg/Cb/Cc/Cm/Cy/Cw 编码 0～7，换 R 编码 8～15。",
+  "binding": "订单中 Rg/Rb/Rc/Rm/Ry 引用该列底到顶的普通格。染料模板的同种标记引用对应原层晶体色，Cr 指固定红染料。只在指令 14 取基础料，只在指令 10 取染料。"
+}

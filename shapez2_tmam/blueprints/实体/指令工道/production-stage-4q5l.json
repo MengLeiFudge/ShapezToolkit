@@ -1,0 +1,46 @@
+{
+  "component": "production_stage",
+  "index": 0,
+  "inputs": {
+    "address": 1640000,
+    "phase": 1640001,
+    "opcode": 1640002,
+    "a": 1640003,
+    "b": 1640004,
+    "destination": 1640005,
+    "base": 1640006,
+    "color": 1640007
+  },
+  "outputs": {
+    "ordered_base": 1600076,
+    "operands_match": 1640008,
+    "materials_match": 1640009
+  },
+  "call_channels": {
+    "command": 1600060,
+    "a": 1600061,
+    "b": 1600062
+  },
+  "slots": [
+    -12,
+    -9,
+    8,
+    11,
+    28,
+    31
+  ],
+  "operand_order": "a 为下料或第一操作数，b 为上料或第二操作数。",
+  "base_input": "领取基础层时，译码器关闭 A、B 取料并发布 ordered_base；实物经收料台南侧中口建筑层1送入。",
+  "crystal_commands": [
+    "color:r",
+    "color:g",
+    "color:b",
+    "color:c",
+    "color:m",
+    "color:y",
+    "color:w"
+  ],
+  "islands": 9,
+  "foundation_3x3": 6,
+  "space_belts": 3
+}

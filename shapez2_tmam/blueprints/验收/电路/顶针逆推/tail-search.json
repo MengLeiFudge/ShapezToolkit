@@ -1,0 +1,41 @@
+{
+  "inputs": {
+    "enable": 1705300,
+    "preflight_ready": 1705303,
+    "preflight_ok": 1705304,
+    "can_pin": 1705305,
+    "resuming": 1705306,
+    "s_matches": 1705307,
+    "cursor_matches": 1705308,
+    "has_parent": 1705309,
+    "parent_ready": 1705310,
+    "leaf_ready": 1705311,
+    "member": 1705312,
+    "s_ready": 1704802,
+    "s_exhausted": 1704803,
+    "pin_proof": 1703314,
+    "pin_exhausted": 1703317,
+    "pin_fault": 1703318
+  },
+  "outputs": {
+    "preflight": 1705330,
+    "stack": 1705331,
+    "stack_reject": 1705332,
+    "pin": 1705333,
+    "proof_missed": 1705334,
+    "save": 1705335,
+    "capture_leaf": 1705336,
+    "down": 1705337,
+    "read_parent": 1705338,
+    "restore": 1705339,
+    "resumed": 1705340,
+    "solved": 1705341,
+    "exhausted": 1705342,
+    "fault": 1705343
+  },
+  "phase": 1705301,
+  "hold_signal_ticks": 4128,
+  "phase_sample_signal_ticks": 96,
+  "platforms": 12,
+  "building_entries": 11664
+}

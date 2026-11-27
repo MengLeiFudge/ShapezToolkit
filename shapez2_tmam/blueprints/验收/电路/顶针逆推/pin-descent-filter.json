@@ -1,0 +1,89 @@
+{
+  "inputs": {
+    "request": 1704902,
+    "mask": 1703303,
+    "rows_ready": 1704309,
+    "source_rows": [
+      1704300,
+      1704301,
+      1704302,
+      1704303
+    ],
+    "source_materials": [
+      [
+        1701867,
+        1701873,
+        1701879,
+        1701885
+      ],
+      [
+        1701868,
+        1701874,
+        1701880,
+        1701886
+      ],
+      [
+        1701869,
+        1701875,
+        1701881,
+        1701887
+      ],
+      [
+        1701870,
+        1701876,
+        1701882,
+        1701888
+      ]
+    ],
+    "pushed_rows": [
+      1704304,
+      1704305,
+      1704306,
+      1704307,
+      1704308
+    ]
+  },
+  "outputs": {
+    "ready": 1704900,
+    "ok": 1704901,
+    "template_top": 1705111,
+    "source_lowest": 1705126,
+    "pushed_lowest": 1705127,
+    "member_column_a": 1705141,
+    "pin_base_possible": 1705142,
+    "strict_descent": 1705128,
+    "local_ready": 1705143,
+    "local_ok": 1705144
+  },
+  "support": {
+    "inputs": {
+      "enable": 1705100,
+      "grounded": 1705101,
+      "optional_top": 1705102,
+      "rows": [
+        1705103,
+        1705104,
+        1705105,
+        1705106,
+        1705107
+      ]
+    },
+    "outputs": {
+      "done": 1705108,
+      "accepted": 1705109
+    }
+  },
+  "channels": {
+    "reserved_range": [
+      1705100,
+      1705199
+    ]
+  },
+  "timing": {
+    "channel_signal_ticks": 12,
+    "local_hold_signal_ticks": 1800,
+    "support_reset_signal_ticks": 120
+  },
+  "platforms": 44,
+  "building_entries": 32737
+}

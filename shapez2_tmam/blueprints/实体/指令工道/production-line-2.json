@@ -1,0 +1,21 @@
+{
+  "first_stage": 0,
+  "last_stage": 1,
+  "stages": 2,
+  "write_bus": {
+    "address": 1640000,
+    "phase": 1640001,
+    "opcode": 1640002,
+    "a": 1640003,
+    "b": 1640004,
+    "destination": 1640005,
+    "base": 1640006,
+    "color": 1640007
+  },
+  "readback": [
+    1640008,
+    1640009
+  ],
+  "product_filter_channel": 1640010,
+  "islands": 19
+}

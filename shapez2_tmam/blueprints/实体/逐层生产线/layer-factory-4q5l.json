@@ -1,0 +1,50 @@
+{
+  "target": 1600000,
+  "run": 1640030,
+  "product_filter": 1640010,
+  "coverage": "逐层骨架直接还原目标，或该骨架经一次单色结晶还原目标",
+  "stage_count": 10,
+  "program_lengths": [
+    9,
+    10
+  ],
+  "product_outlet": {
+    "platform": [
+      168,
+      0,
+      0
+    ],
+    "east": 31,
+    "level": 0
+  },
+  "shape_train_heads": [
+    [
+      -12,
+      -17
+    ],
+    [
+      6,
+      -17
+    ],
+    [
+      42,
+      -17
+    ],
+    [
+      78,
+      -17
+    ],
+    [
+      114,
+      -17
+    ]
+  ],
+  "fluid_train_heads": [
+    [
+      153,
+      3
+    ]
+  ],
+  "islands": 410,
+  "foundations": 218
+}

@@ -10,9 +10,9 @@
     "empty": 1600014,
     "pin": 1600015
   },
-  "input_contract": "row 为配方内非空、无晶体单层。quadrant 为 0 至 3。",
+  "input_contract": "row 为空信号时停止领料。有效订单为非空无晶体单层，quadrant 为 0 至 3。",
   "return_contract": "普通角返回整片无色 stock 及目标 color；针或空角按 pin、empty 领任一牺牲整片。",
   "platforms": 1,
-  "building_entries": 1175,
+  "building_entries": 1295,
   "internal_global_devices": 0
 }

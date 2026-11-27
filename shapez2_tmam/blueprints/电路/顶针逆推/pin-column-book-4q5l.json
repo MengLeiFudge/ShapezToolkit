@@ -1,0 +1,21 @@
+{
+  "target": 1600000,
+  "quadrant": 1655030,
+  "run": 1655031,
+  "ordinal": 1655024,
+  "pattern": 1655023,
+  "column_word": 1655035,
+  "material_tokens": {
+    "--": "Cu------",
+    "Cu": "Ru------",
+    "P-": "Su------",
+    "cr": "Wu------"
+  },
+  "pages": 292,
+  "platforms": 7,
+  "table_global_receivers": 1,
+  "table_global_transmitters": 1,
+  "input": "保持非空四象限目标和象限 0～3。run=0 复位至少 128 信号 tick，再置 1。固定接线常速下等 256 信号 tick 后从序号 0 开始读取。每次改变序号等待 64 tick，首次返回空信号时本列枚举结束。",
+  "output": "四象限依次编码前态的底层至第四层。Cu 为空，Su 为辅助红晶体，R 的颜色 r/g/b/y/w 指向目标的第 1/2/3/4/5 层，复制该格的原始标签。",
+  "scope": "按 pin_column_at 筛过的本列前四层。后续还需跨列约束、第五层、顶破及制造证明。"
+}

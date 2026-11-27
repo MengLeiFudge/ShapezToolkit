@@ -1,0 +1,14 @@
+{
+  "target": 1600000,
+  "address": 1640020,
+  "packet": {
+    "opcode": 1640024,
+    "a": 1640025,
+    "b": 1640026,
+    "destination": 1640027,
+    "base": 1640028
+  },
+  "crystal_free": 1600001,
+  "matches": 1600002,
+  "use": "仅在目标非空且 crystal_free 和 matches 均为 1 时，依次读取地址 0 至 8。空操作保持旁路。最后的活物在槽 0。"
+}

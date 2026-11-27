@@ -1,0 +1,57 @@
+{
+  "stage": 0,
+  "terminal": false,
+  "write_bus": {
+    "address": 1640000,
+    "phase": 1640001,
+    "opcode": 1640002,
+    "a": 1640003,
+    "b": 1640004,
+    "destination": 1640005,
+    "base": 1640006,
+    "color": 1640007
+  },
+  "readback": [
+    1640008,
+    1640009
+  ],
+  "base_transfer": {
+    "from": [
+      3,
+      -3
+    ],
+    "to": [
+      3,
+      0
+    ],
+    "x": 30,
+    "level": 0,
+    "direction": "south"
+  },
+  "stock_inputs": [
+    [
+      -6,
+      -15
+    ],
+    [
+      -6,
+      -12
+    ],
+    [
+      -6,
+      -9
+    ],
+    [
+      -6,
+      -6
+    ]
+  ],
+  "machine_fluids": [
+    0,
+    3
+  ],
+  "target_filter": null,
+  "foundation_3x3": 24,
+  "space_belts": 3,
+  "buildings": 22503
+}

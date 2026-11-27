@@ -1,0 +1,817 @@
+{
+  "capacity": 486,
+  "stage_pitch": 12,
+  "origin_x": 0,
+  "page_size": 9,
+  "pages": [
+    {
+      "page": 0,
+      "start": 0,
+      "stop": 9,
+      "place_at": [
+        0,
+        0,
+        0
+      ],
+      "blueprint": "page-000-008.spz2bp",
+      "connections": "page-000-008.json",
+      "terminal": false
+    },
+    {
+      "page": 1,
+      "start": 9,
+      "stop": 18,
+      "place_at": [
+        108,
+        0,
+        0
+      ],
+      "blueprint": "page-009-017.spz2bp",
+      "connections": "page-009-017.json",
+      "terminal": false
+    },
+    {
+      "page": 2,
+      "start": 18,
+      "stop": 27,
+      "place_at": [
+        216,
+        0,
+        0
+      ],
+      "blueprint": "page-018-026.spz2bp",
+      "connections": "page-018-026.json",
+      "terminal": false
+    },
+    {
+      "page": 3,
+      "start": 27,
+      "stop": 36,
+      "place_at": [
+        324,
+        0,
+        0
+      ],
+      "blueprint": "page-027-035.spz2bp",
+      "connections": "page-027-035.json",
+      "terminal": false
+    },
+    {
+      "page": 4,
+      "start": 36,
+      "stop": 45,
+      "place_at": [
+        432,
+        0,
+        0
+      ],
+      "blueprint": "page-036-044.spz2bp",
+      "connections": "page-036-044.json",
+      "terminal": false
+    },
+    {
+      "page": 5,
+      "start": 45,
+      "stop": 54,
+      "place_at": [
+        540,
+        0,
+        0
+      ],
+      "blueprint": "page-045-053.spz2bp",
+      "connections": "page-045-053.json",
+      "terminal": false
+    },
+    {
+      "page": 6,
+      "start": 54,
+      "stop": 63,
+      "place_at": [
+        648,
+        0,
+        0
+      ],
+      "blueprint": "page-054-062.spz2bp",
+      "connections": "page-054-062.json",
+      "terminal": false
+    },
+    {
+      "page": 7,
+      "start": 63,
+      "stop": 72,
+      "place_at": [
+        756,
+        0,
+        0
+      ],
+      "blueprint": "page-063-071.spz2bp",
+      "connections": "page-063-071.json",
+      "terminal": false
+    },
+    {
+      "page": 8,
+      "start": 72,
+      "stop": 81,
+      "place_at": [
+        864,
+        0,
+        0
+      ],
+      "blueprint": "page-072-080.spz2bp",
+      "connections": "page-072-080.json",
+      "terminal": false
+    },
+    {
+      "page": 9,
+      "start": 81,
+      "stop": 90,
+      "place_at": [
+        972,
+        0,
+        0
+      ],
+      "blueprint": "page-081-089.spz2bp",
+      "connections": "page-081-089.json",
+      "terminal": false
+    },
+    {
+      "page": 10,
+      "start": 90,
+      "stop": 99,
+      "place_at": [
+        1080,
+        0,
+        0
+      ],
+      "blueprint": "page-090-098.spz2bp",
+      "connections": "page-090-098.json",
+      "terminal": false
+    },
+    {
+      "page": 11,
+      "start": 99,
+      "stop": 108,
+      "place_at": [
+        1188,
+        0,
+        0
+      ],
+      "blueprint": "page-099-107.spz2bp",
+      "connections": "page-099-107.json",
+      "terminal": false
+    },
+    {
+      "page": 12,
+      "start": 108,
+      "stop": 117,
+      "place_at": [
+        1296,
+        0,
+        0
+      ],
+      "blueprint": "page-108-116.spz2bp",
+      "connections": "page-108-116.json",
+      "terminal": false
+    },
+    {
+      "page": 13,
+      "start": 117,
+      "stop": 126,
+      "place_at": [
+        1404,
+        0,
+        0
+      ],
+      "blueprint": "page-117-125.spz2bp",
+      "connections": "page-117-125.json",
+      "terminal": false
+    },
+    {
+      "page": 14,
+      "start": 126,
+      "stop": 135,
+      "place_at": [
+        1512,
+        0,
+        0
+      ],
+      "blueprint": "page-126-134.spz2bp",
+      "connections": "page-126-134.json",
+      "terminal": false
+    },
+    {
+      "page": 15,
+      "start": 135,
+      "stop": 144,
+      "place_at": [
+        1620,
+        0,
+        0
+      ],
+      "blueprint": "page-135-143.spz2bp",
+      "connections": "page-135-143.json",
+      "terminal": false
+    },
+    {
+      "page": 16,
+      "start": 144,
+      "stop": 153,
+      "place_at": [
+        1728,
+        0,
+        0
+      ],
+      "blueprint": "page-144-152.spz2bp",
+      "connections": "page-144-152.json",
+      "terminal": false
+    },
+    {
+      "page": 17,
+      "start": 153,
+      "stop": 162,
+      "place_at": [
+        1836,
+        0,
+        0
+      ],
+      "blueprint": "page-153-161.spz2bp",
+      "connections": "page-153-161.json",
+      "terminal": false
+    },
+    {
+      "page": 18,
+      "start": 162,
+      "stop": 171,
+      "place_at": [
+        1944,
+        0,
+        0
+      ],
+      "blueprint": "page-162-170.spz2bp",
+      "connections": "page-162-170.json",
+      "terminal": false
+    },
+    {
+      "page": 19,
+      "start": 171,
+      "stop": 180,
+      "place_at": [
+        2052,
+        0,
+        0
+      ],
+      "blueprint": "page-171-179.spz2bp",
+      "connections": "page-171-179.json",
+      "terminal": false
+    },
+    {
+      "page": 20,
+      "start": 180,
+      "stop": 189,
+      "place_at": [
+        2160,
+        0,
+        0
+      ],
+      "blueprint": "page-180-188.spz2bp",
+      "connections": "page-180-188.json",
+      "terminal": false
+    },
+    {
+      "page": 21,
+      "start": 189,
+      "stop": 198,
+      "place_at": [
+        2268,
+        0,
+        0
+      ],
+      "blueprint": "page-189-197.spz2bp",
+      "connections": "page-189-197.json",
+      "terminal": false
+    },
+    {
+      "page": 22,
+      "start": 198,
+      "stop": 207,
+      "place_at": [
+        2376,
+        0,
+        0
+      ],
+      "blueprint": "page-198-206.spz2bp",
+      "connections": "page-198-206.json",
+      "terminal": false
+    },
+    {
+      "page": 23,
+      "start": 207,
+      "stop": 216,
+      "place_at": [
+        2484,
+        0,
+        0
+      ],
+      "blueprint": "page-207-215.spz2bp",
+      "connections": "page-207-215.json",
+      "terminal": false
+    },
+    {
+      "page": 24,
+      "start": 216,
+      "stop": 225,
+      "place_at": [
+        2592,
+        0,
+        0
+      ],
+      "blueprint": "page-216-224.spz2bp",
+      "connections": "page-216-224.json",
+      "terminal": false
+    },
+    {
+      "page": 25,
+      "start": 225,
+      "stop": 234,
+      "place_at": [
+        2700,
+        0,
+        0
+      ],
+      "blueprint": "page-225-233.spz2bp",
+      "connections": "page-225-233.json",
+      "terminal": false
+    },
+    {
+      "page": 26,
+      "start": 234,
+      "stop": 243,
+      "place_at": [
+        2808,
+        0,
+        0
+      ],
+      "blueprint": "page-234-242.spz2bp",
+      "connections": "page-234-242.json",
+      "terminal": false
+    },
+    {
+      "page": 27,
+      "start": 243,
+      "stop": 252,
+      "place_at": [
+        2916,
+        0,
+        0
+      ],
+      "blueprint": "page-243-251.spz2bp",
+      "connections": "page-243-251.json",
+      "terminal": false
+    },
+    {
+      "page": 28,
+      "start": 252,
+      "stop": 261,
+      "place_at": [
+        3024,
+        0,
+        0
+      ],
+      "blueprint": "page-252-260.spz2bp",
+      "connections": "page-252-260.json",
+      "terminal": false
+    },
+    {
+      "page": 29,
+      "start": 261,
+      "stop": 270,
+      "place_at": [
+        3132,
+        0,
+        0
+      ],
+      "blueprint": "page-261-269.spz2bp",
+      "connections": "page-261-269.json",
+      "terminal": false
+    },
+    {
+      "page": 30,
+      "start": 270,
+      "stop": 279,
+      "place_at": [
+        3240,
+        0,
+        0
+      ],
+      "blueprint": "page-270-278.spz2bp",
+      "connections": "page-270-278.json",
+      "terminal": false
+    },
+    {
+      "page": 31,
+      "start": 279,
+      "stop": 288,
+      "place_at": [
+        3348,
+        0,
+        0
+      ],
+      "blueprint": "page-279-287.spz2bp",
+      "connections": "page-279-287.json",
+      "terminal": false
+    },
+    {
+      "page": 32,
+      "start": 288,
+      "stop": 297,
+      "place_at": [
+        3456,
+        0,
+        0
+      ],
+      "blueprint": "page-288-296.spz2bp",
+      "connections": "page-288-296.json",
+      "terminal": false
+    },
+    {
+      "page": 33,
+      "start": 297,
+      "stop": 306,
+      "place_at": [
+        3564,
+        0,
+        0
+      ],
+      "blueprint": "page-297-305.spz2bp",
+      "connections": "page-297-305.json",
+      "terminal": false
+    },
+    {
+      "page": 34,
+      "start": 306,
+      "stop": 315,
+      "place_at": [
+        3672,
+        0,
+        0
+      ],
+      "blueprint": "page-306-314.spz2bp",
+      "connections": "page-306-314.json",
+      "terminal": false
+    },
+    {
+      "page": 35,
+      "start": 315,
+      "stop": 324,
+      "place_at": [
+        3780,
+        0,
+        0
+      ],
+      "blueprint": "page-315-323.spz2bp",
+      "connections": "page-315-323.json",
+      "terminal": false
+    },
+    {
+      "page": 36,
+      "start": 324,
+      "stop": 333,
+      "place_at": [
+        3888,
+        0,
+        0
+      ],
+      "blueprint": "page-324-332.spz2bp",
+      "connections": "page-324-332.json",
+      "terminal": false
+    },
+    {
+      "page": 37,
+      "start": 333,
+      "stop": 342,
+      "place_at": [
+        3996,
+        0,
+        0
+      ],
+      "blueprint": "page-333-341.spz2bp",
+      "connections": "page-333-341.json",
+      "terminal": false
+    },
+    {
+      "page": 38,
+      "start": 342,
+      "stop": 351,
+      "place_at": [
+        4104,
+        0,
+        0
+      ],
+      "blueprint": "page-342-350.spz2bp",
+      "connections": "page-342-350.json",
+      "terminal": false
+    },
+    {
+      "page": 39,
+      "start": 351,
+      "stop": 360,
+      "place_at": [
+        4212,
+        0,
+        0
+      ],
+      "blueprint": "page-351-359.spz2bp",
+      "connections": "page-351-359.json",
+      "terminal": false
+    },
+    {
+      "page": 40,
+      "start": 360,
+      "stop": 369,
+      "place_at": [
+        4320,
+        0,
+        0
+      ],
+      "blueprint": "page-360-368.spz2bp",
+      "connections": "page-360-368.json",
+      "terminal": false
+    },
+    {
+      "page": 41,
+      "start": 369,
+      "stop": 378,
+      "place_at": [
+        4428,
+        0,
+        0
+      ],
+      "blueprint": "page-369-377.spz2bp",
+      "connections": "page-369-377.json",
+      "terminal": false
+    },
+    {
+      "page": 42,
+      "start": 378,
+      "stop": 387,
+      "place_at": [
+        4536,
+        0,
+        0
+      ],
+      "blueprint": "page-378-386.spz2bp",
+      "connections": "page-378-386.json",
+      "terminal": false
+    },
+    {
+      "page": 43,
+      "start": 387,
+      "stop": 396,
+      "place_at": [
+        4644,
+        0,
+        0
+      ],
+      "blueprint": "page-387-395.spz2bp",
+      "connections": "page-387-395.json",
+      "terminal": false
+    },
+    {
+      "page": 44,
+      "start": 396,
+      "stop": 405,
+      "place_at": [
+        4752,
+        0,
+        0
+      ],
+      "blueprint": "page-396-404.spz2bp",
+      "connections": "page-396-404.json",
+      "terminal": false
+    },
+    {
+      "page": 45,
+      "start": 405,
+      "stop": 414,
+      "place_at": [
+        4860,
+        0,
+        0
+      ],
+      "blueprint": "page-405-413.spz2bp",
+      "connections": "page-405-413.json",
+      "terminal": false
+    },
+    {
+      "page": 46,
+      "start": 414,
+      "stop": 423,
+      "place_at": [
+        4968,
+        0,
+        0
+      ],
+      "blueprint": "page-414-422.spz2bp",
+      "connections": "page-414-422.json",
+      "terminal": false
+    },
+    {
+      "page": 47,
+      "start": 423,
+      "stop": 432,
+      "place_at": [
+        5076,
+        0,
+        0
+      ],
+      "blueprint": "page-423-431.spz2bp",
+      "connections": "page-423-431.json",
+      "terminal": false
+    },
+    {
+      "page": 48,
+      "start": 432,
+      "stop": 441,
+      "place_at": [
+        5184,
+        0,
+        0
+      ],
+      "blueprint": "page-432-440.spz2bp",
+      "connections": "page-432-440.json",
+      "terminal": false
+    },
+    {
+      "page": 49,
+      "start": 441,
+      "stop": 450,
+      "place_at": [
+        5292,
+        0,
+        0
+      ],
+      "blueprint": "page-441-449.spz2bp",
+      "connections": "page-441-449.json",
+      "terminal": false
+    },
+    {
+      "page": 50,
+      "start": 450,
+      "stop": 459,
+      "place_at": [
+        5400,
+        0,
+        0
+      ],
+      "blueprint": "page-450-458.spz2bp",
+      "connections": "page-450-458.json",
+      "terminal": false
+    },
+    {
+      "page": 51,
+      "start": 459,
+      "stop": 468,
+      "place_at": [
+        5508,
+        0,
+        0
+      ],
+      "blueprint": "page-459-467.spz2bp",
+      "connections": "page-459-467.json",
+      "terminal": false
+    },
+    {
+      "page": 52,
+      "start": 468,
+      "stop": 477,
+      "place_at": [
+        5616,
+        0,
+        0
+      ],
+      "blueprint": "page-468-476.spz2bp",
+      "connections": "page-468-476.json",
+      "terminal": false
+    },
+    {
+      "page": 53,
+      "start": 477,
+      "stop": 486,
+      "place_at": [
+        5724,
+        0,
+        0
+      ],
+      "blueprint": "page-477-485.spz2bp",
+      "connections": "page-477-485.json",
+      "terminal": true
+    }
+  ],
+  "size": {
+    "islands": 34513,
+    "platforms": 14101,
+    "buildings": 12632496
+  },
+  "belt_items_per_second": "2",
+  "headway_seconds": "60",
+  "supply_basis": "port_peaks_by_opcode_and_material",
+  "controls": {
+    "file": "controls.spz2bp",
+    "place_at": [
+      0,
+      12,
+      0
+    ],
+    "size": {
+      "islands": 8,
+      "platforms": 8,
+      "buildings": 9608
+    }
+  },
+  "recipe": {
+    "channels": {
+      "controller_outputs": {
+        "target": 1600000,
+        "length": 1640043,
+        "replay_result": 1640044,
+        "accepted": 1640045,
+        "payload": {
+          "opcode": 1640002,
+          "a": 1640003,
+          "b": 1640004,
+          "destination": 1640005,
+          "base": 1640006,
+          "color": 1640007
+        },
+        "packet_tag": 1640046
+      },
+      "operator_outputs": {
+        "run": 1640030,
+        "clean_confirmed": 1640060,
+        "enable_feed": 1640059
+      },
+      "factory_outputs": {
+        "address": 1640000,
+        "phase": 1640001,
+        "ready": 1640014,
+        "request": 1640011,
+        "ack": 1640013,
+        "loaded": 1640057,
+        "reset": 1640012,
+        "readback": {
+          "operands": 1640008,
+          "materials": 1640009
+        }
+      },
+      "length": {
+        "min": 1,
+        "max": 486
+      },
+      "address_base": 0,
+      "reset_phase": 3
+    },
+    "before_run": {
+      "target": "shape",
+      "length": {
+        "minimum": 1,
+        "maximum": 486
+      },
+      "replay_result": "target",
+      "accepted": 1
+    },
+    "candidate": {
+      "address": 1680007,
+      "fields": {
+        "opcode": 1680001,
+        "a": 1680002,
+        "b": 1680003,
+        "destination": 1680004,
+        "base": 1680005,
+        "color": 1680006
+      },
+      "public_fields": {
+        "opcode": 1640002,
+        "a": 1640003,
+        "b": 1640004,
+        "destination": 1640005,
+        "base": 1640006,
+        "color": 1640007
+      },
+      "hold_until_current_ack": true
+    },
+    "reset_phase": 3,
+    "reset_signal_ticks": 128
+  },
+  "changeover": {
+    "wait_for_physical_empty": true,
+    "inspect": [
+      "slot_belts",
+      "parallel_a_and_b",
+      "stacker_buffers",
+      "merge_and_exit"
+    ],
+    "idle_tail": "all_six_slots_through",
+    "reset_phase": 3,
+    "reset_signal_ticks": 128
+  }
+}

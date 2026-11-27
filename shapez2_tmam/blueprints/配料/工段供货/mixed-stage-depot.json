@@ -1,0 +1,115 @@
+{
+  "cars": [
+    {
+      "wagon": 1,
+      "type": "Shapes",
+      "layers_bottom_to_top": [
+        "C",
+        "R",
+        "S"
+      ]
+    },
+    {
+      "wagon": 2,
+      "type": "Shapes",
+      "layers_bottom_to_top": [
+        "W",
+        null,
+        null
+      ]
+    },
+    {
+      "wagon": 3,
+      "type": "Fluids",
+      "layers_bottom_to_top": [
+        "r",
+        "g",
+        "b"
+      ]
+    },
+    {
+      "wagon": 4,
+      "type": "Shapes",
+      "layers_bottom_to_top": [
+        "C",
+        "R",
+        "S"
+      ]
+    },
+    {
+      "wagon": 5,
+      "type": "Shapes",
+      "layers_bottom_to_top": [
+        "W",
+        null,
+        null
+      ]
+    },
+    {
+      "wagon": 6,
+      "type": "Fluids",
+      "layers_bottom_to_top": [
+        "r",
+        "g",
+        "b"
+      ]
+    },
+    {
+      "wagon": 7,
+      "type": "Shapes",
+      "layers_bottom_to_top": [
+        "C",
+        "R",
+        "S"
+      ]
+    },
+    {
+      "wagon": 8,
+      "type": "Shapes",
+      "layers_bottom_to_top": [
+        "W",
+        null,
+        null
+      ]
+    },
+    {
+      "wagon": 9,
+      "type": "Fluids",
+      "layers_bottom_to_top": [
+        "r",
+        "g",
+        "b"
+      ]
+    },
+    {
+      "wagon": 10,
+      "type": "Shapes",
+      "layers_bottom_to_top": [
+        "C",
+        "R",
+        "S"
+      ]
+    },
+    {
+      "wagon": 11,
+      "type": "Shapes",
+      "layers_bottom_to_top": [
+        "W",
+        null,
+        null
+      ]
+    },
+    {
+      "wagon": 12,
+      "type": "Fluids",
+      "layers_bottom_to_top": [
+        "r",
+        "g",
+        "b"
+      ]
+    }
+  ],
+  "train_head": "north",
+  "stage": null,
+  "islands": 14
+}
