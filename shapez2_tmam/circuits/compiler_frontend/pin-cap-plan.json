@@ -1,0 +1,81 @@
+{
+  "inputs": {
+    "enable": 1703300,
+    "tuple_ready": 1701858,
+    "plan": 1703312,
+    "reject": 1703313,
+    "remaining_pins": 1703740,
+    "filter_ready": 1703741,
+    "filter_ok": 1703742,
+    "columns": [
+      {
+        "word": 1701842,
+        "materials": [
+          1701867,
+          1701868,
+          1701869,
+          1701870
+        ]
+      },
+      {
+        "word": 1701843,
+        "materials": [
+          1701873,
+          1701874,
+          1701875,
+          1701876
+        ]
+      },
+      {
+        "word": 1701844,
+        "materials": [
+          1701879,
+          1701880,
+          1701881,
+          1701882
+        ]
+      },
+      {
+        "word": 1701845,
+        "materials": [
+          1701885,
+          1701886,
+          1701887,
+          1701888
+        ]
+      }
+    ]
+  },
+  "outputs": {
+    "plan_ready": 1703301,
+    "kind": 1703302,
+    "mask": 1703303,
+    "members": [
+      1703308,
+      1703309,
+      1703310,
+      1703311
+    ],
+    "filter_request": 1703743,
+    "crystal_allowed": [
+      1703775,
+      1703776,
+      1703777,
+      1703778
+    ]
+  },
+  "channels": {
+    "reserved_range": [
+      1703740,
+      1703839
+    ],
+    "phase": 1703745
+  },
+  "timing": {
+    "channel_signal_ticks": 12,
+    "settle_signal_ticks": 1632,
+    "tuple_reset_signal_ticks": 48
+  },
+  "platforms": 26,
+  "building_entries": 32991
+}

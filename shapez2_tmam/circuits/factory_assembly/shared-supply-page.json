@@ -1,0 +1,11473 @@
+{
+  "window": [
+    0,
+    9
+  ],
+  "six_slots": {
+    "input": {
+      "island": [
+        0,
+        0,
+        0
+      ],
+      "x": -18,
+      "rows": [
+        -12,
+        -9,
+        8,
+        11,
+        28,
+        31
+      ],
+      "level": 0
+    },
+    "output": {
+      "island": [
+        159,
+        0,
+        0
+      ],
+      "x": 37,
+      "rows": [
+        -12,
+        -9,
+        8,
+        11,
+        28,
+        31
+      ],
+      "level": 0
+    }
+  },
+  "baseline": {
+    "islands": 666,
+    "platforms": 288,
+    "buildings": 241236
+  },
+  "shared": {
+    "islands": 1139,
+    "platforms": 989,
+    "buildings": 731488
+  },
+  "delta": {
+    "islands": 473,
+    "platforms": 701,
+    "buildings": 490252
+  },
+  "base_stops": [
+    {
+      "first": 0,
+      "count": 4,
+      "head": [
+        -36,
+        -50,
+        0
+      ],
+      "rails": {
+        "arrival": {
+          "tile": [
+            -37,
+            -51,
+            0
+          ],
+          "outside_tile": [
+            -37,
+            -52,
+            0
+          ],
+          "rotation": 1
+        },
+        "departure": {
+          "tile": [
+            -36,
+            -51,
+            0
+          ],
+          "outside_tile": [
+            -36,
+            -52,
+            0
+          ],
+          "rotation": 3
+        }
+      }
+    },
+    {
+      "first": 4,
+      "count": 4,
+      "head": [
+        36,
+        -50,
+        0
+      ],
+      "rails": {
+        "arrival": {
+          "tile": [
+            35,
+            -51,
+            0
+          ],
+          "outside_tile": [
+            35,
+            -52,
+            0
+          ],
+          "rotation": 1
+        },
+        "departure": {
+          "tile": [
+            36,
+            -51,
+            0
+          ],
+          "outside_tile": [
+            36,
+            -52,
+            0
+          ],
+          "rotation": 3
+        }
+      }
+    },
+    {
+      "first": 8,
+      "count": 1,
+      "head": [
+        108,
+        -50,
+        0
+      ],
+      "rails": {
+        "arrival": {
+          "tile": [
+            107,
+            -51,
+            0
+          ],
+          "outside_tile": [
+            107,
+            -52,
+            0
+          ],
+          "rotation": 1
+        },
+        "departure": {
+          "tile": [
+            108,
+            -51,
+            0
+          ],
+          "outside_tile": [
+            108,
+            -52,
+            0
+          ],
+          "rotation": 3
+        }
+      }
+    }
+  ],
+  "crystal_stops": [
+    {
+      "first": 0,
+      "count": 2,
+      "head": [
+        -12,
+        15,
+        0
+      ],
+      "rails": {
+        "arrival": {
+          "tile": [
+            -12,
+            19,
+            0
+          ],
+          "outside_tile": [
+            -12,
+            20,
+            0
+          ],
+          "rotation": 3
+        },
+        "departure": {
+          "tile": [
+            -13,
+            19,
+            0
+          ],
+          "outside_tile": [
+            -13,
+            20,
+            0
+          ],
+          "rotation": 1
+        }
+      }
+    },
+    {
+      "first": 2,
+      "count": 2,
+      "head": [
+        24,
+        15,
+        0
+      ],
+      "rails": {
+        "arrival": {
+          "tile": [
+            24,
+            19,
+            0
+          ],
+          "outside_tile": [
+            24,
+            20,
+            0
+          ],
+          "rotation": 3
+        },
+        "departure": {
+          "tile": [
+            23,
+            19,
+            0
+          ],
+          "outside_tile": [
+            23,
+            20,
+            0
+          ],
+          "rotation": 1
+        }
+      }
+    },
+    {
+      "first": 4,
+      "count": 2,
+      "head": [
+        60,
+        15,
+        0
+      ],
+      "rails": {
+        "arrival": {
+          "tile": [
+            60,
+            19,
+            0
+          ],
+          "outside_tile": [
+            60,
+            20,
+            0
+          ],
+          "rotation": 3
+        },
+        "departure": {
+          "tile": [
+            59,
+            19,
+            0
+          ],
+          "outside_tile": [
+            59,
+            20,
+            0
+          ],
+          "rotation": 1
+        }
+      }
+    },
+    {
+      "first": 6,
+      "count": 2,
+      "head": [
+        96,
+        15,
+        0
+      ],
+      "rails": {
+        "arrival": {
+          "tile": [
+            96,
+            19,
+            0
+          ],
+          "outside_tile": [
+            96,
+            20,
+            0
+          ],
+          "rotation": 3
+        },
+        "departure": {
+          "tile": [
+            95,
+            19,
+            0
+          ],
+          "outside_tile": [
+            95,
+            20,
+            0
+          ],
+          "rotation": 1
+        }
+      }
+    },
+    {
+      "first": 8,
+      "count": 1,
+      "head": [
+        132,
+        15,
+        0
+      ],
+      "rails": {
+        "arrival": {
+          "tile": [
+            132,
+            19,
+            0
+          ],
+          "outside_tile": [
+            132,
+            20,
+            0
+          ],
+          "rotation": 3
+        },
+        "departure": {
+          "tile": [
+            131,
+            19,
+            0
+          ],
+          "outside_tile": [
+            131,
+            20,
+            0
+          ],
+          "rotation": 1
+        }
+      }
+    }
+  ],
+  "base_contacts": [
+    {
+      "stage": 3,
+      "quadrant": 2,
+      "raw": [
+        -33,
+        -48,
+        0
+      ],
+      "selector": [
+        48,
+        -15,
+        0
+      ],
+      "receiver": [
+        45,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -9,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -9,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            31,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            31,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            31,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          15,
+          -48,
+          0
+        ],
+        [
+          15,
+          -45,
+          0
+        ],
+        [
+          15,
+          -42,
+          0
+        ],
+        [
+          15,
+          -39,
+          0
+        ],
+        [
+          15,
+          -36,
+          0
+        ],
+        [
+          15,
+          -33,
+          0
+        ],
+        [
+          15,
+          -30,
+          0
+        ],
+        [
+          15,
+          -27,
+          0
+        ],
+        [
+          15,
+          -24,
+          0
+        ],
+        [
+          18,
+          -24,
+          0
+        ],
+        [
+          21,
+          -24,
+          0
+        ],
+        [
+          24,
+          -24,
+          0
+        ],
+        [
+          27,
+          -24,
+          0
+        ],
+        [
+          30,
+          -24,
+          0
+        ],
+        [
+          33,
+          -24,
+          0
+        ],
+        [
+          36,
+          -24,
+          0
+        ],
+        [
+          39,
+          -24,
+          0
+        ],
+        [
+          42,
+          -24,
+          0
+        ],
+        [
+          42,
+          -21,
+          0
+        ],
+        [
+          42,
+          -18,
+          2
+        ],
+        [
+          42,
+          -15,
+          2
+        ],
+        [
+          45,
+          -15,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 2,
+      "quadrant": 2,
+      "raw": [
+        -33,
+        -48,
+        0
+      ],
+      "selector": [
+        30,
+        -15,
+        0
+      ],
+      "receiver": [
+        27,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -10,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -10,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            30,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            30,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            30,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          18,
+          -48,
+          2
+        ],
+        [
+          18,
+          -45,
+          2
+        ],
+        [
+          18,
+          -42,
+          2
+        ],
+        [
+          18,
+          -39,
+          2
+        ],
+        [
+          18,
+          -36,
+          2
+        ],
+        [
+          18,
+          -33,
+          2
+        ],
+        [
+          18,
+          -30,
+          2
+        ],
+        [
+          18,
+          -27,
+          2
+        ],
+        [
+          21,
+          -27,
+          2
+        ],
+        [
+          24,
+          -27,
+          2
+        ],
+        [
+          27,
+          -27,
+          2
+        ],
+        [
+          27,
+          -24,
+          2
+        ],
+        [
+          27,
+          -21,
+          2
+        ],
+        [
+          27,
+          -18,
+          2
+        ],
+        [
+          24,
+          -18,
+          2
+        ],
+        [
+          24,
+          -15,
+          2
+        ],
+        [
+          27,
+          -15,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 1,
+      "quadrant": 2,
+      "raw": [
+        -33,
+        -48,
+        0
+      ],
+      "selector": [
+        12,
+        -15,
+        0
+      ],
+      "receiver": [
+        9,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -11,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -11,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            29,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            29,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            29,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          21,
+          -48,
+          1
+        ],
+        [
+          21,
+          -45,
+          1
+        ],
+        [
+          21,
+          -42,
+          1
+        ],
+        [
+          21,
+          -39,
+          1
+        ],
+        [
+          21,
+          -36,
+          1
+        ],
+        [
+          21,
+          -33,
+          1
+        ],
+        [
+          21,
+          -30,
+          1
+        ],
+        [
+          21,
+          -27,
+          1
+        ],
+        [
+          21,
+          -24,
+          1
+        ],
+        [
+          21,
+          -21,
+          1
+        ],
+        [
+          18,
+          -21,
+          1
+        ],
+        [
+          15,
+          -21,
+          1
+        ],
+        [
+          12,
+          -21,
+          1
+        ],
+        [
+          9,
+          -21,
+          1
+        ],
+        [
+          6,
+          -21,
+          1
+        ],
+        [
+          6,
+          -18,
+          1
+        ],
+        [
+          6,
+          -15,
+          1
+        ],
+        [
+          9,
+          -15,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 0,
+      "quadrant": 2,
+      "raw": [
+        -33,
+        -48,
+        0
+      ],
+      "selector": [
+        -6,
+        -15,
+        0
+      ],
+      "receiver": [
+        -9,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          24,
+          -48,
+          0
+        ],
+        [
+          27,
+          -48,
+          0
+        ],
+        [
+          27,
+          -45,
+          0
+        ],
+        [
+          27,
+          -42,
+          0
+        ],
+        [
+          24,
+          -42,
+          0
+        ],
+        [
+          21,
+          -42,
+          0
+        ],
+        [
+          18,
+          -42,
+          0
+        ],
+        [
+          15,
+          -42,
+          1
+        ],
+        [
+          12,
+          -42,
+          1
+        ],
+        [
+          9,
+          -42,
+          1
+        ],
+        [
+          6,
+          -42,
+          0
+        ],
+        [
+          3,
+          -42,
+          0
+        ],
+        [
+          0,
+          -42,
+          1
+        ],
+        [
+          -3,
+          -42,
+          1
+        ],
+        [
+          -3,
+          -39,
+          1
+        ],
+        [
+          -3,
+          -36,
+          2
+        ],
+        [
+          -3,
+          -33,
+          2
+        ],
+        [
+          -3,
+          -30,
+          2
+        ],
+        [
+          -3,
+          -27,
+          2
+        ],
+        [
+          -3,
+          -24,
+          2
+        ],
+        [
+          -6,
+          -24,
+          2
+        ],
+        [
+          -9,
+          -24,
+          2
+        ],
+        [
+          -12,
+          -24,
+          1
+        ],
+        [
+          -12,
+          -21,
+          1
+        ],
+        [
+          -12,
+          -18,
+          1
+        ],
+        [
+          -12,
+          -15,
+          1
+        ],
+        [
+          -9,
+          -15,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 3,
+      "quadrant": 3,
+      "raw": [
+        -33,
+        -45,
+        0
+      ],
+      "selector": [
+        48,
+        -12,
+        0
+      ],
+      "receiver": [
+        45,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -9,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -9,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            31,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            31,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            31,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          0,
+          -45,
+          0
+        ],
+        [
+          0,
+          -42,
+          0
+        ],
+        [
+          0,
+          -39,
+          0
+        ],
+        [
+          3,
+          -39,
+          0
+        ],
+        [
+          6,
+          -39,
+          0
+        ],
+        [
+          9,
+          -39,
+          0
+        ],
+        [
+          12,
+          -39,
+          1
+        ],
+        [
+          15,
+          -39,
+          1
+        ],
+        [
+          18,
+          -39,
+          1
+        ],
+        [
+          21,
+          -39,
+          0
+        ],
+        [
+          24,
+          -39,
+          0
+        ],
+        [
+          27,
+          -39,
+          0
+        ],
+        [
+          30,
+          -39,
+          0
+        ],
+        [
+          33,
+          -39,
+          0
+        ],
+        [
+          33,
+          -36,
+          0
+        ],
+        [
+          33,
+          -33,
+          0
+        ],
+        [
+          33,
+          -30,
+          0
+        ],
+        [
+          33,
+          -27,
+          0
+        ],
+        [
+          36,
+          -27,
+          0
+        ],
+        [
+          39,
+          -27,
+          0
+        ],
+        [
+          42,
+          -27,
+          0
+        ],
+        [
+          45,
+          -27,
+          0
+        ],
+        [
+          45,
+          -24,
+          0
+        ],
+        [
+          45,
+          -21,
+          0
+        ],
+        [
+          45,
+          -18,
+          0
+        ],
+        [
+          42,
+          -18,
+          0
+        ],
+        [
+          42,
+          -15,
+          0
+        ],
+        [
+          42,
+          -12,
+          0
+        ],
+        [
+          45,
+          -12,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 2,
+      "quadrant": 3,
+      "raw": [
+        -33,
+        -45,
+        0
+      ],
+      "selector": [
+        30,
+        -12,
+        0
+      ],
+      "receiver": [
+        27,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -10,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -10,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            30,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            30,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            30,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          3,
+          -45,
+          2
+        ],
+        [
+          3,
+          -42,
+          2
+        ],
+        [
+          3,
+          -39,
+          2
+        ],
+        [
+          3,
+          -36,
+          2
+        ],
+        [
+          3,
+          -33,
+          2
+        ],
+        [
+          3,
+          -30,
+          2
+        ],
+        [
+          3,
+          -27,
+          2
+        ],
+        [
+          3,
+          -24,
+          2
+        ],
+        [
+          6,
+          -24,
+          2
+        ],
+        [
+          9,
+          -24,
+          2
+        ],
+        [
+          12,
+          -24,
+          2
+        ],
+        [
+          15,
+          -24,
+          2
+        ],
+        [
+          18,
+          -24,
+          2
+        ],
+        [
+          21,
+          -24,
+          2
+        ],
+        [
+          24,
+          -24,
+          2
+        ],
+        [
+          24,
+          -21,
+          2
+        ],
+        [
+          24,
+          -18,
+          1
+        ],
+        [
+          24,
+          -15,
+          1
+        ],
+        [
+          24,
+          -12,
+          1
+        ],
+        [
+          27,
+          -12,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 1,
+      "quadrant": 3,
+      "raw": [
+        -33,
+        -45,
+        0
+      ],
+      "selector": [
+        12,
+        -12,
+        0
+      ],
+      "receiver": [
+        9,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -11,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -11,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            29,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            29,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            29,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          6,
+          -45,
+          1
+        ],
+        [
+          6,
+          -42,
+          1
+        ],
+        [
+          6,
+          -39,
+          1
+        ],
+        [
+          6,
+          -36,
+          1
+        ],
+        [
+          6,
+          -33,
+          1
+        ],
+        [
+          6,
+          -30,
+          1
+        ],
+        [
+          6,
+          -27,
+          1
+        ],
+        [
+          9,
+          -27,
+          1
+        ],
+        [
+          9,
+          -24,
+          1
+        ],
+        [
+          9,
+          -21,
+          0
+        ],
+        [
+          9,
+          -18,
+          0
+        ],
+        [
+          6,
+          -18,
+          0
+        ],
+        [
+          6,
+          -15,
+          0
+        ],
+        [
+          6,
+          -12,
+          0
+        ],
+        [
+          9,
+          -12,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 0,
+      "quadrant": 3,
+      "raw": [
+        -33,
+        -45,
+        0
+      ],
+      "selector": [
+        -6,
+        -12,
+        0
+      ],
+      "receiver": [
+        -9,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          9,
+          -45,
+          0
+        ],
+        [
+          12,
+          -45,
+          0
+        ],
+        [
+          12,
+          -42,
+          0
+        ],
+        [
+          12,
+          -39,
+          0
+        ],
+        [
+          12,
+          -36,
+          0
+        ],
+        [
+          12,
+          -33,
+          0
+        ],
+        [
+          9,
+          -33,
+          0
+        ],
+        [
+          6,
+          -33,
+          0
+        ],
+        [
+          3,
+          -33,
+          0
+        ],
+        [
+          0,
+          -33,
+          0
+        ],
+        [
+          -3,
+          -33,
+          0
+        ],
+        [
+          -6,
+          -33,
+          0
+        ],
+        [
+          -9,
+          -33,
+          0
+        ],
+        [
+          -12,
+          -33,
+          0
+        ],
+        [
+          -15,
+          -33,
+          0
+        ],
+        [
+          -15,
+          -30,
+          0
+        ],
+        [
+          -15,
+          -27,
+          0
+        ],
+        [
+          -15,
+          -24,
+          0
+        ],
+        [
+          -15,
+          -21,
+          0
+        ],
+        [
+          -15,
+          -18,
+          1
+        ],
+        [
+          -15,
+          -15,
+          1
+        ],
+        [
+          -15,
+          -12,
+          1
+        ],
+        [
+          -12,
+          -12,
+          1
+        ],
+        [
+          -9,
+          -12,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 3,
+      "quadrant": 1,
+      "raw": [
+        -33,
+        -42,
+        0
+      ],
+      "selector": [
+        48,
+        -9,
+        0
+      ],
+      "receiver": [
+        45,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -9,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -9,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            31,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            31,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            31,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          -15,
+          -42,
+          0
+        ],
+        [
+          -15,
+          -39,
+          0
+        ],
+        [
+          -15,
+          -36,
+          0
+        ],
+        [
+          -12,
+          -36,
+          0
+        ],
+        [
+          -9,
+          -36,
+          0
+        ],
+        [
+          -6,
+          -36,
+          0
+        ],
+        [
+          -3,
+          -36,
+          0
+        ],
+        [
+          0,
+          -36,
+          1
+        ],
+        [
+          3,
+          -36,
+          1
+        ],
+        [
+          6,
+          -36,
+          0
+        ],
+        [
+          9,
+          -36,
+          0
+        ],
+        [
+          12,
+          -36,
+          1
+        ],
+        [
+          15,
+          -36,
+          1
+        ],
+        [
+          18,
+          -36,
+          1
+        ],
+        [
+          21,
+          -36,
+          0
+        ],
+        [
+          24,
+          -36,
+          0
+        ],
+        [
+          27,
+          -36,
+          1
+        ],
+        [
+          30,
+          -36,
+          1
+        ],
+        [
+          33,
+          -36,
+          1
+        ],
+        [
+          33,
+          -33,
+          1
+        ],
+        [
+          33,
+          -30,
+          1
+        ],
+        [
+          33,
+          -27,
+          1
+        ],
+        [
+          33,
+          -24,
+          1
+        ],
+        [
+          33,
+          -21,
+          1
+        ],
+        [
+          33,
+          -18,
+          1
+        ],
+        [
+          36,
+          -18,
+          1
+        ],
+        [
+          39,
+          -18,
+          1
+        ],
+        [
+          42,
+          -18,
+          1
+        ],
+        [
+          42,
+          -15,
+          1
+        ],
+        [
+          42,
+          -12,
+          1
+        ],
+        [
+          42,
+          -9,
+          1
+        ],
+        [
+          45,
+          -9,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 2,
+      "quadrant": 1,
+      "raw": [
+        -33,
+        -42,
+        0
+      ],
+      "selector": [
+        30,
+        -9,
+        0
+      ],
+      "receiver": [
+        27,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -10,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -10,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            30,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            30,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            30,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          -12,
+          -42,
+          2
+        ],
+        [
+          -12,
+          -39,
+          2
+        ],
+        [
+          -12,
+          -36,
+          2
+        ],
+        [
+          -12,
+          -33,
+          2
+        ],
+        [
+          -12,
+          -30,
+          2
+        ],
+        [
+          -12,
+          -27,
+          2
+        ],
+        [
+          -12,
+          -24,
+          2
+        ],
+        [
+          -12,
+          -21,
+          2
+        ],
+        [
+          -9,
+          -21,
+          2
+        ],
+        [
+          -6,
+          -21,
+          2
+        ],
+        [
+          -3,
+          -21,
+          2
+        ],
+        [
+          0,
+          -21,
+          2
+        ],
+        [
+          3,
+          -21,
+          2
+        ],
+        [
+          6,
+          -21,
+          2
+        ],
+        [
+          9,
+          -21,
+          2
+        ],
+        [
+          12,
+          -21,
+          2
+        ],
+        [
+          15,
+          -21,
+          2
+        ],
+        [
+          18,
+          -21,
+          2
+        ],
+        [
+          21,
+          -21,
+          2
+        ],
+        [
+          21,
+          -18,
+          2
+        ],
+        [
+          21,
+          -15,
+          2
+        ],
+        [
+          21,
+          -12,
+          2
+        ],
+        [
+          21,
+          -9,
+          2
+        ],
+        [
+          24,
+          -9,
+          2
+        ],
+        [
+          27,
+          -9,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 1,
+      "quadrant": 1,
+      "raw": [
+        -33,
+        -42,
+        0
+      ],
+      "selector": [
+        12,
+        -9,
+        0
+      ],
+      "receiver": [
+        9,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -11,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -11,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            29,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            29,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            29,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          -9,
+          -42,
+          1
+        ],
+        [
+          -9,
+          -39,
+          1
+        ],
+        [
+          -9,
+          -36,
+          1
+        ],
+        [
+          -9,
+          -33,
+          2
+        ],
+        [
+          -9,
+          -30,
+          2
+        ],
+        [
+          -9,
+          -27,
+          0
+        ],
+        [
+          -9,
+          -24,
+          0
+        ],
+        [
+          -9,
+          -21,
+          0
+        ],
+        [
+          -9,
+          -18,
+          1
+        ],
+        [
+          -6,
+          -18,
+          1
+        ],
+        [
+          -3,
+          -18,
+          1
+        ],
+        [
+          0,
+          -18,
+          1
+        ],
+        [
+          3,
+          -18,
+          1
+        ],
+        [
+          3,
+          -15,
+          1
+        ],
+        [
+          3,
+          -12,
+          1
+        ],
+        [
+          3,
+          -9,
+          1
+        ],
+        [
+          6,
+          -9,
+          1
+        ],
+        [
+          9,
+          -9,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 0,
+      "quadrant": 1,
+      "raw": [
+        -33,
+        -42,
+        0
+      ],
+      "selector": [
+        -6,
+        -9,
+        0
+      ],
+      "receiver": [
+        -9,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          -6,
+          -42,
+          0
+        ],
+        [
+          -3,
+          -42,
+          0
+        ],
+        [
+          -3,
+          -39,
+          0
+        ],
+        [
+          -6,
+          -39,
+          0
+        ],
+        [
+          -9,
+          -39,
+          0
+        ],
+        [
+          -12,
+          -39,
+          0
+        ],
+        [
+          -15,
+          -39,
+          1
+        ],
+        [
+          -18,
+          -39,
+          1
+        ],
+        [
+          -18,
+          -36,
+          1
+        ],
+        [
+          -18,
+          -33,
+          1
+        ],
+        [
+          -18,
+          -30,
+          1
+        ],
+        [
+          -18,
+          -27,
+          2
+        ],
+        [
+          -18,
+          -24,
+          2
+        ],
+        [
+          -18,
+          -21,
+          2
+        ],
+        [
+          -18,
+          -18,
+          2
+        ],
+        [
+          -18,
+          -15,
+          1
+        ],
+        [
+          -18,
+          -12,
+          1
+        ],
+        [
+          -18,
+          -9,
+          1
+        ],
+        [
+          -15,
+          -9,
+          1
+        ],
+        [
+          -12,
+          -9,
+          1
+        ],
+        [
+          -9,
+          -9,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 3,
+      "quadrant": 0,
+      "raw": [
+        -33,
+        -39,
+        0
+      ],
+      "selector": [
+        48,
+        -6,
+        0
+      ],
+      "receiver": [
+        45,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -9,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -9,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            31,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            31,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            31,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          -30,
+          -39,
+          0
+        ],
+        [
+          -30,
+          -36,
+          0
+        ],
+        [
+          -30,
+          -33,
+          0
+        ],
+        [
+          -30,
+          -30,
+          0
+        ],
+        [
+          -30,
+          -27,
+          0
+        ],
+        [
+          -30,
+          -24,
+          0
+        ],
+        [
+          -30,
+          -21,
+          0
+        ],
+        [
+          -30,
+          -18,
+          0
+        ],
+        [
+          -27,
+          -18,
+          0
+        ],
+        [
+          -24,
+          -18,
+          0
+        ],
+        [
+          -21,
+          -18,
+          0
+        ],
+        [
+          -18,
+          -18,
+          0
+        ],
+        [
+          -15,
+          -18,
+          0
+        ],
+        [
+          -12,
+          -18,
+          0
+        ],
+        [
+          -9,
+          -18,
+          0
+        ],
+        [
+          -6,
+          -18,
+          0
+        ],
+        [
+          -3,
+          -18,
+          0
+        ],
+        [
+          0,
+          -18,
+          0
+        ],
+        [
+          0,
+          -21,
+          0
+        ],
+        [
+          0,
+          -24,
+          0
+        ],
+        [
+          0,
+          -27,
+          0
+        ],
+        [
+          3,
+          -27,
+          0
+        ],
+        [
+          6,
+          -27,
+          0
+        ],
+        [
+          9,
+          -27,
+          0
+        ],
+        [
+          12,
+          -27,
+          0
+        ],
+        [
+          12,
+          -24,
+          0
+        ],
+        [
+          12,
+          -21,
+          0
+        ],
+        [
+          12,
+          -18,
+          0
+        ],
+        [
+          15,
+          -18,
+          0
+        ],
+        [
+          18,
+          -18,
+          0
+        ],
+        [
+          21,
+          -18,
+          0
+        ],
+        [
+          24,
+          -18,
+          0
+        ],
+        [
+          27,
+          -18,
+          0
+        ],
+        [
+          30,
+          -18,
+          0
+        ],
+        [
+          33,
+          -18,
+          2
+        ],
+        [
+          36,
+          -18,
+          2
+        ],
+        [
+          39,
+          -18,
+          2
+        ],
+        [
+          39,
+          -15,
+          2
+        ],
+        [
+          39,
+          -12,
+          2
+        ],
+        [
+          39,
+          -9,
+          2
+        ],
+        [
+          39,
+          -6,
+          2
+        ],
+        [
+          42,
+          -6,
+          2
+        ],
+        [
+          45,
+          -6,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 2,
+      "quadrant": 0,
+      "raw": [
+        -33,
+        -39,
+        0
+      ],
+      "selector": [
+        30,
+        -6,
+        0
+      ],
+      "receiver": [
+        27,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -10,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -10,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            30,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            30,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            30,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          -27,
+          -39,
+          2
+        ],
+        [
+          -27,
+          -36,
+          2
+        ],
+        [
+          -27,
+          -33,
+          2
+        ],
+        [
+          -27,
+          -30,
+          2
+        ],
+        [
+          -27,
+          -27,
+          2
+        ],
+        [
+          -27,
+          -24,
+          2
+        ],
+        [
+          -27,
+          -21,
+          2
+        ],
+        [
+          -27,
+          -18,
+          2
+        ],
+        [
+          -27,
+          -15,
+          2
+        ],
+        [
+          -24,
+          -15,
+          2
+        ],
+        [
+          -21,
+          -15,
+          2
+        ],
+        [
+          -18,
+          -15,
+          2
+        ],
+        [
+          -15,
+          -15,
+          2
+        ],
+        [
+          -12,
+          -15,
+          2
+        ],
+        [
+          -12,
+          -18,
+          2
+        ],
+        [
+          -9,
+          -18,
+          2
+        ],
+        [
+          -6,
+          -18,
+          2
+        ],
+        [
+          -3,
+          -18,
+          2
+        ],
+        [
+          0,
+          -18,
+          2
+        ],
+        [
+          3,
+          -18,
+          2
+        ],
+        [
+          6,
+          -18,
+          2
+        ],
+        [
+          9,
+          -18,
+          2
+        ],
+        [
+          12,
+          -18,
+          2
+        ],
+        [
+          15,
+          -18,
+          2
+        ],
+        [
+          18,
+          -18,
+          2
+        ],
+        [
+          21,
+          -18,
+          1
+        ],
+        [
+          21,
+          -15,
+          1
+        ],
+        [
+          21,
+          -12,
+          1
+        ],
+        [
+          21,
+          -9,
+          1
+        ],
+        [
+          21,
+          -6,
+          1
+        ],
+        [
+          24,
+          -6,
+          1
+        ],
+        [
+          27,
+          -6,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 1,
+      "quadrant": 0,
+      "raw": [
+        -33,
+        -39,
+        0
+      ],
+      "selector": [
+        12,
+        -6,
+        0
+      ],
+      "receiver": [
+        9,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -11,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -11,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            29,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            29,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            29,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          -24,
+          -39,
+          1
+        ],
+        [
+          -24,
+          -36,
+          1
+        ],
+        [
+          -24,
+          -33,
+          1
+        ],
+        [
+          -24,
+          -30,
+          1
+        ],
+        [
+          -24,
+          -27,
+          1
+        ],
+        [
+          -21,
+          -27,
+          1
+        ],
+        [
+          -18,
+          -27,
+          1
+        ],
+        [
+          -15,
+          -27,
+          1
+        ],
+        [
+          -12,
+          -27,
+          1
+        ],
+        [
+          -9,
+          -27,
+          1
+        ],
+        [
+          -6,
+          -27,
+          1
+        ],
+        [
+          -3,
+          -27,
+          1
+        ],
+        [
+          0,
+          -27,
+          1
+        ],
+        [
+          3,
+          -27,
+          1
+        ],
+        [
+          3,
+          -24,
+          1
+        ],
+        [
+          3,
+          -21,
+          1
+        ],
+        [
+          3,
+          -18,
+          0
+        ],
+        [
+          3,
+          -15,
+          0
+        ],
+        [
+          3,
+          -12,
+          0
+        ],
+        [
+          3,
+          -9,
+          0
+        ],
+        [
+          3,
+          -6,
+          0
+        ],
+        [
+          6,
+          -6,
+          0
+        ],
+        [
+          9,
+          -6,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 0,
+      "quadrant": 0,
+      "raw": [
+        -33,
+        -39,
+        0
+      ],
+      "selector": [
+        -6,
+        -6,
+        0
+      ],
+      "receiver": [
+        -9,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          -21,
+          -39,
+          0
+        ],
+        [
+          -18,
+          -39,
+          0
+        ],
+        [
+          -18,
+          -36,
+          0
+        ],
+        [
+          -18,
+          -33,
+          0
+        ],
+        [
+          -18,
+          -30,
+          0
+        ],
+        [
+          -18,
+          -27,
+          0
+        ],
+        [
+          -18,
+          -24,
+          0
+        ],
+        [
+          -21,
+          -24,
+          0
+        ],
+        [
+          -21,
+          -21,
+          0
+        ],
+        [
+          -21,
+          -18,
+          1
+        ],
+        [
+          -21,
+          -15,
+          1
+        ],
+        [
+          -21,
+          -12,
+          1
+        ],
+        [
+          -21,
+          -9,
+          1
+        ],
+        [
+          -21,
+          -6,
+          1
+        ],
+        [
+          -18,
+          -6,
+          1
+        ],
+        [
+          -15,
+          -6,
+          1
+        ],
+        [
+          -12,
+          -6,
+          1
+        ],
+        [
+          -9,
+          -6,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 7,
+      "quadrant": 2,
+      "raw": [
+        39,
+        -48,
+        0
+      ],
+      "selector": [
+        120,
+        -15,
+        0
+      ],
+      "receiver": [
+        117,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -9,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -9,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            31,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            31,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            31,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          87,
+          -48,
+          0
+        ],
+        [
+          87,
+          -45,
+          0
+        ],
+        [
+          87,
+          -42,
+          0
+        ],
+        [
+          87,
+          -39,
+          0
+        ],
+        [
+          87,
+          -36,
+          0
+        ],
+        [
+          87,
+          -33,
+          0
+        ],
+        [
+          87,
+          -30,
+          0
+        ],
+        [
+          87,
+          -27,
+          0
+        ],
+        [
+          90,
+          -27,
+          0
+        ],
+        [
+          93,
+          -27,
+          0
+        ],
+        [
+          96,
+          -27,
+          0
+        ],
+        [
+          99,
+          -27,
+          2
+        ],
+        [
+          102,
+          -27,
+          2
+        ],
+        [
+          105,
+          -27,
+          2
+        ],
+        [
+          108,
+          -27,
+          2
+        ],
+        [
+          108,
+          -24,
+          2
+        ],
+        [
+          108,
+          -21,
+          2
+        ],
+        [
+          108,
+          -18,
+          2
+        ],
+        [
+          111,
+          -18,
+          2
+        ],
+        [
+          111,
+          -15,
+          2
+        ],
+        [
+          114,
+          -15,
+          2
+        ],
+        [
+          117,
+          -15,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 6,
+      "quadrant": 2,
+      "raw": [
+        39,
+        -48,
+        0
+      ],
+      "selector": [
+        102,
+        -15,
+        0
+      ],
+      "receiver": [
+        99,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -10,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -10,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            30,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            30,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            30,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          90,
+          -48,
+          2
+        ],
+        [
+          90,
+          -45,
+          2
+        ],
+        [
+          90,
+          -42,
+          2
+        ],
+        [
+          90,
+          -39,
+          2
+        ],
+        [
+          90,
+          -36,
+          2
+        ],
+        [
+          90,
+          -33,
+          2
+        ],
+        [
+          90,
+          -30,
+          2
+        ],
+        [
+          90,
+          -27,
+          2
+        ],
+        [
+          90,
+          -24,
+          2
+        ],
+        [
+          93,
+          -24,
+          2
+        ],
+        [
+          96,
+          -24,
+          2
+        ],
+        [
+          96,
+          -21,
+          2
+        ],
+        [
+          96,
+          -18,
+          2
+        ],
+        [
+          96,
+          -15,
+          2
+        ],
+        [
+          99,
+          -15,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 5,
+      "quadrant": 2,
+      "raw": [
+        39,
+        -48,
+        0
+      ],
+      "selector": [
+        84,
+        -15,
+        0
+      ],
+      "receiver": [
+        81,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -11,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -11,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            29,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            29,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            29,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          93,
+          -48,
+          1
+        ],
+        [
+          93,
+          -45,
+          1
+        ],
+        [
+          93,
+          -42,
+          1
+        ],
+        [
+          93,
+          -39,
+          1
+        ],
+        [
+          93,
+          -36,
+          1
+        ],
+        [
+          93,
+          -33,
+          1
+        ],
+        [
+          93,
+          -30,
+          1
+        ],
+        [
+          93,
+          -27,
+          1
+        ],
+        [
+          90,
+          -27,
+          1
+        ],
+        [
+          87,
+          -27,
+          1
+        ],
+        [
+          84,
+          -27,
+          1
+        ],
+        [
+          81,
+          -27,
+          1
+        ],
+        [
+          78,
+          -27,
+          0
+        ],
+        [
+          78,
+          -24,
+          0
+        ],
+        [
+          78,
+          -21,
+          0
+        ],
+        [
+          78,
+          -18,
+          0
+        ],
+        [
+          78,
+          -15,
+          0
+        ],
+        [
+          81,
+          -15,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 4,
+      "quadrant": 2,
+      "raw": [
+        39,
+        -48,
+        0
+      ],
+      "selector": [
+        66,
+        -15,
+        0
+      ],
+      "receiver": [
+        63,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          96,
+          -48,
+          0
+        ],
+        [
+          99,
+          -48,
+          0
+        ],
+        [
+          99,
+          -45,
+          0
+        ],
+        [
+          99,
+          -42,
+          0
+        ],
+        [
+          99,
+          -39,
+          0
+        ],
+        [
+          99,
+          -36,
+          0
+        ],
+        [
+          99,
+          -33,
+          0
+        ],
+        [
+          99,
+          -30,
+          0
+        ],
+        [
+          99,
+          -27,
+          0
+        ],
+        [
+          99,
+          -24,
+          0
+        ],
+        [
+          99,
+          -21,
+          0
+        ],
+        [
+          96,
+          -21,
+          0
+        ],
+        [
+          93,
+          -21,
+          0
+        ],
+        [
+          90,
+          -21,
+          0
+        ],
+        [
+          87,
+          -21,
+          0
+        ],
+        [
+          84,
+          -21,
+          0
+        ],
+        [
+          81,
+          -21,
+          0
+        ],
+        [
+          78,
+          -21,
+          2
+        ],
+        [
+          75,
+          -21,
+          2
+        ],
+        [
+          72,
+          -21,
+          2
+        ],
+        [
+          69,
+          -21,
+          2
+        ],
+        [
+          66,
+          -21,
+          2
+        ],
+        [
+          63,
+          -21,
+          2
+        ],
+        [
+          60,
+          -21,
+          2
+        ],
+        [
+          60,
+          -18,
+          2
+        ],
+        [
+          60,
+          -15,
+          2
+        ],
+        [
+          63,
+          -15,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 7,
+      "quadrant": 3,
+      "raw": [
+        39,
+        -45,
+        0
+      ],
+      "selector": [
+        120,
+        -12,
+        0
+      ],
+      "receiver": [
+        117,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -9,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -9,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            31,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            31,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            31,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          72,
+          -45,
+          0
+        ],
+        [
+          72,
+          -42,
+          0
+        ],
+        [
+          72,
+          -39,
+          0
+        ],
+        [
+          72,
+          -36,
+          0
+        ],
+        [
+          75,
+          -36,
+          0
+        ],
+        [
+          78,
+          -36,
+          0
+        ],
+        [
+          81,
+          -36,
+          0
+        ],
+        [
+          84,
+          -36,
+          1
+        ],
+        [
+          87,
+          -36,
+          1
+        ],
+        [
+          90,
+          -36,
+          1
+        ],
+        [
+          93,
+          -36,
+          0
+        ],
+        [
+          96,
+          -36,
+          0
+        ],
+        [
+          99,
+          -36,
+          2
+        ],
+        [
+          102,
+          -36,
+          2
+        ],
+        [
+          105,
+          -36,
+          2
+        ],
+        [
+          105,
+          -33,
+          2
+        ],
+        [
+          108,
+          -33,
+          2
+        ],
+        [
+          111,
+          -33,
+          2
+        ],
+        [
+          114,
+          -33,
+          2
+        ],
+        [
+          114,
+          -30,
+          2
+        ],
+        [
+          114,
+          -27,
+          2
+        ],
+        [
+          114,
+          -24,
+          2
+        ],
+        [
+          114,
+          -21,
+          2
+        ],
+        [
+          114,
+          -18,
+          2
+        ],
+        [
+          114,
+          -15,
+          1
+        ],
+        [
+          114,
+          -12,
+          1
+        ],
+        [
+          117,
+          -12,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 6,
+      "quadrant": 3,
+      "raw": [
+        39,
+        -45,
+        0
+      ],
+      "selector": [
+        102,
+        -12,
+        0
+      ],
+      "receiver": [
+        99,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -10,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -10,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            30,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            30,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            30,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          75,
+          -45,
+          2
+        ],
+        [
+          75,
+          -42,
+          2
+        ],
+        [
+          75,
+          -39,
+          2
+        ],
+        [
+          75,
+          -36,
+          2
+        ],
+        [
+          75,
+          -33,
+          2
+        ],
+        [
+          75,
+          -30,
+          2
+        ],
+        [
+          78,
+          -30,
+          2
+        ],
+        [
+          81,
+          -30,
+          2
+        ],
+        [
+          84,
+          -30,
+          2
+        ],
+        [
+          87,
+          -30,
+          2
+        ],
+        [
+          87,
+          -27,
+          2
+        ],
+        [
+          87,
+          -24,
+          2
+        ],
+        [
+          87,
+          -21,
+          2
+        ],
+        [
+          87,
+          -18,
+          2
+        ],
+        [
+          90,
+          -18,
+          2
+        ],
+        [
+          93,
+          -18,
+          2
+        ],
+        [
+          93,
+          -15,
+          2
+        ],
+        [
+          93,
+          -12,
+          2
+        ],
+        [
+          96,
+          -12,
+          2
+        ],
+        [
+          99,
+          -12,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 5,
+      "quadrant": 3,
+      "raw": [
+        39,
+        -45,
+        0
+      ],
+      "selector": [
+        84,
+        -12,
+        0
+      ],
+      "receiver": [
+        81,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -11,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -11,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            29,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            29,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            29,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          78,
+          -45,
+          1
+        ],
+        [
+          78,
+          -42,
+          1
+        ],
+        [
+          78,
+          -39,
+          1
+        ],
+        [
+          78,
+          -36,
+          1
+        ],
+        [
+          75,
+          -36,
+          1
+        ],
+        [
+          72,
+          -36,
+          1
+        ],
+        [
+          72,
+          -33,
+          1
+        ],
+        [
+          72,
+          -30,
+          2
+        ],
+        [
+          72,
+          -27,
+          2
+        ],
+        [
+          75,
+          -27,
+          2
+        ],
+        [
+          78,
+          -27,
+          2
+        ],
+        [
+          81,
+          -27,
+          2
+        ],
+        [
+          84,
+          -27,
+          2
+        ],
+        [
+          84,
+          -24,
+          2
+        ],
+        [
+          84,
+          -21,
+          2
+        ],
+        [
+          84,
+          -18,
+          2
+        ],
+        [
+          81,
+          -18,
+          2
+        ],
+        [
+          78,
+          -18,
+          2
+        ],
+        [
+          78,
+          -15,
+          2
+        ],
+        [
+          78,
+          -12,
+          2
+        ],
+        [
+          81,
+          -12,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 4,
+      "quadrant": 3,
+      "raw": [
+        39,
+        -45,
+        0
+      ],
+      "selector": [
+        66,
+        -12,
+        0
+      ],
+      "receiver": [
+        63,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          81,
+          -45,
+          0
+        ],
+        [
+          84,
+          -45,
+          0
+        ],
+        [
+          84,
+          -42,
+          0
+        ],
+        [
+          84,
+          -39,
+          0
+        ],
+        [
+          84,
+          -36,
+          0
+        ],
+        [
+          84,
+          -33,
+          0
+        ],
+        [
+          81,
+          -33,
+          0
+        ],
+        [
+          78,
+          -33,
+          0
+        ],
+        [
+          75,
+          -33,
+          0
+        ],
+        [
+          72,
+          -33,
+          0
+        ],
+        [
+          72,
+          -30,
+          0
+        ],
+        [
+          72,
+          -27,
+          0
+        ],
+        [
+          72,
+          -24,
+          0
+        ],
+        [
+          72,
+          -21,
+          0
+        ],
+        [
+          72,
+          -18,
+          0
+        ],
+        [
+          69,
+          -18,
+          0
+        ],
+        [
+          66,
+          -18,
+          0
+        ],
+        [
+          63,
+          -18,
+          0
+        ],
+        [
+          60,
+          -18,
+          0
+        ],
+        [
+          60,
+          -15,
+          0
+        ],
+        [
+          60,
+          -12,
+          0
+        ],
+        [
+          63,
+          -12,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 7,
+      "quadrant": 1,
+      "raw": [
+        39,
+        -42,
+        0
+      ],
+      "selector": [
+        120,
+        -9,
+        0
+      ],
+      "receiver": [
+        117,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -9,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -9,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            31,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            31,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            31,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          57,
+          -42,
+          0
+        ],
+        [
+          57,
+          -39,
+          0
+        ],
+        [
+          57,
+          -36,
+          0
+        ],
+        [
+          57,
+          -33,
+          0
+        ],
+        [
+          60,
+          -33,
+          0
+        ],
+        [
+          63,
+          -33,
+          0
+        ],
+        [
+          66,
+          -33,
+          0
+        ],
+        [
+          66,
+          -30,
+          0
+        ],
+        [
+          69,
+          -30,
+          0
+        ],
+        [
+          72,
+          -30,
+          1
+        ],
+        [
+          75,
+          -30,
+          1
+        ],
+        [
+          78,
+          -30,
+          1
+        ],
+        [
+          81,
+          -30,
+          1
+        ],
+        [
+          84,
+          -30,
+          1
+        ],
+        [
+          87,
+          -30,
+          1
+        ],
+        [
+          90,
+          -30,
+          1
+        ],
+        [
+          93,
+          -30,
+          0
+        ],
+        [
+          96,
+          -30,
+          0
+        ],
+        [
+          99,
+          -30,
+          2
+        ],
+        [
+          102,
+          -30,
+          2
+        ],
+        [
+          105,
+          -30,
+          2
+        ],
+        [
+          108,
+          -30,
+          2
+        ],
+        [
+          111,
+          -30,
+          2
+        ],
+        [
+          111,
+          -27,
+          2
+        ],
+        [
+          111,
+          -24,
+          0
+        ],
+        [
+          111,
+          -21,
+          0
+        ],
+        [
+          111,
+          -18,
+          1
+        ],
+        [
+          111,
+          -15,
+          1
+        ],
+        [
+          111,
+          -12,
+          1
+        ],
+        [
+          111,
+          -9,
+          1
+        ],
+        [
+          114,
+          -9,
+          1
+        ],
+        [
+          117,
+          -9,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 6,
+      "quadrant": 1,
+      "raw": [
+        39,
+        -42,
+        0
+      ],
+      "selector": [
+        102,
+        -9,
+        0
+      ],
+      "receiver": [
+        99,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -10,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -10,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            30,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            30,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            30,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          60,
+          -42,
+          2
+        ],
+        [
+          60,
+          -39,
+          2
+        ],
+        [
+          60,
+          -36,
+          2
+        ],
+        [
+          60,
+          -33,
+          2
+        ],
+        [
+          60,
+          -30,
+          2
+        ],
+        [
+          60,
+          -27,
+          2
+        ],
+        [
+          60,
+          -24,
+          2
+        ],
+        [
+          63,
+          -24,
+          2
+        ],
+        [
+          66,
+          -24,
+          2
+        ],
+        [
+          69,
+          -24,
+          2
+        ],
+        [
+          72,
+          -24,
+          2
+        ],
+        [
+          75,
+          -24,
+          2
+        ],
+        [
+          78,
+          -24,
+          2
+        ],
+        [
+          81,
+          -24,
+          2
+        ],
+        [
+          84,
+          -24,
+          1
+        ],
+        [
+          87,
+          -24,
+          1
+        ],
+        [
+          90,
+          -24,
+          1
+        ],
+        [
+          93,
+          -24,
+          1
+        ],
+        [
+          96,
+          -24,
+          1
+        ],
+        [
+          96,
+          -21,
+          1
+        ],
+        [
+          96,
+          -18,
+          1
+        ],
+        [
+          96,
+          -15,
+          1
+        ],
+        [
+          96,
+          -12,
+          1
+        ],
+        [
+          96,
+          -9,
+          1
+        ],
+        [
+          99,
+          -9,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 5,
+      "quadrant": 1,
+      "raw": [
+        39,
+        -42,
+        0
+      ],
+      "selector": [
+        84,
+        -9,
+        0
+      ],
+      "receiver": [
+        81,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -11,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -11,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            29,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            29,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            29,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          63,
+          -42,
+          1
+        ],
+        [
+          63,
+          -39,
+          1
+        ],
+        [
+          63,
+          -36,
+          1
+        ],
+        [
+          63,
+          -33,
+          1
+        ],
+        [
+          63,
+          -30,
+          1
+        ],
+        [
+          63,
+          -27,
+          0
+        ],
+        [
+          60,
+          -27,
+          0
+        ],
+        [
+          60,
+          -24,
+          0
+        ],
+        [
+          60,
+          -21,
+          1
+        ],
+        [
+          60,
+          -18,
+          1
+        ],
+        [
+          63,
+          -18,
+          1
+        ],
+        [
+          66,
+          -18,
+          2
+        ],
+        [
+          69,
+          -18,
+          2
+        ],
+        [
+          72,
+          -18,
+          2
+        ],
+        [
+          75,
+          -18,
+          2
+        ],
+        [
+          75,
+          -15,
+          2
+        ],
+        [
+          75,
+          -12,
+          2
+        ],
+        [
+          75,
+          -9,
+          2
+        ],
+        [
+          78,
+          -9,
+          2
+        ],
+        [
+          81,
+          -9,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 4,
+      "quadrant": 1,
+      "raw": [
+        39,
+        -42,
+        0
+      ],
+      "selector": [
+        66,
+        -9,
+        0
+      ],
+      "receiver": [
+        63,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          66,
+          -42,
+          0
+        ],
+        [
+          69,
+          -42,
+          0
+        ],
+        [
+          69,
+          -39,
+          0
+        ],
+        [
+          69,
+          -36,
+          0
+        ],
+        [
+          66,
+          -36,
+          0
+        ],
+        [
+          63,
+          -36,
+          0
+        ],
+        [
+          60,
+          -36,
+          0
+        ],
+        [
+          57,
+          -36,
+          1
+        ],
+        [
+          57,
+          -33,
+          1
+        ],
+        [
+          57,
+          -30,
+          1
+        ],
+        [
+          57,
+          -27,
+          2
+        ],
+        [
+          57,
+          -24,
+          2
+        ],
+        [
+          57,
+          -21,
+          2
+        ],
+        [
+          57,
+          -18,
+          1
+        ],
+        [
+          57,
+          -15,
+          1
+        ],
+        [
+          57,
+          -12,
+          1
+        ],
+        [
+          57,
+          -9,
+          1
+        ],
+        [
+          60,
+          -9,
+          1
+        ],
+        [
+          63,
+          -9,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 7,
+      "quadrant": 0,
+      "raw": [
+        39,
+        -39,
+        0
+      ],
+      "selector": [
+        120,
+        -6,
+        0
+      ],
+      "receiver": [
+        117,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -9,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -9,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            31,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            31,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            31,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          42,
+          -39,
+          0
+        ],
+        [
+          42,
+          -36,
+          0
+        ],
+        [
+          45,
+          -36,
+          0
+        ],
+        [
+          48,
+          -36,
+          0
+        ],
+        [
+          51,
+          -36,
+          0
+        ],
+        [
+          54,
+          -36,
+          1
+        ],
+        [
+          54,
+          -39,
+          1
+        ],
+        [
+          57,
+          -39,
+          1
+        ],
+        [
+          60,
+          -39,
+          1
+        ],
+        [
+          63,
+          -39,
+          0
+        ],
+        [
+          66,
+          -39,
+          0
+        ],
+        [
+          69,
+          -39,
+          1
+        ],
+        [
+          72,
+          -39,
+          1
+        ],
+        [
+          72,
+          -42,
+          1
+        ],
+        [
+          75,
+          -42,
+          1
+        ],
+        [
+          78,
+          -42,
+          0
+        ],
+        [
+          81,
+          -42,
+          0
+        ],
+        [
+          84,
+          -42,
+          1
+        ],
+        [
+          87,
+          -42,
+          1
+        ],
+        [
+          90,
+          -42,
+          1
+        ],
+        [
+          93,
+          -42,
+          0
+        ],
+        [
+          96,
+          -42,
+          0
+        ],
+        [
+          99,
+          -42,
+          1
+        ],
+        [
+          102,
+          -42,
+          1
+        ],
+        [
+          105,
+          -42,
+          1
+        ],
+        [
+          105,
+          -39,
+          1
+        ],
+        [
+          105,
+          -36,
+          1
+        ],
+        [
+          105,
+          -33,
+          1
+        ],
+        [
+          105,
+          -30,
+          1
+        ],
+        [
+          105,
+          -27,
+          1
+        ],
+        [
+          105,
+          -24,
+          0
+        ],
+        [
+          105,
+          -21,
+          0
+        ],
+        [
+          105,
+          -18,
+          0
+        ],
+        [
+          108,
+          -18,
+          0
+        ],
+        [
+          111,
+          -18,
+          0
+        ],
+        [
+          114,
+          -18,
+          0
+        ],
+        [
+          114,
+          -15,
+          0
+        ],
+        [
+          114,
+          -12,
+          0
+        ],
+        [
+          114,
+          -9,
+          0
+        ],
+        [
+          114,
+          -6,
+          0
+        ],
+        [
+          117,
+          -6,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 6,
+      "quadrant": 0,
+      "raw": [
+        39,
+        -39,
+        0
+      ],
+      "selector": [
+        102,
+        -6,
+        0
+      ],
+      "receiver": [
+        99,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -10,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -10,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            10,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            30,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            30,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            30,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          45,
+          -39,
+          2
+        ],
+        [
+          45,
+          -36,
+          2
+        ],
+        [
+          45,
+          -33,
+          2
+        ],
+        [
+          45,
+          -30,
+          2
+        ],
+        [
+          45,
+          -27,
+          2
+        ],
+        [
+          45,
+          -24,
+          2
+        ],
+        [
+          45,
+          -21,
+          2
+        ],
+        [
+          48,
+          -21,
+          2
+        ],
+        [
+          51,
+          -21,
+          0
+        ],
+        [
+          54,
+          -21,
+          0
+        ],
+        [
+          57,
+          -21,
+          0
+        ],
+        [
+          60,
+          -21,
+          0
+        ],
+        [
+          63,
+          -21,
+          0
+        ],
+        [
+          66,
+          -21,
+          1
+        ],
+        [
+          66,
+          -18,
+          1
+        ],
+        [
+          69,
+          -18,
+          1
+        ],
+        [
+          72,
+          -18,
+          1
+        ],
+        [
+          75,
+          -18,
+          1
+        ],
+        [
+          78,
+          -18,
+          1
+        ],
+        [
+          81,
+          -18,
+          1
+        ],
+        [
+          84,
+          -18,
+          1
+        ],
+        [
+          87,
+          -18,
+          1
+        ],
+        [
+          90,
+          -18,
+          1
+        ],
+        [
+          93,
+          -18,
+          1
+        ],
+        [
+          93,
+          -15,
+          1
+        ],
+        [
+          93,
+          -12,
+          1
+        ],
+        [
+          93,
+          -9,
+          1
+        ],
+        [
+          93,
+          -6,
+          1
+        ],
+        [
+          96,
+          -6,
+          1
+        ],
+        [
+          99,
+          -6,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 5,
+      "quadrant": 0,
+      "raw": [
+        39,
+        -39,
+        0
+      ],
+      "selector": [
+        84,
+        -6,
+        0
+      ],
+      "receiver": [
+        81,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -11,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -11,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -11,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            9,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            29,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            29,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            29,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          48,
+          -39,
+          1
+        ],
+        [
+          48,
+          -36,
+          1
+        ],
+        [
+          48,
+          -33,
+          1
+        ],
+        [
+          48,
+          -30,
+          1
+        ],
+        [
+          48,
+          -27,
+          1
+        ],
+        [
+          51,
+          -27,
+          1
+        ],
+        [
+          54,
+          -27,
+          1
+        ],
+        [
+          57,
+          -27,
+          1
+        ],
+        [
+          60,
+          -27,
+          1
+        ],
+        [
+          63,
+          -27,
+          1
+        ],
+        [
+          66,
+          -27,
+          1
+        ],
+        [
+          69,
+          -27,
+          1
+        ],
+        [
+          72,
+          -27,
+          1
+        ],
+        [
+          75,
+          -27,
+          1
+        ],
+        [
+          75,
+          -24,
+          1
+        ],
+        [
+          75,
+          -21,
+          1
+        ],
+        [
+          75,
+          -18,
+          0
+        ],
+        [
+          75,
+          -15,
+          0
+        ],
+        [
+          75,
+          -12,
+          0
+        ],
+        [
+          75,
+          -9,
+          0
+        ],
+        [
+          75,
+          -6,
+          0
+        ],
+        [
+          78,
+          -6,
+          0
+        ],
+        [
+          81,
+          -6,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 4,
+      "quadrant": 0,
+      "raw": [
+        39,
+        -39,
+        0
+      ],
+      "selector": [
+        66,
+        -6,
+        0
+      ],
+      "receiver": [
+        63,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          51,
+          -39,
+          0
+        ],
+        [
+          54,
+          -39,
+          0
+        ],
+        [
+          54,
+          -36,
+          0
+        ],
+        [
+          54,
+          -33,
+          0
+        ],
+        [
+          54,
+          -30,
+          0
+        ],
+        [
+          54,
+          -27,
+          0
+        ],
+        [
+          54,
+          -24,
+          0
+        ],
+        [
+          54,
+          -21,
+          1
+        ],
+        [
+          51,
+          -21,
+          1
+        ],
+        [
+          51,
+          -18,
+          1
+        ],
+        [
+          54,
+          -18,
+          1
+        ],
+        [
+          57,
+          -18,
+          0
+        ],
+        [
+          57,
+          -15,
+          0
+        ],
+        [
+          57,
+          -12,
+          0
+        ],
+        [
+          57,
+          -9,
+          0
+        ],
+        [
+          57,
+          -6,
+          0
+        ],
+        [
+          60,
+          -6,
+          0
+        ],
+        [
+          63,
+          -6,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 8,
+      "quadrant": 2,
+      "raw": [
+        111,
+        -48,
+        0
+      ],
+      "selector": [
+        138,
+        -15,
+        0
+      ],
+      "receiver": [
+        135,
+        -15,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 1,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 2,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 3,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          114,
+          -48,
+          0
+        ],
+        [
+          117,
+          -48,
+          0
+        ],
+        [
+          120,
+          -48,
+          0
+        ],
+        [
+          123,
+          -48,
+          0
+        ],
+        [
+          126,
+          -48,
+          0
+        ],
+        [
+          129,
+          -48,
+          0
+        ],
+        [
+          132,
+          -48,
+          0
+        ],
+        [
+          132,
+          -45,
+          0
+        ],
+        [
+          132,
+          -42,
+          0
+        ],
+        [
+          132,
+          -39,
+          0
+        ],
+        [
+          132,
+          -36,
+          0
+        ],
+        [
+          132,
+          -33,
+          0
+        ],
+        [
+          132,
+          -30,
+          0
+        ],
+        [
+          132,
+          -27,
+          0
+        ],
+        [
+          132,
+          -24,
+          0
+        ],
+        [
+          132,
+          -21,
+          0
+        ],
+        [
+          132,
+          -18,
+          0
+        ],
+        [
+          132,
+          -15,
+          0
+        ],
+        [
+          135,
+          -15,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 8,
+      "quadrant": 3,
+      "raw": [
+        111,
+        -45,
+        0
+      ],
+      "selector": [
+        138,
+        -12,
+        0
+      ],
+      "receiver": [
+        135,
+        -12,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 4,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 5,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 6,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          114,
+          -45,
+          0
+        ],
+        [
+          117,
+          -45,
+          0
+        ],
+        [
+          120,
+          -45,
+          0
+        ],
+        [
+          123,
+          -45,
+          0
+        ],
+        [
+          126,
+          -45,
+          0
+        ],
+        [
+          129,
+          -45,
+          0
+        ],
+        [
+          129,
+          -42,
+          0
+        ],
+        [
+          129,
+          -39,
+          0
+        ],
+        [
+          129,
+          -36,
+          0
+        ],
+        [
+          129,
+          -33,
+          0
+        ],
+        [
+          129,
+          -30,
+          0
+        ],
+        [
+          129,
+          -27,
+          0
+        ],
+        [
+          129,
+          -24,
+          0
+        ],
+        [
+          129,
+          -21,
+          0
+        ],
+        [
+          129,
+          -18,
+          0
+        ],
+        [
+          129,
+          -15,
+          0
+        ],
+        [
+          129,
+          -12,
+          0
+        ],
+        [
+          132,
+          -12,
+          0
+        ],
+        [
+          135,
+          -12,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 8,
+      "quadrant": 1,
+      "raw": [
+        111,
+        -42,
+        0
+      ],
+      "selector": [
+        138,
+        -9,
+        0
+      ],
+      "receiver": [
+        135,
+        -9,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 7,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 8,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 9,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          114,
+          -42,
+          0
+        ],
+        [
+          117,
+          -42,
+          0
+        ],
+        [
+          120,
+          -42,
+          0
+        ],
+        [
+          123,
+          -42,
+          0
+        ],
+        [
+          126,
+          -42,
+          0
+        ],
+        [
+          129,
+          -42,
+          1
+        ],
+        [
+          132,
+          -42,
+          1
+        ],
+        [
+          132,
+          -39,
+          1
+        ],
+        [
+          132,
+          -36,
+          1
+        ],
+        [
+          132,
+          -33,
+          1
+        ],
+        [
+          132,
+          -30,
+          1
+        ],
+        [
+          132,
+          -27,
+          1
+        ],
+        [
+          132,
+          -24,
+          1
+        ],
+        [
+          132,
+          -21,
+          1
+        ],
+        [
+          132,
+          -18,
+          1
+        ],
+        [
+          132,
+          -15,
+          1
+        ],
+        [
+          132,
+          -12,
+          1
+        ],
+        [
+          132,
+          -9,
+          1
+        ],
+        [
+          135,
+          -9,
+          1
+        ]
+      ]
+    },
+    {
+      "stage": 8,
+      "quadrant": 0,
+      "raw": [
+        111,
+        -39,
+        0
+      ],
+      "selector": [
+        138,
+        -6,
+        0
+      ],
+      "receiver": [
+        135,
+        -6,
+        0
+      ],
+      "ports": [
+        {
+          "cargo": "C",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "R",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            1
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "S",
+          "wagon": 10,
+          "unload": [
+            -18,
+            -12,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            -12,
+            2
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "W",
+          "wagon": 11,
+          "unload": [
+            -18,
+            8,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            8,
+            0
+          ],
+          "required_per_second": "2"
+        },
+        {
+          "cargo": "r",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            0
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            0
+          ],
+          "required_per_second": "40"
+        },
+        {
+          "cargo": "g",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            1
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            1
+          ],
+          "required_per_second": "20"
+        },
+        {
+          "cargo": "b",
+          "wagon": 12,
+          "unload": [
+            -18,
+            28,
+            2
+          ],
+          "selector_inlet": [
+            -18,
+            28,
+            2
+          ],
+          "required_per_second": "20"
+        }
+      ],
+      "route": [
+        [
+          114,
+          -39,
+          0
+        ],
+        [
+          117,
+          -39,
+          0
+        ],
+        [
+          120,
+          -39,
+          0
+        ],
+        [
+          123,
+          -39,
+          0
+        ],
+        [
+          126,
+          -39,
+          0
+        ],
+        [
+          129,
+          -39,
+          2
+        ],
+        [
+          132,
+          -39,
+          2
+        ],
+        [
+          132,
+          -36,
+          2
+        ],
+        [
+          132,
+          -33,
+          2
+        ],
+        [
+          132,
+          -30,
+          2
+        ],
+        [
+          132,
+          -27,
+          2
+        ],
+        [
+          132,
+          -24,
+          2
+        ],
+        [
+          132,
+          -21,
+          2
+        ],
+        [
+          132,
+          -18,
+          2
+        ],
+        [
+          132,
+          -15,
+          2
+        ],
+        [
+          132,
+          -12,
+          2
+        ],
+        [
+          132,
+          -9,
+          2
+        ],
+        [
+          132,
+          -6,
+          2
+        ],
+        [
+          135,
+          -6,
+          2
+        ]
+      ]
+    }
+  ],
+  "crystal_contacts": [
+    {
+      "stage": 0,
+      "feed": [
+        -9,
+        15,
+        0
+      ],
+      "adapter": [
+        -3,
+        3,
+        0
+      ],
+      "work": [
+        0,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          -9,
+          15,
+          2
+        ],
+        [
+          -6,
+          15,
+          2
+        ],
+        [
+          -6,
+          12,
+          2
+        ],
+        [
+          -6,
+          9,
+          0
+        ],
+        [
+          -6,
+          6,
+          0
+        ],
+        [
+          -6,
+          3,
+          0
+        ],
+        [
+          -3,
+          3,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 1,
+      "feed": [
+        -9,
+        15,
+        0
+      ],
+      "adapter": [
+        15,
+        3,
+        0
+      ],
+      "work": [
+        18,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          -9,
+          15,
+          2
+        ],
+        [
+          -9,
+          12,
+          2
+        ],
+        [
+          -9,
+          9,
+          2
+        ],
+        [
+          -6,
+          9,
+          2
+        ],
+        [
+          -3,
+          9,
+          2
+        ],
+        [
+          0,
+          9,
+          2
+        ],
+        [
+          3,
+          9,
+          2
+        ],
+        [
+          6,
+          9,
+          2
+        ],
+        [
+          9,
+          9,
+          2
+        ],
+        [
+          12,
+          9,
+          2
+        ],
+        [
+          12,
+          6,
+          2
+        ],
+        [
+          12,
+          3,
+          2
+        ],
+        [
+          15,
+          3,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 2,
+      "feed": [
+        27,
+        15,
+        0
+      ],
+      "adapter": [
+        33,
+        3,
+        0
+      ],
+      "work": [
+        36,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          27,
+          15,
+          2
+        ],
+        [
+          30,
+          15,
+          2
+        ],
+        [
+          30,
+          12,
+          2
+        ],
+        [
+          30,
+          9,
+          0
+        ],
+        [
+          30,
+          6,
+          0
+        ],
+        [
+          30,
+          3,
+          0
+        ],
+        [
+          33,
+          3,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 3,
+      "feed": [
+        27,
+        15,
+        0
+      ],
+      "adapter": [
+        51,
+        3,
+        0
+      ],
+      "work": [
+        54,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          27,
+          15,
+          2
+        ],
+        [
+          27,
+          12,
+          2
+        ],
+        [
+          27,
+          9,
+          2
+        ],
+        [
+          30,
+          9,
+          2
+        ],
+        [
+          33,
+          9,
+          2
+        ],
+        [
+          36,
+          9,
+          2
+        ],
+        [
+          39,
+          9,
+          2
+        ],
+        [
+          42,
+          9,
+          2
+        ],
+        [
+          45,
+          9,
+          2
+        ],
+        [
+          48,
+          9,
+          2
+        ],
+        [
+          48,
+          6,
+          2
+        ],
+        [
+          48,
+          3,
+          2
+        ],
+        [
+          51,
+          3,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 4,
+      "feed": [
+        63,
+        15,
+        0
+      ],
+      "adapter": [
+        69,
+        3,
+        0
+      ],
+      "work": [
+        72,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          63,
+          15,
+          2
+        ],
+        [
+          66,
+          15,
+          2
+        ],
+        [
+          66,
+          12,
+          2
+        ],
+        [
+          66,
+          9,
+          0
+        ],
+        [
+          66,
+          6,
+          0
+        ],
+        [
+          66,
+          3,
+          0
+        ],
+        [
+          69,
+          3,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 5,
+      "feed": [
+        63,
+        15,
+        0
+      ],
+      "adapter": [
+        87,
+        3,
+        0
+      ],
+      "work": [
+        90,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          63,
+          15,
+          2
+        ],
+        [
+          63,
+          12,
+          2
+        ],
+        [
+          63,
+          9,
+          2
+        ],
+        [
+          66,
+          9,
+          2
+        ],
+        [
+          69,
+          9,
+          2
+        ],
+        [
+          72,
+          9,
+          2
+        ],
+        [
+          75,
+          9,
+          2
+        ],
+        [
+          78,
+          9,
+          2
+        ],
+        [
+          81,
+          9,
+          2
+        ],
+        [
+          84,
+          9,
+          2
+        ],
+        [
+          84,
+          6,
+          2
+        ],
+        [
+          84,
+          3,
+          2
+        ],
+        [
+          87,
+          3,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 6,
+      "feed": [
+        99,
+        15,
+        0
+      ],
+      "adapter": [
+        105,
+        3,
+        0
+      ],
+      "work": [
+        108,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          99,
+          15,
+          2
+        ],
+        [
+          102,
+          15,
+          2
+        ],
+        [
+          102,
+          12,
+          2
+        ],
+        [
+          102,
+          9,
+          0
+        ],
+        [
+          102,
+          6,
+          0
+        ],
+        [
+          102,
+          3,
+          0
+        ],
+        [
+          105,
+          3,
+          0
+        ]
+      ]
+    },
+    {
+      "stage": 7,
+      "feed": [
+        99,
+        15,
+        0
+      ],
+      "adapter": [
+        123,
+        3,
+        0
+      ],
+      "work": [
+        126,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          99,
+          15,
+          2
+        ],
+        [
+          99,
+          12,
+          2
+        ],
+        [
+          99,
+          9,
+          2
+        ],
+        [
+          102,
+          9,
+          2
+        ],
+        [
+          105,
+          9,
+          2
+        ],
+        [
+          108,
+          9,
+          2
+        ],
+        [
+          111,
+          9,
+          2
+        ],
+        [
+          114,
+          9,
+          2
+        ],
+        [
+          117,
+          9,
+          2
+        ],
+        [
+          120,
+          9,
+          2
+        ],
+        [
+          120,
+          6,
+          2
+        ],
+        [
+          120,
+          3,
+          2
+        ],
+        [
+          123,
+          3,
+          2
+        ]
+      ]
+    },
+    {
+      "stage": 8,
+      "feed": [
+        135,
+        15,
+        0
+      ],
+      "adapter": [
+        141,
+        3,
+        0
+      ],
+      "work": [
+        144,
+        3,
+        0
+      ],
+      "colors_by_row": {
+        "-12": "r",
+        "-11": "g",
+        "-10": "b",
+        "-9": "c",
+        "8": "m",
+        "9": "y",
+        "10": "w"
+      },
+      "route": [
+        [
+          135,
+          15,
+          2
+        ],
+        [
+          138,
+          15,
+          2
+        ],
+        [
+          138,
+          12,
+          2
+        ],
+        [
+          138,
+          9,
+          2
+        ],
+        [
+          138,
+          6,
+          2
+        ],
+        [
+          138,
+          3,
+          2
+        ],
+        [
+          141,
+          3,
+          2
+        ]
+      ]
+    }
+  ],
+  "stack": {
+    "0": {
+      "island": [
+        0,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            0,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            0,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            0,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "1": {
+      "island": [
+        18,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            18,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            18,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            18,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "2": {
+      "island": [
+        36,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            36,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            36,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            36,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "3": {
+      "island": [
+        54,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            54,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            54,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            54,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "4": {
+      "island": [
+        72,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            72,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            72,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            72,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "5": {
+      "island": [
+        90,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            90,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            90,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            90,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "6": {
+      "island": [
+        108,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            108,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            108,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            108,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "7": {
+      "island": [
+        126,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            126,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            126,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            126,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    },
+    "8": {
+      "island": [
+        144,
+        6,
+        0
+      ],
+      "readers": {
+        "a": {
+          "island": [
+            144,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            0
+          ],
+          "rotation": 1
+        },
+        "b": {
+          "island": [
+            144,
+            0,
+            0
+          ],
+          "building": [
+            -12,
+            36,
+            1
+          ],
+          "rotation": 1
+        },
+        "result": {
+          "island": [
+            144,
+            6,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        }
+      },
+      "machines": [
+        [
+          10,
+          -15,
+          0
+        ],
+        [
+          10,
+          -9,
+          0
+        ],
+        [
+          10,
+          -3,
+          0
+        ],
+        [
+          10,
+          18,
+          0
+        ],
+        [
+          10,
+          24,
+          0
+        ],
+        [
+          10,
+          30,
+          0
+        ]
+      ],
+      "remaining_slots": "through",
+      "required_opcode": 7
+    }
+  },
+  "belt_items_per_second": "2",
+  "unload_belt_items_per_second": "2",
+  "shared_pipe_liters_per_second": null,
+  "headway_seconds": "60",
+  "capacity": [
+    {
+      "stages": 1,
+      "max_base_steps": 1,
+      "base_item_per_layer_per_second": "2",
+      "base_belt_ports_needed": 1,
+      "base_pin_red_per_quadrant_per_second": "40",
+      "base_paint_per_quadrant_per_second": "20",
+      "max_effective_crystal_steps": 1,
+      "crystal_pipe_per_final_color_per_second": "40",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "40",
+      "one_shape_stop_has_ports": true,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "120",
+      "max_crystal_primary_load_per_visit": "2400"
+    },
+    {
+      "stages": 2,
+      "max_base_steps": 2,
+      "base_item_per_layer_per_second": "4",
+      "base_belt_ports_needed": 2,
+      "base_pin_red_per_quadrant_per_second": "80",
+      "base_paint_per_quadrant_per_second": "40",
+      "max_effective_crystal_steps": 2,
+      "crystal_pipe_per_final_color_per_second": "80",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "80",
+      "one_shape_stop_has_ports": true,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "240",
+      "max_crystal_primary_load_per_visit": "4800"
+    },
+    {
+      "stages": 3,
+      "max_base_steps": 3,
+      "base_item_per_layer_per_second": "6",
+      "base_belt_ports_needed": 3,
+      "base_pin_red_per_quadrant_per_second": "120",
+      "base_paint_per_quadrant_per_second": "60",
+      "max_effective_crystal_steps": 3,
+      "crystal_pipe_per_final_color_per_second": "120",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "120",
+      "one_shape_stop_has_ports": true,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "360",
+      "max_crystal_primary_load_per_visit": "7200"
+    },
+    {
+      "stages": 4,
+      "max_base_steps": 4,
+      "base_item_per_layer_per_second": "8",
+      "base_belt_ports_needed": 4,
+      "base_pin_red_per_quadrant_per_second": "160",
+      "base_paint_per_quadrant_per_second": "80",
+      "max_effective_crystal_steps": 4,
+      "crystal_pipe_per_final_color_per_second": "160",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "160",
+      "one_shape_stop_has_ports": true,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "480",
+      "max_crystal_primary_load_per_visit": "9600"
+    },
+    {
+      "stages": 5,
+      "max_base_steps": 5,
+      "base_item_per_layer_per_second": "10",
+      "base_belt_ports_needed": 5,
+      "base_pin_red_per_quadrant_per_second": "200",
+      "base_paint_per_quadrant_per_second": "100",
+      "max_effective_crystal_steps": 5,
+      "crystal_pipe_per_final_color_per_second": "200",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "200",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "600",
+      "max_crystal_primary_load_per_visit": "12000"
+    },
+    {
+      "stages": 6,
+      "max_base_steps": 6,
+      "base_item_per_layer_per_second": "12",
+      "base_belt_ports_needed": 6,
+      "base_pin_red_per_quadrant_per_second": "240",
+      "base_paint_per_quadrant_per_second": "120",
+      "max_effective_crystal_steps": 6,
+      "crystal_pipe_per_final_color_per_second": "240",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "240",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "720",
+      "max_crystal_primary_load_per_visit": "14400"
+    },
+    {
+      "stages": 7,
+      "max_base_steps": 6,
+      "base_item_per_layer_per_second": "12",
+      "base_belt_ports_needed": 6,
+      "base_pin_red_per_quadrant_per_second": "240",
+      "base_paint_per_quadrant_per_second": "120",
+      "max_effective_crystal_steps": 6,
+      "crystal_pipe_per_final_color_per_second": "240",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "280",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "720",
+      "max_crystal_primary_load_per_visit": "14400"
+    },
+    {
+      "stages": 8,
+      "max_base_steps": 7,
+      "base_item_per_layer_per_second": "14",
+      "base_belt_ports_needed": 7,
+      "base_pin_red_per_quadrant_per_second": "280",
+      "base_paint_per_quadrant_per_second": "140",
+      "max_effective_crystal_steps": 7,
+      "crystal_pipe_per_final_color_per_second": "280",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "320",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "840",
+      "max_crystal_primary_load_per_visit": "16800"
+    },
+    {
+      "stages": 9,
+      "max_base_steps": 7,
+      "base_item_per_layer_per_second": "14",
+      "base_belt_ports_needed": 7,
+      "base_pin_red_per_quadrant_per_second": "280",
+      "base_paint_per_quadrant_per_second": "140",
+      "max_effective_crystal_steps": 7,
+      "crystal_pipe_per_final_color_per_second": "280",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "360",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "840",
+      "max_crystal_primary_load_per_visit": "16800"
+    }
+  ],
+  "capacity_checks": {
+    "base_item_each_belt_per_second": "2",
+    "base_item_full_wagon_layer_per_second": "8",
+    "base_pin_each_pipe_liters_per_second": "40",
+    "base_paint_each_pipe_liters_per_second": "20",
+    "single_crystal_branch_liters_per_second": "40",
+    "paired_crystal_shared_pipe_liters_per_second": "80",
+    "base_belt_rate_meets_target": true,
+    "paired_crystal_pipe_rate_meets_target": null
+  },
+  "changeover": {
+    "reset_phase": 3,
+    "reset_min_signal_ticks": 128,
+    "fixed_cargo_may_remain": true,
+    "returns": [
+      {
+        "stage": 0,
+        "base": {
+          "island": [
+            3,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            0,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              0,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              0,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              0,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      },
+      {
+        "stage": 1,
+        "base": {
+          "island": [
+            21,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            18,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              18,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              18,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              18,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      },
+      {
+        "stage": 2,
+        "base": {
+          "island": [
+            39,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            36,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              36,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              36,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              36,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      },
+      {
+        "stage": 3,
+        "base": {
+          "island": [
+            57,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            54,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              54,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              54,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              54,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      },
+      {
+        "stage": 4,
+        "base": {
+          "island": [
+            75,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            72,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              72,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              72,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              72,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      },
+      {
+        "stage": 5,
+        "base": {
+          "island": [
+            93,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            90,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              90,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              90,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              90,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      },
+      {
+        "stage": 6,
+        "base": {
+          "island": [
+            111,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            108,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              108,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              108,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              108,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      },
+      {
+        "stage": 7,
+        "base": {
+          "island": [
+            129,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            126,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              126,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              126,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              126,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      },
+      {
+        "stage": 8,
+        "base": {
+          "island": [
+            147,
+            -3,
+            0
+          ],
+          "building": [
+            30,
+            34,
+            0
+          ],
+          "rotation": 1
+        },
+        "work": {
+          "island": [
+            144,
+            3,
+            0
+          ],
+          "building": [
+            34,
+            30,
+            0
+          ],
+          "rotation": 0
+        },
+        "stack": {
+          "a": {
+            "island": [
+              144,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              0
+            ],
+            "rotation": 1
+          },
+          "b": {
+            "island": [
+              144,
+              0,
+              0
+            ],
+            "building": [
+              -12,
+              36,
+              1
+            ],
+            "rotation": 1
+          },
+          "result": {
+            "island": [
+              144,
+              6,
+              0
+            ],
+            "building": [
+              34,
+              30,
+              0
+            ],
+            "rotation": 0
+          }
+        }
+      }
+    ],
+    "slot_exit": [
+      {
+        "island": [
+          159,
+          0,
+          0
+        ],
+        "building": [
+          34,
+          -12,
+          0
+        ],
+        "rotation": 0
+      },
+      {
+        "island": [
+          159,
+          0,
+          0
+        ],
+        "building": [
+          34,
+          -9,
+          0
+        ],
+        "rotation": 0
+      },
+      {
+        "island": [
+          159,
+          0,
+          0
+        ],
+        "building": [
+          34,
+          8,
+          0
+        ],
+        "rotation": 0
+      },
+      {
+        "island": [
+          159,
+          0,
+          0
+        ],
+        "building": [
+          34,
+          11,
+          0
+        ],
+        "rotation": 0
+      },
+      {
+        "island": [
+          159,
+          0,
+          0
+        ],
+        "building": [
+          34,
+          28,
+          0
+        ],
+        "rotation": 0
+      },
+      {
+        "island": [
+          159,
+          0,
+          0
+        ],
+        "building": [
+          34,
+          31,
+          0
+        ],
+        "rotation": 0
+      }
+    ]
+  }
+}

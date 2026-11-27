@@ -1,0 +1,37 @@
+{
+  "inputs": {
+    "opcode": 1680001,
+    "a": 1680002,
+    "b": 1680003,
+    "destination": 1680004,
+    "base": 1680005,
+    "color": 1680006,
+    "address": 1680007,
+    "enable": 1701695,
+    "done": 1701699,
+    "target": 1600000
+  },
+  "outputs": {
+    "ack": 1702740,
+    "length": 1702741,
+    "finished": 1702742,
+    "accepted": 1702743,
+    "result": 1702744,
+    "fault": 1702745,
+    "next_address": 1702746
+  },
+  "maximum_length": 971,
+  "reserved_channels": [
+    1702700,
+    1702849
+  ],
+  "timing": {
+    "reset_hold_signal_ticks": 96,
+    "step_hold_signal_ticks": 3072,
+    "settle_phase_signal_ticks": 3120,
+    "commit_drain_signal_ticks": 96
+  },
+  "platforms": 70,
+  "building_entries": 44413,
+  "global_transmitters": 84
+}

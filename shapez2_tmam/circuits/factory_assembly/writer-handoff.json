@@ -1,0 +1,124 @@
+{
+  "recipe": {
+    "controller_outputs": {
+      "target": 1600000,
+      "length": 1640043,
+      "replay_result": 1640044,
+      "accepted": 1640045,
+      "payload": {
+        "opcode": 1640002,
+        "a": 1640003,
+        "b": 1640004,
+        "destination": 1640005,
+        "base": 1640006,
+        "color": 1640007
+      },
+      "packet_tag": 1640046
+    },
+    "operator_outputs": {
+      "run": 1640030,
+      "clean_confirmed": 1640060,
+      "enable_feed": 1640059
+    },
+    "factory_outputs": {
+      "address": 1640000,
+      "phase": 1640001,
+      "ready": 1640014,
+      "request": 1640011,
+      "ack": 1640013,
+      "loaded": 1640057,
+      "reset": 1640012,
+      "readback": {
+        "operands": 1640008,
+        "materials": 1640009
+      }
+    },
+    "length": {
+      "min": 1,
+      "max": 2
+    },
+    "address_base": 0,
+    "reset_phase": 3
+  },
+  "sender": {
+    "select": {
+      "channel": 1640047,
+      "orders": {
+        "handoff": 1
+      }
+    },
+    "write": {
+      "address": 1640000,
+      "phase": 1640001,
+      "ready": 1640014,
+      "request": 1640011,
+      "ack": 1640013,
+      "payload": {
+        "opcode": 1640002,
+        "a": 1640003,
+        "b": 1640004,
+        "destination": 1640005,
+        "base": 1640006,
+        "color": 1640007
+      },
+      "packet_tag": 1640046
+    },
+    "control": {
+      "run": 1640030,
+      "clean_confirmed": 1640060,
+      "enable_feed": 1640059,
+      "loaded": 1640057,
+      "target": 1600000,
+      "length": 1640043,
+      "replay_result": 1640044,
+      "accepted": 1640045
+    }
+  },
+  "order": {
+    "target": "Cucrcrcr",
+    "instructions": [
+      {
+        "opcode": 14,
+        "a": null,
+        "b": null,
+        "destination": 0,
+        "base": "Cu------",
+        "color": null
+      },
+      {
+        "opcode": 10,
+        "a": 0,
+        "b": null,
+        "destination": 0,
+        "base": null,
+        "color": "color:r"
+      }
+    ]
+  },
+  "stored": [
+    {
+      "opcode": 1683010,
+      "a": 1683011,
+      "b": 1683012,
+      "destination": 1683013,
+      "base": 1683014,
+      "color": 1683015
+    },
+    {
+      "opcode": 1683016,
+      "a": 1683017,
+      "b": 1683018,
+      "destination": 1683019,
+      "base": 1683020,
+      "color": 1683021
+    }
+  ],
+  "stream_state": 1640040,
+  "private_channels": [
+    1683000,
+    1683021
+  ],
+  "minimum_hold_signal_ticks": 132,
+  "islands": 14,
+  "buildings": 23298
+}

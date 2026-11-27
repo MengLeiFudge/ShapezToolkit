@@ -1,0 +1,67 @@
+{
+  "inputs": {
+    "enable": 1704200,
+    "read_depth": 1704201,
+    "write_depth": 1704202,
+    "capture": 1704203,
+    "s_counts": [
+      1703518,
+      1703519,
+      1703520,
+      1703521
+    ],
+    "source_slots": [
+      1701865,
+      1701871,
+      1701877,
+      1701883
+    ],
+    "mask": 1703303,
+    "members": [
+      1703308,
+      1703309,
+      1703310,
+      1703311
+    ]
+  },
+  "outputs": {
+    "ready": 1705000,
+    "s_match": 1705001,
+    "slots_match": 1705002,
+    "cap_match": 1705003,
+    "s_counts": [
+      1705010,
+      1705011,
+      1705012,
+      1705013
+    ],
+    "source_slots": [
+      1705014,
+      1705015,
+      1705016,
+      1705017
+    ],
+    "mask": 1705018,
+    "members": [
+      1705019,
+      1705020,
+      1705021,
+      1705022
+    ]
+  },
+  "depths": [
+    0,
+    1,
+    2
+  ],
+  "reserved_channels": [
+    1705000,
+    1705099
+  ],
+  "timing": {
+    "hold_signal_ticks": 96
+  },
+  "platforms": 22,
+  "building_entries": 31984,
+  "global_transmitters": 69
+}

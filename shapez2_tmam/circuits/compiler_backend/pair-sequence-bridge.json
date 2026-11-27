@@ -1,0 +1,93 @@
+{
+  "inputs": {
+    "enable": 1701695,
+    "kind": 1701691,
+    "next": 1701698,
+    "done": 1701699
+  },
+  "outputs": {
+    "phase": 1701690,
+    "settled": 1701696,
+    "confirmed": 1701697
+  },
+  "methods": {
+    "1": {
+      "run": 1702052,
+      "done": 1702053,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "2": {
+      "run": 1702054,
+      "done": 1702062,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "3": {
+      "run": 1702056,
+      "done": 1702062,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "4": {
+      "run": 1702058,
+      "done": 1702062,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "5": {
+      "run": 1702060,
+      "done": 1702062,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    }
+  },
+  "request_address": 1702070,
+  "ack_address": 1702071,
+  "reserved_channels": [
+    1702070,
+    1702138
+  ],
+  "timing": {
+    "input_hold_signal_ticks": 1536,
+    "update_hold_signal_ticks": 1536,
+    "settle_phase_signal_ticks": 1560,
+    "update_phase_signal_ticks": 1548,
+    "reset_hold_signal_ticks": 72
+  },
+  "platforms": 37,
+  "building_entries": 35612,
+  "writer": {
+    "inputs": {
+      "done": 1701766,
+      "packet_run": 1701741,
+      "packet_done": 1701746,
+      "step": 1701710,
+      "appended": 1701747
+    },
+    "outputs": {
+      "selector": 1701740,
+      "run": 1701761
+    },
+    "selectors_by_kind": {
+      "2": 3,
+      "3": 3,
+      "4": 4,
+      "5": 3
+    },
+    "shared_done": 1702062
+  },
+  "combined_platforms": 95,
+  "combined_building_entries": 106121,
+  "combined_global_transmitters": 184
+}

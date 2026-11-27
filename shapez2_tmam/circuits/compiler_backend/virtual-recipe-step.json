@@ -1,0 +1,58 @@
+{
+  "inputs": {
+    "opcode": 1702700,
+    "a": 1702701,
+    "b": 1702702,
+    "destination": 1702703,
+    "base": 1702704,
+    "color": 1702705,
+    "slot0": 1702706,
+    "slot1": 1702707,
+    "slot2": 1702708,
+    "slot3": 1702709,
+    "slot4": 1702710,
+    "slot5": 1702711
+  },
+  "outputs": {
+    "slot0": 1702712,
+    "slot1": 1702713,
+    "slot2": 1702714,
+    "slot3": 1702715,
+    "slot4": 1702716,
+    "slot5": 1702717,
+    "valid": 1702718
+  },
+  "reserved_channels": [
+    1702700,
+    1702731
+  ],
+  "quadrants": 4,
+  "height": 5,
+  "opcodes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    14
+  ],
+  "schedule": "combination",
+  "settling": {
+    "hold_signal_ticks": 3072,
+    "max_gate_depth": 40
+  },
+  "platforms": 7,
+  "building_entries": 7499,
+  "internal_channels": [
+    1702720,
+    1702721,
+    1702722,
+    1702723
+  ],
+  "global_transmitters": 11
+}

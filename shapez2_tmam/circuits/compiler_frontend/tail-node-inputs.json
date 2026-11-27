@@ -1,0 +1,69 @@
+{
+  "parts": {
+    "target": {
+      "inputs": {
+        "rows_bottom_to_top": [
+          1705350,
+          1705351,
+          1705352,
+          1705353,
+          1705354
+        ],
+        "preflight": 1705330
+      },
+      "outputs": {
+        "limits_q0_to_q3": [
+          1703509,
+          1703510,
+          1703511,
+          1703512
+        ],
+        "column_a_q0_to_q3": [
+          1705525,
+          1705526,
+          1705527,
+          1705528
+        ],
+        "all_columns_a": 1705530,
+        "has_lowest_crystal": 1705529,
+        "eligible": 1705356,
+        "prepared": 1705531
+      },
+      "timing": {
+        "preflight_hold_signal_ticks": 1968,
+        "preflight_rearm_signal_ticks": 48
+      }
+    },
+    "candidate": {
+      "inputs": {
+        "rows_bottom_to_top": [
+          1703513,
+          1703514,
+          1703515,
+          1703516,
+          1703517
+        ],
+        "s_ready": 1704802
+      },
+      "outputs": {
+        "words_q0_to_q3": [
+          1701842,
+          1701843,
+          1701844,
+          1701845
+        ]
+      },
+      "consumer_start": 1705333,
+      "timing": {
+        "candidate_hold_signal_ticks": 1152,
+        "withdraw_signal_ticks": 24
+      }
+    }
+  },
+  "private_range": [
+    1705500,
+    1705699
+  ],
+  "platforms": 28,
+  "building_entries": 35274
+}

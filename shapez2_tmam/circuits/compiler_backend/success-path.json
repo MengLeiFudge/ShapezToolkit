@@ -1,0 +1,118 @@
+{
+  "inputs": {
+    "enable": 1702855,
+    "frame_count": 1704000,
+    "frame_valid": 1704205,
+    "target_rows": [
+      1704220,
+      1704221,
+      1704222,
+      1704223,
+      1704224
+    ],
+    "pushed_rows": [
+      1704225,
+      1704226,
+      1704227,
+      1704228,
+      1704229
+    ]
+  },
+  "outputs": {
+    "done": 1701699,
+    "read_frame": 1704201,
+    "phase": 1704003
+  },
+  "max_frames": 3,
+  "reserved_channels": [
+    1704000,
+    1704059
+  ],
+  "timing": {
+    "reset_signal_ticks": 120,
+    "frame_read_signal_ticks": 1944
+  },
+  "external_inputs": [
+    1600000,
+    1640000,
+    1640011,
+    1640012,
+    1640013,
+    1640057,
+    1640060,
+    1702850,
+    1702851,
+    1703002,
+    1703006,
+    1703007,
+    1703008,
+    1703009,
+    1703010,
+    1703011,
+    1703012,
+    1703013,
+    1703014,
+    1703015,
+    1703016,
+    1703116,
+    1703117,
+    1703118,
+    1703119,
+    1704000,
+    1704200,
+    1704202,
+    1704203,
+    1704230,
+    1704231,
+    1704232,
+    1704233,
+    1704234,
+    1704235,
+    1704236,
+    1704237,
+    1704238,
+    1704239
+  ],
+  "two_pass": {
+    "inputs": {
+      "start": 1702850,
+      "feed_request": 1702851,
+      "target": 1600000
+    },
+    "outputs": {
+      "status": 1702852,
+      "finished": 1702854,
+      "fault": 1702853
+    },
+    "factory": {
+      "operator": {
+        "run": 1640030,
+        "clean_confirmed": 1640060,
+        "enable_feed": 1640059
+      },
+      "status": {
+        "address": 1640000,
+        "phase": 1640001,
+        "ready": 1640014,
+        "request": 1640011,
+        "ack": 1640013
+      },
+      "loaded": 1640057,
+      "reset": 1640012,
+      "order": {
+        "target": 1600000,
+        "length": 1640043,
+        "replay_result": 1640044,
+        "accepted": 1640045
+      }
+    },
+    "timing": {
+      "phase_reset_signal_ticks": 192,
+      "factory_submit_hold_signal_ticks": 384
+    }
+  },
+  "includes_frame_store": true,
+  "platforms": 294,
+  "building_entries": 286581,
+  "global_transmitters": 502
+}

@@ -1,0 +1,107 @@
+{
+  "inputs": {
+    "enable": 1703300,
+    "plan_ready": 1703301,
+    "kind": 1703302,
+    "mask": 1703303,
+    "proof_done": 1703304,
+    "proof_ok": 1703305,
+    "replay_done": 1703306,
+    "replay_ok": 1703307,
+    "members": [
+      1703308,
+      1703309,
+      1703310,
+      1703311
+    ]
+  },
+  "outputs": {
+    "plan": 1703312,
+    "reject": 1703313,
+    "proof": 1703314,
+    "replay": 1703315,
+    "accepted": 1703316,
+    "exhausted": 1703317,
+    "fault": 1703318
+  },
+  "columns": {
+    "enable": 1701840,
+    "advance": 1701841,
+    "ready": 1701858,
+    "exhausted": 1701859
+  },
+  "seal": {
+    "inputs": {
+      "enable": 1702280,
+      "candidate_ready": 1701858,
+      "mode": 1702281,
+      "crystal_mask": 1702282,
+      "members": [
+        1702283,
+        1702284,
+        1702285,
+        1702286
+      ]
+    },
+    "outputs": {
+      "ready": 1702287,
+      "valid": 1702288,
+      "rows_bottom_to_top": [
+        1702289,
+        1702290,
+        1702291,
+        1702292,
+        1702293
+      ]
+    }
+  },
+  "closure": {
+    "inputs": {
+      "enable": 1703000,
+      "mode": 1703001,
+      "optional_top": 1703002,
+      "column": 1703003,
+      "target": 1600000,
+      "valid": 1702288,
+      "source_rows_bottom_to_top": [
+        1702289,
+        1702290,
+        1702291,
+        1702292,
+        1702293
+      ]
+    },
+    "outputs": {
+      "chosen": 1703004,
+      "exhausted": 1703005,
+      "alternate": 1703006,
+      "height": 1703007,
+      "heights": [
+        1703008,
+        1703009,
+        1703010,
+        1703011
+      ],
+      "rows_bottom_to_top": [
+        1703012,
+        1703013,
+        1703014,
+        1703015,
+        1703016
+      ]
+    }
+  },
+  "channels": {
+    "reserved_range": [
+      1703300,
+      1703399
+    ],
+    "phase": 1703319
+  },
+  "timing": {
+    "channel_signal_ticks": 12,
+    "attempt_reset_signal_ticks": 456
+  },
+  "platforms": 14,
+  "building_entries": 19762
+}

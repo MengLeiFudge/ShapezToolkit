@@ -1,0 +1,57 @@
+{
+  "stage_capacity": 2,
+  "inputs": {
+    "target": 1600000,
+    "length": 1640043,
+    "replay_result": 1640044,
+    "accepted": 1640045,
+    "run_permit": 1640058,
+    "packet_tag": 1640046,
+    "fields": {
+      "opcode": 1640002,
+      "a": 1640003,
+      "b": 1640004,
+      "destination": 1640005,
+      "base": 1640006,
+      "color": 1640007
+    }
+  },
+  "outputs": {
+    "address": 1640000,
+    "phase": 1640001,
+    "stream_state": 1640040,
+    "reset": 1640012,
+    "request": 1640011,
+    "ack": 1640013,
+    "ready": 1640014,
+    "loaded": 1640057,
+    "readback": [
+      1640008,
+      1640009
+    ],
+    "storage": [
+      {
+        "opcode": 1600070,
+        "a": 1600071,
+        "b": 1600072,
+        "destination": 1600063,
+        "base": 1600075,
+        "color": 1600074
+      },
+      {
+        "opcode": 1600102,
+        "a": 1600103,
+        "b": 1600104,
+        "destination": 1600095,
+        "base": 1600107,
+        "color": 1600106
+      }
+    ]
+  },
+  "timing": {
+    "phase_hold_signal_ticks": 132,
+    "radio_signal_ticks": 12
+  },
+  "islands": 35,
+  "buildings": 28697
+}

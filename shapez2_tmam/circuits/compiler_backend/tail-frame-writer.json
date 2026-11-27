@@ -1,0 +1,70 @@
+{
+  "inputs": {
+    "start": 1703900,
+    "target_rows_bottom_to_top": [
+      1703902,
+      1703903,
+      1703904,
+      1703905,
+      1703906
+    ],
+    "pushed_rows_bottom_to_top": [
+      1703907,
+      1703908,
+      1703909,
+      1703910,
+      1703911
+    ]
+  },
+  "outputs": {
+    "done": 1703901
+  },
+  "shared_writer": false,
+  "method_run": null,
+  "reserved_channels": [
+    1703900,
+    1703963
+  ],
+  "external_inputs": [
+    1640000,
+    1640011,
+    1640012,
+    1640013,
+    1640030,
+    1703900,
+    1703902,
+    1703903,
+    1703904,
+    1703905,
+    1703906,
+    1703907,
+    1703908,
+    1703909,
+    1703910,
+    1703911
+  ],
+  "writer_bus": {
+    "address": 1701763,
+    "ack_address": 1701764,
+    "request_address": 1701762,
+    "fields": {
+      "opcode": 1701750,
+      "a": 1701751,
+      "b": 1701752,
+      "destination": 1701753,
+      "base": 1701754,
+      "color": 1701755
+    }
+  },
+  "timing": {
+    "input_hold_signal_ticks": 3288,
+    "update_hold_signal_ticks": 24,
+    "settle_phase_signal_ticks": 3312,
+    "update_phase_signal_ticks": 36,
+    "reset_hold_signal_ticks": 48,
+    "restart_low_signal_ticks": 72
+  },
+  "platforms": 24,
+  "building_entries": 21236,
+  "global_transmitters": 45
+}

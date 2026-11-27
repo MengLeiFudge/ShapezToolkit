@@ -1,0 +1,36 @@
+{
+  "inputs": {
+    "start": 1704700,
+    "target_rows_bottom_to_top": [
+      1704710,
+      1704711,
+      1704712,
+      1704713,
+      1704714
+    ],
+    "candidate_rows_bottom_to_top": [
+      1703513,
+      1703514,
+      1703515,
+      1703516,
+      1703517
+    ]
+  },
+  "outputs": {
+    "done": 1704701,
+    "accepted": 1704702
+  },
+  "reserved_channels": [
+    1704700,
+    1704799
+  ],
+  "timing": {
+    "row_hold_signal_ticks": 2232,
+    "accepted_path_signal_ticks": 11400,
+    "reset_signal_ticks": 48
+  },
+  "row_logic_gates": 188,
+  "platforms": 11,
+  "building_entries": 12491,
+  "global_transmitters": 17
+}

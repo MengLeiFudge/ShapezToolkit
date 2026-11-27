@@ -1,0 +1,727 @@
+{
+  "select": {
+    "channel": 1640047,
+    "orders": {
+      "crystal": 1,
+      "stack": 2
+    }
+  },
+  "orders": {
+    "crystal": {
+      "target": "CucmRuWu:CuCuCuCu",
+      "instructions": [
+        {
+          "opcode": 14,
+          "a": null,
+          "b": null,
+          "destination": 0,
+          "base": "Cu--SuWu",
+          "color": null
+        },
+        {
+          "opcode": 10,
+          "a": 0,
+          "b": null,
+          "destination": 0,
+          "base": null,
+          "color": "color:m"
+        },
+        {
+          "opcode": 14,
+          "a": null,
+          "b": null,
+          "destination": 1,
+          "base": "--CuRuWu",
+          "color": null
+        },
+        {
+          "opcode": 8,
+          "a": 0,
+          "b": 1,
+          "destination": 0,
+          "base": null,
+          "color": null
+        },
+        {
+          "opcode": 14,
+          "a": null,
+          "b": null,
+          "destination": 1,
+          "base": "CuCuCuCu",
+          "color": null
+        },
+        {
+          "opcode": 7,
+          "a": 0,
+          "b": 1,
+          "destination": 0,
+          "base": null,
+          "color": null
+        }
+      ],
+      "product_slot": 0,
+      "cargo_per_product": [
+        {
+          "stage": 0,
+          "station": "q0",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12,
+          "cargo": "C",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 0,
+          "station": "q1",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12,
+          "cargo": "C",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 0,
+          "station": "q2",
+          "wagon": 1,
+          "layer": 2,
+          "row": -12,
+          "cargo": "S",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 0,
+          "station": "q3",
+          "wagon": 5,
+          "layer": 0,
+          "row": 8,
+          "cargo": "W",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "station": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "row": 29,
+          "cargo": "r",
+          "per_product": "10",
+          "unit": "liter"
+        },
+        {
+          "stage": 1,
+          "station": "crystal",
+          "wagon": 1,
+          "layer": 2,
+          "row": 28,
+          "cargo": "b",
+          "per_product": "10",
+          "unit": "liter"
+        },
+        {
+          "stage": 2,
+          "station": "q0",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12,
+          "cargo": "C",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 2,
+          "station": "q1",
+          "wagon": 7,
+          "layer": 0,
+          "row": -12,
+          "cargo": "C",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 2,
+          "station": "q2",
+          "wagon": 1,
+          "layer": 1,
+          "row": -12,
+          "cargo": "R",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 2,
+          "station": "q3",
+          "wagon": 5,
+          "layer": 0,
+          "row": 8,
+          "cargo": "W",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 4,
+          "station": "q0",
+          "wagon": 10,
+          "layer": 0,
+          "row": -12,
+          "cargo": "C",
+          "per_product": "1",
+          "unit": "item"
+        }
+      ]
+    },
+    "stack": {
+      "target": "RuRuRuRu:SuSuSuSu",
+      "instructions": [
+        {
+          "opcode": 14,
+          "a": null,
+          "b": null,
+          "destination": 0,
+          "base": "RuRuRuRu",
+          "color": null
+        },
+        {
+          "opcode": 14,
+          "a": null,
+          "b": null,
+          "destination": 1,
+          "base": "SuSuSuSu",
+          "color": null
+        },
+        {
+          "opcode": 7,
+          "a": 0,
+          "b": 1,
+          "destination": 0,
+          "base": null,
+          "color": null
+        }
+      ],
+      "product_slot": 0,
+      "cargo_per_product": [
+        {
+          "stage": 0,
+          "station": "q0",
+          "wagon": 10,
+          "layer": 1,
+          "row": -12,
+          "cargo": "R",
+          "per_product": "1",
+          "unit": "item"
+        },
+        {
+          "stage": 1,
+          "station": "q0",
+          "wagon": 10,
+          "layer": 2,
+          "row": -12,
+          "cargo": "S",
+          "per_product": "1",
+          "unit": "item"
+        }
+      ]
+    }
+  },
+  "stage_capacity": 6,
+  "compact_stations": true,
+  "interfaces": {
+    "stations": [
+      {
+        "stage": 0,
+        "base_head": [
+          -12,
+          -17
+        ]
+      },
+      {
+        "stage": 1,
+        "base_head": [
+          6,
+          -17
+        ],
+        "crystal_head": [
+          9,
+          3
+        ]
+      },
+      {
+        "stage": 2,
+        "base_head": [
+          24,
+          -17
+        ]
+      },
+      {
+        "stage": 3
+      },
+      {
+        "stage": 4,
+        "base_head": [
+          60,
+          -17
+        ]
+      },
+      {
+        "stage": 5
+      }
+    ],
+    "load": [
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 2,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 5,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 8,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 11,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      }
+    ],
+    "recipe": {
+      "controller_outputs": {
+        "target": 1600000,
+        "length": 1640043,
+        "replay_result": 1640044,
+        "accepted": 1640045,
+        "payload": {
+          "opcode": 1640002,
+          "a": 1640003,
+          "b": 1640004,
+          "destination": 1640005,
+          "base": 1640006,
+          "color": 1640007
+        },
+        "packet_tag": 1640046
+      },
+      "operator_outputs": {
+        "run": 1640030,
+        "clean_confirmed": 1640060,
+        "enable_feed": 1640059
+      },
+      "factory_outputs": {
+        "address": 1640000,
+        "phase": 1640001,
+        "ready": 1640014,
+        "request": 1640011,
+        "ack": 1640013,
+        "loaded": 1640057,
+        "reset": 1640012,
+        "readback": {
+          "operands": 1640008,
+          "materials": 1640009
+        }
+      },
+      "length": {
+        "min": 1,
+        "max": 6
+      },
+      "address_base": 0,
+      "reset_phase": 3
+    },
+    "output": {
+      "platform": [
+        96,
+        0,
+        0
+      ],
+      "east_y": 31,
+      "level": 0
+    }
+  },
+  "submit_bridge": {
+    "inputs": {
+      "address": 1640000,
+      "length": 1640043,
+      "reset": 1640012,
+      "candidate_fields": {
+        "opcode": 1680001,
+        "a": 1680002,
+        "b": 1680003,
+        "destination": 1680004,
+        "base": 1680005,
+        "color": 1680006
+      },
+      "accepted": 1640045
+    },
+    "outputs": {
+      "fields": {
+        "opcode": 1640002,
+        "a": 1640003,
+        "b": 1640004,
+        "destination": 1640005,
+        "base": 1640006,
+        "color": 1640007
+      },
+      "commit_address": 1680008,
+      "packet_tag": 1640046,
+      "candidate_address": 1680007
+    },
+    "reserved_internal_channels": [
+      1681000,
+      1681020
+    ],
+    "timing": {
+      "hold_signal_ticks": 120,
+      "radio_signal_ticks": 12,
+      "delay_steps": 10,
+      "timer": "counter",
+      "timer_islands": 3,
+      "eligible_to_commit_signal_ticks": 120,
+      "commit_to_public_signal_ticks": 12,
+      "public_to_tag_signal_ticks": 24
+    },
+    "islands": 14,
+    "buildings": 12083
+  },
+  "islands": 326,
+  "buildings": 159128
+}

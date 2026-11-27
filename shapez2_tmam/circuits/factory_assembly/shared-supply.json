@@ -1,0 +1,3061 @@
+{
+  "belt_items_per_second": "2",
+  "unload_belt_items_per_second": "2",
+  "shared_pipe_liters_per_second": null,
+  "planned_arrival_seconds": "60",
+  "groups": [
+    {
+      "stages": 1,
+      "max_base_steps": 1,
+      "base_item_per_layer_per_second": "2",
+      "base_belt_ports_needed": 1,
+      "base_pin_red_per_quadrant_per_second": "40",
+      "base_paint_per_quadrant_per_second": "20",
+      "max_effective_crystal_steps": 1,
+      "crystal_pipe_per_final_color_per_second": "40",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "40",
+      "one_shape_stop_has_ports": true,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "120",
+      "max_crystal_primary_load_per_visit": "2400"
+    },
+    {
+      "stages": 2,
+      "max_base_steps": 2,
+      "base_item_per_layer_per_second": "4",
+      "base_belt_ports_needed": 2,
+      "base_pin_red_per_quadrant_per_second": "80",
+      "base_paint_per_quadrant_per_second": "40",
+      "max_effective_crystal_steps": 2,
+      "crystal_pipe_per_final_color_per_second": "80",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "80",
+      "one_shape_stop_has_ports": true,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "240",
+      "max_crystal_primary_load_per_visit": "4800"
+    },
+    {
+      "stages": 3,
+      "max_base_steps": 3,
+      "base_item_per_layer_per_second": "6",
+      "base_belt_ports_needed": 3,
+      "base_pin_red_per_quadrant_per_second": "120",
+      "base_paint_per_quadrant_per_second": "60",
+      "max_effective_crystal_steps": 3,
+      "crystal_pipe_per_final_color_per_second": "120",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "120",
+      "one_shape_stop_has_ports": true,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "360",
+      "max_crystal_primary_load_per_visit": "7200"
+    },
+    {
+      "stages": 4,
+      "max_base_steps": 4,
+      "base_item_per_layer_per_second": "8",
+      "base_belt_ports_needed": 4,
+      "base_pin_red_per_quadrant_per_second": "160",
+      "base_paint_per_quadrant_per_second": "80",
+      "max_effective_crystal_steps": 4,
+      "crystal_pipe_per_final_color_per_second": "160",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "160",
+      "one_shape_stop_has_ports": true,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "480",
+      "max_crystal_primary_load_per_visit": "9600"
+    },
+    {
+      "stages": 5,
+      "max_base_steps": 5,
+      "base_item_per_layer_per_second": "10",
+      "base_belt_ports_needed": 5,
+      "base_pin_red_per_quadrant_per_second": "200",
+      "base_paint_per_quadrant_per_second": "100",
+      "max_effective_crystal_steps": 5,
+      "crystal_pipe_per_final_color_per_second": "200",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "200",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "600",
+      "max_crystal_primary_load_per_visit": "12000"
+    },
+    {
+      "stages": 6,
+      "max_base_steps": 6,
+      "base_item_per_layer_per_second": "12",
+      "base_belt_ports_needed": 6,
+      "base_pin_red_per_quadrant_per_second": "240",
+      "base_paint_per_quadrant_per_second": "120",
+      "max_effective_crystal_steps": 6,
+      "crystal_pipe_per_final_color_per_second": "240",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "240",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "720",
+      "max_crystal_primary_load_per_visit": "14400"
+    },
+    {
+      "stages": 7,
+      "max_base_steps": 6,
+      "base_item_per_layer_per_second": "12",
+      "base_belt_ports_needed": 6,
+      "base_pin_red_per_quadrant_per_second": "240",
+      "base_paint_per_quadrant_per_second": "120",
+      "max_effective_crystal_steps": 6,
+      "crystal_pipe_per_final_color_per_second": "240",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "280",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "720",
+      "max_crystal_primary_load_per_visit": "14400"
+    },
+    {
+      "stages": 8,
+      "max_base_steps": 7,
+      "base_item_per_layer_per_second": "14",
+      "base_belt_ports_needed": 7,
+      "base_pin_red_per_quadrant_per_second": "280",
+      "base_paint_per_quadrant_per_second": "140",
+      "max_effective_crystal_steps": 7,
+      "crystal_pipe_per_final_color_per_second": "280",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "320",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "840",
+      "max_crystal_primary_load_per_visit": "16800"
+    },
+    {
+      "stages": 9,
+      "max_base_steps": 7,
+      "base_item_per_layer_per_second": "14",
+      "base_belt_ports_needed": 7,
+      "base_pin_red_per_quadrant_per_second": "280",
+      "base_paint_per_quadrant_per_second": "140",
+      "max_effective_crystal_steps": 7,
+      "crystal_pipe_per_final_color_per_second": "280",
+      "crystal_pipe_reserved_per_second_if_all_opcode_10_counted": "360",
+      "one_shape_stop_has_ports": false,
+      "one_shared_pure_pipe_has_capacity": null,
+      "max_solid_load_per_visit": "840",
+      "max_crystal_primary_load_per_visit": "16800"
+    }
+  ],
+  "base_segment": {
+    "head": [
+      -18,
+      -17,
+      0
+    ],
+    "rail": {
+      "arrival": {
+        "tile": [
+          -19,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          -19,
+          -19,
+          0
+        ],
+        "rotation": 1
+      },
+      "departure": {
+        "tile": [
+          -18,
+          -18,
+          0
+        ],
+        "outside_tile": [
+          -18,
+          -19,
+          0
+        ],
+        "rotation": 3
+      }
+    },
+    "addresses": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "outlets": [
+      {
+        "address": 0,
+        "quadrant": 2,
+        "cargo": "C",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          0
+        ],
+        "outlet": [
+          37,
+          -12,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 2,
+        "cargo": "C",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          0
+        ],
+        "outlet": [
+          37,
+          -11,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 2,
+        "cargo": "C",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          0
+        ],
+        "outlet": [
+          37,
+          -10,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 2,
+        "cargo": "C",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          0
+        ],
+        "outlet": [
+          37,
+          -9,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 2,
+        "cargo": "R",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          1
+        ],
+        "outlet": [
+          37,
+          -12,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 2,
+        "cargo": "R",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          1
+        ],
+        "outlet": [
+          37,
+          -11,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 2,
+        "cargo": "R",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          1
+        ],
+        "outlet": [
+          37,
+          -10,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 2,
+        "cargo": "R",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          1
+        ],
+        "outlet": [
+          37,
+          -9,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 2,
+        "cargo": "S",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          2
+        ],
+        "outlet": [
+          37,
+          -12,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 2,
+        "cargo": "S",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          2
+        ],
+        "outlet": [
+          37,
+          -11,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 2,
+        "cargo": "S",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          2
+        ],
+        "outlet": [
+          37,
+          -10,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 2,
+        "cargo": "S",
+        "wagon": 1,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          2
+        ],
+        "outlet": [
+          37,
+          -9,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 2,
+        "cargo": "W",
+        "wagon": 2,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          8,
+          0
+        ],
+        "outlet": [
+          37,
+          8,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 2,
+        "cargo": "W",
+        "wagon": 2,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          9,
+          0
+        ],
+        "outlet": [
+          37,
+          9,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 2,
+        "cargo": "W",
+        "wagon": 2,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          10,
+          0
+        ],
+        "outlet": [
+          37,
+          10,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 2,
+        "cargo": "W",
+        "wagon": 2,
+        "unit": "item",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          11,
+          0
+        ],
+        "outlet": [
+          37,
+          11,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 2,
+        "cargo": "r",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          0
+        ],
+        "outlet": [
+          37,
+          28,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 1,
+        "quadrant": 2,
+        "cargo": "r",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          0
+        ],
+        "outlet": [
+          37,
+          29,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 2,
+        "quadrant": 2,
+        "cargo": "r",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          0
+        ],
+        "outlet": [
+          37,
+          30,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 3,
+        "quadrant": 2,
+        "cargo": "r",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          0
+        ],
+        "outlet": [
+          37,
+          31,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 0,
+        "quadrant": 2,
+        "cargo": "g",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          1
+        ],
+        "outlet": [
+          37,
+          28,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 1,
+        "quadrant": 2,
+        "cargo": "g",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          1
+        ],
+        "outlet": [
+          37,
+          29,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 2,
+        "quadrant": 2,
+        "cargo": "g",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          1
+        ],
+        "outlet": [
+          37,
+          30,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 3,
+        "quadrant": 2,
+        "cargo": "g",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          1
+        ],
+        "outlet": [
+          37,
+          31,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 0,
+        "quadrant": 2,
+        "cargo": "b",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          2
+        ],
+        "outlet": [
+          37,
+          28,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 1,
+        "quadrant": 2,
+        "cargo": "b",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          2
+        ],
+        "outlet": [
+          37,
+          29,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 2,
+        "quadrant": 2,
+        "cargo": "b",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          2
+        ],
+        "outlet": [
+          37,
+          30,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 3,
+        "quadrant": 2,
+        "cargo": "b",
+        "wagon": 3,
+        "unit": "liter",
+        "island": [
+          -15,
+          -15,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          2
+        ],
+        "outlet": [
+          37,
+          31,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 0,
+        "quadrant": 3,
+        "cargo": "C",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          0
+        ],
+        "outlet": [
+          37,
+          -12,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 3,
+        "cargo": "C",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          0
+        ],
+        "outlet": [
+          37,
+          -11,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 3,
+        "cargo": "C",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          0
+        ],
+        "outlet": [
+          37,
+          -10,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 3,
+        "cargo": "C",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          0
+        ],
+        "outlet": [
+          37,
+          -9,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 3,
+        "cargo": "R",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          1
+        ],
+        "outlet": [
+          37,
+          -12,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 3,
+        "cargo": "R",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          1
+        ],
+        "outlet": [
+          37,
+          -11,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 3,
+        "cargo": "R",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          1
+        ],
+        "outlet": [
+          37,
+          -10,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 3,
+        "cargo": "R",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          1
+        ],
+        "outlet": [
+          37,
+          -9,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 3,
+        "cargo": "S",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          2
+        ],
+        "outlet": [
+          37,
+          -12,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 3,
+        "cargo": "S",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          2
+        ],
+        "outlet": [
+          37,
+          -11,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 3,
+        "cargo": "S",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          2
+        ],
+        "outlet": [
+          37,
+          -10,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 3,
+        "cargo": "S",
+        "wagon": 4,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          2
+        ],
+        "outlet": [
+          37,
+          -9,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 3,
+        "cargo": "W",
+        "wagon": 5,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          8,
+          0
+        ],
+        "outlet": [
+          37,
+          8,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 3,
+        "cargo": "W",
+        "wagon": 5,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          9,
+          0
+        ],
+        "outlet": [
+          37,
+          9,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 3,
+        "cargo": "W",
+        "wagon": 5,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          10,
+          0
+        ],
+        "outlet": [
+          37,
+          10,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 3,
+        "cargo": "W",
+        "wagon": 5,
+        "unit": "item",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          11,
+          0
+        ],
+        "outlet": [
+          37,
+          11,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 3,
+        "cargo": "r",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          0
+        ],
+        "outlet": [
+          37,
+          28,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 1,
+        "quadrant": 3,
+        "cargo": "r",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          0
+        ],
+        "outlet": [
+          37,
+          29,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 2,
+        "quadrant": 3,
+        "cargo": "r",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          0
+        ],
+        "outlet": [
+          37,
+          30,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 3,
+        "quadrant": 3,
+        "cargo": "r",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          0
+        ],
+        "outlet": [
+          37,
+          31,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 0,
+        "quadrant": 3,
+        "cargo": "g",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          1
+        ],
+        "outlet": [
+          37,
+          28,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 1,
+        "quadrant": 3,
+        "cargo": "g",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          1
+        ],
+        "outlet": [
+          37,
+          29,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 2,
+        "quadrant": 3,
+        "cargo": "g",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          1
+        ],
+        "outlet": [
+          37,
+          30,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 3,
+        "quadrant": 3,
+        "cargo": "g",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          1
+        ],
+        "outlet": [
+          37,
+          31,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 0,
+        "quadrant": 3,
+        "cargo": "b",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          2
+        ],
+        "outlet": [
+          37,
+          28,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 1,
+        "quadrant": 3,
+        "cargo": "b",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          2
+        ],
+        "outlet": [
+          37,
+          29,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 2,
+        "quadrant": 3,
+        "cargo": "b",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          2
+        ],
+        "outlet": [
+          37,
+          30,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 3,
+        "quadrant": 3,
+        "cargo": "b",
+        "wagon": 6,
+        "unit": "liter",
+        "island": [
+          -15,
+          -12,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          2
+        ],
+        "outlet": [
+          37,
+          31,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 0,
+        "quadrant": 1,
+        "cargo": "C",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          0
+        ],
+        "outlet": [
+          37,
+          -12,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 1,
+        "cargo": "C",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          0
+        ],
+        "outlet": [
+          37,
+          -11,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 1,
+        "cargo": "C",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          0
+        ],
+        "outlet": [
+          37,
+          -10,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 1,
+        "cargo": "C",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          0
+        ],
+        "outlet": [
+          37,
+          -9,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 1,
+        "cargo": "R",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          1
+        ],
+        "outlet": [
+          37,
+          -12,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 1,
+        "cargo": "R",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          1
+        ],
+        "outlet": [
+          37,
+          -11,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 1,
+        "cargo": "R",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          1
+        ],
+        "outlet": [
+          37,
+          -10,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 1,
+        "cargo": "R",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          1
+        ],
+        "outlet": [
+          37,
+          -9,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 1,
+        "cargo": "S",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          2
+        ],
+        "outlet": [
+          37,
+          -12,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 1,
+        "cargo": "S",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          2
+        ],
+        "outlet": [
+          37,
+          -11,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 1,
+        "cargo": "S",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          2
+        ],
+        "outlet": [
+          37,
+          -10,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 1,
+        "cargo": "S",
+        "wagon": 7,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          2
+        ],
+        "outlet": [
+          37,
+          -9,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 1,
+        "cargo": "W",
+        "wagon": 8,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          8,
+          0
+        ],
+        "outlet": [
+          37,
+          8,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 1,
+        "cargo": "W",
+        "wagon": 8,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          9,
+          0
+        ],
+        "outlet": [
+          37,
+          9,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 1,
+        "cargo": "W",
+        "wagon": 8,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          10,
+          0
+        ],
+        "outlet": [
+          37,
+          10,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 1,
+        "cargo": "W",
+        "wagon": 8,
+        "unit": "item",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          11,
+          0
+        ],
+        "outlet": [
+          37,
+          11,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 1,
+        "cargo": "r",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          0
+        ],
+        "outlet": [
+          37,
+          28,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 1,
+        "quadrant": 1,
+        "cargo": "r",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          0
+        ],
+        "outlet": [
+          37,
+          29,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 2,
+        "quadrant": 1,
+        "cargo": "r",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          0
+        ],
+        "outlet": [
+          37,
+          30,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 3,
+        "quadrant": 1,
+        "cargo": "r",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          0
+        ],
+        "outlet": [
+          37,
+          31,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 0,
+        "quadrant": 1,
+        "cargo": "g",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          1
+        ],
+        "outlet": [
+          37,
+          28,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 1,
+        "quadrant": 1,
+        "cargo": "g",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          1
+        ],
+        "outlet": [
+          37,
+          29,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 2,
+        "quadrant": 1,
+        "cargo": "g",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          1
+        ],
+        "outlet": [
+          37,
+          30,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 3,
+        "quadrant": 1,
+        "cargo": "g",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          1
+        ],
+        "outlet": [
+          37,
+          31,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 0,
+        "quadrant": 1,
+        "cargo": "b",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          2
+        ],
+        "outlet": [
+          37,
+          28,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 1,
+        "quadrant": 1,
+        "cargo": "b",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          2
+        ],
+        "outlet": [
+          37,
+          29,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 2,
+        "quadrant": 1,
+        "cargo": "b",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          2
+        ],
+        "outlet": [
+          37,
+          30,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 3,
+        "quadrant": 1,
+        "cargo": "b",
+        "wagon": 9,
+        "unit": "liter",
+        "island": [
+          -15,
+          -9,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          2
+        ],
+        "outlet": [
+          37,
+          31,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 0,
+        "quadrant": 0,
+        "cargo": "C",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          0
+        ],
+        "outlet": [
+          37,
+          -12,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 0,
+        "cargo": "C",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          0
+        ],
+        "outlet": [
+          37,
+          -11,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 0,
+        "cargo": "C",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          0
+        ],
+        "outlet": [
+          37,
+          -10,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 0,
+        "cargo": "C",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          0
+        ],
+        "outlet": [
+          37,
+          -9,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 0,
+        "cargo": "R",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          1
+        ],
+        "outlet": [
+          37,
+          -12,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 0,
+        "cargo": "R",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          1
+        ],
+        "outlet": [
+          37,
+          -11,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 0,
+        "cargo": "R",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          1
+        ],
+        "outlet": [
+          37,
+          -10,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 0,
+        "cargo": "R",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          1
+        ],
+        "outlet": [
+          37,
+          -9,
+          1
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 0,
+        "cargo": "S",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -12,
+          2
+        ],
+        "outlet": [
+          37,
+          -12,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 0,
+        "cargo": "S",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -11,
+          2
+        ],
+        "outlet": [
+          37,
+          -11,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 0,
+        "cargo": "S",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -10,
+          2
+        ],
+        "outlet": [
+          37,
+          -10,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 0,
+        "cargo": "S",
+        "wagon": 10,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          -9,
+          2
+        ],
+        "outlet": [
+          37,
+          -9,
+          2
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 0,
+        "cargo": "W",
+        "wagon": 11,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          8,
+          0
+        ],
+        "outlet": [
+          37,
+          8,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 1,
+        "quadrant": 0,
+        "cargo": "W",
+        "wagon": 11,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          9,
+          0
+        ],
+        "outlet": [
+          37,
+          9,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 2,
+        "quadrant": 0,
+        "cargo": "W",
+        "wagon": 11,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          10,
+          0
+        ],
+        "outlet": [
+          37,
+          10,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 3,
+        "quadrant": 0,
+        "cargo": "W",
+        "wagon": 11,
+        "unit": "item",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          11,
+          0
+        ],
+        "outlet": [
+          37,
+          11,
+          0
+        ],
+        "max_per_second": "2",
+        "max_per_visit": "120"
+      },
+      {
+        "address": 0,
+        "quadrant": 0,
+        "cargo": "r",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          0
+        ],
+        "outlet": [
+          37,
+          28,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 1,
+        "quadrant": 0,
+        "cargo": "r",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          0
+        ],
+        "outlet": [
+          37,
+          29,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 2,
+        "quadrant": 0,
+        "cargo": "r",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          0
+        ],
+        "outlet": [
+          37,
+          30,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 3,
+        "quadrant": 0,
+        "cargo": "r",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          0
+        ],
+        "outlet": [
+          37,
+          31,
+          0
+        ],
+        "max_per_second": "40",
+        "max_per_visit": "2400"
+      },
+      {
+        "address": 0,
+        "quadrant": 0,
+        "cargo": "g",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          1
+        ],
+        "outlet": [
+          37,
+          28,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 1,
+        "quadrant": 0,
+        "cargo": "g",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          1
+        ],
+        "outlet": [
+          37,
+          29,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 2,
+        "quadrant": 0,
+        "cargo": "g",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          1
+        ],
+        "outlet": [
+          37,
+          30,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 3,
+        "quadrant": 0,
+        "cargo": "g",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          1
+        ],
+        "outlet": [
+          37,
+          31,
+          1
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 0,
+        "quadrant": 0,
+        "cargo": "b",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          28,
+          2
+        ],
+        "outlet": [
+          37,
+          28,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 1,
+        "quadrant": 0,
+        "cargo": "b",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          29,
+          2
+        ],
+        "outlet": [
+          37,
+          29,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 2,
+        "quadrant": 0,
+        "cargo": "b",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          30,
+          2
+        ],
+        "outlet": [
+          37,
+          30,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      },
+      {
+        "address": 3,
+        "quadrant": 0,
+        "cargo": "b",
+        "wagon": 12,
+        "unit": "liter",
+        "island": [
+          -15,
+          -6,
+          0
+        ],
+        "inlet": [
+          -18,
+          31,
+          2
+        ],
+        "outlet": [
+          37,
+          31,
+          2
+        ],
+        "max_per_second": "20",
+        "max_per_visit": "1200"
+      }
+    ],
+    "islands": 34,
+    "platforms": 4,
+    "buildings": 6272
+  },
+  "crystal_segment": {
+    "head": [
+      -3,
+      0,
+      0
+    ],
+    "rail": {
+      "arrival": {
+        "tile": [
+          -3,
+          4,
+          0
+        ],
+        "outside_tile": [
+          -3,
+          5,
+          0
+        ],
+        "rotation": 3
+      },
+      "departure": {
+        "tile": [
+          -4,
+          4,
+          0
+        ],
+        "outside_tile": [
+          -4,
+          5,
+          0
+        ],
+        "rotation": 1
+      }
+    },
+    "wagon": 1,
+    "raw_rows": [
+      28,
+      29,
+      30,
+      31
+    ],
+    "primaries_by_layer": "rgb",
+    "work": [
+      {
+        "address": 0,
+        "board": [
+          3,
+          0,
+          0
+        ],
+        "rotation": 0,
+        "operands": {
+          "north": [
+            -12,
+            -18
+          ],
+          "levels": [
+            0,
+            1
+          ]
+        },
+        "result": [
+          37,
+          30,
+          0
+        ]
+      },
+      {
+        "address": 1,
+        "board": [
+          0,
+          -3,
+          0
+        ],
+        "rotation": 3,
+        "operands": {
+          "west": [
+            -18,
+            31
+          ],
+          "levels": [
+            0,
+            1
+          ]
+        },
+        "result": [
+          30,
+          -18,
+          0
+        ]
+      }
+    ],
+    "dyes": [
+      {
+        "color": "r",
+        "floor": 2,
+        "east": [
+          37,
+          -12
+        ],
+        "north": [
+          -12,
+          -18
+        ]
+      },
+      {
+        "color": "g",
+        "floor": 2,
+        "east": [
+          37,
+          -11
+        ],
+        "north": [
+          -11,
+          -18
+        ]
+      },
+      {
+        "color": "b",
+        "floor": 2,
+        "east": [
+          37,
+          -10
+        ],
+        "north": [
+          -10,
+          -18
+        ]
+      },
+      {
+        "color": "c",
+        "floor": 2,
+        "east": [
+          37,
+          -9
+        ],
+        "north": [
+          -9,
+          -18
+        ]
+      },
+      {
+        "color": "m",
+        "floor": 2,
+        "east": [
+          37,
+          8
+        ],
+        "north": [
+          8,
+          -18
+        ]
+      },
+      {
+        "color": "y",
+        "floor": 2,
+        "east": [
+          37,
+          9
+        ],
+        "north": [
+          9,
+          -18
+        ]
+      },
+      {
+        "color": "w",
+        "floor": 2,
+        "east": [
+          37,
+          10
+        ],
+        "north": [
+          10,
+          -18
+        ]
+      }
+    ],
+    "max_per_dye_liters_per_second": "80",
+    "platforms_saved_at_intake": 1,
+    "islands": 15,
+    "platforms": 3,
+    "buildings": 3911
+  }
+}

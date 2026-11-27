@@ -1,0 +1,73 @@
+{
+  "inputs": {
+    "target": 1600000,
+    "enable": 1701581,
+    "optional_top": 1701575,
+    "column": 1700873
+  },
+  "outputs": {
+    "chosen": 1701584,
+    "exhausted": 1701585,
+    "alternate": 1700871,
+    "height": 1700816,
+    "heights": [
+      1700766,
+      1700767,
+      1700768,
+      1700769
+    ]
+  },
+  "top_adapter": {
+    "raw_heights": [
+      1701570,
+      1701571,
+      1701572,
+      1701573
+    ],
+    "raw_top_item": 1701574,
+    "closure_initial": [
+      1700761,
+      1700762,
+      1700763,
+      1700764
+    ],
+    "closure_top_item": 1700770
+  },
+  "timing": {
+    "orientation_hold_signal_ticks": 448,
+    "read_hold_signal_ticks": 1920,
+    "first_pack_hold_signal_ticks": 4380,
+    "later_pack_hold_signal_ticks": 2004,
+    "restore_hold_signal_ticks": 448,
+    "closure_reset_hold_signal_ticks": 256,
+    "closure_wait_after_both_done_signal_ticks": 2124,
+    "source_reset_hold_signal_ticks": 384,
+    "closure_start_to_sample_signal_ticks": 160,
+    "top_adapter_hold_signal_ticks": 1408
+  },
+  "column_reader_private_height": 1701605,
+  "platforms": 81,
+  "building_entries": 104188,
+  "part_platforms": {
+    "prefix-scan-wiring": 20,
+    "choose-cut": 2,
+    "choose-cut-clock": 9,
+    "orient-cut": 1,
+    "four-column-targets": 1,
+    "read-four-columns": 14,
+    "seed-pair-0": 2,
+    "seed-pair-1": 2,
+    "seed-two-halves": 16,
+    "restore-seed-0": 1,
+    "restore-seed-1": 1,
+    "paired-prefix-scan": 5,
+    "check-column-0": 1,
+    "check-column-1": 1,
+    "check-column-2": 1,
+    "check-column-3": 1,
+    "check-prefix": 1,
+    "optional-top-prefix": 2
+  },
+  "global_receivers": 300,
+  "global_transmitters": 173
+}

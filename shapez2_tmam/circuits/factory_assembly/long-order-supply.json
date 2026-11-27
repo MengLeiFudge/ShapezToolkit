@@ -1,0 +1,1654 @@
+{
+  "belt_items_per_second": "2",
+  "fleet_interval_seconds": "60",
+  "long_orders": {
+    "four-color": {
+      "stages": 40,
+      "levels": [
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "amount_per_product": "7",
+          "amount_per_cycle": "840"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 2,
+          "cargo": "S",
+          "amount_per_product": "2",
+          "amount_per_cycle": "240"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "amount_per_product": "7",
+          "amount_per_cycle": "840"
+        },
+        {
+          "service": "base",
+          "wagon": 5,
+          "layer": 0,
+          "cargo": "W",
+          "amount_per_product": "2",
+          "amount_per_cycle": "240"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "amount_per_product": "7",
+          "amount_per_cycle": "840"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 1,
+          "cargo": "R",
+          "amount_per_product": "2",
+          "amount_per_cycle": "240"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "amount_per_product": "7",
+          "amount_per_cycle": "840"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 1,
+          "cargo": "R",
+          "amount_per_product": "1",
+          "amount_per_cycle": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 2,
+          "cargo": "S",
+          "amount_per_product": "1",
+          "amount_per_cycle": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 11,
+          "layer": 0,
+          "cargo": "W",
+          "amount_per_product": "1",
+          "amount_per_cycle": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "amount_per_product": "80",
+          "amount_per_cycle": "9600"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "r",
+          "amount_per_product": "30",
+          "amount_per_cycle": "3600"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 1,
+          "cargo": "g",
+          "amount_per_product": "30",
+          "amount_per_cycle": "3600"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 2,
+          "cargo": "b",
+          "amount_per_product": "20",
+          "amount_per_cycle": "2400"
+        }
+      ],
+      "ports": [
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 1,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 7,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 8,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 17,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 18,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 24,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 25,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 2,
+          "cargo": "S",
+          "stage": 36,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 2,
+          "cargo": "S",
+          "stage": 38,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 1,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 7,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 8,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 17,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 18,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 24,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 25,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 5,
+          "layer": 0,
+          "cargo": "W",
+          "stage": 36,
+          "row": 8,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 5,
+          "layer": 0,
+          "cargo": "W",
+          "stage": 38,
+          "row": 8,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 1,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 7,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 8,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 17,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 18,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 24,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 25,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 1,
+          "cargo": "R",
+          "stage": 36,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 1,
+          "cargo": "R",
+          "stage": 38,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 0,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 1,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 8,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 18,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 25,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 36,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 38,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 1,
+          "cargo": "R",
+          "stage": 7,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 2,
+          "cargo": "S",
+          "stage": 17,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 11,
+          "layer": 0,
+          "cargo": "W",
+          "stage": 24,
+          "row": 8,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 1,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 8,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 18,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 25,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 3,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 27,
+          "row": 30,
+          "amount_per_second": "20",
+          "buffer_for_interval": "1200"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 1,
+          "cargo": "g",
+          "stage": 20,
+          "row": 31,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 1,
+          "cargo": "g",
+          "stage": 27,
+          "row": 29,
+          "amount_per_second": "20",
+          "buffer_for_interval": "1200"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 2,
+          "cargo": "b",
+          "stage": 10,
+          "row": 31,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        }
+      ]
+    },
+    "four-color-alternate": {
+      "stages": 41,
+      "levels": [
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "amount_per_product": "7",
+          "amount_per_cycle": "840"
+        },
+        {
+          "service": "base",
+          "wagon": 2,
+          "layer": 0,
+          "cargo": "W",
+          "amount_per_product": "2",
+          "amount_per_cycle": "240"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "amount_per_product": "9",
+          "amount_per_cycle": "1080"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "amount_per_product": "7",
+          "amount_per_cycle": "840"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 2,
+          "cargo": "S",
+          "amount_per_product": "2",
+          "amount_per_cycle": "240"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "amount_per_product": "5",
+          "amount_per_cycle": "600"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 1,
+          "cargo": "R",
+          "amount_per_product": "3",
+          "amount_per_cycle": "360"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 2,
+          "cargo": "S",
+          "amount_per_product": "1",
+          "amount_per_cycle": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 11,
+          "layer": 0,
+          "cargo": "W",
+          "amount_per_product": "1",
+          "amount_per_cycle": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "amount_per_product": "80",
+          "amount_per_cycle": "9600"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "r",
+          "amount_per_product": "30",
+          "amount_per_cycle": "3600"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 1,
+          "cargo": "g",
+          "amount_per_product": "30",
+          "amount_per_cycle": "3600"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 2,
+          "cargo": "b",
+          "amount_per_product": "20",
+          "amount_per_cycle": "2400"
+        }
+      ],
+      "ports": [
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 1,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 7,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 8,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 17,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 18,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 24,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 25,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 2,
+          "layer": 0,
+          "cargo": "W",
+          "stage": 36,
+          "row": 8,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 2,
+          "layer": 0,
+          "cargo": "W",
+          "stage": 38,
+          "row": 8,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 1,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 7,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 8,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 17,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 18,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 24,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 25,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 36,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 4,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 38,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 1,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 7,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 8,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 17,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 18,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 24,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 25,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 2,
+          "cargo": "S",
+          "stage": 36,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 7,
+          "layer": 2,
+          "cargo": "S",
+          "stage": 38,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 0,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 1,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 8,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 18,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 0,
+          "cargo": "C",
+          "stage": 25,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 1,
+          "cargo": "R",
+          "stage": 7,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 1,
+          "cargo": "R",
+          "stage": 36,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 1,
+          "cargo": "R",
+          "stage": 38,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 10,
+          "layer": 2,
+          "cargo": "S",
+          "stage": 17,
+          "row": -12,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 11,
+          "layer": 0,
+          "cargo": "W",
+          "stage": 24,
+          "row": 8,
+          "amount_per_second": "2",
+          "buffer_for_interval": "120"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 1,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 8,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 18,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "base",
+          "wagon": 12,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 25,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 3,
+          "row": 28,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 0,
+          "cargo": "r",
+          "stage": 27,
+          "row": 30,
+          "amount_per_second": "20",
+          "buffer_for_interval": "1200"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 1,
+          "cargo": "g",
+          "stage": 20,
+          "row": 31,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 1,
+          "cargo": "g",
+          "stage": 27,
+          "row": 29,
+          "amount_per_second": "20",
+          "buffer_for_interval": "1200"
+        },
+        {
+          "service": "crystal",
+          "wagon": 1,
+          "layer": 2,
+          "cargo": "b",
+          "stage": 10,
+          "row": 31,
+          "amount_per_second": "40",
+          "buffer_for_interval": "2400"
+        }
+      ]
+    }
+  },
+  "interfaces": {
+    "stations": [
+      {
+        "stage": 0,
+        "base_head": [
+          -9,
+          -17
+        ],
+        "base_unload_wagons": [
+          10,
+          11
+        ]
+      },
+      {
+        "stage": 1,
+        "base_head": [
+          9,
+          -17
+        ]
+      },
+      {
+        "stage": 2
+      }
+    ],
+    "load": [
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 1,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 2,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q2",
+        "wagon": 3,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 4,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 5,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q3",
+        "wagon": 6,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 7,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 8,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q1",
+        "wagon": 9,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "C",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 1,
+        "cargo": "R",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 10,
+        "kind": "Shapes",
+        "layer": 2,
+        "cargo": "S",
+        "rows": [
+          -12
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 11,
+        "kind": "Shapes",
+        "layer": 0,
+        "cargo": "W",
+        "rows": [
+          8
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "q0",
+        "wagon": 12,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 0,
+        "cargo": "r",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 1,
+        "cargo": "g",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      },
+      {
+        "station": "crystal",
+        "wagon": 1,
+        "kind": "Fluids",
+        "layer": 2,
+        "cargo": "b",
+        "rows": [
+          28,
+          29,
+          30,
+          31
+        ]
+      }
+    ],
+    "recipe": {
+      "controller_outputs": {
+        "target": 1600000,
+        "length": 1640043,
+        "replay_result": 1640044,
+        "accepted": 1640045,
+        "payload": {
+          "opcode": 1640002,
+          "a": 1640003,
+          "b": 1640004,
+          "destination": 1640005,
+          "base": 1640006,
+          "color": 1640007
+        },
+        "packet_tag": 1640046
+      },
+      "operator_outputs": {
+        "run": 1640030,
+        "clean_confirmed": 1640060,
+        "enable_feed": 1640059
+      },
+      "factory_outputs": {
+        "address": 1640000,
+        "phase": 1640001,
+        "ready": 1640014,
+        "request": 1640011,
+        "ack": 1640013,
+        "loaded": 1640057,
+        "reset": 1640012,
+        "readback": {
+          "operands": 1640008,
+          "materials": 1640009
+        }
+      },
+      "length": {
+        "min": 1,
+        "max": 3
+      },
+      "address_base": 0,
+      "reset_phase": 3
+    },
+    "output": {
+      "platform": [
+        42,
+        0,
+        0
+      ],
+      "east_y": 31,
+      "level": 0
+    }
+  },
+  "sender": {
+    "select": {
+      "channel": 1640047,
+      "orders": {
+        "plain-and-pin": 1
+      }
+    },
+    "write": {
+      "address": 1640000,
+      "phase": 1640001,
+      "ready": 1640014,
+      "request": 1640011,
+      "ack": 1640013,
+      "payload": {
+        "opcode": 1640002,
+        "a": 1640003,
+        "b": 1640004,
+        "destination": 1640005,
+        "base": 1640006,
+        "color": 1640007
+      },
+      "packet_tag": 1640046
+    },
+    "control": {
+      "run": 1640030,
+      "clean_confirmed": 1640060,
+      "enable_feed": 1640059,
+      "loaded": 1640057,
+      "target": 1600000,
+      "length": 1640043,
+      "replay_result": 1640044,
+      "accepted": 1640045
+    }
+  },
+  "sample": {
+    "target": "CuCuCuCu:P-CuCuCu",
+    "instructions": [
+      {
+        "opcode": 14,
+        "a": null,
+        "b": null,
+        "destination": 0,
+        "base": "CuCuCuCu",
+        "color": null
+      },
+      {
+        "opcode": 14,
+        "a": null,
+        "b": null,
+        "destination": 1,
+        "base": "P-CuCuCu",
+        "color": null
+      },
+      {
+        "opcode": 7,
+        "a": 0,
+        "b": 1,
+        "destination": 0,
+        "base": null,
+        "color": null
+      }
+    ],
+    "product_slot": 0
+  },
+  "islands": 134,
+  "buildings": 62835
+}

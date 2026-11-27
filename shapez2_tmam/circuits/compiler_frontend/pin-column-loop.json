@@ -1,0 +1,112 @@
+{
+  "inputs": {
+    "enable": 1701840,
+    "advance": 1701841,
+    "q0": 1701842,
+    "q1": 1701843,
+    "q2": 1701844,
+    "q3": 1701845
+  },
+  "outputs": {
+    "ready": 1701858,
+    "exhausted": 1701859,
+    "columns": [
+      {
+        "slot": 1701865,
+        "next_slot": 1701866,
+        "material_0": 1701867,
+        "material_1": 1701868,
+        "material_2": 1701869,
+        "material_3": 1701870
+      },
+      {
+        "slot": 1701871,
+        "next_slot": 1701872,
+        "material_0": 1701873,
+        "material_1": 1701874,
+        "material_2": 1701875,
+        "material_3": 1701876
+      },
+      {
+        "slot": 1701877,
+        "next_slot": 1701878,
+        "material_0": 1701879,
+        "material_1": 1701880,
+        "material_2": 1701881,
+        "material_3": 1701882
+      },
+      {
+        "slot": 1701883,
+        "next_slot": 1701884,
+        "material_0": 1701885,
+        "material_1": 1701886,
+        "material_2": 1701887,
+        "material_3": 1701888
+      }
+    ]
+  },
+  "column_base": 1701800,
+  "cursor": {
+    "inputs": {
+      "enable": 1701823,
+      "word": 1701800,
+      "start_slot": 1701846
+    },
+    "column": {
+      "slot": 1701801,
+      "valid": 1701818,
+      "material_0": 1701819,
+      "material_1": 1701820,
+      "material_2": 1701821,
+      "material_3": 1701822
+    },
+    "outputs": {
+      "slot": 1701801,
+      "done": 1701824,
+      "valid": 1701825,
+      "material_0": 1701826,
+      "material_1": 1701827,
+      "material_2": 1701828,
+      "material_3": 1701829,
+      "next_slot": 1701839
+    },
+    "cursor_channels": [
+      1701823,
+      1701824,
+      1701825,
+      1701826,
+      1701827,
+      1701828,
+      1701829,
+      1701830,
+      1701831,
+      1701832,
+      1701833,
+      1701834,
+      1701835,
+      1701836,
+      1701837,
+      1701838,
+      1701839
+    ],
+    "reset_signal_ticks": 72,
+    "column_hold_signal_ticks": 6960,
+    "phase_hold_signal_ticks": 6996,
+    "max_search_signal_ticks": 140712,
+    "start_slot_hold_signal_ticks": 24,
+    "platforms": 7,
+    "buildings": 9445
+  },
+  "reserved_channels": [
+    1701840,
+    1701903
+  ],
+  "timing": {
+    "channel_signal_ticks": 12,
+    "reset_signal_ticks": 96,
+    "query_reset_wait_signal_ticks": 744,
+    "transition_wait_signal_ticks": 1908
+  },
+  "platforms": 31,
+  "building_entries": 38777
+}

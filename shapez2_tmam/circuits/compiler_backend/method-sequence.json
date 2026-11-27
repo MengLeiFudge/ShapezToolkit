@@ -1,0 +1,86 @@
+{
+  "inputs": {
+    "enable": 1701695,
+    "h0": 1700766,
+    "h1": 1700767,
+    "h2": 1700768,
+    "h3": 1700769,
+    "alternate": 1700871
+  },
+  "outputs": {
+    "phase": 1701690,
+    "settled": 1701696,
+    "confirmed": 1701697,
+    "kind": 1701691,
+    "column": 1700873,
+    "destination": 1701692,
+    "left": 1701693,
+    "right": 1701694,
+    "next": 1701698,
+    "done": 1701699
+  },
+  "methods": {
+    "1": {
+      "run": 1702052,
+      "done": 1702053,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "2": {
+      "run": 1702054,
+      "done": 1702055,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "3": {
+      "run": 1702056,
+      "done": 1702057,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "4": {
+      "run": 1702058,
+      "done": 1702059,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    },
+    "5": {
+      "run": 1702060,
+      "done": 1702061,
+      "reset_hold_signal_ticks": 256,
+      "start_to_sample_signal_ticks": 160,
+      "reset_timer_signal_ticks": 288,
+      "sample_timer_signal_ticks": 192
+    }
+  },
+  "request_address": 1702070,
+  "ack_address": 1702071,
+  "reserved_channels": [
+    1702070,
+    1702138
+  ],
+  "timing": {
+    "input_hold_signal_ticks": 1536,
+    "update_hold_signal_ticks": 1536,
+    "settle_phase_signal_ticks": 1560,
+    "update_phase_signal_ticks": 1548,
+    "reset_hold_signal_ticks": 72
+  },
+  "platforms": 38,
+  "building_entries": 38793,
+  "pair_job_hold_signal_ticks": {
+    "pair-job": 1024,
+    "pair-job-inputs": 896,
+    "pair-job-cursor": 1216
+  },
+  "global_receivers": 148,
+  "global_transmitters": 84
+}

@@ -1,0 +1,40 @@
+{
+  "inputs": {
+    "enable": 1700930,
+    "closure_done": 1700765,
+    "halves_ready": 1701279
+  },
+  "outputs": {
+    "replay_run": 1701194
+  },
+  "replay_inputs": {
+    "initial_replay": 1701195,
+    "initial_mask": 1701196,
+    "item0": 1701200,
+    "item1": 1701201,
+    "item2": 1701202,
+    "item3": 1701203,
+    "item4": 1701204
+  },
+  "replay_outputs": {
+    "done": 1701197,
+    "result_replay": 1701198,
+    "result_mask": 1701199
+  },
+  "reserved_channels": [
+    1701280,
+    1701291
+  ],
+  "timing": {
+    "channel_signal_ticks": 12,
+    "mask_hold_signal_ticks": 1600,
+    "join_hold_signal_ticks": 768,
+    "replay_reset_hold_signal_ticks": 256,
+    "closure_wait_signal_ticks": 1860,
+    "halves_wait_signal_ticks": 1032,
+    "enable_to_run_low_signal_ticks": 12,
+    "replay_start_to_sample_signal_ticks": 160
+  },
+  "platforms": 8,
+  "building_entries": 7518
+}

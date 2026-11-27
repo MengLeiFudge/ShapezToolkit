@@ -1,0 +1,102 @@
+{
+  "routes": {
+    "s": {
+      "enable": 1705200,
+      "grounded": 1705201,
+      "optional_top": 1705202,
+      "rows": [
+        1705203,
+        1705204,
+        1705205,
+        1705206,
+        1705207
+      ],
+      "done": 1705208,
+      "accepted": 1705209
+    },
+    "pin": {
+      "enable": 1705210,
+      "grounded": 1705211,
+      "optional_top": 1705212,
+      "rows": [
+        1705213,
+        1705214,
+        1705215,
+        1705216,
+        1705217
+      ],
+      "done": 1705218,
+      "accepted": 1705219
+    },
+    "recursive_g": {
+      "enable": 1705220,
+      "grounded": 1705221,
+      "optional_top": 1705222,
+      "rows": [
+        1705223,
+        1705224,
+        1705225,
+        1705226,
+        1705227
+      ],
+      "done": 1705228,
+      "accepted": 1705229
+    }
+  },
+  "outputs": {
+    "fault": 1705230,
+    "pin_reached_rows": [
+      1704425,
+      1704426,
+      1704427,
+      1704428,
+      1704429
+    ]
+  },
+  "scanner": {
+    "inputs": {
+      "enable": 1704410,
+      "grounded": 1704413,
+      "optional_top": 1704414,
+      "rows": [
+        1704420,
+        1704421,
+        1704422,
+        1704423,
+        1704424
+      ]
+    },
+    "outputs": {
+      "done": 1704412,
+      "accepted": 1704416,
+      "reached_rows": [
+        1704425,
+        1704426,
+        1704427,
+        1704428,
+        1704429
+      ]
+    },
+    "timing": {
+      "input_hold_signal_ticks": 7168,
+      "update_hold_signal_ticks": 768,
+      "settle_phase_signal_ticks": 7200,
+      "update_phase_signal_ticks": 780,
+      "reset_hold_signal_ticks": 48
+    }
+  },
+  "reserved_channels": [
+    1705200,
+    1705299
+  ],
+  "includes_scan": true,
+  "timing": {
+    "channel_signal_ticks": 12,
+    "warm_hold_signal_ticks": 120,
+    "all_low_fault_clear_signal_ticks": 24
+  },
+  "switch_platforms": 11,
+  "platforms": 47,
+  "building_entries": 43016,
+  "global_transmitters": 64
+}

@@ -1,0 +1,49 @@
+{
+  "inputs": {
+    "rows_bottom_to_top": [
+      1702289,
+      1702290,
+      1702291,
+      1702292,
+      1702293
+    ],
+    "valid": 1702288,
+    "alternate": 1702340
+  },
+  "outputs": {
+    "q0": 1702341,
+    "q1": 1702342,
+    "q2": 1702343,
+    "q3": 1702344
+  },
+  "cut_order": {
+    "0": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "1": [
+      1,
+      2,
+      3,
+      0
+    ]
+  },
+  "reserved_channels": [
+    1702340,
+    1702341,
+    1702342,
+    1702343,
+    1702344
+  ],
+  "settling": {
+    "max_gate_depth": 17,
+    "hold_signal_ticks": 1216
+  },
+  "platforms": 4,
+  "building_entries": 8115,
+  "global_receivers": 28,
+  "global_transmitters": 4,
+  "internal_global_devices": 0
+}
