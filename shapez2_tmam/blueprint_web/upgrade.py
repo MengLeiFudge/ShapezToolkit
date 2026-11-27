@@ -271,9 +271,9 @@ def _check_catalog(body: dict[str, Any], report: UpgradeReport) -> None:
     if unknown:
         preview = "、".join(unknown[:6]) + ("…" if len(unknown) > 6 else "")
         removed = [name for name in unknown if catalog.resolve(name) == "removed"]
-        detail = f"{len(unknown)} 个 id 在本机 1.2 里不成立：{preview}"
+        detail = f"{len(unknown)} 个 id 在本机可读资源里找不到：{preview}"
         if removed:
-            detail += f"（其中 {len(removed)} 个是 1.2 已移除的定义）"
+            detail += f"（其中 {len(removed)} 个是 1.2 已移除的定义，其余可能藏在压缩 bundle 里）"
         report.add("catalog", "unsupported", detail)
     else:
         report.add("catalog", "skipped", "全部 id 都能在本机 1.2 目录里解析")
