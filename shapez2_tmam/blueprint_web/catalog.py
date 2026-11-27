@@ -55,6 +55,29 @@ LIFT_LAYERS = (1, 2)
 MIRRORED_SUFFIX = "Mirrored"
 FLIPPED_SUFFIX = "_Flipped"
 
+# 这些 id 在 1.2 已经不作为可放置定义存在，字数串残留在资源里也不能当成有效。
+REMOVED_IDS = frozenset(
+    {
+        "Layout_SpaceBeltTunnel_Entrance",
+        "Layout_SpaceBeltTunnel_Exit",
+        "Layout_SpacePipeTunnel_Entrance",
+        "Layout_SpacePipeTunnel_Exit",
+        "Layout_SpaceBeltNode",
+        "Layout_SpacePipeNode",
+        "Layout_RailNode",
+        "Layout_TrainStation",
+        "Layout_Normal_1",
+        "Layout_Normal_2",
+        "Layout_Normal_3_L",
+        "Layout_Normal_3x1",
+        "Layout_Normal_3x2",
+        "Layout_Normal_4_2x2",
+        "Layout_Normal_4_T",
+        "Layout_Normal_5_Cross",
+        "Layout_Normal_9_3x3",
+    }
+)
+
 ASSET_PATTERN = re.compile(rb"[A-Za-z0-9_]*InternalVariant|(?:Layout|Foundation)_[A-Za-z0-9_]*")
 CHUNK_SIZE = 8 << 20
 CHUNK_OVERLAP = 128
@@ -70,6 +93,8 @@ class Catalog:
 
     def resolve(self, name: str) -> str:
         """返回 ``asset``、``generated`` 或 ``unknown``。"""
+        if name in REMOVED_IDS:
+            return "removed"
         if name in self.asset_ids:
             return "asset"
         if name in self.generated_ids:
@@ -80,10 +105,10 @@ class Catalog:
         return "unknown"
 
     def unknown(self, names: list[str]) -> list[str]:
-        """过滤出目录里完全解析不到的 id，保持输入顺序。"""
+        """过滤出在本机目录里不成立的 id，保持输入顺序。"""
         seen: list[str] = []
         for name in names:
-            if name not in seen and self.resolve(name) == "unknown":
+            if name not in seen and self.resolve(name) in ("unknown", "removed"):
                 seen.append(name)
         return seen
 

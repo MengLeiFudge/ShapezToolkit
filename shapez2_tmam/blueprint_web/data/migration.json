@@ -1,77 +1,202 @@
 {
-  "target": {
-    "game_version": "1.2.0-rc3",
-    "document_version": 1138,
-    "format_version": 5,
-    "source": "Game.Core/Game.Core/GameVersion.cs 的枚举最大值；Game.Core.Blueprint.Serialization/BlueprintFormat.cs 的 Version = 5"
+ "target": {
+  "game_version": "1.2.0-rc3",
+  "document_version": 1138,
+  "format_version": 5,
+  "source": "Game.Core/Game.Core/GameVersion.cs 的枚举最大值；Game.Core.Blueprint.Serialization/BlueprintFormat.cs 的 Version = 5"
+ },
+ "accepted_windows": [
+  {
+   "game_version": "0.0.9-rc7",
+   "format_version": 2,
+   "lowest": 1095,
+   "current": 1105
   },
-  "accepted_windows": [
-    {"game_version": "0.0.9-rc7", "format_version": 2, "lowest": 1095, "current": 1105},
-    {"game_version": "0.1.1", "format_version": 3, "lowest": 1105, "current": 1122},
-    {"game_version": "1.0.3-rc3", "format_version": 4, "lowest": 1130, "current": 1137},
-    {"game_version": "1.1.0-rc2", "format_version": 4, "lowest": 1130, "current": 1137},
-    {"game_version": "1.2.0-rc3", "format_version": 5, "lowest": 1126, "current": 1138}
-  ],
-  "island_renames": [
-    {"old": "Layout_Normal_1", "new": "Foundation_1x1", "gate": 1118},
-    {"old": "Layout_Normal_2", "new": "Foundation_1x2", "gate": 1118},
-    {"old": "Layout_Normal_3_L", "new": "Foundation_L3", "gate": 1118},
-    {"old": "Layout_Normal_3x1", "new": "Foundation_1x3", "gate": 1118},
-    {"old": "Layout_Normal_3x2", "new": "Foundation_2x3", "gate": 1118},
-    {"old": "Layout_Normal_4_2x2", "new": "Foundation_2x2", "gate": 1118},
-    {"old": "Layout_Normal_4_T", "new": "Foundation_T4", "gate": 1118},
-    {"old": "Layout_Normal_5_Cross", "new": "Foundation_C5", "gate": 1118},
-    {"old": "Layout_Normal_9_3x3", "new": "Foundation_3x3", "gate": 1118},
-    {"old": "Layout_TrainStation", "new": "Layout_TrainQuickStation", "gate": 1114}
-  ],
-  "island_swaps": [
-    {"first": "Rail_LeftFwdMerger", "second": "Rail_RightFwdMerger", "gate": 1110}
-  ],
-  "island_entry_defaults": {"z_gate": 1106, "z_value": 0},
-  "binary_version_removed_in": 1138,
-  "icon": {
-    "type": "BlueprintIcon, SPZGameAssembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-    "moved_in_format": 5
+  {
+   "game_version": "0.1.1",
+   "format_version": 3,
+   "lowest": 1105,
+   "current": 1122
   },
-  "data_branches": [
-    {"gate": 1098, "name": "RemoveIslandConfigurations", "classes": "BeltReaderSimulationState、LogicGate*SimulationState"},
-    {"gate": 1100, "name": "AddStructuresForStepsAndTicks", "classes": "CrystalGeneratorSimulationState、FastBeltPathLaneState"},
-    {"gate": 1102, "name": "AddSimulatorState", "classes": "GlobalSignalReceiverConfiguration、SimulationStateSerializer"},
-    {"gate": 1103, "name": "ChangeSignalConductorSerialization", "classes": "BeltReaderSimulationState、DisplaySimulationState、LogicGate*"},
-    {"gate": 1106, "name": "Add3DPlatforms", "classes": "GlobalChunkCoordinateSerializer"},
-    {"gate": 1107, "name": "RemoveConfigurationFromSpacePaths", "classes": "SpaceConveyorSimulationState、SpaceMergerSimulationState、PathSplitterSimulationState"},
-    {"gate": 1109, "name": "UnifyBeltLaneLength", "classes": "BeltLaneState、CrystalGeneratorSimulationState、PainterSimulationState"},
-    {"gate": 1110, "name": "IncreaseSpacePathBandwidth", "classes": "MergerSimulationState、PathSplitterSimulationState、PrioritySplitterSimulationState"},
-    {"gate": 1112, "name": "ChangeBeltFilterSerialization", "classes": "BeltFilterSimulationState"},
-    {"gate": 1114, "name": "AddOptionalEntityConfiguration", "classes": "BeltPort*、IslandLayoutSerializer"},
-    {"gate": 1116, "name": "ChangeTrainSerialization", "classes": "ExchangeLayerFilterConfig"},
-    {"gate": 1121, "name": "AddTrainTransferStationsSerialization", "classes": "CargoExchangingOrchestrator"},
-    {"gate": 1127, "name": "ItemProducerCounting", "classes": "ConverterHubProducerSimulationState"},
-    {"gate": 1128, "name": "MemoryFriendlyFastBeltPathLaneSerialization", "classes": "FastBeltPathLaneState"},
-    {"gate": 1131, "name": "ReworkExchangeFilter", "classes": "ExchangeLayerFilterConfig"},
-    {"gate": 1132, "name": "RevertItemProducerCounting", "classes": "ItemProducerSimulationState"},
-    {"gate": 1137, "name": "IncreaseTrainPackageCapacity", "classes": "TrainCargoExchangerState、TrainCargoTransferState"}
-  ],
-  "gaps": [
-    {
-      "id": "legacy_island_config",
-      "gate": 1098,
-      "detail": "1098 及更早的岛配置是带标记字节的旧布局（轨节点、太空带节点、太空管节点），尚未实现"
-    },
-    {
-      "id": "island_config_blob",
-      "gate": 1114,
-      "detail": "1099..1113 的岛配置字节串布局在 1114 之后整体更换，尚未实现"
-    },
-    {
-      "id": "train_producer_offset",
-      "gate": 1117,
-      "detail": "列车生产器原点后移一格需要生产器 id 清单，随建筑目录补齐"
-    },
-    {
-      "id": "config_blob",
-      "gate": 1138,
-      "detail": "建筑与岛状态字节串按 visitor.Version 分叉，旧布局的逐类解码尚未实现"
-    }
-  ]
+  {
+   "game_version": "1.0.3-rc3",
+   "format_version": 4,
+   "lowest": 1130,
+   "current": 1137
+  },
+  {
+   "game_version": "1.1.0-rc2",
+   "format_version": 4,
+   "lowest": 1130,
+   "current": 1137
+  },
+  {
+   "game_version": "1.2.0-rc3",
+   "format_version": 5,
+   "lowest": 1126,
+   "current": 1138
+  }
+ ],
+ "island_renames": [
+  {
+   "old": "Layout_Normal_1",
+   "new": "Foundation_1x1",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_Normal_2",
+   "new": "Foundation_1x2",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_Normal_3_L",
+   "new": "Foundation_L3",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_Normal_3x1",
+   "new": "Foundation_1x3",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_Normal_3x2",
+   "new": "Foundation_2x3",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_Normal_4_2x2",
+   "new": "Foundation_2x2",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_Normal_4_T",
+   "new": "Foundation_T4",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_Normal_5_Cross",
+   "new": "Foundation_C5",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_Normal_9_3x3",
+   "new": "Foundation_3x3",
+   "gate": 1118
+  },
+  {
+   "old": "Layout_TrainStation",
+   "new": "Layout_TrainQuickStation",
+   "gate": 1114
+  }
+ ],
+ "island_swaps": [
+  {
+   "first": "Rail_LeftFwdMerger",
+   "second": "Rail_RightFwdMerger",
+   "gate": 1110
+  }
+ ],
+ "island_entry_defaults": {
+  "z_gate": 1106,
+  "z_value": 0
+ },
+ "binary_version_removed_in": 1138,
+ "icon": {
+  "type": "BlueprintIcon, SPZGameAssembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+  "moved_in_format": 5
+ },
+ "data_branches": [
+  {
+   "gate": 1098,
+   "name": "RemoveIslandConfigurations",
+   "classes": "BeltReaderSimulationState、LogicGate*SimulationState"
+  },
+  {
+   "gate": 1100,
+   "name": "AddStructuresForStepsAndTicks",
+   "classes": "CrystalGeneratorSimulationState、FastBeltPathLaneState"
+  },
+  {
+   "gate": 1102,
+   "name": "AddSimulatorState",
+   "classes": "GlobalSignalReceiverConfiguration、SimulationStateSerializer"
+  },
+  {
+   "gate": 1103,
+   "name": "ChangeSignalConductorSerialization",
+   "classes": "BeltReaderSimulationState、DisplaySimulationState、LogicGate*"
+  },
+  {
+   "gate": 1106,
+   "name": "Add3DPlatforms",
+   "classes": "GlobalChunkCoordinateSerializer"
+  },
+  {
+   "gate": 1107,
+   "name": "RemoveConfigurationFromSpacePaths",
+   "classes": "SpaceConveyorSimulationState、SpaceMergerSimulationState、PathSplitterSimulationState"
+  },
+  {
+   "gate": 1109,
+   "name": "UnifyBeltLaneLength",
+   "classes": "BeltLaneState、CrystalGeneratorSimulationState、PainterSimulationState"
+  },
+  {
+   "gate": 1110,
+   "name": "IncreaseSpacePathBandwidth",
+   "classes": "MergerSimulationState、PathSplitterSimulationState、PrioritySplitterSimulationState"
+  },
+  {
+   "gate": 1112,
+   "name": "ChangeBeltFilterSerialization",
+   "classes": "BeltFilterSimulationState"
+  },
+  {
+   "gate": 1114,
+   "name": "AddOptionalEntityConfiguration",
+   "classes": "BeltPort*、IslandLayoutSerializer"
+  },
+  {
+   "gate": 1116,
+   "name": "ChangeTrainSerialization",
+   "classes": "ExchangeLayerFilterConfig"
+  },
+  {
+   "gate": 1121,
+   "name": "AddTrainTransferStationsSerialization",
+   "classes": "CargoExchangingOrchestrator"
+  },
+  {
+   "gate": 1127,
+   "name": "ItemProducerCounting",
+   "classes": "ConverterHubProducerSimulationState"
+  },
+  {
+   "gate": 1128,
+   "name": "MemoryFriendlyFastBeltPathLaneSerialization",
+   "classes": "FastBeltPathLaneState"
+  },
+  {
+   "gate": 1131,
+   "name": "ReworkExchangeFilter",
+   "classes": "ExchangeLayerFilterConfig"
+  },
+  {
+   "gate": 1132,
+   "name": "RevertItemProducerCounting",
+   "classes": "ItemProducerSimulationState"
+  },
+  {
+   "gate": 1137,
+   "name": "IncreaseTrainPackageCapacity",
+   "classes": "TrainCargoExchangerState、TrainCargoTransferState"
+  }
+ ],
+ "gaps": [
+  {
+   "id": "legacy_island_config",
+   "gate": 1098,
+   "detail": "1098 及更早的岛配置字节串没有公开布局，只按节点网络整类替换，其余保持原样"
+  }
+ ]
 }

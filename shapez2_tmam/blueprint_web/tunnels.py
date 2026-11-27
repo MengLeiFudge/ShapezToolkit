@@ -26,9 +26,6 @@ TUNNEL_SUFFIXES = {
 }
 TUNNEL_IDS = frozenset(TUNNEL_SUFFIXES)
 
-# 0.0.9 的太空带是自由连线的节点网，1.2 换成按区块相邻的 SpaceBelt_* 岛。
-SPACE_NODE_IDS = frozenset({"Layout_SpaceBeltNode", "Layout_SpacePipeNode"})
-
 # ChunkDirection：东 0、南 1、西 2、北 3；GridRotation 顺时针同号。
 DIRECTION_VECTOR = {0: (1, 0), 1: (0, 1), 2: (-1, 0), 3: (0, -1)}
 DIRECTION_AFFIX = {0: "Forward", 1: "Right", 2: "Backward", 3: "Left"}
@@ -164,8 +161,3 @@ def _route(
     )
     occupied.extend([(exit_entry["X"], exit_entry["Y"], 1), (exit_entry["X"], exit_entry["Y"], 0)])
     return {"entries": entries, "occupied": occupied}
-
-
-def find_space_nodes(entries: list[dict[str, Any]]) -> list[tuple[Any, Any]]:
-    """列出旧版太空节点网的节点坐标。"""
-    return [(entry.get("X"), entry.get("Y")) for entry in entries if entry.get("T") in SPACE_NODE_IDS]

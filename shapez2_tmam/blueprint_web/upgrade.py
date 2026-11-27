@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from . import catalog as catalog_module
-from . import tunnels
+from . import legacy, tunnels
 from .codec import Blueprint, BlueprintError, build_custom_data, read_custom_data
 
 DATA_PATH = Path(__file__).resolve().parent / "data" / "migration.json"
@@ -78,10 +78,15 @@ def upgrade(source: Blueprint) -> tuple[Blueprint, UpgradeReport]:
     custom_data = _migrate_icon(source, body, counters)
     _migrate_entries(body, source.version, counters, renamed)
     _migrate_space_tunnels(body, source.version, report)
+    notes: list[str] = []
+    problems: list[str] = []
+    _migrate_legacy(body, source.version, counters, notes, problems)
     _stamp_versions(body)
     document["V"] = TARGET_VERSION
     _report_steps(source, custom_data, counters, renamed, report)
-    _report_gaps(body, source.version, counters, report, source.kind == "Island")
+    _report_legacy(counters, problems, report)
+    _report_notes(notes, report)
+    _report_gaps(body, source.version, report, source.kind == "Island")
     _check_catalog(body, report)
     return Blueprint(document=document, format_version=TARGET_FORMAT, custom_data=custom_data), report
 
@@ -145,20 +150,12 @@ def _migrate_space_tunnels(body: dict[str, Any], version: int, report: UpgradeRe
         node["Entries"] = replaced
         converted += len(replacements)
         problems.extend(issues)
-    nodes: list[tuple[Any, Any]] = []
-    for node in _bodies(body):
-        nodes.extend(tunnels.find_space_nodes(_entries(node)))
     if converted:
         report.add("space_tunnel", "applied", f"{converted} 处地下隧道改成升降段与 z=1 太空段")
     if problems:
         report.add("space_tunnel", "unsupported", "；".join(problems[:4]))
-    if nodes:
-        preview = "、".join(f"({x}, {y})" for x, y in nodes[:4])
-        report.add(
-            "space_nodes", "unsupported", f"{len(nodes)} 个 0.0.9 太空节点（{preview}）要按连线重建为 SpaceBelt_* 岛"
-        )
-    if not converted and not problems and not nodes:
-        report.add("space_tunnel", "skipped", "没有旧版地下隧道与太空节点")
+    if not converted and not problems:
+        report.add("space_tunnel", "skipped", "没有旧版地下隧道")
 
 
 def _stamp_versions(body: dict[str, Any]) -> None:
@@ -203,37 +200,81 @@ def _report_steps(
     report.add("version", "applied", f"V {source.version} → {TARGET_VERSION}")
 
 
-def _report_gaps(
-    body: dict[str, Any], version: int, counters: Counter[str], report: UpgradeReport, is_island: bool
+def _migrate_legacy(
+    body: dict[str, Any], version: int, counters: Counter[str], notes: list[str], problems: list[str]
 ) -> None:
+    """节点网换成网格岛、生产器坐标补偏移、清空旧岛状态、改写两处分叉配置。"""
+    for node in _bodies(body):
+        entries = _entries(node)
+        if not entries:
+            continue
+        replaced, node_notes, node_problems = legacy.migrate_nodes(entries, counters)
+        if replaced is not entries:
+            node["Entries"] = replaced
+        notes.extend(node_notes)
+        problems.extend(node_problems)
+        legacy.shift_producers(_entries(node), version, counters)
+        legacy.drop_island_state(_entries(node), version, counters)
+        legacy.rewrite_configs(_entries(node), version, counters, notes)
+
+
+def _report_legacy(counters: Counter[str], problems: list[str], report: UpgradeReport) -> None:
+    """把 legacy 迁移的结果写成报告步骤。"""
+    if counters["node"]:
+        detail = f"{counters['node']} 个旧节点换成网格岛"
+        if counters["node_kept"]:
+            detail += f"，{counters['node_kept']} 个连接面数对不上仍保留原样"
+        report.add("node_network", "applied", detail)
+    else:
+        report.add("node_network", "skipped", "没有旧版节点网")
+    if problems:
+        report.add("node_network", "unsupported", "；".join(problems[:4]))
+    if counters["producer"]:
+        report.add("producer_offset", "applied", f"{counters['producer']} 个列车生产器坐标后移一格")
+    else:
+        report.add("producer_offset", "skipped", "没有需要补偏移的生产器")
+    if counters["state"]:
+        report.add("island_state", "applied", f"清空 {counters['state']} 个旧岛状态，交给游戏重建")
+    else:
+        report.add("island_state", "skipped", "没有旧岛状态")
+    if counters["signal"]:
+        report.add("signal_channel", "applied", f"{counters['signal']} 个受控信号接收器的通道换成 uid")
+    else:
+        report.add("signal_channel", "skipped", "没有旧式通道配置")
+    if counters["exchange"]:
+        report.add("exchange_filter", "applied", f"{counters['exchange']} 个交换层筛选改成位掩码")
+    else:
+        report.add("exchange_filter", "skipped", "没有旧式交换层筛选")
+
+
+def _report_notes(notes: list[str], report: UpgradeReport) -> None:
+    """把需要人工确认的推测写进报告。"""
+    if notes:
+        preview = "；".join(notes[:3])
+        report.add("needs_review", "unsupported", f"{len(notes)} 处按推测改写，需实机确认：{preview}")
+
+
+def _report_gaps(body: dict[str, Any], version: int, report: UpgradeReport, is_island: bool) -> None:
     """把尚未实现的迁移逐条标成 unsupported，不静默吞掉。"""
     gaps = {str(gap["id"]): gap for gap in RULES["gaps"]}
     island_entries = _entries(body) if is_island else []
-    triggers = {
-        "legacy_island_config": version <= int(gaps["legacy_island_config"]["gate"])
-        and any("C" in entry for entry in island_entries),
-        "island_config_blob": version < int(gaps["island_config_blob"]["gate"])
-        and any(entry.get("S") for entry in island_entries),
-        "train_producer_offset": version < int(gaps["train_producer_offset"]["gate"]) and bool(island_entries),
-        "config_blob": version < TARGET_VERSION and counters["configs"] > 0,
-    }
-    for name, triggered in triggers.items():
-        if triggered:
-            report.add(name, "unsupported", str(gaps[name]["detail"]))
-    pending = [
-        f"{branch['gate']} {branch['name']}" for branch in RULES["data_branches"] if version < int(branch["gate"])
-    ]
-    if pending and counters["configs"]:
-        report.add("data_branches", "unsupported", "待实现的字节串分叉：" + "、".join(pending))
+    legacy_gap = gaps.get("legacy_island_config")
+    if legacy_gap and version <= int(legacy_gap["gate"]) and any("C" in entry for entry in island_entries):
+        report.add("legacy_island_config", "unsupported", str(legacy_gap["detail"]))
 
 
 def _check_catalog(body: dict[str, Any], report: UpgradeReport) -> None:
     """用本机 1.2 的 id 目录核对条目，解析不到的 id 单列出来。"""
     names = [name for name in _all_names(body) if isinstance(name, str)]
-    unknown = _catalog().unknown(names)
+    catalog = _catalog()
+    unknown = catalog.unknown(names)
     if unknown:
         preview = "、".join(unknown[:6]) + ("…" if len(unknown) > 6 else "")
-        report.add("catalog", "unsupported", f"{len(unknown)} 个 id 不在本机 1.2 目录里：{preview}")
+        removed = [name for name in unknown if catalog.resolve(name) == "removed"]
+        detail = f"{len(unknown)} 个 id 在本机 1.2 里不成立：{preview}"
+        if removed:
+            detail += f"（其中 {len(removed)} 个是 1.2 已移除的定义）"
+        report.add("catalog", "unsupported", detail)
     else:
         report.add("catalog", "skipped", "全部 id 都能在本机 1.2 目录里解析")
 
