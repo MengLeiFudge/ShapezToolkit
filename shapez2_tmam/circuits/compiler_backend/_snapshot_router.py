@@ -48,7 +48,7 @@ def _free_pair(endpoints, sender, receiver, turn):
     return not any((x + i * dx, y + i * dy, z, turn) in endpoints[_RECEIVER] for i in _SHORT_RANGE)
 
 
-def _path(board, net, start, targets, facing, estimate, flywire, pads, history):
+def _path(board, net, start, targets, facing, estimate, flywire, pads, history, preferred_level):
     if start in targets:
         return True
     sequence = count()
@@ -78,6 +78,7 @@ def _path(board, net, start, targets, facing, estimate, flywire, pads, history):
                 return None
             expansions -= 1
         x, y, level = point
+        planar_cost = 1 if preferred_level in (None, level) else 5
         for step in range(4):
             direction = (facing + step) % 4
             dx, dy = DIRECTIONS[direction]
@@ -87,7 +88,7 @@ def _path(board, net, start, targets, facing, estimate, flywire, pads, history):
                 wires = traces.get(site, {})
                 if not wires or net in wires:
                     if len(wires) <= 1:
-                        reach(site, abs(site[0] - x) + abs(site[1] - y), direction)
+                        reach(site, planar_cost * (abs(site[0] - x) + abs(site[1] - y)), direction)
                     break
                 if (site in pads or len(wires) != 1
                         or next(iter(wires.values())) != {(direction + 1) % 4, (direction + 3) % 4}):
@@ -109,7 +110,7 @@ def _path(board, net, start, targets, facing, estimate, flywire, pads, history):
                     if not any(p in board.occupied or traces.get(p, {}).keys() - {net} for p in crossed):
                         continue
                     if _free_pair(endpoints, sender, receiver, turn):
-                        reach(site, 4, direction, (sender, receiver, turn))
+                        reach(site, 4 * planar_cost, direction, (sender, receiver, turn))
             for other in sorted((z for z in range(3) if z != level), key=lambda z: abs(z - level)):
                 lo, hi = sorted((level, other))
                 if any((a, b, z) in board.occupied or traces.get((a, b, z)) for z in range(lo, hi + 1)):
@@ -205,13 +206,14 @@ def _straight_join(board, net, start, tree):
     return False
 
 
-def _join(board, net, site, tree, *, direct=False, flywire=False, protect_pads=False, history=None):
+def _join(board, net, site, tree, *, direct=False, flywire=False, protect_pads=False, history=None, preferred_level=None):
     pads = getattr(board, "pad_sites", None) if protect_pads else set()
     if pads is None:
         pads = set().union(*board.terminals.values())
     if history is None:
         history = {}
-    if direct and not history and hasattr(board, "short_sites") and _straight_join(board, net, site, tree):
+    if (direct and not history and preferred_level in (None, site[2]) and hasattr(board, 'short_sites')
+            and _straight_join(board, net, site, tree)):
         return True
     estimate: Callable[[tuple[int, int, int]], int] | None = None
     if direct:
@@ -230,7 +232,7 @@ def _join(board, net, site, tree, *, direct=False, flywire=False, protect_pads=F
         estimate = distance_to_box
 
     for direction in range(4):
-        result = _path(board, net, site, tree, direction, estimate, flywire, pads, history)
+        result = _path(board, net, site, tree, direction, estimate, flywire, pads, history, preferred_level)
         # 换方向只改变同代价的选路顺序，搜索穷尽后无需重试。
         if result is None:
             return False

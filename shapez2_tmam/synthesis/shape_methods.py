@@ -104,18 +104,15 @@ def read_labeled_corner_q3(row: Shape | None) -> Shape | None:
     return _label_single_row(rotate_cw(row))
 
 
-def select_prefix_cell(cell: Shape | None, row_height: int, prefix_height: int) -> Shape | None:
-    """选择已经解码的一格原料，层号从 1 起算。"""
-    if (row_height >= 1) & (row_height <= prefix_height):
-        return cell
-    return None
-
-
 def read_prefix_corner(row: Shape | None, row_height: int, prefix_height: int) -> Shape | None:
     """保留前缀内的一格原料，层高从 1 起算。"""
     if (row_height < 1) | (row_height > prefix_height):
         return None
     return read_labeled_corner(row)
+
+
+def target_present(target: Shape | None) -> bool:
+    return target is not None
 
 
 def target_height(target: Shape | None) -> int:

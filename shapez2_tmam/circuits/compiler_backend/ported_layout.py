@@ -23,6 +23,9 @@ from ._snapshot_router import _join
 
 _RX = "WireTransmitterReceiver"
 _TX = "WireTransmitterSender"
+_GLOBAL_RX = 'ControlledSignalReceiver'
+_GLOBAL_TX = 'ControlledSignalTransmitter'
+_RADIOS = {_GLOBAL_RX, _GLOBAL_TX}
 _FOUNDATIONS = (
     "Foundation_1x1",
     "Foundation_1x2",
@@ -67,6 +70,7 @@ class _Unit:
 
 class _Netlist:
     feedback_units: tuple[_Unit, ...] | None = None
+    feedback_nets: frozenset[int] = frozenset()
 
     def __init__(self, programs: Mapping[str, Program]):
         if not programs:
@@ -95,13 +99,14 @@ class _Netlist:
                    {name: method.name for name, method in methods.items()})
 
     @classmethod
-    def from_circuit(cls, circuit, inputs, outputs, *, feedback=None):
+    def from_circuit(cls, circuit, inputs, outputs, *, feedback=None, transmitters=None):
         model = cls.__new__(cls)
-        model._load(circuit, inputs, outputs, dict.fromkeys(outputs, '原生网表'))
+        model._load(circuit, inputs, outputs, dict.fromkeys(outputs, '原生网表'), transmitters)
         if feedback:
             # 开环网表决定试摆顺序，最终走线和验线共用闭环网。
             model.lane_nets = tuple(net for name, net in model.outputs.items() if name not in feedback.values())
             model.feedback_units = model.units()
+            model.feedback_nets = frozenset(model.outputs[name] for name in feedback.values())
             for input_, output in feedback.items():
                 old = model.inputs.pop(input_)
                 new = model.outputs.pop(output)
@@ -111,9 +116,13 @@ class _Netlist:
                 model.live.add(new)
         return model
 
-    def _load(self, circuit, inputs, outputs, methods):
+    def _load(self, circuit, inputs, outputs, methods, transmitters=None):
         names = tuple(outputs)
-        outputs = dict(enumerate(outputs.values()))
+        channels = tuple(transmitters or ())
+        signals = () if transmitters is None else tuple(transmitters.values())
+        if any(type(channel) is not int or not 1 <= channel < 1 << 24 for channel in channels):
+            raise ValueError('发射器频道需要为 1 至 2^24−1 的整数')
+        outputs = dict(enumerate((*outputs.values(), *signals)))
         # 输入占位与普通常量即使值相同也必须成不同的网。
         circuit, refs = compact(circuit, outputs, distinct=tuple(inputs.values()))
         simplify_null_guards(circuit)
@@ -125,6 +134,9 @@ class _Netlist:
             for node, gate in enumerate(circuit.gates)
             if node in circuit.retained_nodes and node not in {ref.node for ref in inputs.values()}
         }
+        for offset, channel in enumerate(channels, len(names)):
+            node = len(circuit.gates) + offset
+            self.gates[node] = Gate(_GLOBAL_TX, (Literal(channel), refs[offset]), None)
         self.inputs = {name: self.nets[ref] for name, ref in inputs.items()}
         self.outputs = {name: self.nets[refs[i]] for i, name in enumerate(names)}
         self.writers = defaultdict(set)
@@ -409,12 +421,21 @@ def _input_spine(board, net, entry, exits):
     board.wire((1, y, z), net, 2)
 
 
+def _open_notches(ground, interior):
+    for x, y in sorted(ground - interior):
+        for side, (dx, dy) in zip(_SIDES, DIRECTIONS, strict=True):
+            if (x - dx, y - dy) in interior:
+                for level in range(3):
+                    yield Notch(x, y, level, side)
+
+
 def _input_slots(ground, interior, x, count, used):
-    rows = sorted(y for a, y in ground - interior if a == x and (a + 1, y) in interior)
-    choices = (Notch(x, y, z, "W") for z in range(3) for y in rows)
-    slots = [port for port in choices if port not in used]
+    clear = [port for port in _open_notches(ground, interior) if port not in used]
+    slots = sorted((p for p in clear if p.side == 'W' and p.x == x), key=lambda p: (p.level, p.y))
+    if count > len(clear):
+        raise ValueError(f'只剩 {len(clear)} 个朝向空地的输入凹口')
     if count > len(slots):
-        raise ValueError(f"西侧只剩 {len(slots)} 个可用凹口")
+        return tuple((slots + sorted((p for p in clear if p not in slots), key=lambda p: (p.level, p.x, p.y)))[:count])
     first_layer = [p for p in slots if p.level == 0]
     if count <= len(first_layer):
         return tuple(first_layer[(2 * i + 1) * len(first_layer) // (2 * count)] for i in range(count))
@@ -427,7 +448,12 @@ def _proposal(board, model, unit, x, y, z, turn):
     chain = unit.nodes
     body = {(x + unit.offset(i), y, z) for i in range(len(chain))}
     for i, node in enumerate(chain):
-        if model.gates[node].kind == "VirtualHalvesSwapper":
+        kind = model.gates[node].kind
+        if kind in _RADIOS:
+            if z != 0:
+                return None
+            body.update((x + dx, y + dy, level) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for level in range(3))
+        elif kind == 'VirtualHalvesSwapper':
             dx, dy = _rotate(0, -1, turn)
             body.add((x + unit.offset(i) + dx, y + dy, z))
     if any(not board.on_ground(a, b) or p in board.occupied or board.traces.get(p) for p in body for a, b, _ in (p,)):
@@ -506,7 +532,7 @@ def _reroute(board, model, failed):
             tree = {pins[0]}
             unique = len(model.writers[net]) + int(net in model.inputs.values()) == 1
             for site in pins[1:]:
-                flywire = unique and not terminals[net][pins[0]] and terminals[net][site]
+                flywire = unique and net not in model.feedback_nets and not terminals[net][pins[0]] and terminals[net][site]
                 if not _join(trial, net, site, tree, direct=True, flywire=flywire,
                              protect_pads=True, history=history):
                     break
@@ -570,7 +596,8 @@ def _attach(board, model, unit, site, plan, driven, *, reroute=False, rebuild=Fa
     body, pads, literals = plan
     for i, node in enumerate(unit.nodes):
         gate = model.gates[node]
-        trial.place(gate.kind, x + unit.offset(i), y, z, turn, gate.config)
+        radio = gate.kind in _RADIOS
+        trial.place(gate.kind, x + unit.offset(i), y, z, turn, gate.config, radius=int(radio), height=3 if radio else 1)
     trial.occupied.update(body)
     for p, (config, facing) in literals.items():
         a, b, level = p
@@ -588,7 +615,8 @@ def _attach(board, model, unit, site, plan, driven, *, reroute=False, rebuild=Fa
     for p, (net, _, sink) in sorted(pads.items(), key=lambda item: (not item[1][2], len(trees[item[1][0]]))):
         tree = trees[net]
         unique = len(model.writers[net]) + int(net in model.inputs.values()) == 1
-        if tree and not _join(trial, net, p, tree, direct=True, flywire=sink and unique and net in driven,
+        flywire = sink and unique and net in driven and net not in model.feedback_nets
+        if tree and not _join(trial, net, p, tree, direct=True, flywire=flywire,
                               protect_pads=True):
             return _reroute(trial, model, net) if reroute else None
         trees[net] = tree | {p}
@@ -694,6 +722,22 @@ def _put_group(board, model, group, ideal, driven, *, rebuild=False):
     raise _PlacementError(f"逻辑器件 {unit.nodes} 在列 {unit.column} 无法摆放并接通，有 {len(candidates)} 个候选")
 
 
+def _local_sources(wiring, index, port):
+    todo = list(wiring._direct_sources(index, port))
+    visited, drivers = set(), set()
+    while todo:
+        source = todo.pop()
+        if source in visited:
+            continue
+        visited.add(source)
+        owner, _ = source
+        if owner in wiring.short_ports:
+            todo.extend(wiring._direct_sources(wiring.short_ports[owner], 0))
+        else:
+            drivers.add(source)
+    return drivers
+
+
 def _verify(island, model, coordinates, inputs, outputs):
     wiring = Wiring(island)
     input_indices = {name: wiring.lookup[0, p.x, p.y, p.level] for name, p in inputs.items()}
@@ -711,25 +755,10 @@ def _verify(island, model, coordinates, inputs, outputs):
         for port in range(len(PORTS[gate.kind][0])):
             drivers[model.nets[Ref(node, port)]].add((positions[node], port))
 
-    def sources(index, port):
-        todo = list(wiring._direct_sources(index, port))
-        visited, actual = set(), set()
-        while todo:
-            source = todo.pop()
-            if source in visited:
-                continue
-            visited.add(source)
-            idx, _ = source
-            if idx in wiring.short_ports:
-                todo.extend(wiring._direct_sources(wiring.short_ports[idx], 0))
-            else:
-                actual.add(source)
-        return actual
-
     for node, gate in model.gates.items():
         for port, arg in enumerate(gate.inputs):
             index = positions[node]
-            actual = sources(index, port)
+            actual = _local_sources(wiring, index, port)
             if isinstance(arg, Ref):
                 matches = actual == drivers[model.nets[arg]]
             else:
@@ -741,7 +770,7 @@ def _verify(island, model, coordinates, inputs, outputs):
                 expected = drivers[model.nets[arg]] if isinstance(arg, Ref) else arg.value
                 raise ValueError(f"门 {node} {wiring.sites[index]}/{port} 的驱动 {actual} 与网表 {expected} 不一致")
     for name, index in output_indices.items():
-        if sources(index, 0) != drivers[model.outputs[name]]:
+        if _local_sources(wiring, index, 0) != drivers[model.outputs[name]]:
             raise ValueError(f"输出 {name} 的驱动与网表不一致")
     return wiring
 
@@ -765,10 +794,10 @@ def _crossings(board, wiring):
     return crossings
 
 
-def _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports, *, front=2):
+def _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports, *, front=2, blocked=()):
     board = _RoutingBoard(foundation=foundation)
     parallel = len(model.lane_nets) > len(model.outputs)
-    if parallel or len(input_ports) + len(output_ports) >= 9:
+    if parallel or len(input_ports) + len(output_ports) >= 9 or any(g.kind in _RADIOS for g in model.gates.values()):
         board.wide = True
         board.route_budget = 220
     ground = platform_ground(foundation, rotation)
@@ -777,7 +806,7 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
     top = min(y for _, y in board.ground)
     board.origin_x, board.origin_y = left + 1, top
     dots = sorted(y for x, y in ground - board.ground if x == right and (x - 1, y) in board.ground)
-    used = set(output_ports.values()) | set(input_ports.values())
+    used = set(output_ports.values()) | set(input_ports.values()) | set(blocked)
     outputs = dict(output_ports)
     output_lanes = (lanes[-1],) if len(model.outputs) == 1 else lanes[:len(model.outputs)]
     for name, (y, z) in zip(model.outputs, output_lanes, strict=True):
@@ -786,7 +815,9 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
         free = (Notch(right, r, level, "E") for r in dots for level in range(3))
         choices = [port for port in free if port not in used]
         if not choices:
-            raise ValueError("东侧没有可用输出凹口")
+            choices = [p for p in _open_notches(ground, board.ground) if p not in used]
+        if not choices:
+            raise ValueError('没有朝向空地的输出凹口')
         port = min(choices, key=lambda p: (abs(p.y - top - y) + 4 * abs(z - p.level), abs(z - p.level), p.y))
         outputs[name] = port
         used.add(port)
@@ -807,7 +838,9 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
             raise ValueError(f"无法连接共用信号的输出端口 {name}")
         edge_pads[net].add(pad)
 
-    spine = len(inputs) == 1 and len(outputs) > 1 and not (input_ports or output_ports) and foundation != "Foundation_L3"
+    single_west = len(inputs) == 1 and next(iter(inputs.values())).side == 'W'
+    spine = (single_west and len(outputs) > 1 and not output_ports and foundation != 'Foundation_L3'
+             and (not input_ports or len(outputs) >= 8))
     if spine:
         (net,) = model.inputs.values()
         _input_spine(board, net, next(iter(inputs.values())), tuple(outputs.values()))
@@ -891,7 +924,7 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
         "blocked_pad_ripups": board.route_stats['blocked_pad_ripups'],
         "logic_gates": len(model.gates),
         "building_entries": len(wiring.entries),
-        "global_radios": 0,
+        'global_radios': sum(g.kind in _RADIOS for g in model.gates.values()),
         "local_flywires": len(wiring.short_ports),
         "flywire_crossings": _crossings(board, wiring),
         "inputs": {name: {"X": p.x, "Y": p.y, "L": p.level, "R": p.rotation(True)} for name, p in inputs.items()},
@@ -904,8 +937,12 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
 
 
 def _lane_options(height, count):
-    for step in ((8, 6, 5) if height < 22 else (6, 8, 5)):
-        for per_layer in (count, (count + 1) // 2, (count + 2) // 3):
+    steps = (8, 6, 5) if height < 22 else (6, 8, 5)
+    if count >= 9:
+        steps += (3, 2)
+    rows = (count, (count + 1) // 2, (count + 2) // 3)
+    for step in steps:
+        for per_layer in (rows[::-1] if count >= 9 else rows):
             used = 4 + (per_layer - 1) * step
             if used <= height:
                 start = max(2, (min(height, 24) - used) // 2 + 2)
@@ -924,7 +961,7 @@ def build(
                           start=start)
 
 
-def _build_netlist(model, *, platform, input_ports, output_ports, start=None):
+def _build_netlist(model, *, platform, input_ports, output_ports, start=None, blocked=()):
     if start is None:
         start = perf_counter()
     units = model.feedback_units
@@ -981,7 +1018,7 @@ def _build_netlist(model, *, platform, input_ports, output_ports, start=None):
             for stride in ((2, 1, 3) if found == 0 else (2,)):
                 try:
                     bp, report = _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports,
-                                         front=front)
+                                         front=front, blocked=blocked)
                 except ValueError as error:
                     errors.append(f"{foundation}/{rotation}/{stride} {error}")
                     continue

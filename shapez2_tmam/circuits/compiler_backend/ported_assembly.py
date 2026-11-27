@@ -1,5 +1,7 @@
 """在单一岛层装配组合模块，并从原生接线回放公开端口。"""
 
+from __future__ import annotations
+
 from collections import Counter, defaultdict
 from base64 import b64decode
 from copy import deepcopy
@@ -13,7 +15,7 @@ from ...mari.signals import Signal, decode_constant, merge, operate
 from ..compiler_contract import Program, ValueType
 from ..foundations import TILE_SIZE, foundation_origin, foundation_tiles, platform_ground, platform_interior, rotate_cell
 from ._snapshot_router import _join
-from .ported_layout import Notch, _Netlist, _RoutingBoard, _build_netlist, _edge, build
+from .ported_layout import Notch, _Netlist, _RoutingBoard, _build_netlist, _crossings, _edge, _local_sources
 
 
 @dataclass(frozen=True)
@@ -58,6 +60,41 @@ def _turn(port, rotation):
     return Notch(x, y, port.level, side)
 
 
+def _outside(offset, port):
+    x, y = offset
+    dx, dy = DIRECTIONS['ESWN'.index(port.side)]
+    return x + port.x // TILE_SIZE + dx, y + port.y // TILE_SIZE + dy
+
+
+def public_port_access(wiring):
+    """逐一检查未配对短距口前方的岛格，从原生平台锚点和旋转还原。"""
+    occupied = {}
+    for i, p in enumerate(wiring.platforms):
+        tiles, _, _ = _geometry((p['T'], p.get('R', 0)))
+        occupied.update({(p.get('X', 0) + x, p.get('Y', 0) + y, p.get('Z', 0)): i for x, y in tiles})
+    paired = wiring.short_ports.keys() | set(wiring.short_ports.values())
+    result = []
+    for i, (board, entry) in enumerate(wiring.entries):
+        kind = _kind(entry)
+        if i in paired or kind not in ('WireTransmitterReceiver', 'WireTransmitterSender'):
+            continue
+        p = wiring.platforms[board]
+        _, x, y, layer = wiring.sites[i]
+        side = 'ESWN'[(entry.get('R', 0) + 2 * (kind == 'WireTransmitterReceiver')) % 4]
+        facing = _outside((p.get('X', 0), p.get('Y', 0)), Notch(x, y, layer, side)) + (p.get('Z', 0),)
+        result.append({'board': board, 'notch': (x, y, layer, side), 'adjacent_island': facing,
+                       'blocked_by': occupied.get(facing)})
+    return result
+
+
+def require_public_access(wiring):
+    access = public_port_access(wiring)
+    blocked = [port for port in access if port['blocked_by'] is not None]
+    if blocked:
+        raise ValueError(f'{len(blocked)} 个公开端口被平台阻挡：{blocked}')
+    return access
+
+
 def _pairs(offsets, links, geometry, input_sides, corridors, fixed_inputs, fixed_outputs):
     def rotate_ports(entries):
         return {(name, signal): _turn(port, geometry[name][2])
@@ -73,7 +110,7 @@ def _pairs(offsets, links, geometry, input_sides, corridors, fixed_inputs, fixed
 
     choices = []
     for (source, output), (dest, input_) in links:
-        lane = corridors.get(dest, {}).get(input_)
+        lane = corridors.get(dest, {}).get(input_, corridors.get(source, {}).get(output))
         source_pad = output_pads.get((source, output))
         dest_pad = input_pads.get((dest, input_))
         tx, ty = offsets[source]
@@ -133,13 +170,92 @@ def _outline(occupied):
     return width, height
 
 
-def _floorplan(modules, links, dependencies):
-    platforms = {n: tuple((m.platform[0], r) for r in range(4)) if isinstance(m, Module) and m.rotate else (m.platform,)
-                 for n, m in modules.items()}
+def _compact_plan(width, height, platforms, shapes, neighbours, public, finish):
+    cells = {(x, y): 1 << (x * height + y) for x in range(width) for y in range(height)}
+    choices = {}
+    for name, variants in platforms.items():
+        poses = []
+        for platform in variants:
+            tiles = shapes[platform][0]
+            ox, oy = min(x for x, _ in tiles), min(y for _, y in tiles)
+            for x, y in cells:
+                anchor = x - ox, y - oy
+                body = frozenset((a + anchor[0], b + anchor[1]) for a, b in tiles)
+                if not body <= cells.keys():
+                    continue
+                rim = {(a + dx, b + dy) for a, b in body for dx, dy in DIRECTIONS} - body
+                poses.append((sum(cells[p] for p in body), sum(cells.get(p, 0) for p in rim),
+                              bool(rim - cells.keys()), anchor, platform))
+        choices[name] = sorted(poses, key=lambda p: (public[name] != p[2], p[4][1], p[3]))
+    chosen = {}
+    trials = 0
+
+    def search(used):
+        nonlocal trials
+        if len(chosen) == len(choices):
+            return finish({n: p[3] for n, p in chosen.items()}, {n: p[4] for n, p in chosen.items()})
+        domains = {}
+        for name, poses in choices.items():
+            if name in chosen:
+                continue
+            attached = [chosen[n][0] for n in neighbours[name] if n in chosen]
+            options = [p for p in poses if not p[0] & used and all(p[1] & near for near in attached)
+                       and (not public[name] or p[2] or p[1] & ~used)]
+            if not options:
+                return None
+            domains[name] = options
+        name = min(domains, key=lambda n: (len(domains[n]), -len(neighbours[n]), n))
+        for pose in domains[name]:
+            trials += 1
+            if trials > 10000:
+                break
+            mask = used | pose[0]
+            if any(public[n] and not p[2] and not p[1] & ~mask for n, p in chosen.items()):
+                continue
+            chosen[name] = pose
+            answer = search(mask)
+            if answer is not None:
+                return answer
+            del chosen[name]
+        return None
+
+    return search(0)
+
+
+def _floorplan(modules, links, dependencies, inputs, outputs):
+    platforms = {}
+    for name, module in modules.items():
+        kind, rotation = module.platform
+        if not getattr(module, 'rotate', False):
+            platforms[name] = (module.platform,)
+            continue
+        # 没有固定凹口或入线侧时，同形转向在排板阶段等价。
+        fixed_orientation = isinstance(module, Module) and (module.inputs or module.outputs or module.input_side)
+        rotations = range(4) if fixed_orientation or kind == 'Foundation_L3' else range(1 + (kind in (
+            'Foundation_1x2', 'Foundation_1x3', 'Foundation_1x4', 'Foundation_2x3', 'Foundation_2x4')))
+        platforms[name] = tuple((kind, r) for r in rotations)
     shapes = {p: _geometry(p) for choices in platforms.values() for p in choices}
     selected = {}
     corridors = {n: {key: i % 3 for i, key in enumerate(m.signals)}
                  for n, m in modules.items() if isinstance(m, _Corridor)}
+    linked_out, linked_in = map(set, zip(*links)) if links else (set(), set())
+    public_inputs = {n: tuple(p for p in fields if (n, p) not in linked_in) for n, fields in inputs.items()}
+    public_outputs = {n: tuple(p for p in fields if (n, p) not in linked_out) for n, fields in outputs.items()}
+    fixed = {n: (getattr(m, 'inputs', {}) if isinstance(m, Module) else {},
+                 getattr(m, 'outputs', {}) if isinstance(m, Module) else {}) for n, m in modules.items()}
+
+    def blocked_edges(offset, platform, occupied):
+        return frozenset((x, y, side) for x, y, side in shapes[platform][1]
+                         if _outside(offset, Notch(x, y, 0, side)) in occupied)
+
+    def outlets_clear(name, offset, platform, occupied):
+        blocked = blocked_edges(offset, platform, occupied)
+        specs = tuple(_turn(ports[field], platform[1])
+                      for fields, ports in zip((public_inputs[name], public_outputs[name]), fixed[name], strict=True)
+                      for field in fields if field in ports)
+        clear = set(shapes[platform][1]) - blocked
+        return (all((p.x, p.y, p.side) in clear for p in specs)
+                and len(public_inputs[name]) + len(public_outputs[name]) <= 3 * len(clear))
     neighbours = defaultdict(set)
     incoming = defaultdict(set)
     fixed_neighbours = defaultdict(list)
@@ -150,6 +266,26 @@ def _floorplan(modules, links, dependencies):
         m = modules[source]
         if isinstance(m, Module) and signal in m.outputs:
             fixed_neighbours[dest].append((source, m.outputs[signal]))
+
+    for name, variants in platforms.items():
+        body = shapes[variants[0]][0]
+        rim = {(x + dx, y + dy) for x, y in body for dx, dy in DIRECTIONS} - body
+        if len(neighbours[name]) > len(rim):
+            raise _FloorplanError(f'{name} 有 {len(neighbours[name])} 个相邻模块，周边只有 {len(rim)} 个可接岛格')
+
+    def complete(offsets, selected):
+        occupied = {(offsets[n][0] + x, offsets[n][1] + y) for n, p in selected.items() for x, y in shapes[p][0]}
+        if any(not outlets_clear(n, offsets[n], selected[n], occupied) for n in modules):
+            return None
+        geometry = {n: shapes[p] for n, p in selected.items()}
+        sides = {n: 'ESWN'[('ESWN'.index(m.input_side) + selected[n][1]) % 4]
+                 for n, m in modules.items() if isinstance(m, Module) and m.input_side is not None}
+        notches = _pairs(offsets, links, geometry, sides, corridors,
+                         {n: pads[0] for n, pads in fixed.items()}, {n: pads[1] for n, pads in fixed.items()})
+        if notches is not None:
+            return offsets.copy(), notches, selected.copy()
+        return None
+
     offsets: dict[str, tuple[int, int]] = {}
     tiles: dict[str, set[tuple[int, int]]] = {}
     trials = 0
@@ -164,16 +300,9 @@ def _floorplan(modules, links, dependencies):
             width, height = _outline(occupied)
             score = width * height, max(width, height)
             if not best or score < best[0][0]:
-                geometry = {n: shapes[p] for n, p in selected.items()}
-                sides = {n: 'ESWN'[('ESWN'.index(m.input_side) + selected[n][1]) % 4]
-                         for n, m in modules.items() if isinstance(m, Module) and m.input_side is not None}
-                notches = _pairs(
-                    offsets, links, geometry, sides, corridors,
-                    {n: m.inputs for n, m in modules.items() if isinstance(m, Module) and m.inputs},
-                    {n: m.outputs for n, m in modules.items() if isinstance(m, Module) and m.outputs},
-                )
-                if notches is not None:
-                    best[:] = [(score, offsets.copy(), notches, selected.copy())]
+                result = complete(offsets, selected)
+                if result is not None:
+                    best[:] = [(score, *result)]
             return
         if trials >= limit:
             return
@@ -214,6 +343,10 @@ def _floorplan(modules, links, dependencies):
                         break
                 else:
                     used = occupied | body
+                    if not outlets_clear(name, (x, y), platform, used):
+                        continue
+                    if any(not outlets_clear(m, offsets[m], selected[m], used) for m in adjacent):
+                        continue
                     w, h = _outline(used)
                     if w <= max_width and h <= max_height and (not best or (w * h, max(w, h)) < best[0][0]):
                         options.append(((max(w * h, total), max(w, h)), platform, (x, y), body, used))
@@ -229,6 +362,12 @@ def _floorplan(modules, links, dependencies):
     # 先比外框面积，再比最长边。给紧凑外框单独留搜索预算。
     bounds = sorted((w * h, max(w, h), w, h) for w in range(2, total + 1)
                     for h in range(max(2, w - 3), min(total, w + 3) + 1) if w * h >= total)
+    if corridors and not any(isinstance(m, Module) and (m.input_side or m.inputs or m.outputs) for m in modules.values()):
+        public = {n: bool(public_inputs[n] or public_outputs[n]) for n in modules}
+        for _, _, w, h in bounds[:8]:
+            result = _compact_plan(w, h, platforms, shapes, neighbours, public, complete)
+            if result is not None:
+                return result
     for area, _, max_width, max_height in bounds[:8]:
         limit = trials + 2500
         place(set())
@@ -248,28 +387,36 @@ def _index(wiring, platform, port):
 
 def _wire_corridor(foundation, mapping, inputs, outputs):
     ground = platform_ground(foundation)
-    for reverse in (False, True):
-        board = _RoutingBoard(foundation=foundation)
-        board.ground = platform_interior(foundation)
-        board.origin_x = min(x for x, _ in board.ground)
-        board.origin_y = min(y for _, y in board.ground)
-        nets = {name: i for i, name in enumerate(inputs)}
-        sources = {nets[name]: _edge(board, 'WireTransmitterReceiver', port, nets[name], ground)
-                   for name, port in inputs.items()}
-        taps = defaultdict(list)
-        for name, port in outputs.items():
-            net = nets[mapping[name]]
-            taps[net].append(_edge(board, 'WireTransmitterSender', port, net, ground))
-        order = sorted(sources, key=lambda n: (sources[n][2], sources[n][1], sources[n][0]), reverse=reverse)
-        for net in order:
+    base = _RoutingBoard(foundation=foundation)
+    base.ground = platform_interior(foundation)
+    base.origin_x = min(x for x, _ in base.ground)
+    base.origin_y = min(y for _, y in base.ground)
+    base.route_budget = 1600
+    nets = {name: i for i, name in enumerate(inputs)}
+    sources = {nets[name]: _edge(base, 'WireTransmitterReceiver', port, nets[name], ground)
+               for name, port in inputs.items()}
+    taps = defaultdict(list)
+    for name, port in outputs.items():
+        net = nets[mapping[name]]
+        taps[net].append(_edge(base, 'WireTransmitterSender', port, net, ground))
+    order = sorted(sources, key=lambda n: (-len(taps[n]), sources[n]))
+    layouts = []
+    history = Counter()
+    ripups = 0
+    for net_order in (order, order[::-1], sorted(sources), sorted(sources, key=lambda n: sources[n][2])):
+        board = base.fork()
+        for net in net_order:
             seed = sources[net]
             tree = {seed}
             for tap in sorted(taps[net], key=lambda p: sum(abs(a - b) for a, b in zip(p, seed, strict=True))):
-                if not _join(board, net, tap, tree, direct=True, protect_pads=True):
+                if not _join(board, net, tap, tree, direct=True, flywire=True, protect_pads=True,
+                             preferred_level=seed[2], history=history):
                     break
-                tree = board.tracks(net) - (board.pad_sites - tree - {tap})
+                tree = (tree | board.tracks(net) | {tap}) - (board.pad_sites - tree - {tap})
             else:
                 continue
+            history.update(p for p in board.traces if p not in board.pad_sites)
+            ripups += 1
             break
         else:
             island = board.finish()
@@ -278,23 +425,35 @@ def _wire_corridor(foundation, mapping, inputs, outputs):
                 return {'X': p.x, 'Y': p.y, 'L': p.level, 'R': p.rotation(receive)}
             rx = {n: to_port(p, True) for n, p in inputs.items()}
             tx = {n: to_port(p, False) for n, p in outputs.items()}
-            if not wiring.short_ports and all(tuple(wiring._direct_sources(_index(wiring, 0, p), 0)) ==
-                    ((_index(wiring, 0, rx[mapping[n]]), 0),) for n, p in tx.items()):
-                return {'V': 1137, 'BP': island}, {
+            paired = wiring.short_ports.keys() | set(wiring.short_ports.values())
+            edge_ids = {_index(wiring, 0, port) for port in (*rx.values(), *tx.values())}
+            if not paired & edge_ids and all(
+                _local_sources(wiring, _index(wiring, 0, port), 0) == {(_index(wiring, 0, rx[mapping[name]]), 0)}
+                for name, port in tx.items()
+            ):
+                layers = {name: [sum(p[2] == z for p in board.tracks(net)) for z in range(3)]
+                          for name, net in nets.items()}
+                report = {
                     'foundation': foundation, 'rotation': 0, 'inputs': rx, 'outputs': tx,
                     'signal_count': len(rx), 'logic_gates': 0, 'island_tiles': len(foundation_tiles(foundation)),
                     'building_entries': len(wiring.entries), 'direct_macros': [], 'tapped_macros': [],
-                    'replicated_units': [], 'flywire_crossings': [], 'ripups': 0, 'ripup_attempts': 0,
+                    'replicated_units': [], 'flywire_crossings': _crossings(board, wiring),
+                    'ripups': int(bool(ripups)), 'ripup_attempts': ripups, 'tracks_by_layer': layers,
                 }
-    raise ValueError(f'{foundation} 的 {len(inputs)} 路走廊无法原生接通')
+                off_layer = sum(sum(layers[name]) - layers[name][sources[net][2]] for name, net in nets.items())
+                layouts.append(((off_layer, len(wiring.entries)), island, report))
+    if not layouts:
+        raise ValueError(f'{foundation} 的 {len(inputs)} 路走廊无法原生接通')
+    _, island, report = min(layouts, key=lambda item: item[0])
+    return {'V': 1137, 'BP': island}, report
 
 
 def _rotate_template(entry, report, rotation):
     if not rotation:
         return entry, report
     entry, report = deepcopy((entry, report))
-    entry['R'] = rotation
-    report['rotation'] = rotation
+    entry['R'] = (entry.get('R', 0) + rotation) % 4
+    report['rotation'] = entry['R']
 
     def turn(item):
         item['X'], item['Y'] = rotate_cell(item['X'], item['Y'], rotation)
@@ -318,7 +477,7 @@ def _rotate_template(entry, report, rotation):
     return entry, report
 
 
-def assemble(modules: Mapping[str, Module], links: tuple[Link, ...], *, through: tuple[Port, ...] = ()) -> tuple[dict, dict]:
+def assemble(modules: Mapping[str, Module | _PhysicalModule], links: tuple[Link, ...], *, through: tuple[Port, ...] = ()) -> tuple[dict, dict]:
     """按端口图总装，必要时经条形走廊分支；未连接端口保留为公开端口。"""
     shared = bool(through)
     if not through:
@@ -346,10 +505,12 @@ def assemble(modules: Mapping[str, Module], links: tuple[Link, ...], *, through:
             else:
                 group.append(port)
 
+    # 指定多路共用时优先横排分支，自动单源扇出则先沿纵向展开。
+    rotations = (1, 0) if shared and len(destinations) > 1 else (0, 1)
     last = None
     for length in (2, 3, 4):
-        for rotation in (0, 1):
-            extended: dict[str, Module | _Corridor] = dict(modules)
+        for rotation in rotations:
+            extended: dict[str, Module | _PhysicalModule | _Corridor] = dict(modules)
             incoming = []
             relays = {}
             for group in groups:
@@ -359,9 +520,13 @@ def assemble(modules: Mapping[str, Module], links: tuple[Link, ...], *, through:
                 types = {}
                 for n, source in enumerate(group):
                     a, field = source
-                    program = modules[a].programs[field]
                     signal = f'signal{n}'
-                    types[signal] = next(f.result for f in program.functions if f.name == program.entry)
+                    module = modules[a]
+                    if isinstance(module, _PhysicalModule):
+                        types[signal] = module.outputs[field]
+                    else:
+                        program = module.programs[field]
+                        types[signal] = next(f.result for f in program.functions if f.name == program.entry)
                     incoming.append((source, (name, signal)))
                     relays[source] = name, signal
                 extended[name] = _Corridor(types, (f'Foundation_1x{length}', rotation))
@@ -388,6 +553,7 @@ class _PhysicalModule:
     inputs: Mapping[str, ValueType]
     outputs: Mapping[str, ValueType]
     platform: tuple[str, int]
+    rotate: bool = False
 
 
 def _assemble(modules, links, *, feedback=()):
@@ -429,7 +595,9 @@ def _assemble(modules, links, *, feedback=()):
         if (source, dest) not in feedback:
             dependencies[b].add(a)
     tuple(TopologicalSorter(dependencies).static_order())
-    offsets, notches, platforms = _floorplan(modules, links, dependencies)
+    offsets, notches, platforms = _floorplan(modules, links, dependencies, inputs, outputs)
+    occupied = {(offsets[n][0] + x, offsets[n][1] + y)
+                for n, platform in platforms.items() for x, y in _geometry(platform)[0]}
     in_ports = defaultdict(dict)
     out_ports = defaultdict(dict)
     programs = {name: dict(m.programs) for name, m in modules.items() if isinstance(m, Module)}
@@ -464,19 +632,40 @@ def _assemble(modules, links, *, feedback=()):
         if isinstance(descriptor, Module):
             incoming = {**descriptor.inputs, **incoming}
             outgoing = {**descriptor.outputs, **outgoing}
+        frame = 0
         if isinstance(descriptor, _Corridor):
             bp, report = _wire_corridor(foundation, corridor_outputs[module], incoming, outgoing)
         else:
             model = descriptor.model if isinstance(descriptor, _PhysicalModule) else None
             logic = model if model is not None else tuple(programs[module].items())
-            spec = (foundation, logic, tuple(sorted(incoming.items())), tuple(sorted(outgoing.items())))
-            if spec not in cache:
-                if model is not None:
-                    cache[spec] = _build_netlist(model, platform=(foundation, 0), input_ports=incoming, output_ports=outgoing)
-                else:
-                    cache[spec] = build(programs[module], platform=(foundation, 0), input_ports=incoming, output_ports=outgoing)
-            bp, report = cache[spec]
-        entry, reports[module] = _rotate_template(bp['BP']['Entries'][0], report, rotation)
+            blocked = frozenset(_turn(port, (-rotation) % 4)
+                                for x, y, side in _geometry((foundation, rotation))[1]
+                                for z in range(3) for port in (Notch(x, y, z, side),)
+                                if _outside(offsets[module], port) in occupied)
+            frames = (0,)
+            if isinstance(descriptor, _PhysicalModule) and len(incoming) == 1 and len(descriptor.outputs) >= 8:
+                side = next(iter(incoming.values())).side
+                facing_west = (2 - 'ESWN'.index(side)) % 4
+                frames = tuple(dict.fromkeys((facing_west, 0, 1, 2, 3)))
+            last = None
+            for frame in frames:
+                ins = {name: _turn(port, frame) for name, port in incoming.items()}
+                outs = {name: _turn(port, frame) for name, port in outgoing.items()}
+                blocked_ports = frozenset(_turn(port, frame) for port in blocked)
+                spec = (foundation, frame, logic, tuple(sorted(ins.items())), tuple(sorted(outs.items())), blocked_ports)
+                if spec not in cache:
+                    model = _Netlist(programs[module]) if model is None else model
+                    try:
+                        cache[spec] = _build_netlist(model, platform=(foundation, frame), input_ports=ins,
+                                                     output_ports=outs, blocked=blocked_ports)
+                    except ValueError as error:
+                        last = error
+                        continue
+                bp, report = cache[spec]
+                break
+            else:
+                raise ValueError(f'{module} 无法布通：{last}') from last
+        entry, reports[module] = _rotate_template(bp['BP']['Entries'][0], report, (rotation - frame) % 4)
         x, y = offsets[module]
         entries.append(dict(entry, X=x, Y=y, Z=0))
     island = {'$type': 'Island', 'BinaryVersion': 1137, 'Entries': entries}
@@ -488,6 +677,7 @@ def _assemble(modules, links, *, feedback=()):
     actual = {rx: tx for rx, tx in wiring.short_ports.items() if wiring.sites[rx][0] != wiring.sites[tx][0]}
     if actual != expected:
         raise ValueError(f"跨板短距配对与连接图不一致：{actual} ≠ {expected}")
+    access = require_public_access(wiring)
     sent = {a for a, _ in physical_links}
     ports = {direction: {f"{name}.{port}": (indices[name], spec)
                          for name, report in reports.items() for port, spec in report[direction].items()
@@ -495,6 +685,7 @@ def _assemble(modules, links, *, feedback=()):
              for direction, skips in (('inputs', seen), ('outputs', sent))}
     return {'V': 1137, 'BP': island}, {
         **ports, 'modules': reports, 'unique_layouts': len(cache), 'cross_flywires': len(actual),
+        'public_access': access,
         'ripup_attempts': sum(report['ripup_attempts'] for _, report in cache.values()),
         'building_entries': len(wiring.entries), 'island_tiles': sum(r['island_tiles'] for r in reports.values()),
         'ripups': sum(report['ripups'] for _, report in cache.values()),

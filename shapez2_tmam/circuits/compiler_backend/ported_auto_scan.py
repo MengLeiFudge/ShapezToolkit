@@ -4,11 +4,9 @@ from collections import Counter
 
 from ...mari.blueprint import Wiring, _kind
 from ..circuit import Circuit, Literal, Ref, constant
-from ..decoder_circuit import height_flags
 from ..foundations import TILE_SIZE, foundation_tiles, platform_interior
-from ._layout import _EdgeLinks, _layout_platform
-from .ported_assembly import _index
-from .ported_layout import Notch, _Netlist, _build_netlist
+from .ported_assembly import _index, require_public_access
+from .ported_layout import Notch, _Netlist, _build_netlist, _layout
 
 # 五位计数器每 12 刻递增，低两位提供每相四个计数。第六位在第一圈结束后置位。
 _PHASE_TICKS = 48
@@ -31,16 +29,15 @@ def _clock(channel):
         carry = circuit.add('LogicGateAnd', carry, bit)
     armed = circuit.add('LogicGateOr', read[5], carry)
     writes.append(circuit.add('LogicGateAnd', armed, enable))
-    channels = circuit.channel_map()
-    outputs = dict(zip(range(channel, channel + 6), writes, strict=True))
-    ports = _EdgeLinks({channels[enable]: (27, 0)}, {channels[v]: (y + 17, 0) for v, y in zip(read[2:], _Y, strict=True)})
-    placed = _layout_platform(circuit, channels, set(range(1, len(circuit.gates))), outputs, ports)
-    wiring = Wiring({'$type': 'Island', 'Entries': [placed.entry]})
-    for (index, port), expected in placed.expected.items():
-        if tuple(sorted(wiring._direct_sources(index, port))) != expected:
-            raise ValueError(f'时钟原生端口 {index}/{port} 失配')
-    transmit = dict(zip(_BITS, (wiring.entries[i][1] for i in placed.senders.values()), strict=True))
-    return placed.entry, wiring.entries[next(iter(placed.receivers.values()))][1], transmit
+    transmitters = dict(zip(range(channel, channel + 6), writes, strict=True))
+    phases = dict(zip(_BITS, read[2:], strict=True))
+    model = _Netlist.from_circuit(circuit, {'enable': enable}, phases, transmitters=transmitters)
+    kind = 'Foundation_2x2'
+    inputs = {'enable': Notch(2, 10, 0, 'W')}
+    outputs = {name: Notch(37, y, 0, 'E') for name, y in zip(_BITS, _Y, strict=True)}
+    lanes = ((9, 0), (15, 0), (9, 1), (15, 1))
+    blueprint, report = _layout(model, model.units(), kind, 0, 3, lanes, inputs, outputs)
+    return blueprint['BP']['Entries'][0], report['inputs']['enable'], report['outputs']
 
 
 def _scanner(foundation):
@@ -81,25 +78,37 @@ def _scanner(foundation):
     model = _Netlist.from_circuit(circuit, inputs, outputs,
                                 feedback={'a_saved': 'prior', 'b_saved': 'staged', 'a_input': 'next', 'b_input': 'lower'})
     # 时钟到扫描均走同一条板缝，各端口朝西接入。
-    left = min(x for x, _ in platform_interior(foundation)) - 1
+    area = platform_interior(foundation)
+    left, east = min(x for x, _ in area) - 1, max(x for x, _ in area) + 1
+    north, south = min(y for _, y in area) - 1, max(y for _, y in area) + 1
     pins = {name: Notch(left, y, 0, 'W') for name, y in zip(_BITS, _Y, strict=True)}
-    east = max(x for x, _ in platform_interior(foundation)) + 1
+    pins['target'] = Notch(10, north, 0, 'N')
     outputs = {name: Notch(east, y, 0, 'E') for name, y in (('remaining', 10), ('sample', 9))}
+    outputs['done'] = Notch(10, south, 0, 'S')
     return _build_netlist(model, platform=(foundation, 0), input_ports=pins, output_ports=outputs)
 
 
-def _readout():
+def _readout(foundation):
     circuit = Circuit()
     inputs = {n: circuit.add('ConstantSignal', config=constant(i)) for i, n in enumerate(('remaining', 'sample'))}
     target, sample = inputs.values()
     split = circuit.add('VirtualUnstacker', target)
     top = circuit.add('LogicGateIf', Ref(split.node, 1), sample)
-    flags = height_flags(circuit, target, sample)
-    heights = tuple(circuit.add('LogicGateIf', Literal(i), flag) for i, flag in enumerate(flags, 1))
-    circuit.aliases.append(heights)
-    model = _Netlist.from_circuit(circuit, inputs, {'top': top, 'original_layer': heights[0], 'sample': sample})
+    filled = circuit.add('VirtualCrystalGenerator', target, Literal('color:r'))
+    # 结晶标记量高度时保留空层。逐次拆出的下半为空时，对应原始高度。
+    readings = []
+    for i in range(1, 6):
+        current = circuit.add('LogicGateCompare', filled, Literal(None), config='Bg==')
+        if i < 5:
+            filled = circuit.add('VirtualUnstacker', filled)
+            lower_empty = circuit.add('LogicGateCompare', filled, Literal(None), config='AQ==')
+            current = circuit.add('LogicGateAnd', current, lower_empty)
+        readings.append(circuit.add('LogicGateIf', Literal(i), current))
+    circuit.aliases.append(tuple(readings))
+    height = circuit.add('LogicGateIf', readings[0], sample)
+    model = _Netlist.from_circuit(circuit, inputs, {'top': top, 'original_layer': height, 'sample': sample})
     ports = {name: Notch(2, y, 0, 'W') for name, y in (('remaining', 10), ('sample', 9))}
-    return _build_netlist(model, platform=('Foundation_1x2', 0), input_ports=ports, output_ports=None)
+    return _build_netlist(model, platform=(foundation, 0), input_ports=ports, output_ports=None)
 
 
 def build_clock(channel=CLOCK_CHANNEL):
@@ -121,22 +130,14 @@ def _timing(channel):
 
 def build_autonomous(channel=CLOCK_CHANNEL):
     clock, enable, clock_out = _clock(channel)
-    for kind in ('Foundation_2x2', 'Foundation_2x3', 'Foundation_3x3'):
-        try:
-            document, scanner = _scanner(kind)
-        except ValueError as error:
-            last = error
-        else:
-            break
-    else:
-        raise ValueError(f'自主扫描器布线失败：{last}') from last
+    kind = 'Foundation_1x3'
+    document, scanner = _scanner(kind)
     part = document['BP']['Entries'][0]
-    part['X'] = 2 - min(x for x, _ in platform_interior(kind)) // TILE_SIZE
-    readout, reader = _readout()
-    label = readout['BP']['Entries'][0]
-    right = max(x for x, _ in platform_interior(kind)) // TILE_SIZE
-    label['X'] = part['X'] + right + 1
-    island = dict(document['BP'], Entries=[clock, part, label])
+    clock_right = max(x for x, _ in platform_interior(clock['T'])) // TILE_SIZE
+    part['X'] = clock_right + 1 - min(x for x, _ in platform_interior(kind)) // TILE_SIZE
+    readout, reader = _readout('Foundation_1x1')
+    last = dict(readout['BP']['Entries'][0], X=part['X'] + max(x for x, _ in platform_interior(kind)) // TILE_SIZE + 1)
+    island = dict(document['BP'], Entries=[clock, part, last])
     wiring = Wiring(island)
     expected = {_index(wiring, 1, scanner['inputs'][name]): _index(wiring, 0, clock_out[name]) for name in _BITS}
     expected.update({_index(wiring, 2, reader['inputs'][name]): _index(wiring, 1, scanner['outputs'][name])
@@ -149,7 +150,9 @@ def build_autonomous(channel=CLOCK_CHANNEL):
         'inputs': {'target': (1, scanner['inputs']['target']), 'enable': (0, enable)},
         'outputs': {**{name: (2, p) for name, p in reader['outputs'].items()}, 'done': (1, scanner['outputs']['done'])},
         'observe': {'remaining': (1, scanner['outputs']['remaining'])},
-        'island_tiles': 11 + len(foundation_tiles(kind)), 'building_entries': len(wiring.entries),
+        'public_access': require_public_access(wiring),
+        'island_tiles': 1 + len(foundation_tiles(clock['T'])) + len(foundation_tiles(kind)),
+        'building_entries': len(wiring.entries),
         'cross_flywires': len(actual), 'global_receivers': counts['ControlledSignalReceiver'],
         'global_transmitters': counts['ControlledSignalTransmitter'], 'state_global_devices': 0,
         'timing': _timing(channel),

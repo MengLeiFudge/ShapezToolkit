@@ -10,6 +10,7 @@ from shutil import copyfile
 
 from ..mari.blueprint import DIRECTIONS, PORTS, _kind, _rotate
 from ..mari.signals import decode_constant
+from .compiler_backend.ported_assembly import public_port_access
 from .compiler_backend.prefix_scan_wiring import _native_wiring
 from .foundations import FOUNDATION_CHUNKS, TILE_SIZE, foundation_origin, foundation_tiles, platform_ground, platform_interior
 
@@ -111,7 +112,7 @@ def _diagram(path):
                           decode_constant(wiring.entries[source][1]["C"])))
         elif kind == "ConstantSignal":
             color = "constant"
-        entries.append((x, y, island, level, color, kind, parts, offsets))
+        entries.append((x, y, island, level, color, kind, parts, offsets, board + 1))
     links = [(_position(wiring, tx), _position(wiring, rx)) for rx, tx in wiring.short_ports.items()]
     coverage = [(len(cells), len({(x, y) for x, y, _ in cells}), len(ground[board]),
                  placement_errors[board], board in unknown_footprints, Counter(z for _, _, z in cells), radio_cells[board])
@@ -122,6 +123,11 @@ def _diagram(path):
 def _section(path, output_dir, audit):
     platforms, entries, links, radio, coverage = _diagram(path)
     wiring = _native_wiring(path)
+    access = public_port_access(wiring)
+    blocked = sum(port['blocked_by'] is not None for port in access)
+    access_path = output_dir / f'{path.stem}.ports.json'
+    access_path.write_text(json.dumps(access, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    access_verdict = '验收失败' if blocked else '通过'
     local, across = Counter(), Counter()
     for receiver, sender in wiring.short_ports.items():
         a, b = (wiring.sites[i][0] + 1 for i in (receiver, sender))
@@ -219,6 +225,7 @@ def _section(path, output_dir, audit):
             f'外框填充率 {outline_fill:.1%} · '
             f'板内飞线 {sum(local.values())} 对 · 跨板飞线 {sum(across.values()) // 2} 对 · '
             f'全局接收 {receivers} · 全局发射 {transmitters}</p>'
+            f'<p><a href="{escape(access_path.name)}">公开端口检查</a> · {len(access)} 个 · 被阻挡 {blocked} 个 · {access_verdict}</p>'
             f'<p>总建筑占比 {len(entries) / capacity:.1%} · 三维占地率 '
             f'{sum(r[0] for r in coverage) / (_LEVELS * sum(r[2] for r in coverage)):.1%}</p>'
             f'{evidence}'
@@ -229,10 +236,11 @@ def _section(path, output_dir, audit):
             f'</thead><tbody>{"".join(board_rows)}</tbody></table></details>'
             '<table><thead><tr><th>建筑层</th><th>器件</th><th>线缆件</th></tr></thead>'
             f'<tbody>{layers}</tbody></table>'
-            f'<div class="drawings"></div><script type="application/json">{data}</script>'
+            f'<div class="drawings"></div><details><summary>逐板三层图</summary><div class="board-drawings"></div></details>'
+            f'<script type="application/json">{data}</script>'
             '<details><summary>全局收发器的实际频道与板内坐标</summary><table><thead>'
             '<tr><th>板号</th><th>岛层</th><th>建筑层</th><th>X</th><th>Y</th><th>方向</th><th>频道</th></tr>'
-            f'</thead><tbody>{table}</tbody></table></details></section>')
+            f'</thead><tbody>{table}</tbody></table></details></section>'), blocked
 
 
 _HEADER = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
@@ -322,7 +330,8 @@ function draw(container, platforms, entries, links, island, layer) {
     canvas.title = kind ? `${kind}　(${x}, ${y})` : `(${x}, ${y})`;
   };
   const label = document.createElement('figcaption');
-  label.textContent = `岛层 Z${island} · 建筑层 L${layer} · ${cells.size} 个建筑`;
+  const board = platforms.length === 1 ? `P${platforms[0][0]} · ` : '';
+  label.textContent = `${board}岛层 Z${island} · 建筑层 L${layer} · ${cells.size} 个建筑`;
   figure.append(canvas,label); container.append(figure);
 }
 for (const section of document.querySelectorAll('section')) {
@@ -331,6 +340,24 @@ for (const section of document.querySelectorAll('section')) {
     const boards = platforms.filter(p => p[3] === island);
     const buildings = entries.filter(e => e[2] === island);
     for (const layer of [0,1,2]) draw(section.querySelector('.drawings'),boards,buildings,links,island,layer);
+  }
+  if (platforms.length < 2) {
+    section.querySelector('.board-drawings').parentElement.hidden = true;
+    continue;
+  }
+  for (const board of platforms) {
+    const panel = document.createElement('details');
+    const label = document.createElement('summary');
+    const drawings = document.createElement('div');
+    label.textContent = `P${board[0]}`; drawings.className = 'drawings';
+    panel.append(label, drawings); section.querySelector('.board-drawings').append(panel);
+    panel.addEventListener('toggle', () => {
+      if (!panel.open || drawings.children.length) return;
+      const buildings = entries.filter(e => e[8] === board[0]);
+      const cells = new Set(buildings.map(e => e.slice(0,4).join(',')));
+      const boardLinks = links.filter(edge => edge.some(point => cells.has(point.join(','))));
+      for (const layer of [0,1,2]) draw(drawings,[board],buildings,boardLinks,board[3],layer);
+    });
   }
 }
 </script></body></html>
@@ -348,12 +375,16 @@ def main() -> int:
     try:
         args.output_dir.mkdir(parents=True, exist_ok=True)
         audit = json.loads(args.audit.read_text(encoding="utf-8")) if args.audit else {}
-        sections = [_section(path, args.output_dir, audit.get(path.stem)) for path in args.blueprints]
+        results = [_section(path, args.output_dir, audit.get(path.stem)) for path in args.blueprints]
+        sections, counts = zip(*results, strict=True)
+        blocked = [path.name for path, count in zip(args.blueprints, counts, strict=True) if count]
         index = args.output_dir / "index.html"
         index.write_text(_HEADER + "\n".join(sections) + _SCRIPT, encoding="utf-8")
     except (OSError, ValueError, KeyError) as error:
         parser.error(str(error))
     print(f"已导出 {index}")
+    if blocked:
+        parser.exit(1, f'公开端口被同图平台阻挡，验收失败：{", ".join(blocked)}\n')
     return 0
 
 

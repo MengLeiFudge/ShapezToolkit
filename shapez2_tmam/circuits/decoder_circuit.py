@@ -73,23 +73,24 @@ def decode(circuit: Circuit, target: Ref, enable: Ref, rules: Rules) -> DecodedS
         # 原始非空层高度严格下降，同一高度只会收到一份非空层。
         circuit.aliases.append(tuple(group))
         rows.append(group[0])
-    pin = Literal(rules.parse("P-" + "--" * (rules.quadrants - 1)))
-    crystal = Literal(rules.parse("cu" + "--" * (rules.quadrants - 1)))
-    cells = []
-    for row in rows:
-        rotated = row
-        decoded = []
-        for q in range(rules.quadrants):
-            if q:
-                rotated = circuit.add("VirtualRotatorCCW", rotated)
-            analyzed = circuit.add("VirtualAnalyzer", rotated)
-            decoded.append(DecodedCell(
-                analyzed, Ref(analyzed.node, 1),
-                circuit.add("LogicGateCompare", analyzed, Literal(None), config="Bg=="),
-                circuit.add("LogicGateCompare", analyzed, pin, config="AQ=="),
-                circuit.add("LogicGateCompare", analyzed, crystal, config="AQ==")))
-        cells.append(tuple(decoded))
-    return DecodedShape(valid, tuple(rows), tuple(cells))
+    return DecodedShape(valid, tuple(rows), tuple(decode_row(circuit, row, rules) for row in rows))
+
+
+def decode_row(circuit: Circuit, row: Ref, rules: Rules) -> tuple[DecodedCell, ...]:
+    """为每个象限保留原颜色，并生成去色部件和三项材料判定。"""
+    pin = Literal(rules.parse('P-' + '--' * (rules.quadrants - 1)))
+    crystal = Literal(rules.parse('cu' + '--' * (rules.quadrants - 1)))
+    decoded = []
+    for q in range(rules.quadrants):
+        if q:
+            row = circuit.add('VirtualRotatorCCW', row)
+        analyzed = circuit.add('VirtualAnalyzer', row)
+        decoded.append(DecodedCell(
+            analyzed, Ref(analyzed.node, 1),
+            circuit.add('LogicGateCompare', analyzed, Literal(None), config='Bg=='),
+            circuit.add('LogicGateCompare', analyzed, pin, config='AQ=='),
+            circuit.add('LogicGateCompare', analyzed, crystal, config='AQ==')))
+    return tuple(decoded)
 
 
 def build_decoder(channel_base: int = 1_006_000) -> tuple[Circuit, dict]:
