@@ -3,7 +3,7 @@
 from base64 import b64decode
 from collections import defaultdict
 from functools import cache
-from graphlib import TopologicalSorter
+from graphlib import CycleError, TopologicalSorter
 from random import Random
 
 from ...mari.blueprint import Wiring, _kind
@@ -57,12 +57,58 @@ def _strong_components(dependencies):
     return groups
 
 
+def _minimum_forward_order(group, dependencies):
+    """对稀疏大环用边不相交的环作下界，精确搜索需要留下的顺序边。"""
+    members = set(group)
+    internal = {n: (dependencies[n] & members) - {n} for n in group}
+    best = None
+    visited = set()
+
+    def order_or_cycle(removed):
+        graph = {n: tuple(p for p in sorted(parents) if (n, p) not in removed)
+                 for n, parents in internal.items()}
+        try:
+            return tuple(reversed(tuple(TopologicalSorter(graph).static_order()))), ()
+        except CycleError as error:
+            cycle = error.args[1]
+            return (), tuple((n, p) for p, n in zip(cycle, cycle[1:]))
+
+    def search(removed):
+        nonlocal best
+        if removed in visited or (best is not None and len(removed) >= best[0]):
+            return
+        visited.add(removed)
+        if len(visited) > 100_000:
+            raise ValueError('反馈环的精确逆序排列超出搜索预算')
+        order, cycle = order_or_cycle(removed)
+        if order:
+            best = len(removed), order
+            return
+        if best is not None:
+            disjoint = set(removed) | set(cycle)
+            lower = len(removed) + 1
+            while lower < best[0]:
+                _, next_cycle = order_or_cycle(disjoint)
+                if not next_cycle:
+                    break
+                lower += 1
+                disjoint.update(next_cycle)
+            if lower >= best[0]:
+                return
+        for edge in sorted(cycle, key=lambda pair: (-len(internal[pair[0]]), pair)):
+            search(removed | {edge})
+
+    search(frozenset())
+    assert best is not None
+    return best[1]
+
+
 def _most_backward(group, dependencies):
     """选最长逆序的排列。逐项假定哪一个节点最后更新，记忆化求精确值。"""
     if len(group) == 1:
         return group
     if len(group) > 16:
-        raise ValueError('精确逆序压力回放支持最多 16 节点的反馈分量')
+        return _minimum_forward_order(group, dependencies)
     readers = [sum(1 << j for j, target in enumerate(group) if node in dependencies[target]) for node in group]
 
     @cache

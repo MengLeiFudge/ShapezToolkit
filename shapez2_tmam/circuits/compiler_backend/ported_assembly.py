@@ -222,7 +222,7 @@ def _compact_plan(width, height, platforms, shapes, neighbours, public, finish):
     return search(0)
 
 
-def _floorplan(modules, links, dependencies, inputs, outputs):
+def _floorplan(modules, links, dependencies, inputs, outputs, placements=None, port_levels=None):
     platforms = {}
     for name, module in modules.items():
         kind, rotation = module.platform
@@ -238,6 +238,8 @@ def _floorplan(modules, links, dependencies, inputs, outputs):
     selected = {}
     corridors = {n: {key: i % 3 for i, key in enumerate(m.signals)}
                  for n, m in modules.items() if isinstance(m, _Corridor)}
+    for name, levels in (port_levels or {}).items():
+        corridors.setdefault(name, {}).update(levels)
     linked_out, linked_in = map(set, zip(*links)) if links else (set(), set())
     public_inputs = {n: tuple(p for p in fields if (n, p) not in linked_in) for n, fields in inputs.items()}
     public_outputs = {n: tuple(p for p in fields if (n, p) not in linked_out) for n, fields in outputs.items()}
@@ -285,6 +287,20 @@ def _floorplan(modules, links, dependencies, inputs, outputs):
         if notches is not None:
             return offsets.copy(), notches, selected.copy()
         return None
+
+    if placements is not None:
+        if placements.keys() != modules.keys():
+            raise ValueError('固定板位须覆盖全部模块')
+        offsets = {n: (x, y) for n, (x, y, _) in placements.items()}
+        selected = {n: (modules[n].platform[0], r) for n, (_, _, r) in placements.items()}
+        shapes.update({p: _geometry(p) for p in selected.values()})
+        fixed_tiles = [(x + dx, y + dy) for n, (x, y) in offsets.items() for dx, dy in shapes[selected[n]][0]]
+        if len(fixed_tiles) != len(set(fixed_tiles)):
+            raise ValueError('固定板位相互覆盖')
+        result = complete(offsets, selected)
+        if result is None:
+            raise _FloorplanError('固定板位无对向凹口或阻挡公开口')
+        return result
 
     offsets: dict[str, tuple[int, int]] = {}
     tiles: dict[str, set[tuple[int, int]]] = {}
@@ -362,7 +378,8 @@ def _floorplan(modules, links, dependencies, inputs, outputs):
     # 先比外框面积，再比最长边。给紧凑外框单独留搜索预算。
     bounds = sorted((w * h, max(w, h), w, h) for w in range(2, total + 1)
                     for h in range(max(2, w - 3), min(total, w + 3) + 1) if w * h >= total)
-    if corridors and not any(isinstance(m, Module) and (m.input_side or m.inputs or m.outputs) for m in modules.values()):
+    wide_graph = corridors or any(len(neighbours[n]) >= 5 for n in modules)
+    if wide_graph and not any(isinstance(m, Module) and (m.input_side or m.inputs or m.outputs) for m in modules.values()):
         public = {n: bool(public_inputs[n] or public_outputs[n]) for n in modules}
         for _, _, w, h in bounds[:8]:
             result = _compact_plan(w, h, platforms, shapes, neighbours, public, complete)
@@ -556,7 +573,7 @@ class _PhysicalModule:
     rotate: bool = False
 
 
-def _assemble(modules, links, *, feedback=()):
+def _assemble(modules, links, *, feedback=(), placements=None, port_levels=None):
     feedback = set(feedback)
     if feedback - set(links):
         raise ValueError('反馈端口须在实接连接图内')
@@ -595,7 +612,7 @@ def _assemble(modules, links, *, feedback=()):
         if (source, dest) not in feedback:
             dependencies[b].add(a)
     tuple(TopologicalSorter(dependencies).static_order())
-    offsets, notches, platforms = _floorplan(modules, links, dependencies, inputs, outputs)
+    offsets, notches, platforms = _floorplan(modules, links, dependencies, inputs, outputs, placements, port_levels)
     occupied = {(offsets[n][0] + x, offsets[n][1] + y)
                 for n, platform in platforms.items() for x, y in _geometry(platform)[0]}
     in_ports = defaultdict(dict)
@@ -643,8 +660,9 @@ def _assemble(modules, links, *, feedback=()):
                                 for z in range(3) for port in (Notch(x, y, z, side),)
                                 if _outside(offsets[module], port) in occupied)
             frames = (0,)
-            if isinstance(descriptor, _PhysicalModule) and len(incoming) == 1 and len(descriptor.outputs) >= 8:
-                side = next(iter(incoming.values())).side
+            if isinstance(descriptor, _PhysicalModule) and descriptor.rotate and incoming:
+                sides = Counter(port.side for port in incoming.values())
+                side = sides.most_common(1)[0][0]
                 facing_west = (2 - 'ESWN'.index(side)) % 4
                 frames = tuple(dict.fromkeys((facing_west, 0, 1, 2, 3)))
             last = None

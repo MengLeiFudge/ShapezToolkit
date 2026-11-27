@@ -122,11 +122,13 @@ class _Netlist:
         signals = () if transmitters is None else tuple(transmitters.values())
         if any(type(channel) is not int or not 1 <= channel < 1 << 24 for channel in channels):
             raise ValueError('发射器频道需要为 1 至 2^24−1 的整数')
-        outputs = dict(enumerate((*outputs.values(), *signals)))
-        # 输入占位与普通常量即使值相同也必须成不同的网。
+        input_start = len(names) + len(signals)
+        outputs = dict(enumerate((*outputs.values(), *signals, *inputs.values())))
+        # 合并会重排器件，外部占位也需要使用重映射后的引用。
         circuit, refs = compact(circuit, outputs, distinct=tuple(inputs.values()))
+        inputs = {name: refs[i] for i, name in enumerate(inputs, input_start)}
         simplify_null_guards(circuit)
-        circuit.retain_outputs(tuple(refs.values()))
+        circuit.retain_outputs(tuple(refs[i] for i in range(input_start)))
         assert circuit.retained_nodes is not None
         self.nets = circuit.channel_map()
         self.gates = {
@@ -797,9 +799,10 @@ def _crossings(board, wiring):
 def _layout(model, units, foundation, rotation, stride, lanes, input_ports, output_ports, *, front=2, blocked=()):
     board = _RoutingBoard(foundation=foundation)
     parallel = len(model.lane_nets) > len(model.outputs)
-    if parallel or len(input_ports) + len(output_ports) >= 9 or any(g.kind in _RADIOS for g in model.gates.values()):
+    large = len(model.gates) >= 42 and len(input_ports) >= 3 and len(foundation_tiles(foundation)) >= 2
+    if large or parallel or len(input_ports) + len(output_ports) >= 9 or any(g.kind in _RADIOS for g in model.gates.values()):
         board.wide = True
-        board.route_budget = 220
+        board.route_budget = 480 if large else 220
     ground = platform_ground(foundation, rotation)
     board.ground = platform_interior(foundation, rotation)
     left, right = min(x for x, _ in ground), max(x for x, _ in ground)
@@ -808,10 +811,11 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
     dots = sorted(y for x, y in ground - board.ground if x == right and (x - 1, y) in board.ground)
     used = set(output_ports.values()) | set(input_ports.values()) | set(blocked)
     outputs = dict(output_ports)
-    output_lanes = (lanes[-1],) if len(model.outputs) == 1 else lanes[:len(model.outputs)]
-    for name, (y, z) in zip(model.outputs, output_lanes, strict=True):
+    output_lanes = (lanes[-1],) if len(model.outputs) == 1 else lanes
+    for i, name in enumerate(model.outputs):
         if name in outputs:
             continue
+        y, z = output_lanes[i % len(output_lanes)]
         free = (Notch(right, r, level, "E") for r in dots for level in range(3))
         choices = [port for port in free if port not in used]
         if not choices:
@@ -871,7 +875,7 @@ def _layout(model, units, foundation, rotation, stride, lanes, input_ports, outp
         x = front + min(span * column // extent, stride * column)
         if parallel:
             x = 5 + (span - 9) * column // extent
-        if len(inputs) + len(outputs) >= 9:
+        if large or len(inputs) + len(outputs) >= 9:
             signals = {model.nets[arg] for n in first.nodes for arg in model.gates[n].inputs if isinstance(arg, Ref)}
             points = [min(board.tracks(net), key=lambda p: abs(p[0] - x) + abs(p[1] - y) + 5 * abs(p[2] - z))
                       for net in sorted(signals) if board.tracks(net)]

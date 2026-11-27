@@ -36,6 +36,29 @@ python -m shapez2_tmam.circuits.compiler_backend append_five --channel-base 1700
 
 例如，`synthesis/direct_recipe.py` 中的工序、下料槽、上料槽和目标槽方法都接收 `address`、`length`，可按 `opcode`、`a`、`b`、`destination` 组合导出。`address` 和四个输出用 `stage_memory.WRITE_BUS` 的频道，`length` 用 `stream_controller.PROGRAM_LENGTH`。接口表的 `reserved_channels` 列出实际占用的每个频道，按 `settling.hold_signal_ticks` 保持整组输入后采样。
 
+## 有线定步状态更新
+
+`ported_state_steps.compile_state_steps(programs, steps, initial=..., clock_channel=...)` 接受一组同签名 `Program`。入口同时读取整组旧状态，每个方法返回同名字段的下一值。字段可以混用形状、布尔和有符号整数。`initial` 指定固化的字段初值，其余从 `initial_<字段>` 进线。所有结果随 `done` 发布，可在保持期内重复读取。
+
+传 `--clock` 导出带六频道共享时钟的蓝图，调用方独占这六个频道。省略该选项时，接入共享的 `p0`、`p1`、`p2`、`armed` 四条有线相位。内置时钟用 `enable=0` 至少保持 96 刻复位，外接时钟以 `armed=0` 复位。准备初值后启动，等 `done=1` 再取结果。每相 48 刻，每轮 384 刻。组合计算板按原生端口检查最长依赖深度，避免一步计算超出四相窗口。
+
+```bash
+out=.codex/tmp/deliverables/wired-factory
+python -m shapez2_tmam.circuits.compiler_backend.ported_state_steps \
+  shapez2_tmam/synthesis/direct_stack.py --steps 5 --clock \
+  --field remaining=direct_scan_remaining --field valid=direct_scan_valid \
+  --field replay=direct_scan_replay --output "$out/direct-scan-wired.spz2bp"
+python -m shapez2_tmam.circuits.compiler_backend.ported_direct_scan_audit \
+  "$out/direct-scan-wired.spz2bp" --output "$out/direct-scan-wired.ticks.json"
+```
+
+`ported_half` 从五层原色行逐列推进列 A 状态，按标准半形的原生半切、两列判据及晶色范围判定。公开 `target`、`enable` 和七个判定字段，逐格信号在部件内部使用。
+
+```bash
+python -m shapez2_tmam.circuits.compiler_backend.ported_half \
+  --output "$out/half-4q5l-wired.spz2bp"
+```
+
 ## 固定次数的时序复用
 
 `timed.compile_fold(program, steps, channel_base)` 编译一个 `(累积值, 本轮输入) → 累积值` 方法。从 `initial` 开始依次折叠 `item0` 至 `item{steps-1}`，支持 1～8 轮。状态模块占一块平台，四条频道在状态与计算模块之间传递当前索引、当前累计值、下一索引和下一累计值。
