@@ -147,14 +147,21 @@ def _coord(entry: dict[str, Any], key: str) -> int:
 
 
 def _connection_pairs(entry: dict[str, Any]) -> frozenset[tuple[int, int]]:
-    """旧节点的 `C` 里记着每条连线的进出口方向，解成 (输入面, 输出面) 集合。"""
+    """旧节点的 `C` 里记着每条连线的进出口方向，解成 (输入面, 输出面) 集合。
+
+    太空节点每条连线 2 字节，轨道节点每条 2 字节方向加 4 字节颜色掩码。
+    """
     payload = _decode(entry.get("C"))
-    if not payload or payload[0] != SPACE_PATH_CONFIG_FLAG:
+    if not payload:
         return frozenset()
+    flag = payload[0]
+    if flag not in (SPACE_PATH_CONFIG_FLAG, RAIL_CONFIG_FLAG) or len(payload) < 2:
+        return frozenset()
+    stride = 2 if flag == SPACE_PATH_CONFIG_FLAG else 2 + BLOB_INT_BYTES
     count = payload[1]
-    if len(payload) != 2 + 2 * count:
+    if len(payload) != 2 + stride * count:
         return frozenset()
-    return frozenset((payload[2 + 2 * index], payload[3 + 2 * index]) for index in range(count))
+    return frozenset((payload[2 + stride * index], payload[3 + stride * index]) for index in range(count))
 
 
 def _match_pairs(pairs: frozenset[tuple[int, int]]) -> tuple[str, int] | None:
